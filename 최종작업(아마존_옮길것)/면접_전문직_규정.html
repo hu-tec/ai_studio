@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>전문직(개발자) 업무 1차 개발 규정</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.08);
+      --color-success: #10b981;
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 40px -10px rgba(0,0,0,0.1);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .app-container {
+      min-height: 100vh;
+    }
+    .main-content {
+      width: 100%;
+      max-width: none;
+      padding: 2rem 2rem 3rem;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .step-header {
+      margin-bottom: 2rem;
+    }
+    .step-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .step-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .content-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    /* 개발 규정 - 뷰 전환 버튼 */
+    .rule-view-switcher { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .rule-view-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .rule-view-left-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .rule-view-left-desc {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    .rule-view-right {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .rule-view-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text-muted); cursor: pointer; transition: all 0.2s; }
+    .rule-view-btn:hover { color: var(--color-text); }
+    .rule-view-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4); }
+    .rule-cols-sep { width: 1px; height: 20px; background: var(--color-border); margin: 0 0.5rem; }
+    .rule-cols-switcher { display: flex; gap: 0.25rem; }
+    .rule-cols-btn { width: 32px; height: 36px; padding: 0; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text-muted); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+    .rule-cols-btn:hover { color: var(--color-text); }
+    .rule-cols-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+    /* 개발 규정 - 테이블/바둑판 공통 */
+    .rule-container { font-size: 0.9rem; }
+    .rule-cell { padding: 0.875rem 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+    .rule-container .img-cell { min-width: 180px; }
+    .rule-container .img-cell input[type="file"] { font-size: 0.75rem; max-width: 100%; }
+    .rule-container .img-cell .img-preview { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .rule-container .img-cell .img-preview.static-carousel { display: block; flex-wrap: unset; }
+    .rule-container .img-cell .img-preview > img { max-width: 260px; max-height: 195px; object-fit: contain; border-radius: 8px; border: 1px solid var(--color-border); background: #f8fafc; flex-shrink: 0; }
+    .rule-container .img-cell .img-preview .preview-viewer { position: relative; width: 260px; min-height: 195px; border-radius: 8px; border: 1px solid var(--color-border); overflow: hidden; background: #f8fafc; }
+    .rule-container .img-cell .img-preview .preview-item { display: none; border-radius: 8px; overflow: hidden; }
+    .rule-container .img-cell .img-preview .preview-item.active { display: block; }
+    .rule-container .img-cell .img-preview .preview-item img,
+    .rule-container .img-cell .img-preview .preview-item video { display: block; width: 260px; height: 195px; object-fit: contain; background: #f8fafc; cursor: pointer; }
+    .img-preview img, .video-thumb { cursor: pointer; }
+    /* 왼쪽 절반만 쓰는 확대 오버레이 (1번) */
+    .zoom-overlay-left {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 61vw;
+      max-width: 61%;
+      z-index: 9999;
+      background: rgba(0,0,0,0.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    .zoom-overlay-left.active { display: flex; }
+    .zoom-overlay-left .zoom-content {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zoom-overlay-left .zoom-content img,
+    .zoom-overlay-left .zoom-content video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .zoom-overlay-left .zoom-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 1.25rem;
+      cursor: pointer;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    .zoom-overlay-left .zoom-close:hover {
+      background: rgba(255,255,255,0.35);
+    }
+    .zoom-overlay-left .zoom-prev,
+    .zoom-overlay-left .zoom-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: background 0.2s;
+    }
+    .zoom-overlay-left .zoom-prev:hover:not(:disabled),
+    .zoom-overlay-left .zoom-next:hover:not(:disabled) {
+      background: rgba(255,255,255,0.45);
+    }
+    .zoom-overlay-left .zoom-prev:disabled,
+    .zoom-overlay-left .zoom-next:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .zoom-overlay-left .zoom-prev { left: 0.75rem; }
+    .zoom-overlay-left .zoom-next { right: 0.75rem; }
+    .zoom-overlay-left .zoom-counter {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.85);
+      z-index: 10;
+    }
+    .rule-container .img-cell .img-preview .preview-nav { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
+    .rule-container .img-cell .img-preview .preview-nav button { padding: 0.35rem 0.75rem; font-size: 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text); cursor: pointer; }
+    .rule-container .img-cell .img-preview .preview-nav button:hover { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+    .rule-container .img-cell .img-preview .preview-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .rule-container .img-cell .img-preview .preview-nav .preview-counter { font-size: 0.75rem; color: var(--color-text-muted); }
+    .rule-container .rule-notes { color: var(--color-text-muted); font-size: 0.85rem; }
+    .rule-container .qa-cell { min-width: 160px; max-width: 280px; }
+    .rule-container .qa-cell textarea { width: 100%; min-height: 60px; padding: 0.35rem 0.5rem; font-size: 0.8rem; border: 1px solid var(--color-border); border-radius: 6px; font-family: inherit; resize: vertical; box-sizing: border-box; }
+    .rule-container .feedback-cell { min-width: 120px; max-width: 200px; }
+    .rule-container.rule-view-table .rule-field-label { display: none; }
+    .rule-container .feedback-cell input, .rule-container .feedback-cell textarea {
+      width: 100%; padding: 0.35rem 0.5rem; font-size: 0.8rem;
+      border: 1px solid var(--color-border); border-radius: 6px; font-family: inherit;
+    }
+    .rule-container .feedback-cell textarea { min-height: 36px; resize: vertical; }
+
+    /* 테이블 뷰 - 8열(질문/답변/피드백 분리), wrappers는 display:contents, order로 순서 맞춤 */
+    .rule-container.rule-view-table { width: 100%; }
+    .rule-container.rule-view-table .rule-table-header { display: grid; grid-template-columns: 40px minmax(100px, 140px) minmax(160px, 1fr) minmax(180px, 220px) minmax(60px, 100px) minmax(120px, 180px) minmax(120px, 180px) minmax(100px, 160px); background: var(--color-surface-alt); font-weight: 600; color: var(--color-text); border-bottom: 1px solid var(--color-border); }
+    .rule-container.rule-view-table .rule-table-header .rule-th { padding: 0.875rem 1rem; }
+    .rule-container.rule-view-table .rule-item { display: grid; grid-template-columns: 40px minmax(100px, 140px) minmax(160px, 1fr) minmax(180px, 220px) minmax(60px, 100px) minmax(120px, 180px) minmax(120px, 180px) minmax(100px, 160px); }
+    .rule-container.rule-view-table .rule-item .rule-col-left,
+    .rule-container.rule-view-table .rule-item .rule-col-right,
+    .rule-container.rule-view-table .rule-item .rule-right-main,
+    .rule-container.rule-view-table .rule-item .rule-right-side { display: contents; }
+    .rule-container.rule-view-table .rule-item .rule-num { order: 1; }
+    .rule-container.rule-view-table .rule-item .rule-title { order: 2; }
+    .rule-container.rule-view-table .rule-item .rule-content { order: 3; }
+    .rule-container.rule-view-table .rule-item .rule-img { order: 4; }
+    .rule-container.rule-view-table .rule-item .rule-notes { order: 5; }
+    .rule-container.rule-view-table .rule-item .rule-question { order: 6; }
+    .rule-container.rule-view-table .rule-item .rule-answer { order: 7; }
+    .rule-container.rule-view-table .rule-item .rule-feedback { order: 8; }
+
+    /* 바둑판(갤러리) 뷰 */
+    .rule-container.rule-view-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+    .rule-container.rule-view-gallery .rule-table-header { display: none; }
+    .rule-container.rule-view-gallery .rule-item {
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      background: var(--color-surface);
+      box-shadow: var(--shadow);
+    }
+    .rule-container.rule-view-gallery .rule-num {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      padding-bottom: 0.25rem;
+    }
+    .rule-container.rule-view-gallery .rule-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--color-text);
+      padding-top: 0;
+    }
+    .rule-container.rule-view-gallery .rule-content {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+    .rule-container.rule-view-gallery .rule-img {
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    .rule-container.rule-view-gallery .rule-notes,
+    .rule-container.rule-view-gallery .rule-question,
+    .rule-container.rule-view-gallery .rule-answer,
+    .rule-container.rule-view-gallery .rule-feedback {
+      padding-top: 0.75rem;
+    }
+
+    /* 바둑판 1개 보기: 왼쪽 이미지 칸을 더 넓게, 오른쪽은 제목+내용 / 질문·답변·피드백(3칸) */
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-item {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 0;
+      align-items: stretch;
+      padding: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--color-surface);
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-right: 1px solid var(--color-border);
+      padding: 1rem 0;
+      background: var(--color-surface-alt);
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img {
+      flex: 1;
+      min-height: 200px;
+      border: none;
+      padding: 0;
+      border-bottom: none;
+    }
+    /* 왼쪽 이미지: 1개 보기에서 가로를 칸 전체로 채움 */
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview.preview-viewer,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview .preview-viewer,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview .preview-item {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview .preview-viewer {
+      min-height: 200px;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview > img,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview .preview-item img,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-img .img-preview .preview-item video {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto;
+      max-height: 70vh;
+      min-height: 120px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: #f8fafc;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-left .rule-notes {
+      display: none;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-col-right {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-items: stretch;
+      min-height: 0;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-surface);
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-main .rule-num {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      padding: 0;
+      border: none;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-main .rule-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text);
+      padding: 0;
+      border: none;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-main .rule-content {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      padding: 0;
+      border: none;
+    }
+    /* 오른쪽 맨 오른쪽: 3칸(1 질문, 2 답변, 3 피드백) - 가로로 칸 전체 사용 */
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: var(--color-surface);
+      min-width: 0;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-question,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-answer,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-feedback {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+      max-width: none;
+      width: 100%;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-feedback {
+      border-bottom: none;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-field-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      display: block;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-question textarea,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-answer textarea,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-feedback textarea {
+      width: 100%;
+      max-width: none;
+      box-sizing: border-box;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-question textarea,
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-answer textarea {
+      min-height: 72px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      resize: vertical;
+    }
+    .rule-container.rule-view-gallery.rule-cols-1 .rule-right-side .rule-feedback textarea {
+      min-height: 120px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    /* 바둑판 2/3/4열: 기존 카드형 유지, 새 구조에 맞게 자식 배치 */
+    .rule-container.rule-view-gallery.rule-cols-2 .rule-item,
+    .rule-container.rule-view-gallery.rule-cols-3 .rule-item,
+    .rule-container.rule-view-gallery.rule-cols-4 .rule-item {
+      padding: 1rem;
+    }
+    .rule-container.rule-view-gallery.rule-cols-2 .rule-col-left .rule-notes,
+    .rule-container.rule-view-gallery.rule-cols-3 .rule-col-left .rule-notes,
+    .rule-container.rule-view-gallery.rule-cols-4 .rule-col-left .rule-notes {
+      display: none;
+    }
+    .rule-container.rule-view-gallery.rule-cols-2 .rule-col-right,
+    .rule-container.rule-view-gallery.rule-cols-3 .rule-col-right,
+    .rule-container.rule-view-gallery.rule-cols-4 .rule-col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* 바둑판 컬럼 수 */
+    .rule-container.rule-view-gallery.rule-cols-1 { grid-template-columns: repeat(1, minmax(0,1fr)); }
+    .rule-container.rule-view-gallery.rule-cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .rule-container.rule-view-gallery.rule-cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .rule-container.rule-view-gallery.rule-cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        padding: 1.5rem 1.25rem 2.5rem;
+      }
+      .rule-container.rule-view-gallery {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+      .rule-container.rule-view-gallery.rule-cols-3,
+      .rule-container.rule-view-gallery.rule-cols-4 {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+      .rule-container.rule-view-gallery.rule-cols-1 .rule-item {
+        grid-template-columns: 1fr;
+      }
+      .rule-container.rule-view-gallery.rule-cols-1 .rule-col-right {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rule-view-switcher {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .rule-view-right {
+        align-self: stretch;
+        justify-content: flex-end;
+        width: 100%;
+      }
+      .rule-container.rule-view-gallery,
+      .rule-container.rule-view-gallery.rule-cols-2,
+      .rule-container.rule-view-gallery.rule-cols-3,
+      .rule-container.rule-view-gallery.rule-cols-4 {
+        grid-template-columns: repeat(1, minmax(0,1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <main class="main-content">
+      <header class="step-header">
+        <span class="step-badge">Work 1</span>
+        <h1 class="step-title">전문직(개발자) 업무 1차 개발 규정</h1>
+      </header>
+
+      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">
+        아래 규정은 전문직(개발자) 업무 1차 진행 시, 공통으로 적용되는 개발·기획·UI/UX 관련 기본 원칙입니다.
+      </p>
+
+      <div class="rule-view-switcher">
+        <div class="rule-view-left">
+          <div class="rule-view-left-title">개발 규정 보기 방식</div>
+          <div class="rule-view-left-desc">테이블 / 바둑판 뷰를 선택하고, 한 줄에 표시할 카드 개수를 조절할 수 있습니다.</div>
+        </div>
+        <div class="rule-view-right">
+          <button type="button" class="rule-view-btn" data-view="table" title="테이블">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </button>
+          <button type="button" class="rule-view-btn active" data-view="gallery" title="바둑판">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
+          <span class="rule-cols-sep"></span>
+          <div class="rule-cols-switcher">
+            <button type="button" class="rule-cols-btn active" data-cols="1" title="한 줄에 1개 (이미지 모두 미리보기)">1</button>
+            <button type="button" class="rule-cols-btn" data-cols="2" title="한 줄에 2개">2</button>
+            <button type="button" class="rule-cols-btn" data-cols="3" title="한 줄에 3개">3</button>
+            <button type="button" class="rule-cols-btn" data-cols="4" title="한 줄에 4개">4</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card rule-container rule-view-gallery rule-cols-1">
+        <div class="rule-table-header">
+          <span class="rule-th">번호</span>
+          <span class="rule-th">제목</span>
+          <span class="rule-th">내용</span>
+          <span class="rule-th">이미지</span>
+          <span class="rule-th">비고</span>
+          <span class="rule-th">질문</span>
+          <span class="rule-th">답변</span>
+          <span class="rule-th">피드백</span>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg1" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정1.png" alt="개발 통합 관리"><img src="규정1-1.png" alt="개발 통합 관리"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">1</span>
+              <span class="rule-title rule-cell">개발 통합 관리</span>
+              <span class="rule-content rule-cell">개별로 흩어진 모든 개발 리소스를 성격에 따른 카테고리별 폴더 구조로 통합하여 단일화된 관리 체계를 유지한다.</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion1" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer1" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb1" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg2" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정2-1.png" alt="홈페이지 개발"><img src="규정2-2.png" alt="홈페이지 개발"><img src="규정2-3.png" alt="홈페이지 개발"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">2</span>
+              <span class="rule-title rule-cell">홈페이지 개발</span>
+              <span class="rule-content rule-cell">1 회원 결제<br>2 활동 분류<br>3 검색기능 위와 아래<br>4 많은 정도 하나에 넣기<br>5 엑셀올리고 다운하기<br>6. 이모지나 색깔 혹은 글자크기로 가독성<br>A. 대시보드로 통계보이도록<br>B 분류표<br>C 이모지많이 쓰기</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion2" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer2" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb2" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg3" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정3-1.png" alt="티어 표현"><img src="규정3-2.png" alt="티어 표현"><img src="규정3-3.png" alt="티어 표현"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">3</span>
+              <span class="rule-title rule-cell">티어 표현</span>
+              <span class="rule-content rule-cell">복잡한 내용은 티어로 표현.</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion3" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer3" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb3" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg4" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정4.png" alt="대·중·소 분류"><img src="규정4-1.png" alt="대·중·소 분류"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">4</span>
+              <span class="rule-title rule-cell">대·중·소 분류</span>
+              <span class="rule-content rule-cell">대·중·소 분류·급수로 구분, 선택 항목만 표시.</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion4" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer4" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb4" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg5" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정5-1.png" alt="영역별 레이아웃"><img src="규정5-2.png" alt="영역별 레이아웃"><img src="규정5-3.png" alt="영역별 레이아웃"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">5</span>
+              <span class="rule-title rule-cell">영역별 레이아웃</span>
+              <span class="rule-content rule-cell">상·하·좌·우 영역 구분 후 각 영역에 맞는 내용 배치, 한 화면 최대 표현.</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion5" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer5" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb5" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg6" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정6.png" alt="선택 방식 규칙"><img src="규정6-1.png" alt="선택 방식 규칙"><img src="규정6-2.png" alt="선택 방식 규칙"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">6</span>
+              <span class="rule-title rule-cell">선택 방식 규칙</span>
+              <span class="rule-content rule-cell">복수→체크박스, 단일 4개 이하→라디오, 5개 이상→셀렉트.</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion6" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer6" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb6" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-col-left">
+            <div class="rule-img rule-cell img-cell"><input type="file" name="ruleImg7" accept="image/*,video/*" class="rule-img-inp" multiple><div class="img-preview"><img src="규정7.png" alt="직관적 가시화"></div></div>
+            <span class="rule-notes rule-cell"></span>
+          </div>
+          <div class="rule-col-right">
+            <div class="rule-right-main">
+              <span class="rule-num rule-cell">7</span>
+              <span class="rule-title rule-cell">직관적 가시화</span>
+              <span class="rule-content rule-cell">ERD와 같은 전문적인 기술 도표 대신 누구나 구조를 한눈에 파악할 수 있도록 서비스 화면(UI) 중심의 직관적인 구성도로 시각화</span>
+            </div>
+            <div class="rule-right-side">
+              <div class="rule-question rule-cell qa-cell"><label class="rule-field-label">질문</label><textarea name="ruleQuestion7" placeholder="질문"></textarea></div>
+              <div class="rule-answer rule-cell qa-cell"><label class="rule-field-label">답변</label><textarea name="ruleAnswer7" placeholder="답변"></textarea></div>
+              <div class="rule-feedback rule-cell feedback-cell"><label class="rule-field-label">피드백</label><textarea name="ruleFb7" placeholder="피드백" rows="4"></textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 개발 규정 - 테이블/바둑판 뷰 전환
+    document.querySelectorAll('.rule-view-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var view = this.dataset.view;
+        var container = document.querySelector('.rule-container');
+        if (!container) return;
+        document.querySelectorAll('.rule-view-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        container.classList.remove('rule-view-table', 'rule-view-gallery');
+        container.classList.add('rule-view-' + view);
+      });
+    });
+
+    // 개발 규정 - 바둑판 열 수 선택 (1, 2, 3, 4)
+    document.querySelectorAll('.rule-cols-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var cols = this.dataset.cols;
+        var container = document.querySelector('.rule-container');
+        if (!container) return;
+        document.querySelectorAll('.rule-cols-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        container.classList.remove('rule-cols-1', 'rule-cols-2', 'rule-cols-3', 'rule-cols-4');
+        container.classList.add('rule-cols-' + cols);
+      });
+    });
+
+    // 1번: 왼쪽 절반만 쓰는 확대 오버레이 + 이전/다음 버튼으로 여러 이미지 넘기기
+    var zoomOverlayLeft = document.createElement('div');
+    zoomOverlayLeft.className = 'zoom-overlay-left';
+    zoomOverlayLeft.innerHTML = '<button type="button" class="zoom-close" aria-label="닫기">×</button><button type="button" class="zoom-prev" aria-label="이전">‹</button><button type="button" class="zoom-next" aria-label="다음">›</button><span class="zoom-counter"></span><div class="zoom-content"></div>';
+    document.body.appendChild(zoomOverlayLeft);
+    var zoomContent = zoomOverlayLeft.querySelector('.zoom-content');
+    var zoomCloseBtn = zoomOverlayLeft.querySelector('.zoom-close');
+    var zoomPrevBtn = zoomOverlayLeft.querySelector('.zoom-prev');
+    var zoomNextBtn = zoomOverlayLeft.querySelector('.zoom-next');
+    var zoomCounter = zoomOverlayLeft.querySelector('.zoom-counter');
+    var zoomMediaList = [];
+    var zoomCurrentIndex = 0;
+    function closeZoomLeft() {
+      zoomOverlayLeft.classList.remove('active');
+      var v = zoomContent.querySelector('video');
+      if (v) v.pause();
+      zoomContent.innerHTML = '';
+      zoomMediaList = [];
+    }
+    function showZoomMediaAtIndex(index) {
+      zoomContent.innerHTML = '';
+      if (index < 0 || index >= zoomMediaList.length) return;
+      zoomCurrentIndex = index;
+      var el = zoomMediaList[index];
+      var clone = el.cloneNode(true);
+      if (clone.tagName === 'VIDEO') {
+        clone.controls = true;
+        clone.muted = true;
+        clone.play();
+      }
+      zoomContent.appendChild(clone);
+      zoomPrevBtn.disabled = index <= 0;
+      zoomNextBtn.disabled = index >= zoomMediaList.length - 1;
+      zoomCounter.textContent = (index + 1) + ' / ' + zoomMediaList.length;
+      zoomPrevBtn.style.display = zoomNextBtn.style.display = zoomCounter.style.display = zoomMediaList.length > 1 ? '' : 'none';
+    }
+    zoomCloseBtn.addEventListener('click', closeZoomLeft);
+    zoomPrevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (zoomCurrentIndex > 0) showZoomMediaAtIndex(zoomCurrentIndex - 1);
+    });
+    zoomNextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (zoomCurrentIndex < zoomMediaList.length - 1) showZoomMediaAtIndex(zoomCurrentIndex + 1);
+    });
+    zoomOverlayLeft.addEventListener('click', function(e) {
+      if (e.target === zoomOverlayLeft || e.target.classList.contains('zoom-content')) closeZoomLeft();
+    });
+    function openZoomLeft(clickedEl) {
+      var preview = clickedEl.closest('.img-preview');
+      if (!preview) return;
+      var items = preview.querySelectorAll('.preview-item');
+      var media = [];
+      if (items.length) {
+        items.forEach(function(it) {
+          var m = it.querySelector('img, video');
+          if (m) media.push(m);
+        });
+      } else {
+        media = Array.from(preview.querySelectorAll(':scope > img, :scope > video'));
+      }
+      if (media.length === 0) media = [clickedEl];
+      var idx = media.indexOf(clickedEl);
+      if (idx < 0) idx = 0;
+      zoomMediaList = media;
+      showZoomMediaAtIndex(idx);
+      zoomOverlayLeft.classList.add('active');
+    }
+    document.addEventListener('click', function(e) {
+      var t = e.target;
+      if (!t.closest('.zoom-overlay-left') && (t.tagName === 'IMG' || t.tagName === 'VIDEO') && t.closest('.img-preview')) {
+        e.preventDefault();
+        openZoomLeft(t);
+      }
+    });
+
+    // 정적 이미지 2개 이상 → 캐러셀 구조로 변환
+    document.querySelectorAll('.img-cell .img-preview').forEach(function(preview) {
+      var directImgs = Array.from(preview.querySelectorAll(':scope > img'));
+      if (directImgs.length < 2) return;
+      var viewer = document.createElement('div');
+      viewer.className = 'preview-viewer';
+      directImgs.forEach(function(img, i) {
+        var item = document.createElement('div');
+        item.className = 'preview-item' + (i === 0 ? ' active' : '');
+        item.appendChild(img);
+        viewer.appendChild(item);
+      });
+      var navDiv = document.createElement('div');
+      navDiv.className = 'preview-nav';
+      var prevBtn = document.createElement('button');
+      prevBtn.type = 'button';
+      prevBtn.textContent = '← 이전';
+      var nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.textContent = '다음 →';
+      var counterSpan = document.createElement('span');
+      counterSpan.className = 'preview-counter';
+      var items = viewer.querySelectorAll('.preview-item');
+      var idx = 0;
+      function showItem(i) {
+        idx = i;
+        items.forEach(function(it, k) { it.classList.toggle('active', k === i); });
+        prevBtn.disabled = i <= 0;
+        nextBtn.disabled = i >= items.length - 1;
+        counterSpan.textContent = (i + 1) + ' / ' + items.length;
+      }
+      prevBtn.addEventListener('click', function() { if (idx > 0) showItem(idx - 1); });
+      nextBtn.addEventListener('click', function() { if (idx < items.length - 1) showItem(idx + 1); });
+      navDiv.appendChild(prevBtn);
+      navDiv.appendChild(counterSpan);
+      navDiv.appendChild(nextBtn);
+      preview.innerHTML = '';
+      preview.appendChild(viewer);
+      preview.appendChild(navDiv);
+      preview.classList.add('static-carousel');
+      showItem(0);
+    });
+
+    // 개발 규정 테이블 - 이미지/동영상 미리보기 (한 번에 1개만 표시, 버튼으로 전환)
+    document.querySelectorAll('.rule-img-inp').forEach(function(inp) {
+      inp.addEventListener('change', function() {
+        var wrap = this.nextElementSibling;
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        var files = Array.from(this.files).slice(0, 4);
+        if (files.length === 0) return;
+
+        var viewer = document.createElement('div');
+        viewer.className = 'preview-viewer';
+        var items = [];
+
+        files.forEach(function(f) {
+          var url = URL.createObjectURL(f);
+          var item = document.createElement('div');
+          item.className = 'preview-item';
+          if (f.type.startsWith('image/')) {
+            var img = document.createElement('img');
+            img.src = url;
+            img.alt = '';
+            item.appendChild(img);
+          } else if (f.type.startsWith('video/')) {
+            var vid = document.createElement('video');
+            vid.src = url;
+            vid.controls = true;
+            item.appendChild(vid);
+          } else {
+            item.innerHTML = '<span style="font-size:0.75rem;padding:0.5rem;">미리보기 불가</span>';
+          }
+          items.push(item);
+          viewer.appendChild(item);
+        });
+
+        wrap.appendChild(viewer);
+
+        var idx = 0;
+        function showItem(i) {
+          items.forEach(function(it, k) {
+            it.classList.toggle('active', k === i);
+            var v = it.querySelector('video');
+            if (v && k !== i) v.pause();
+          });
+          if (navDiv) {
+            prevBtn.disabled = i <= 0;
+            nextBtn.disabled = i >= items.length - 1;
+            counterSpan.textContent = (i + 1) + ' / ' + items.length;
+          }
+          var v = items[i].querySelector('video');
+          if (v) v.play && v.play();
+        }
+        showItem(0);
+
+        var navDiv = null, prevBtn, nextBtn, counterSpan;
+        if (files.length > 1) {
+          navDiv = document.createElement('div');
+          navDiv.className = 'preview-nav';
+          prevBtn = document.createElement('button');
+          prevBtn.type = 'button';
+          prevBtn.textContent = '← 이전';
+          nextBtn = document.createElement('button');
+          nextBtn.type = 'button';
+          nextBtn.textContent = '다음 →';
+          counterSpan = document.createElement('span');
+          counterSpan.className = 'preview-counter';
+          prevBtn.addEventListener('click', function() { if (idx > 0) { idx--; showItem(idx); } });
+          nextBtn.addEventListener('click', function() { if (idx < items.length - 1) { idx++; showItem(idx); } });
+          navDiv.appendChild(prevBtn);
+          navDiv.appendChild(counterSpan);
+          navDiv.appendChild(nextBtn);
+          wrap.appendChild(navDiv);
+          showItem(0);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

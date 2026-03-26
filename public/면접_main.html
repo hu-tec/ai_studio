@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>면접 안내 | 지원 유형 선택</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f0f4f8;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f8fafc;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.12);
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-hover: 0 12px 32px rgba(59, 130, 246, 0.15);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      background: linear-gradient(160deg, #e0e7ff 0%, #f0f4f8 35%, #f8fafc 100%);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* 상단 네비 (홈/대시보드 링크) */
+    .top-nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .top-nav a {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: rgba(255,255,255,0.8);
+      transition: all 0.2s var(--ease);
+    }
+    .top-nav a:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+
+    /* 웰컴 영역 */
+    .main-welcome {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .main-welcome .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+      letter-spacing: 0.02em;
+    }
+    .main-welcome h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .main-welcome p {
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* 카드 그리드 */
+    .main-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .type-card {
+      display: block;
+      padding: 1.5rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+    .type-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-accent), #60a5fa);
+      opacity: 0;
+      transition: opacity 0.25s var(--ease);
+    }
+    .type-card:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .type-card:hover::before {
+      opacity: 1;
+    }
+    .type-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .type-card h3 .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .type-card p {
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+      padding-left: 2.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .main-cards {
+        grid-template-columns: 1fr;
+      }
+      .main-welcome h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="main-content">
+      <nav class="top-nav">
+        <a href="home.html">홈</a>
+        <a href="dashboard.html">대시보드</a>
+      </nav>
+
+      <header class="main-welcome">
+        <span class="badge">면접 안내</span>
+        <h1>안녕하세요</h1>
+        <p>면접에 참여해 주셔서 감사합니다. 지원 유형을 선택해 주세요.</p>
+      </header>
+
+      <div class="main-cards">
+        <a href="면접_알바.html" class="type-card">
+          <h3><span class="icon">📋</span> 알바</h3>
+          <p>파트타임 근로자를 위한 면접 및 서류 작성</p>
+        </a>
+        <a href="면접_강사_프롬프트ver.html" class="type-card">
+          <h3><span class="icon">👩‍🏫</span> 강사</h3>
+          <p>강사 지원자를 위한 면접 및 서류 작성</p>
+        </a>
+        <a href="면접_전문직.html" class="type-card">
+          <h3><span class="icon">💼</span> 전문직</h3>
+          <p>전문직 지원자를 위한 면접 및 서류 작성</p>
+        </a>
+        <a href="면접_직원.html" class="type-card">
+          <h3><span class="icon">👤</span> 직원</h3>
+          <p>직원 지원자를 위한 면접 및 서류 작성</p>
+        </a>
+        <a href="면접_프리랜서.html" class="type-card">
+          <h3><span class="icon">✨</span> 프리랜서</h3>
+          <p>프리랜서 지원자를 위한 면접 및 서류 작성</p>
+        </a>
+        <a href="면접_정부지원.html" class="type-card">
+          <h3><span class="icon">🏛</span> 정부지원</h3>
+          <p>정부지원 사업 지원자를 위한 면접 및 서류 작성</p>
+        </a>
+      </div>
+    </div>
+  </div>
+<script src="/master-nav.js"></script>
+</body>
+</html>

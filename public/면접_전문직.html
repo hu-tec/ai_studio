@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>면접 안내 | 기업 면접 포털</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.08);
+      --color-success: #10b981;
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 40px -10px rgba(0,0,0,0.1);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== LAYOUT ===== */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR NAV ===== */
+    .sidebar {
+      width: 400px;
+      min-width: 300px;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .home-icon-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      transition: all 0.2s var(--ease);
+      flex-shrink: 0;
+    }
+    .home-icon-link:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-accent);
+    }
+    .home-icon-link svg {
+      width: 20px;
+      height: 20px;
+    }
+    .sidebar-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .sidebar-subtitle {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    .phase-buttons {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0 1.5rem;
+    }
+    .phase-btn {
+      flex: 1;
+      min-width: 0;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+    .phase-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .phase-btn.active {
+      background: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+    }
+    .phase-hidden { display: none !important; }
+    .step-nav {
+      list-style: none;
+    }
+    .step-nav-item {
+      margin: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .step-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s var(--ease);
+    }
+    .step-nav-link:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-text);
+    }
+    .step-nav-link.active {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+    }
+    .step-nav-link.completed {
+      color: var(--color-success);
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-surface-alt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .step-nav-link.active .step-number {
+      background: var(--color-accent);
+      color: white;
+    }
+    .step-nav-link.completed .step-number {
+      background: var(--color-success);
+      color: white;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 2rem 4rem 4rem;
+      max-width: 1500px;
+      min-width: 0;
+    }
+    .main-content:has(#step2.active) { max-width: 1700px; }
+    .step-section {
+      display: none;
+    }
+    .step-section.active {
+      display: block;
+      animation: fadeIn 0.5s var(--ease) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      margin-bottom: 2rem;
+    }
+    .step-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .step-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .content-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .content-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .content-card .card-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+    }
+    .content-card p, .content-card li {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .content-card ul {
+      padding-left: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, var(--color-accent-soft) 0%, rgba(59, 130, 246, 0.04) 100%);
+      border-left: 4px solid var(--color-accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 1rem 0;
+    }
+    .type-badge {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+    .type-badge.instructor {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    /* ===== FORMS ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem 1.5rem;
+    }
+    .form-grid.full {
+      grid-template-columns: 1fr;
+    }
+    .form-grid-5 { grid-template-columns: repeat(5, 1fr); }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group-half {
+      display: flex;
+      flex-direction: column;
+      gap: 0.17rem;
+    }
+    .form-group-inline {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .form-label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .file-input {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      background: var(--color-surface);
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .checkbox-item input {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ===== PERSONALITY TEST ===== */
+    .personality-section {
+      margin-top: 1rem;
+    }
+    .personality-tests-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-bottom: 1rem;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+    }
+    /* + 십자선 */
+    .personality-tests-grid::before,
+    .personality-tests-grid::after {
+      content: '';
+      position: absolute;
+      background: var(--color-border);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .personality-tests-grid::before {
+      top: 0; bottom: 0; left: 50%;
+      width: 2px; transform: translateX(-1px);
+    }
+    .personality-tests-grid::after {
+      left: 0; right: 0; top: 50%;
+      height: 2px; transform: translateY(-1px);
+    }
+    .personality-test-card {
+      margin-bottom: 0;
+      padding: 0.4rem 0.5rem;
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+    }
+    .personality-test-card h3 {
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+      text-align: center;
+      color: var(--color-accent);
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .personality-intro {
+      background: var(--color-surface-alt);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .personality-question {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.35rem;
+      background: var(--color-surface);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      margin-bottom: 0.15rem;
+      transition: border-color 0.15s;
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+    .personality-question:hover {
+      border-color: var(--color-accent);
+    }
+    .personality-question .q-line {
+      display: flex;
+      gap: 0.3rem;
+      align-items: baseline;
+      flex: 1;
+      margin-bottom: 0;
+      min-width: 0;
+    }
+    .personality-question .q-line .q-num {
+      flex-shrink: 0;
+    }
+    .personality-question .q-num {
+      font-size: 0.65rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+    .personality-options {
+      display: flex;
+      gap: 0.2rem;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+    .personality-option {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.1rem 0.3rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .personality-option:hover {
+      border-color: var(--color-accent);
+    }
+    .personality-option.selected {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+    .personality-option input {
+      width: 12px;
+      height: 12px;
+      margin: 0;
+    }
+    .personality-result {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, var(--color-accent-soft) 0%, rgba(59, 130, 246, 0.03) 100%);
+      border-radius: var(--radius);
+      display: none;
+    }
+    .personality-result.show {
+      display: block;
+      animation: fadeIn 0.4s var(--ease);
+    }
+    .personality-result h4 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .mbti-display {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.1em;
+    }
+    .personality-scores { margin-top: 1rem; font-size: 0.9rem; }
+    .score-row { margin: 0.35rem 0; }
+    .scale-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+    .scale-bar label {
+      font-size: 0.8rem;
+      min-width: 70px;
+    }
+    .scale-track {
+      flex: 1;
+      height: 8px;
+      background: var(--color-surface-alt);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .scale-fill {
+      height: 100%;
+      background: var(--color-accent);
+      border-radius: 4px;
+      transition: width 0.5s var(--ease);
+    }
+
+    /* ===== VIDEO SECTION ===== */
+    .video-block {
+      margin-bottom: 2rem;
+    }
+    .video-placeholder {
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+      position: relative;
+      max-width: 480px;
+    }
+    #step4 .video-block .form-textarea {
+      min-height: 200px;
+    }
+    .video-placeholder .video-link {
+      position: absolute;
+      inset: 0;
+      text-decoration: none;
+    }
+    .video-placeholder .video-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .video-placeholder .video-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 48px;
+      background: rgba(255,0,0,0.9);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .video-placeholder .video-play-btn:hover { background: #ff0000; }
+    .video-placeholder .video-play-btn::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 12px 0 12px 20px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px;
+    }
+
+    /* ===== EDUCATION TABLE ===== */
+    .edu-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .edu-table th, .edu-table td {
+      padding: 0.875rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .edu-table th {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .edu-table tr:hover td {
+      background: rgba(59, 130, 246, 0.03);
+    }
+    .edu-table td:first-child {
+      font-weight: 500;
+      min-width: 140px;
+    }
+    .edu-table td:nth-child(2) {
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    .edu-table .feedback-cell {
+      min-width: 120px;
+      max-width: 200px;
+    }
+    .edu-table .feedback-cell input,
+    .edu-table .feedback-cell textarea {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    .edu-table .feedback-cell textarea {
+      min-height: 36px;
+      resize: vertical;
+    }
+    /* 개발 규정 - 뷰 전환 버튼 */
+    .rule-view-switcher { display: flex; justify-content: flex-end; align-items: center; gap: 0.25rem; margin-bottom: 1rem; }
+    .rule-view-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text-muted); cursor: pointer; transition: all 0.2s; }
+    .rule-view-btn:hover { color: var(--color-text); }
+    .rule-view-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4); }
+    .rule-cols-sep { width: 1px; height: 20px; background: var(--color-border); margin: 0 0.5rem; }
+    .rule-cols-switcher { display: flex; gap: 0.25rem; }
+    .rule-cols-btn { width: 32px; height: 36px; padding: 0; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text-muted); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+    .rule-cols-btn:hover { color: var(--color-text); }
+    .rule-cols-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+    /* 개발 규정 - 테이블/바둑판 공통 */
+    .rule-container { font-size: 0.9rem; }
+    .rule-cell { padding: 0.875rem 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+    .rule-container .img-cell { min-width: 180px; }
+    .rule-container .img-cell input[type="file"] { font-size: 0.75rem; max-width: 100%; }
+    .rule-container .img-cell .img-preview { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .rule-container .img-cell .img-preview.static-carousel { display: block; flex-wrap: unset; }
+    .rule-container .img-cell .img-preview > img { max-width: 260px; max-height: 195px; object-fit: contain; border-radius: 8px; border: 1px solid var(--color-border); background: #f8fafc; flex-shrink: 0; }
+    .rule-container .img-cell .img-preview .preview-viewer { position: relative; width: 260px; min-height: 195px; border-radius: 8px; border: 1px solid var(--color-border); overflow: hidden; background: #f8fafc; }
+    .rule-container .img-cell .img-preview .preview-item { display: none; border-radius: 8px; overflow: hidden; }
+    .rule-container .img-cell .img-preview .preview-item.active { display: block; }
+    .rule-container .img-cell .img-preview .preview-item img,
+    .rule-container .img-cell .img-preview .preview-item video { display: block; width: 260px; height: 195px; object-fit: contain; background: #f8fafc; cursor: pointer; }
+    .img-preview img, .video-thumb { cursor: pointer; }
+    .preview-zoom-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; padding: 2rem; box-sizing: border-box; }
+    .preview-zoom-overlay.active { display: flex; }
+    .preview-zoom-overlay img, .preview-zoom-overlay video { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .rule-container .img-cell .img-preview .preview-nav { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
+    .rule-container .img-cell .img-preview .preview-nav button { padding: 0.35rem 0.75rem; font-size: 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-alt); color: var(--color-text); cursor: pointer; }
+    .rule-container .img-cell .img-preview .preview-nav button:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .rule-container .img-cell .img-preview .preview-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .rule-container .img-cell .img-preview .preview-nav .preview-counter { font-size: 0.75rem; color: var(--color-text-muted); }
+    .rule-container .rule-notes { color: var(--color-text-muted); font-size: 0.85rem; }
+    .rule-container .qa-cell { min-width: 160px; max-width: 280px; }
+    .rule-container .qa-cell textarea { width: 100%; min-height: 60px; padding: 0.35rem 0.5rem; font-size: 0.8rem; border: 1px solid var(--color-border); border-radius: 6px; font-family: inherit; resize: vertical; box-sizing: border-box; }
+    .rule-container .feedback-cell { min-width: 120px; max-width: 200px; }
+    .rule-container .feedback-cell input, .rule-container .feedback-cell textarea {
+      width: 100%; padding: 0.35rem 0.5rem; font-size: 0.8rem;
+      border: 1px solid var(--color-border); border-radius: 6px; font-family: inherit;
+    }
+    .rule-container .feedback-cell textarea { min-height: 36px; resize: vertical; }
+
+    /* 테이블 뷰 */
+    .rule-container.rule-view-table { width: 100%; }
+    .rule-container.rule-view-table .rule-table-header { display: grid; grid-template-columns: 40px minmax(100px, 140px) minmax(160px, 1fr) minmax(180px, 220px) minmax(60px, 100px) minmax(160px, 240px) minmax(100px, 160px); background: var(--color-surface-alt); font-weight: 600; color: var(--color-text); border-bottom: 1px solid var(--color-border); }
+    .rule-container.rule-view-table .rule-table-header .rule-th { padding: 0.875rem 1rem; }
+    .rule-container.rule-view-table .rule-item { display: grid; grid-template-columns: 40px minmax(100px, 140px) minmax(160px, 1fr) minmax(180px, 220px) minmax(60px, 100px) minmax(160px, 240px) minmax(100px, 160px); }
+    .rule-container .rule-num { font-weight: 600; color: var(--color-text-muted); font-size: 0.85rem; text-align: center; }
+    .rule-container.rule-view-table .rule-item:hover .rule-cell { background: rgba(59, 130, 246, 0.03); }
+    .rule-container.rule-view-table .rule-title { font-weight: 500; }
+    .rule-container.rule-view-table .rule-content { color: var(--color-text-muted); line-height: 1.6; }
+    .rule-container.rule-view-table .rule-img.img-cell { min-width: 0; overflow: hidden; }
+    .rule-container.rule-view-table .rule-img .img-preview .preview-viewer { width: 100%; max-width: 100%; min-height: 130px; }
+    .rule-container.rule-view-table .rule-img .img-preview .preview-item img,
+    .rule-container.rule-view-table .rule-img .img-preview .preview-item video { width: 100%; max-width: 100%; height: 130px; object-fit: contain; }
+
+    /* 바둑판(갤러리) 뷰 */
+    .rule-container.rule-view-gallery .rule-table-header { display: none; }
+    .rule-container.rule-view-gallery { display: grid; gap: 1.5rem; }
+    .rule-container.rule-view-gallery.rule-cols-1 { grid-template-columns: 1fr; }
+    .rule-container.rule-view-gallery.rule-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .rule-container.rule-view-gallery.rule-cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .rule-container.rule-view-gallery.rule-cols-4 { grid-template-columns: repeat(4, 1fr); }
+    /* 1열 모드: 이미지 모두 썸네일 미리보기로 한 줄 표시 (버튼 없음, 호버 시 크게 보기 유지) */
+    .rule-container.rule-view-gallery.rule-cols-1 .img-cell .img-preview .preview-viewer { display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; min-height: auto; }
+    .rule-container.rule-view-gallery.rule-cols-1 .img-cell .img-preview .preview-item { display: block !important; flex: 0 0 auto; }
+    .rule-container.rule-view-gallery.rule-cols-1 .img-cell .img-preview .preview-item img,
+    .rule-container.rule-view-gallery.rule-cols-1 .img-cell .img-preview .preview-item video { width: 100px; height: 75px; min-width: 100px; min-height: 75px; object-fit: contain; }
+    .rule-container.rule-view-gallery.rule-cols-1 .img-cell .img-preview .preview-nav { display: none !important; }
+    .rule-container.rule-view-gallery .rule-item {
+      display: flex; flex-direction: column; padding: 1.25rem; background: var(--color-surface-alt);
+      border-radius: 10px; border: 1px solid var(--color-border); gap: 0.75rem;
+    }
+    .rule-container.rule-view-gallery .rule-item .rule-cell { border: none; padding: 0; }
+    .rule-container.rule-view-gallery .rule-item:hover { border-color: var(--color-primary); background: rgba(59, 130, 246, 0.04); }
+    .rule-container.rule-view-gallery .rule-num { order: 0; font-weight: 600; color: var(--color-text-muted); font-size: 0.9rem; }
+    .rule-container.rule-view-gallery .rule-title { font-weight: 600; font-size: 1rem; order: 1; }
+    .rule-container.rule-view-gallery .rule-content { color: var(--color-text-muted); line-height: 1.6; font-size: 0.85rem; order: 2; }
+    .rule-container.rule-view-gallery .rule-notes { order: 3; font-size: 0.8rem; }
+    .rule-container.rule-view-gallery .rule-img { order: 4; min-width: 0; }
+    .rule-container.rule-view-gallery .rule-img .img-preview .preview-viewer { width: 100%; max-width: 100%; min-height: 160px; }
+    .rule-container.rule-view-gallery .rule-img .img-preview .preview-item img,
+    .rule-container.rule-view-gallery .rule-img .img-preview .preview-item video { width: 100%; height: 180px; object-fit: contain; }
+    .rule-container.rule-view-gallery .rule-qa { order: 5; max-width: none; }
+    .rule-container.rule-view-gallery .rule-feedback { order: 6; max-width: none; }
+    .feedback-form-section {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .feedback-form-section h3 {
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .feedback-form-section > p {
+      margin-bottom: 0.6rem !important;
+    }
+    .feedback-category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-bottom: 0.6rem;
+      align-items: center;
+    }
+    .feedback-category-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .feedback-category-item label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .feedback-category-item select {
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      min-width: 100px;
+    }
+    .feedback-form-section .form-group:last-child {
+      margin-top: 0.5rem;
+    }
+    .feedback-form-section .form-group:last-child .form-label {
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+    .feedback-form-section .form-textarea {
+      min-height: 70px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+
+    /* ===== CONTRACT ===== */
+    .contract-doc {
+      font-size: 0.95rem;
+      line-height: 1.9;
+    }
+    .contract-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .contract-intro {
+      margin-bottom: 1.5rem;
+    }
+    .contract-article {
+      margin-bottom: 1.75rem;
+    }
+    .contract-article h4 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .contract-article p, .contract-article ol {
+      margin-bottom: 0.6rem;
+      line-height: 1.8;
+    }
+    .contract-article p {
+      overflow-wrap: break-word;
+    }
+    .contract-article ol {
+      padding-left: 1.5rem;
+    }
+    .contract-input {
+      display: inline-block;
+      min-width: 80px;
+      padding: 0.2rem 0.4rem;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      background: transparent;
+      font-size: inherit;
+      font-family: inherit;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .contract-input.tiny {
+      width: 44px;
+      min-width: 44px;
+      max-width: 44px;
+      text-align: center;
+    }
+    .contract-input[type="number"]::-webkit-outer-spin-button,
+    .contract-input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .contract-input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    .contract-input.inline {
+      min-width: 100px;
+    }
+    .contract-input.wide {
+      min-width: 200px;
+    }
+    .contract-input:focus {
+      outline: none;
+      border-bottom-color: var(--color-accent);
+    }
+    .contract-closing {
+      margin: 1.5rem 0;
+    }
+    .contract-date {
+      margin-bottom: 2rem;
+    }
+    .contract-signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .contract-sig-block {
+      padding: 1rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+    }
+    .contract-sig-block input {
+      min-width: 120px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--color-accent);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .btn-secondary:hover {
+      background: var(--color-surface-alt);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+    .btn-submit {
+      background: var(--color-success);
+      color: white;
+    }
+    .btn-submit:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .sidebar-submit {
+      padding: 1rem 1.5rem;
+      margin-top: auto;
+      border-top: 1px solid var(--color-border);
+    }
+    .sidebar nav { flex: 1; }
+    .nav-buttons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    /* ===== PROGRESS INDICATOR ===== */
+    .progress-bar {
+      height: 4px;
+      background: var(--color-surface-alt);
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-accent), #60a5fa);
+      border-radius: 2px;
+      transition: width 0.6s var(--ease);
+    }
+
+    /* ===== STEP 2 COMPACT (구분 유지, 촘촘한 레이아웃) ===== */
+    #step2 .content-card {
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    #step2 .content-card h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    #step2 .content-card .card-desc { font-size: 0.8rem; margin-bottom: 0.75rem; }
+    #step2 .form-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem 0.9rem;
+    }
+    #step2 .form-grid.form-grid-5 {
+      grid-template-columns: 1fr 0.6fr 0.8fr 1.2fr 1fr;
+    }
+    #step2 .form-grid.form-grid-5 .form-group {
+      min-width: 0;
+    }
+    #step2 .form-grid.form-grid-5 .form-input,
+    #step2 .form-grid.form-grid-5 .form-select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #step2 .form-group { gap: 0.2rem; }
+    #step2 .form-label { font-size: 0.8rem; }
+    #step2 .form-input, #step2 .form-select {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.85rem;
+    }
+    #step2 .checkbox-group { gap: 0.5rem; }
+    #step2 .checkbox-item { font-size: 0.82rem; }
+    #step2 .form-group.span-2 { grid-column: span 2; }
+    #step2 .form-group.span-3 { grid-column: span 3; }
+    #step2 .form-group.full-width { grid-column: 1 / -1; }
+    #step2 .form-grid .form-grid {
+      grid-template-columns: repeat(5, minmax(0, 72px));
+      gap: 0.25rem 0.4rem;
+      margin-top: 0.25rem;
+      width: fit-content;
+    }
+    #step2 .form-grid .form-grid .form-group { gap: 0.1rem; }
+    #step2 .form-grid .form-grid .form-input {
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 1100px) {
+      #step2 .form-grid { grid-template-columns: repeat(3, 1fr); }
+      #step2 .form-grid.form-grid-5 { grid-template-columns: repeat(3, 1fr); }
+      #step2 .form-group.span-2 { grid-column: span 2; }
+      #step2 .form-group.span-3 { grid-column: span 3; }
+    }
+    @media (max-width: 1024px) {
+      #step2 .form-grid { grid-template-columns: 1fr; }
+      #step2 .form-grid.form-grid-5 { grid-template-columns: 1fr; }
+      #step2 .form-group.span-2, #step2 .form-group.span-3 { grid-column: 1; }
+      #step2 .form-grid .form-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 500px) {
+      #step2 .form-grid .form-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .personality-tests-grid { grid-template-columns: 1fr; }
+      .personality-tests-grid::before { display: none; }
+      .personality-tests-grid::after { display: none; }
+      .personality-test-card { border-bottom: 2px solid var(--color-border); }
+      .personality-test-card:last-child { border-bottom: none; }
+      .personality-question { flex-direction: column; align-items: stretch; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .app-container { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .step-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .step-nav-item { margin: 0; }
+      .main-content { padding: 1.5rem; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-top">
+          <h2 class="sidebar-title">면접 안내</h2>
+          <a href="면접_main.html" class="home-icon-link" title="메인으로" aria-label="메인으로">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </a>
+        </div>
+        <p class="sidebar-subtitle">5단계 프로세스</p>
+        <span class="type-badge instructor">전문직(개발자)</span>
+      </div>
+
+      <div class="phase-buttons">
+        <button type="button" class="btn btn-secondary phase-btn active" data-phase="interview" onclick="switchPhase('interview')">면접</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work1" onclick="switchPhase('work1')">업무1차</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work2" disabled>업무2차</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work3" disabled>업무3차</button>
+      </div>
+
+      <nav>
+        <ul class="step-nav">
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step1" class="step-nav-link active" data-step="1">
+              <span class="step-number">1</span>
+              면접 과정 안내
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step2" class="step-nav-link" data-step="2">
+              <span class="step-number">2</span>
+              인적사항
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step3" class="step-nav-link" data-step="3">
+              <span class="step-number">3</span>
+              성격 검사
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step4" class="step-nav-link" data-step="4">
+              <span class="step-number">4</span>
+              영상 시청 및 요약
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step6" class="step-nav-link" data-step="5">
+              <span class="step-number">1</span>
+              계약서
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step5" class="step-nav-link" data-step="6">
+              <span class="step-number">2</span>
+              출근 후 교육 안내
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step7" class="step-nav-link" data-step="7">
+              <span class="step-number">3</span>
+              서류첨부
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="면접_전문직_규정.html" class="step-nav-link" data-step="8">
+              <span class="step-number">4</span>
+              개발 규정
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-submit">
+        <button type="button" class="btn btn-submit" style="width: 100%;" onclick="submitForm()">제출</button>
+        <a href="업무일지_260225.html" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem; display: block; text-align: center;">업무일지</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <section id="step1" class="step-section active" data-step="1" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 1</span>
+          <h1 class="step-title">면접 과정 안내</h1>
+        </div>
+
+        <div class="content-card">
+          <p style="font-size: 1.05rem; margin-bottom: 1rem;">안녕하세요, 면접에 참여해주셔서 감사드립니다.</p>
+          <p>아래에 면접 순서와 각 단계별 구체적인 내용을 안내드립니다. 편안한 마음으로 진행해 주시기 바랍니다.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📋 면접 순서</h3>
+          <ul>
+            <li><strong>1단계: 서류 작성과 성향검사 진행</strong> — 약 20분 (서류 작성 2가지는 모두 작성해 주세요)</li>
+            <li><strong>2단계: 영상을 통한 회사소개</strong> — 약 10분 (영상 3개 시청 후 주요 포인트 요약)</li>
+            <li><strong>3단계: 개별 질문과 답변</strong> — 약 10분 / 면접 후 업무를 간단히 진행하면서 회사 파악</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>면접·과제 진행 시간</strong>에 대해 별도 비용은 지급하지 않으며, 입사 시 정규 근로계약(월급제)에 따른 급여가 적용됩니다.
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h3>💡 면접 및 업무 스타일에 대해</h3>
+          <p>저희 회사 면접은 면접자분이 업무를 하시면서 회사 스타일의 업무를 확인하시는 것에 포인트가 있으니, 기분 상하거나 당황하시지 말아 주세요.</p>
+          <p>사람이 중요한 시대, 업무보다 즐겁게 함께 일할 수 있는 스타일을 서로 확인하는 것입니다. 일단 진행해 보시고 담당자와 이야기해 주시면 됩니다.</p>
+          <p>업무를 해보는 것이 면접이며, 회사에 관한 내용과 업무 스타일은 일을 하면서 중간중간 담당자들이 이야기해 드릴 것입니다. 궁금한 점은 마지막에 인사 담당이 질문과 답변을 통해 확인해 드립니다.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📌 구체적인 업무 내용</h3>
+          <ul>
+            <li><strong>1. 잔무 (자료조사와 정리, 기획 등)</strong> — 30분<br>
+            <small>엑셀이나 PPT 샘플 포맷 유지. 질보다 양(30분 10~30개 이상), 서술형 아닌 명사형, 문제점 후 개선점 아이디어 작성</small></li>
+            <li><strong>2. 지원 업무에 대한 기획서 작성 또는 업무진행</strong> — 30분</li>
+            <li><strong>3. 지원 업무 피드백 후 다시 진행</strong> — 30분</li>
+            <li><strong>4. 회사에 제안 혹은 문서 작성</strong> — 30분</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>중요:</strong> 30분 단위로 업무 진행합니다. 마무리되지 않아도 다음 업무로 꼭 넘어가 주세요. 잘하는 것보다 <strong>시간 관리</strong>가 포인트이며, 결과물보다 <strong>업무 양이나 스타일</strong>을 중요하게 생각합니다.
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h3>⚠️ 유의사항</h3>
+          <p>업무를 함에 불편하거나 어려움이 있으면 바로 이야기하기보다, 일단 이해한 만큼만 30분 정도 업무 진행해 보신 후 담당자에게 불편함을 말씀해 주시면 확인 후 설명해 드리겠습니다. 걱정 마시고 편안하게 진행해 주세요.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📞 면접 후 안내</h3>
+          <p>면접을 보신 후, <strong>면접 보신 분이 먼저 출근 여부를 문자로 알려 주시면</strong> 담당자가 연락을 드립니다. 추후 질문은 문자로 부탁드리며, 면접 보러 와 주셔서 감사드립니다. 즐겁게 면접을 봐 주시기 바랍니다.</p>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-primary" onclick="goToStep(2)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="step-section" data-step="2" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 2</span>
+          <h1 class="step-title">인적사항</h1>
+        </div>
+
+        <form id="personalForm">
+          <!-- 기본 정보 -->
+          <div class="content-card">
+            <h3>기본 정보</h3>
+            <p class="card-desc">면접 및 근무 관련 기본 정보를 입력해 주세요.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">이름 <span class="required">*</span></label>
+                <input type="text" class="form-input" name="name" placeholder="이름" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">면접 일시</label>
+                <input type="date" class="form-input" name="interviewDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">근무 시작 희망일</label>
+                <input type="date" class="form-input" name="startDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">근무 가능 기간 (몇 개월)</label>
+                <input type="text" class="form-input" name="availableMonths" placeholder="예: 6개월" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">회사 홈페이지 확인 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="Y" /> Y</label>
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="N" /> N</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">지원 분야</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="직원" /> 직원</label>
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="파트" /> 파트</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">집에서 사무실까지 소요 시간</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="지하철" /> 지하철</label>
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="버스" /> 버스</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-input" name="commuteTime" placeholder="예: 40분" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">생년월일</label>
+                <input type="date" class="form-input" name="birthDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">나이</label>
+                <input type="number" class="form-input" name="age" placeholder="만 나이" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">경력</label>
+                <input type="text" class="form-input" name="experience" placeholder="경력 사항" />
+              </div>
+              <div class="form-group form-group-inline">
+                <div class="form-group-half">
+                  <label class="form-label">운전 가능 여부</label>
+                  <div class="form-row">
+                    <label class="checkbox-item"><input type="radio" name="driving" value="Y" /> Y</label>
+                    <label class="checkbox-item"><input type="radio" name="driving" value="N" /> N</label>
+                  </div>
+                </div>
+                <div class="form-group-half">
+                  <label class="form-label">차량 소유 여부</label>
+                  <div class="form-row">
+                    <label class="checkbox-item"><input type="radio" name="carOwned" value="Y" /> Y</label>
+                    <label class="checkbox-item"><input type="radio" name="carOwned" value="N" /> N</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 기타 여부 -->
+          <div class="content-card">
+            
+            <div class="form-grid form-grid-5">
+
+              <div class="form-group">
+                <label class="form-label">종교</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="religion" value="기독교" /> 기독교</label>
+                  <label class="checkbox-item"><input type="radio" name="religion" value="불교" /> 불교</label>
+                  <label class="checkbox-item"><input type="radio" name="religion" value="그외" /> 그외</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">PT 가능 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="pt" value="Y" /> Y</label>
+                  <label class="checkbox-item"><input type="radio" name="pt" value="N" /> N</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">가족 관계</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="pt" value="동거" /> 동거</label>
+                  <label class="checkbox-item"><input type="radio" name="pt" value="비동거" /> 비동거</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">결혼 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="미혼" /> 미혼</label>
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="기혼" /> 기혼</label>
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="계획중" /> 계획 중</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">자녀 수 및 나이</label>
+                <input type="text" class="form-input" name="children" placeholder="예: 1명, 5세" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 업무 능력 및 가능 시간 -->
+          <div class="content-card">
+            <h3>업무 능력 및 가능 시간</h3>
+            <p class="card-desc">컴퓨터·영어 능력과 요일별 업무 가능 시간을 입력해 주세요.</p>
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label class="form-label">컴퓨터 능력</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="excel" /> 엑셀</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="ppt" /> 파워포인트</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="word" /> 워드</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="photoshop" /> 포토샵</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="illustrator" /> 일러스트</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="video" /> 동영상 편집</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="blog" /> 블로그</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="premiere" /> 프리미어</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">영어 능력</label>
+                <select class="form-select" name="english">
+                  <option value="">선택</option>
+                  <option value="상">상</option>
+                  <option value="중">중</option>
+                  <option value="하">하</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label">업무 가능 시간 (요일별)</label>
+                <div class="form-grid work-time-row">
+                  <div class="form-group"><input type="text" class="form-input" name="mon" placeholder="월" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="tue" placeholder="화" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="wed" placeholder="수" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="thu" placeholder="목" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="fri" placeholder="금" /></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(1)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 3 성격 검사 -->
+      <section id="step3" class="step-section" data-step="3" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 3</span>
+          <h1 class="step-title">성격 검사</h1>
+        </div>
+
+        <div class="personality-section">
+          <p class="personality-intro">아래 40개 문항에서 a와 b 중 자신에 가까운 것을 선택해 주세요.</p>
+
+          <div class="personality-tests-grid" id="personalityQuestions">
+            <!-- 블록 1: 외향(E) vs 내향(I) -->
+            <div class="content-card personality-test-card">
+              <h3>E / I</h3>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 말하기를 좋아해 실수 할 때가 종종 있다 (a) / 나는 말이 없어 주변 사람들이 답답해 할 때가 있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q1" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q1" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 새로운 사람을 만나도 어색하지 않다 (a) / 나는 모르는 사람을 만나는 일이 피곤하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q2" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q2" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 말하면서 생각하고 대화도중 결심할 때가 있다 (a) / 나는 의견을 말하기 앞서 신중히 생각하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q3" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q3" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 팀으로 일하는 것이 편하다 (a) / 나는 혼자 혹은 소수로 일하는 것이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q4" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q4" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 나의 견해를 사람들에게 표현하기를 좋아한다 (a) / 나는 대체로 나의 생각, 견해를 내 안에 간직하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q5" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q5" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 6</span> 말을 할 때 제스처가 큰 편이다 (a) / 말을 할 때 제스처를 사용하면 어색한 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q6" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q6" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 7</span> 오랜시간 혼자 일하다 보면 외롭고 지루한 편이다 (a) / 혼자 오랜시간 일을 잘하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q7" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q7" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 8</span> 일할 때 적막한 것보다는 어느정도의 소리가 도움이 된다 (a) / 나는 소음이 있는 곳에서 일을 할 때 일하기가 힘들다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q8" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q8" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 9</span> 말이 빠른편이다 (a) / 목소리가 작고 조용하게 천천히 말하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q9" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q9" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 활동적인 편이다 (a) / 나는 집에 있는 것이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q10" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q10" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 2: 감각(S) vs 직관(N) -->
+            <div class="content-card personality-test-card">
+              <h3>S / N</h3>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 현실적이다 (a) / 나는 미래지향적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q11" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q11" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 경험으로 판단한다 (a) / 나는 떠오르는 직관으로 판단한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q12" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q12" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 사실적 묘사를 잘한다 (a) / 나는 추상적 표현을 잘한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q13" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q13" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 구체적이다 (a) / 나는 은유적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q14" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q14" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 상식적이다 (a) / 나는 창의적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q15" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q15" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 갔던 길로 가는 것이 편하다 (a) / 나는 새로운 길이 재밌다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q16" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q16" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 했던 일이 편하다 (a) / 나는 새로운 일이 흥미있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q17" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q17" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 8</span> 나는 약도를 구체적으로 그린다 (a) / 나는 약도를 구체적으로 그리기 어렵다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q18" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q18" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 9</span> 나는 구체적이다 (a) / 나는 비약한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q19" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q19" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 실제 경험을 좋아한다 (a) / 나는 공상을 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q20" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q20" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 3: 사고(T) vs 감정(F) -->
+            <div class="content-card personality-test-card">
+              <h3>T / F</h3>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 분석적이다 (a) / 나는 감수성이 풍부하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q21" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q21" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 객관적이다 (a) / 나는 공감적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q22" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q22" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 감정에 치우치지 않고 의사결정을 한다 (a) / 나는 상황을 생각하며 의사결정을 한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q23" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q23" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 이성과 논리로 행동한다 (a) / 나는 가치관과 사람 중심으로 행동한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q24" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q24" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 능력있다는 소리 듣기를 좋아한다 (a) / 나는 따뜻하다는 소리 듣기를 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q25" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q25" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 경쟁한다 (a) / 나는 양보한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q26" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q26" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 직선적인 말이 편하다 (a) / 나는 배려하는 말이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q27" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q27" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 8</span> 나는 사건의 원인과 결과를 쉽게 파악한다 (a) / 나는 사람의 기분을 쉽게 파악한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q28" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q28" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 9</span> 사람들이 나를 차갑다고 느끼는 편이다 (a) / 사람들이 나를 따뜻하다고 하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q29" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q29" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 할말은 한다 (a) / 나는 좋게 생각하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q30" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q30" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 4: 판단(J) vs 인식(P) -->
+            <div class="content-card personality-test-card">
+              <h3>J / P</h3>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 결정에 대해서 잘 변경하지 않는 편이다 (a) / 나는 결정에 대해서 융통성이 있는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q31" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q31" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 계획에 의해서 일을 처리하는 편이다 (a) / 나는 마지막에 임박했을 때에 일을 처리하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q32" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q32" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 계획된 여행이 편하다 (a) / 나는 갑자기 떠나는 여행이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q33" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q33" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 정리정돈을 자주 하는 편이다 (a) / 나는 날 잡아서 정리하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q34" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q34" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 조직적인 분위기에 일이 잘된다 (a) / 나는 즐거운 분위기에 일이 잘된다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q35" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q35" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 계획적이고 조직적이다 (a) / 나는 나의 순발력을 믿는다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q36" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q36" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 규범을 좋아한다 (a) / 나는 자유로운 것을 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q37" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q37" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 8</span> 나는 일할 때 친해진다 (a) / 나는 놀 때 친해진다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q38" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q38" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 9</span> 내 책상은 정리가 잘 되어있다 (a) / 내 책상은 편안하게 되어있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q39" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q39" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 10</span> 쇼핑을 갈 때 적어 가는 편이다 (a) / 쇼핑을 갈 때 적지 않고 그냥 가는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q40" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q40" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="personality-result" id="personalityResult">
+            <h4>성격 유형 결과</h4>
+            <div class="mbti-display" id="mbtiResult">-</div>
+            <div class="personality-scores" id="personalityScores"></div>
+            <div id="scaleBars" style="margin-top: 1rem;"></div>
+            <p class="personality-check-msg" style="margin-top: 1rem; font-size: 0.85rem; color: var(--color-text-muted);">각 유형의 합은 10개, 총합은 40개가 나오셨다면 맞게 체크하셨습니다.</p>
+          </div>
+
+          <div class="personality-complete-wrap" style="margin-top: 2rem; text-align: center;">
+            <button type="button" class="btn btn-primary" id="personalityCompleteBtn">테스트 완료</button>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(2)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section id="step4" class="step-section" data-step="4" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 4</span>
+          <h1 class="step-title">영상 시청 및 요약</h1>
+        </div>
+
+        <p style="color: var(--color-text-muted); margin-bottom: 2rem;">아래 영상 3개를 시청하신 후, 각 영상에 대한 주요 포인트를 요약하여 작성해 주세요.</p>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 1</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 1 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 1 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary1" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback1" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 2</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 2 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 2 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary2" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback2" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 3</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 3 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 3 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary3" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback3" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(3)">← 이전</button>
+          <button class="btn btn-primary" onclick="submitToServer(''); goToStep(6)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <section id="step5" class="step-section" data-step="5" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 5</span>
+          <h1 class="step-title">전문직(개발자) 근로계약서</h1>
+        </div>
+
+        <div class="content-card contract-doc">
+          <div class="contract-title">전문직(개발자) 근로계약서</div>
+          <p class="contract-intro">㈜휴텍씨 대표이사 박미진(이하 "사업주"라 함)과 <input type="text" class="contract-input inline" name="contractWorkerName" placeholder="근로자 성명"> (이하 "근로자"라 함)은 사업주가 부여하는 업무에 대하여 성실히 수행할 것에 합의하고 다음과 같이 근로계약을 체결한다.</p>
+
+          <div class="contract-article">
+            <h4>제1조【근로계약기간】</h4>
+            <p>① 계약기간은 <input type="number" class="contract-input tiny" name="contractYear" value="2026" readonly> 년 <input type="number" class="contract-input tiny" name="contractStartMonth" placeholder="월" min="1" max="12"> 월 <input type="number" class="contract-input tiny" name="contractStartDay" placeholder="일" min="1" max="31"> 일부터 <input type="number" class="contract-input tiny" name="contractEndYear" value="2026"> 년 <input type="number" class="contract-input tiny" name="contractEndMonth" placeholder="월"> 월 <input type="number" class="contract-input tiny" name="contractEndDay" placeholder="일"> 일까지(<input type="number" class="contract-input tiny" name="contractMonths" placeholder="개월"> 개월)로 한다.</p>
+            <p>단, 회사는 업무형편상 계약기간 중 필요한 경우 계약기간 및 계약내용을 조정, 변경하는 것에 동의한다. 동의자 : <input type="text" class="contract-input inline" name="contractAgree1" placeholder="(인)"> (인)</p>
+            <p>② ①항의 계약기간이 만료됨에 따라 자동적으로 본 근로계약은 종료된다.</p>
+            <p>③ 업무수행 능력적부 판정 및 업무의 원활한 수행을 위한 교육실시를 위해 계약체결일로부터 1 개월까지를 수습기간으로 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제2조【근무장소 및 업무내용】</h4>
+            <p>① 근무장소 : ㈜휴텍씨 강남 사무실</p>
+            <p>② 업무내용 : 소프트웨어·프로그램 개발 및 기획, 관련 사무 업무</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제3조【근로일·근로시간·휴게시간】</h4>
+            <p>① 의 1.(기본출근기준, 이하 "1-1"이라 함)<br>
+              근무 시간 : <input type="text" class="contract-input" name="workTime1" placeholder="예: 09:00-18:00"> - <input type="text" class="contract-input" name="workTime1End" placeholder=""> &nbsp;&nbsp; 근무 요일 : <input type="text" class="contract-input" name="workDay1" placeholder="예: 월~금"></p>
+            <p>② 의 1.(기본출근기준, 이하 "1-1"이라 함)<br>
+              근무 시간 : <input type="text" class="contract-input" name="workTime2" placeholder=""> - <input type="text" class="contract-input" name="workTime2End" placeholder=""> &nbsp;&nbsp; 근무 요일 : <input type="text" class="contract-input" name="workDay2" placeholder=""></p>
+            <p>특이사항 : <input type="text" class="contract-input wide" name="workSpecial" placeholder=""></p>
+            <p>①은 정한 근로일·근로시간·휴게시간 이외 발생하는 근로일·근로시간·휴게시간에 대해서는 사업주와 근로자는 상호간 협의하여 정할 수 있다.</p>
+            <p>② ①항의 근로시간에는 근로기준법 제54조에 의거(30분) 또는 (1시간)의 휴게시간이 포함되어 있다.</p>
+            <p>③ 휴게시간으로 1일 4시간 ~ 8시간이하 근무자는 30분 이상, 1일 8시간 ~ 12시간이하 근무자는 1시간 이상의 휴게시간을 근로기준법 제54조(휴게) 규정에 의거 반드시 갖도록 하며, 휴게시간 및 결근이나 조퇴, 지각 등은 무노동 무임금 원칙에 의거 하여 지급하지 않으므로 전체금액에서 해당하는 시간만큼의 임금을 공제하고 지급한다. 동의자: <input type="text" class="contract-input inline" name="contractAgree2" placeholder="(인)"> (인)</p>
+            <p>④ 근로자는 업무상 필요한 경우에는 근로기준법 제53조에 의거 1주간 12시간 한도로 연장 근로하는 것에 합의한다. 동의자: <input type="text" class="contract-input inline" name="contractAgree3" placeholder="(인)"> (인)</p>
+            <p>⑤ 시간외근로수당은 통상임금으로 지급한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제4조【급여】</h4>
+            <p>① 월 기본급은 <input type="number" class="contract-input" name="monthlySalary" placeholder="원"> 원(세전, 각종 수당 별도)으로 한다.</p>
+            <p>② 급여는 매월 15일(휴일일 경우 전일)에 근로자가 지정하는 근로자 명의의 은행계좌로 입금한다.</p>
+            <p>③ 월 급여 계산기간은 매월 1일부터 말일까지로 한다.</p>
+            <p>④ 근로개시 후 업무능력과 업무성과에 따라 사업주와 근로자 간 합의에 의거 기본급(연봉)은 조정될 수 있다.</p>
+            <p>⑤ 입사 후 <input type="number" class="contract-input tiny" name="resignMonths" placeholder=""> ( 개월 안에) 퇴사 시(영업일 기준), 후임자를 구하지 않은 상태에서 인수인계 없이 퇴사 시에는 관련 규정에 따라 급여를 정산하며, 노동부 진정 및 민형사상 일체 이의제기하지 않기로 한다. 동의자 : <input type="text" class="contract-input inline" name="contractAgree4" placeholder="(인)"> (인)</p>
+            <p>* 합의 하에 인수인계 후 퇴사 시에는 계약된 급여를 인정하여 지급한다. 수습 후 1년 이상 근속 시 퇴직금을 지급한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제5조【시간외근무 및 근태관리】</h4>
+            <p>① 계약기간동안 근무시간외 근무를 할 경우 시간외 근무신청과 그에 따른 소속 팀장의 승인과 사인이 있을 경우에 한하여 시간외근무를 인정한다.</p>
+            <p>② 출퇴근기록대장에 시간외 근무이유를 반드시 작성하여 소속 상사에게 승인과 사인을 받아야 하며, 자발적으로 실시한 시간외근로에 대해서는 시간외근무를 인정하지 않는다.</p>
+            <p>③ 지각 시에는 사전에 직속 팀장 또는 상사에게 전화 또는 문자로 지각사유를 밝혀야 한다.</p>
+            <p>④ 결근 시에는 3일전에 미리 직속 상사에게 승인과 사인을 받아야 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제6조【손해배상】</h4>
+            <p>다음 각 호의 사항에 대하여 횡령 및 배임, 형사 처벌 또는 민사상 손해배상책임 등 법적처벌을 받을 수 있다.</p>
+            <ol>
+              <li>퇴사통보는 30일전일 이전이며, 인수인계를 원활하게 이루어지지 않은 경우</li>
+              <li>무단 퇴사하는 경우(30일 전에 통보도 없이 인수인계서를 작성하지 않고 퇴직하는 경우)</li>
+              <li>업무인수인계서 작성 거부 및 업무 인수인계서 작성을 미완료한 경우</li>
+              <li>근로자 본인 업무에 대한 인수인계를 불이행한 경우</li>
+              <li>회사 자산(회사자료, 회사보유의 물품 등)을 함부로 사적인 용도로 배포 및 유출한 경우</li>
+              <li>회사에 막대한 금전적 손실 및 이미지를 손상시키는 경우</li>
+            </ol>
+          </div>
+
+          <div class="contract-article">
+            <h4>제7조【비밀유지 준수사항】</h4>
+            <p>"사업주"와 "근로자"는 본 급여 계약내용 및 금액을 타인에게 누설하지 않으며, 타인이 본인의 급여 계약내용 및 계약금액을 알 수 없도록 보안을 유지할 것을 확약하며 위반할 경우 어떠한 "사업주"의 처분결과에도 이의를 제기하지 않는 것에 동의한다. 동의자 : <input type="text" class="contract-input inline" name="contractAgree5" placeholder="(인)"> (인)</p>
+          </div>
+
+          <p class="contract-closing">본 계약서에 없는 사항은 노동관계법령에 따르기로 하고, 본 계약내용에 대해 이의가 없음을 확인하며 서명날인 후 본 계약서를 각 1부씩 교부하여 보관키로 한다.</p>
+
+          <p class="contract-date"><input type="number" class="contract-input tiny" name="contractDateYear" value="2026"> 년 <input type="number" class="contract-input tiny" name="contractDateMonth" placeholder="월"> 월 <input type="number" class="contract-input tiny" name="contractDateDay" placeholder="일"> 일</p>
+
+          <div class="contract-signatures">
+            <div class="contract-sig-block">
+              <strong>(사업주)</strong> 사업체명 : 주식회사 휴텍씨<br>
+              주 소 : 서울특별시 서초구 양재천로19길 26, 6층<br>
+              대표 이사 : 박 미 진 (서명 날인)
+            </div>
+            <div class="contract-sig-block">
+              <strong>(근로자)</strong> 주 소 : <input type="text" class="contract-input" name="contractAddress" placeholder=""><br>
+              연 락 처 : <input type="text" class="contract-input" name="contractPhone" placeholder=""> &nbsp; 비상 연락처 : <input type="text" class="contract-input" name="contractEmergency" placeholder=""><br>
+              생년월일 : <input type="text" class="contract-input" name="contractBirth" placeholder=""><br>
+              성 명 : <input type="text" class="contract-input" name="contractName" placeholder=""> (서명․날인)
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(4)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 5 -->
+      <section id="step6" class="step-section" data-step="6" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 6</span>
+          <h1 class="step-title">출근 후 교육 내용</h1>
+        </div>
+
+        <p style="color: var(--color-text-muted); margin-bottom: 2rem;">출근 후 필요한 교육 내용과 회사 생활 안내입니다.</p>
+
+        <div class="content-card">
+          <table class="edu-table">
+            <thead>
+              <tr><th>제목</th><th>내용</th><th>비고</th><th>피드백</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>소개</td>
+                <td>휴텍씨, 국제통역번역협회, 타임스미디어 / 본사는 서초동, 여기는 연구소 개념</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb1" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>출퇴근</td>
+                <td>출근/퇴근 업무일지 기록, 업무 우선순위 및 내용 변경 시 추가 업무·이메일 확인 후 처리, 고정 업무·변경 업무·잔무·기획 업무·공용 업무 구분</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb2" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무일지</td>
+                <td>30분 단위 작성, 다음날·다음 주·다음 달 일정 기록, 피드백 하루 2회(모아서 보고), 초기 양 위주 → 이후 질/내용 위주, 1차(잔무·급함·전달·보고) 2차(고정) 3차(새일·연결) 구분</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb3" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 프로세싱</td>
+                <td>맥락·흐름·뉘앙스 이해, 틀·폼·형태 먼저 확인 후 진행, 효율성·가독성·30분 단위 중요</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb4" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무</td>
+                <td>진행 내용 캡처 이미지로 보고 후 다운로드 가능, 우선순위 헷갈릴 때 반드시 질문</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb5" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 인지</td>
+                <td>What/Why/How 함께 설명, A/B 경우 함께 제시, 중간 보고 필수, 마감일 정하고 지시자에게 알리기, 문서 한 달에 한 번씩 정리</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb6" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>정리정돈</td>
+                <td>본인 컴퓨터 위·화면·문서·출력물 정리 요청</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb7" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>보고법</td>
+                <td>보고 대상: 지시한 사람, 중요하거나 긴 업무는 중간 보고 필수, 완료 후 보고 필수, 잔무는 한 마디로 요약 보고</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb8" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 체크리스트</td>
+                <td>각종 업무 체크리스트 활용</td>
+                <td>와이파이</td>
+                <td class="feedback-cell"><input type="text" name="eduFb9" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>이메일</td>
+                <td>-</td>
+                <td>구글 메일</td>
+                <td class="feedback-cell"><input type="text" name="eduFb10" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>AI 활용</td>
+                <td>-</td>
+                <td>GPT, 커서(Cursor)</td>
+                <td class="feedback-cell"><input type="text" name="eduFb11" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>급여</td>
+                <td>매월 15일~말일 입금, 업무일지 기록 시 출퇴근 시간 5분 전 출근하여 기록</td>
+                <td>캔바</td>
+                <td class="feedback-cell"><input type="text" name="eduFb12" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>로그인 정보</td>
+                <td>자료로 제공</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb13" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>엑셀</td>
+                <td>모든 문서 엑셀 1개(시트 20개까지), 줄 긋고 한 장에 50% 이상 프린트 가능하게, 셀 병합 금지, 글자 색·색칠로 보기 쉽게, 시트 20개 넘으면 카테고리별 분류</td>
+                <td>홈페이지</td>
+                <td class="feedback-cell"><input type="text" name="eduFb14" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>PPT</td>
+                <td>한 장에 2장 캡처/출력 가로 4장, 이미지 캡처 위주, 40장까지 하나의 파일로 관리</td>
+                <td>개발 홈피</td>
+                <td class="feedback-cell"><input type="text" name="eduFb15" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>피드백·아이디어</td>
+                <td>종이 출력 내용 위주/캡처하여 내용 삽입</td>
+                <td>카카오톡</td>
+                <td class="feedback-cell"><input type="text" name="eduFb16" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>비품/프린터</td>
+                <td>개인 물품 필요 시 담당자 요청, 프린터 공용 한 장에 4장 출력</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb17" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>보안규정</td>
+                <td>개인 메일·핸드폰·클라우드 사용 금지, 회사 자료 복사·외부 반출·개인 USB 금지</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb18" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>기타</td>
+                <td>모든 문서 삭제 금지, 삭제 파일 보관. 담당: 노재훈 사장님, 서수연 팀장, 정인수 팀장, 이원진 팀장님, 김성태 팀장님</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb19" placeholder="피드백"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="feedback-form-section">
+            <h3>교육 피드백 작성</h3>
+            <div class="feedback-category-row">
+              <div class="feedback-category-item">
+                <label>대분류</label>
+                <select name="feedbackLarge" id="feedbackLarge">
+                  <option value="">선택</option>
+                  <option value="소개·환경">소개·환경</option>
+                  <option value="출퇴근·업무관리">출퇴근·업무관리</option>
+                  <option value="업무처리">업무처리</option>
+                  <option value="보고·소통">보고·소통</option>
+                  <option value="시스템·도구">시스템·도구</option>
+                  <option value="인사·급여">인사·급여</option>
+                  <option value="보안·기타">보안·기타</option>
+                </select>
+              </div>
+              <div class="feedback-category-item">
+                <label>중분류</label>
+                <select name="feedbackMid" id="feedbackMid">
+                  <option value="">선택</option>
+                  <option value="소개">소개</option>
+                  <option value="출퇴근">출퇴근</option>
+                  <option value="업무일지">업무일지</option>
+                  <option value="업무 프로세싱">업무 프로세싱</option>
+                  <option value="업무">업무</option>
+                  <option value="업무 인지">업무 인지</option>
+                  <option value="정리정돈">정리정돈</option>
+                  <option value="보고법">보고법</option>
+                  <option value="업무 체크리스트">업무 체크리스트</option>
+                  <option value="이메일">이메일</option>
+                  <option value="AI 활용">AI 활용</option>
+                  <option value="급여">급여</option>
+                  <option value="로그인 정보">로그인 정보</option>
+                  <option value="엑셀">엑셀</option>
+                  <option value="PPT">PPT</option>
+                  <option value="피드백·아이디어">피드백·아이디어</option>
+                  <option value="비품/프린터">비품/프린터</option>
+                  <option value="보안규정">보안규정</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+              <div class="feedback-category-item">
+                <label>소분류</label>
+                <select name="feedbackSmall" id="feedbackSmall">
+                  <option value="">선택</option>
+                  <option value="내용 이해도">내용 이해도</option>
+                  <option value="교육 시간">교육 시간</option>
+                  <option value="자료 적절성">자료 적절성</option>
+                  <option value="추가 필요 사항">추가 필요 사항</option>
+                  <option value="개선 제안">개선 제안</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <textarea class="form-textarea" name="feedbackContent" placeholder="피드백을 입력해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(6)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(7)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 6 계약서 -->
+
+
+      <!-- STEP 7 서류첨부 -->
+      <section id="step7" class="step-section" data-step="7" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 7</span>
+          <h1 class="step-title">서류첨부</h1>
+        </div>
+        <div class="content-card">
+          <p class="card-desc" style="color: var(--color-text-muted); margin-bottom: 1.5rem;">필요한 서류를 첨부해 주세요. (PDF, 이미지, 한글/엑셀 등)</p>
+          <div class="form-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">이력서</label>
+              <input type="file" class="form-input file-input" name="docResume" accept=".pdf,.hwp,.doc,.docx,.jpg,.jpeg,.png" multiple>
+            </div>
+            <div class="form-group">
+              <label class="form-label">포트폴리오 / 자격증 등</label>
+              <input type="file" class="form-input file-input" name="docPortfolio" accept=".pdf,.hwp,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple>
+            </div>
+            <div class="form-group">
+              <label class="form-label">기타 서류</label>
+              <input type="file" class="form-input file-input" name="docEtc" accept=".pdf,.hwp,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple>
+            </div>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(5)">← 이전</button>
+          <button class="btn btn-primary" onclick="window.location.href='면접_전문직_규정.html'">다음 단계로 →</button>
+          <button type="button" class="btn btn-submit" onclick="submitForm()">제출</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll('.step-section');
+    const navLinks = document.querySelectorAll('.step-nav-link');
+    const progressFill = document.getElementById('progressFill');
+    let currentPhase = 'interview';
+
+    const PHASE_STEPS = { interview: [1,2,3,4], work1: [5,6,7], work2: [], work3: [] };
+
+    function switchPhase(phase, stepNum) {
+      if (!PHASE_STEPS[phase] || PHASE_STEPS[phase].length === 0) return;
+      currentPhase = phase;
+      const stepList = PHASE_STEPS[phase];
+      const targetStep = (stepNum && stepList.includes(stepNum)) ? stepNum : stepList[0];
+      document.querySelectorAll('.step-nav-item').forEach(li => {
+        li.classList.toggle('phase-hidden', li.dataset.phase !== phase);
+      });
+      document.querySelectorAll('.step-section').forEach(sec => {
+        sec.classList.toggle('phase-hidden', sec.dataset.phase !== phase);
+      });
+      document.querySelectorAll('.phase-btn:not([disabled])').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.phase === phase);
+      });
+      goToStep(targetStep, true);
+    }
+
+    // 면접 일시 기본값: 오늘 날짜
+    (function() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const el = document.querySelector('input[name="interviewDate"]');
+      if (el) el.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    })();
+
+    function goToStep(stepNum, skipPhaseCheck) {
+      const targetPhase = Object.keys(PHASE_STEPS).find(p => PHASE_STEPS[p].includes(stepNum));
+      if (!skipPhaseCheck && targetPhase && targetPhase !== currentPhase) {
+        switchPhase(targetPhase, stepNum);
+        return;
+      }
+      const stepList = PHASE_STEPS[currentPhase] || [];
+      steps.forEach(s => {
+        if (s.dataset.phase !== currentPhase) return;
+        s.classList.toggle('active', parseInt(s.dataset.step) === stepNum);
+      });
+      navLinks.forEach(link => {
+        const li = link.closest('.step-nav-item');
+        if (!li || li.dataset.phase !== currentPhase) return;
+        const num = parseInt(link.dataset.step);
+        link.classList.remove('active', 'completed');
+        if (num === stepNum) link.classList.add('active');
+        else if (num < stepNum) link.classList.add('completed');
+      });
+      const totalInPhase = stepList.length || 1;
+      const idx = stepList.indexOf(stepNum);
+      const pct = totalInPhase ? ((idx >= 0 ? idx + 1 : 1) / totalInPhase * 100) : 100;
+      progressFill.style.width = pct + '%';
+      const target = document.getElementById('step' + stepNum);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      if (stepNum === 6) syncContractFromForm();
+    }
+
+    switchPhase('interview');
+
+    function syncContractFromForm() {
+      const name = getVal('name');
+      const birth = getVal('birthDate');
+      ['contractWorkerName', 'contractName'].forEach(n => {
+        const el = document.querySelector(`[name="${n}"]`);
+        if (el && name && !el.value) el.value = name;
+      });
+      const birthEl = document.querySelector('[name="contractBirth"]');
+      if (birthEl && birth && !birthEl.value) birthEl.value = birth;
+    }
+
+    navLinks.forEach(link => {
+      const href = (link.getAttribute('href') || '').trim();
+      if (href && !href.startsWith('#')) return;
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const stepNum = parseInt(link.dataset.step);
+        const phase = link.closest('.step-nav-item')?.dataset.phase;
+        if (phase && phase !== currentPhase) switchPhase(phase);
+        else goToStep(stepNum);
+      });
+    });
+
+    // 개발 규정 - 테이블/바둑판 뷰 전환
+    document.querySelectorAll('.rule-view-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var view = this.dataset.view;
+        var container = document.querySelector('.rule-container');
+        if (!container) return;
+        document.querySelectorAll('.rule-view-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        container.classList.remove('rule-view-table', 'rule-view-gallery');
+        container.classList.add('rule-view-' + view);
+      });
+    });
+    // 개발 규정 - 바둑판 열 수 선택 (2, 3, 4)
+    document.querySelectorAll('.rule-cols-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var cols = this.dataset.cols;
+        var container = document.querySelector('.rule-container');
+        if (!container) return;
+        document.querySelectorAll('.rule-cols-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        container.classList.remove('rule-cols-1', 'rule-cols-2', 'rule-cols-3', 'rule-cols-4');
+        container.classList.add('rule-cols-' + cols);
+      });
+    });
+
+    // 호버 시 크게 보기 오버레이
+    var zoomOverlay = document.createElement('div');
+    zoomOverlay.className = 'preview-zoom-overlay';
+    var zoomHideTimer = null;
+    zoomOverlay.addEventListener('mouseenter', function() { clearTimeout(zoomHideTimer); zoomHideTimer = null; });
+    zoomOverlay.addEventListener('mouseleave', function() {
+      zoomOverlay.classList.remove('active');
+      var v = zoomOverlay.querySelector('video');
+      if (v) v.pause();
+    });
+    document.body.appendChild(zoomOverlay);
+
+    function bindZoomToMedia(el) {
+      if (el.dataset.zoomBound === '1') return;
+      el.dataset.zoomBound = '1';
+      el.addEventListener('mouseenter', function() {
+        clearTimeout(zoomHideTimer);
+        zoomHideTimer = null;
+        zoomOverlay.innerHTML = '';
+        var clone = el.cloneNode(true);
+        if (clone.tagName === 'VIDEO') { clone.controls = true; clone.muted = true; }
+        clone.addEventListener('mouseleave', function() {
+          zoomOverlay.classList.remove('active');
+          var v = zoomOverlay.querySelector('video');
+          if (v) v.pause();
+        });
+        zoomOverlay.appendChild(clone);
+        zoomOverlay.classList.add('active');
+        if (clone.tagName === 'VIDEO') clone.play();
+      });
+      el.addEventListener('mouseleave', function() {
+        zoomHideTimer = setTimeout(function() {
+          zoomOverlay.classList.remove('active');
+          var v = zoomOverlay.querySelector('video');
+          if (v) v.pause();
+          zoomHideTimer = null;
+        }, 80);
+      });
+    }
+    function bindZoomToAllImages() {
+      document.querySelectorAll('.img-preview > img, .img-preview > video, .img-preview .preview-item img, .img-preview .preview-item video, .video-thumb').forEach(bindZoomToMedia);
+    }
+    // 정적 이미지 2개 이상 → 캐러셀 구조로 변환 (테이블/바둑판 2~4열에서 1개씩 + 화살표, 1열은 기존대로 전체 표시)
+    document.querySelectorAll('.img-cell .img-preview').forEach(function(preview) {
+      var directImgs = Array.from(preview.querySelectorAll(':scope > img'));
+      if (directImgs.length < 2) return;
+      var viewer = document.createElement('div');
+      viewer.className = 'preview-viewer';
+      directImgs.forEach(function(img, i) {
+        var item = document.createElement('div');
+        item.className = 'preview-item' + (i === 0 ? ' active' : '');
+        item.appendChild(img);
+        viewer.appendChild(item);
+      });
+      var navDiv = document.createElement('div');
+      navDiv.className = 'preview-nav';
+      var prevBtn = document.createElement('button');
+      prevBtn.type = 'button';
+      prevBtn.textContent = '← 이전';
+      var nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.textContent = '다음 →';
+      var counterSpan = document.createElement('span');
+      counterSpan.className = 'preview-counter';
+      var items = viewer.querySelectorAll('.preview-item');
+      var idx = 0;
+      function showItem(i) {
+        idx = i;
+        items.forEach(function(it, k) { it.classList.toggle('active', k === i); });
+        prevBtn.disabled = i <= 0;
+        nextBtn.disabled = i >= items.length - 1;
+        counterSpan.textContent = (i + 1) + ' / ' + items.length;
+      }
+      prevBtn.addEventListener('click', function() { if (idx > 0) showItem(idx - 1); });
+      nextBtn.addEventListener('click', function() { if (idx < items.length - 1) showItem(idx + 1); });
+      navDiv.appendChild(prevBtn);
+      navDiv.appendChild(counterSpan);
+      navDiv.appendChild(nextBtn);
+      preview.innerHTML = '';
+      preview.appendChild(viewer);
+      preview.appendChild(navDiv);
+      preview.classList.add('static-carousel');
+      showItem(0);
+    });
+    bindZoomToAllImages();
+
+    // 개발 규정 테이블 - 이미지/동영상 미리보기 (한 번에 1개만 표시, 버튼으로 전환)
+    document.querySelectorAll('.rule-img-inp').forEach(function(inp) {
+      inp.addEventListener('change', function() {
+        var wrap = this.nextElementSibling;
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        var files = Array.from(this.files).slice(0, 4);
+        if (files.length === 0) return;
+
+        var viewer = document.createElement('div');
+        viewer.className = 'preview-viewer';
+        var items = [];
+
+        files.forEach(function(f) {
+          var url = URL.createObjectURL(f);
+          var item = document.createElement('div');
+          item.className = 'preview-item';
+          if (f.type.startsWith('image/')) {
+            var img = document.createElement('img');
+            img.src = url;
+            img.alt = '';
+            item.appendChild(img);
+          } else if (f.type.startsWith('video/')) {
+            var vid = document.createElement('video');
+            vid.src = url;
+            vid.controls = true;
+            item.appendChild(vid);
+          } else {
+            item.innerHTML = '<span style="font-size:0.75rem;padding:0.5rem;">미리보기 불가</span>';
+          }
+          items.push(item);
+          viewer.appendChild(item);
+        });
+
+        wrap.appendChild(viewer);
+        bindZoomToAllImages();
+
+        var idx = 0;
+        function showItem(i) {
+          items.forEach(function(it, k) {
+            it.classList.toggle('active', k === i);
+            var v = it.querySelector('video');
+            if (v && k !== i) v.pause();
+          });
+          if (navDiv) {
+            prevBtn.disabled = i <= 0;
+            nextBtn.disabled = i >= items.length - 1;
+            counterSpan.textContent = (i + 1) + ' / ' + items.length;
+          }
+          var v = items[i].querySelector('video');
+          if (v) v.play && v.play();
+        }
+        showItem(0);
+
+        var navDiv = null, prevBtn, nextBtn, counterSpan;
+        if (files.length > 1) {
+          navDiv = document.createElement('div');
+          navDiv.className = 'preview-nav';
+          prevBtn = document.createElement('button');
+          prevBtn.type = 'button';
+          prevBtn.textContent = '← 이전';
+          nextBtn = document.createElement('button');
+          nextBtn.type = 'button';
+          nextBtn.textContent = '다음 →';
+          counterSpan = document.createElement('span');
+          counterSpan.className = 'preview-counter';
+          prevBtn.addEventListener('click', function() { if (idx > 0) { idx--; showItem(idx); } });
+          nextBtn.addEventListener('click', function() { if (idx < items.length - 1) { idx++; showItem(idx); } });
+          navDiv.appendChild(prevBtn);
+          navDiv.appendChild(counterSpan);
+          navDiv.appendChild(nextBtn);
+          wrap.appendChild(navDiv);
+          showItem(0);
+        }
+      });
+    });
+
+    // Personality option styling
+    document.querySelectorAll('.personality-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const parent = this.closest('.personality-question');
+        parent.querySelectorAll('.personality-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+
+    document.getElementById('personalityCompleteBtn').addEventListener('click', updatePersonalityResult);
+
+    function updatePersonalityResult() {
+      const dims = { EI: [0, 0], SN: [0, 0], TF: [0, 0], JP: [0, 0] };
+      document.querySelectorAll('.personality-question').forEach((q) => {
+        const sel = q.querySelector('input[type="radio"]:checked');
+        if (!sel) return;
+        const dim = q.dataset.dim;
+        if (sel.value === 'a') dims[dim][0]++;
+        else dims[dim][1]++;
+      });
+      const total = Object.values(dims).reduce((s, [a,b]) => s + a + b, 0);
+      if (total < 40) {
+        alert('모든 문항(40개)에 답해 주세요.');
+        return;
+      }
+      const mbti = 
+        (dims.EI[0] >= dims.EI[1] ? 'E' : 'I') +
+        (dims.SN[0] >= dims.SN[1] ? 'S' : 'N') +
+        (dims.TF[0] >= dims.TF[1] ? 'T' : 'F') +
+        (dims.JP[0] >= dims.JP[1] ? 'J' : 'P');
+      document.getElementById('mbtiResult').textContent = mbti;
+      document.getElementById('personalityScores').innerHTML = `
+        <div class="score-row">a(E): <strong>${dims.EI[0]}</strong> / b(I): <strong>${dims.EI[1]}</strong></div>
+        <div class="score-row">a(S): <strong>${dims.SN[0]}</strong> / b(N): <strong>${dims.SN[1]}</strong></div>
+        <div class="score-row">a(T): <strong>${dims.TF[0]}</strong> / b(F): <strong>${dims.TF[1]}</strong></div>
+        <div class="score-row">a(J): <strong>${dims.JP[0]}</strong> / b(P): <strong>${dims.JP[1]}</strong></div>
+      `;
+      const barsHtml = [
+        ['외향 E', '내향 I', dims.EI[0], dims.EI[1]],
+        ['감각 S', '직관 N', dims.SN[0], dims.SN[1]],
+        ['사고 T', '감정 F', dims.TF[0], dims.TF[1]],
+        ['판단 J', '인식 P', dims.JP[0], dims.JP[1]]
+      ].map(([a, b, va, vb]) => {
+        const tot = va + vb;
+        const pct = tot ? (va / tot * 100) : 50;
+        return `<div class="scale-bar">
+          <label>${a}</label>
+          <div class="scale-track">
+            <div class="scale-fill" style="width: ${pct}%"></div>
+          </div>
+          <label>${b}</label>
+        </div>`;
+      }).join('');
+      document.getElementById('scaleBars').innerHTML = barsHtml;
+      document.getElementById('personalityResult').classList.add('show');
+      document.getElementById('personalityResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getVal(name) {
+      const el = document.querySelector(`[name="${name}"]`);
+      if (!el) return '';
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.type === 'radio') {
+          const checked = document.querySelector(`[name="${name}"]:checked`);
+          return checked ? checked.value : '';
+        }
+        const checked = document.querySelectorAll(`[name="${name}"]:checked`);
+        return Array.from(checked).map(c => c.value).join(', ');
+      }
+      return el.value || '';
+    }
+
+    function getMBTI() {
+      const dims = getMBTIDims();
+      if (!dims) return '-';
+      return (dims.EI[0] >= dims.EI[1] ? 'E' : 'I') +
+        (dims.SN[0] >= dims.SN[1] ? 'S' : 'N') +
+        (dims.TF[0] >= dims.TF[1] ? 'T' : 'F') +
+        (dims.JP[0] >= dims.JP[1] ? 'J' : 'P');
+    }
+    function getMBTIDims() {
+      const dims = { EI: [0, 0], SN: [0, 0], TF: [0, 0], JP: [0, 0] };
+      document.querySelectorAll('.personality-question').forEach((q) => {
+        const sel = q.querySelector('input[type="radio"]:checked');
+        if (!sel) return;
+        const dim = q.dataset.dim;
+        if (sel.value === 'a') dims[dim][0]++;
+        else dims[dim][1]++;
+      });
+      const total = Object.values(dims).reduce((s, [a,b]) => s + a + b, 0);
+      return total >= 40 ? dims : null;
+    }
+
+    function getDocFiles(name) {
+      const el = document.querySelector(`input[name="${name}"]`);
+      if (!el || !el.files || el.files.length === 0) return '-';
+      return Array.from(el.files).map(f => f.name).join(', ');
+    }
+
+    function getEduFeedbackHtml() {
+      const titles = ['소개','출퇴근','업무일지','업무 프로세싱','업무','업무 인지','정리정돈','보고법','업무 체크리스트','이메일','AI 활용','급여','로그인 정보','엑셀','PPT','피드백·아이디어','비품/프린터','보안규정','기타'];
+      let rows = '';
+      for (let i = 1; i <= 19; i++) {
+        const v = getVal('eduFb' + i);
+        if (v) rows += `<tr><th>${escapeHtml(titles[i-1])}</th><td>${escapeHtml(v)}</td></tr>`;
+      }
+      const large = getVal('feedbackLarge'), mid = getVal('feedbackMid'), small = getVal('feedbackSmall'), content = getVal('feedbackContent');
+      let catPart = '';
+      if (large || mid || small || content) {
+        catPart = `<h4 style="margin-top:1rem; font-size:0.95rem;">분류별 피드백</h4>
+  <table><tr><th>대분류</th><td>${escapeHtml(large) || '-'}</td></tr><tr><th>중분류</th><td>${escapeHtml(mid) || '-'}</td></tr><tr><th>소분류</th><td>${escapeHtml(small) || '-'}</td></tr><tr><th>내용</th><td>${escapeHtml(content) || '-'}</td></tr></table>`;
+      }
+      if (!rows && !catPart) return '';
+      return `<h4 style="margin-bottom:0.5rem; font-size:0.95rem;">행별 피드백</h4>
+  ${rows ? '<table><tr><th>항목</th><th>피드백</th></tr>' + rows + '</table>' : ''}
+  ${catPart}`;
+    }
+
+    function getContractHtml() {
+      const doc = document.querySelector('.contract-doc');
+      if (!doc) return '';
+      const clone = doc.cloneNode(true);
+      clone.querySelectorAll('input').forEach(inp => {
+        const val = inp.value || (inp.placeholder ? `[${inp.placeholder}]` : '');
+        const span = document.createElement('span');
+        span.className = 'contract-value';
+        span.textContent = val;
+        span.style.cssText = 'display:inline; border-bottom:1px solid #94a3b8; padding:0 2px; min-width:1.5em;';
+        inp.parentNode.replaceChild(span, inp);
+      });
+      return clone.innerHTML;
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, '<br>');
+    }
+
+    function row(label, value) {
+      if (!value && value !== 0) value = '-';
+      return `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`;
+    }
+
+    function getMBTIBarHtml() {
+      const dims = getMBTIDims();
+      if (!dims) return '';
+      const pairs = [['E', 'I', dims.EI], ['S', 'N', dims.SN], ['T', 'F', dims.TF], ['J', 'P', dims.JP]];
+      return pairs.map(([a, b, [va, vb]]) => {
+        const tot = va + vb;
+        const pctA = tot ? Math.round(va / tot * 100) : 50;
+        const pctB = tot ? 100 - pctA : 50;
+        return `<div class="mbti-bar-item">
+          <div class="mbti-bar-dim">${escapeHtml(a)} / ${escapeHtml(b)}</div>
+          <div class="mbti-bar-labels">
+            <span class="mbti-bar-label">${escapeHtml(a)} ${pctA}%</span>
+            <span class="mbti-bar-label">${escapeHtml(b)} ${pctB}%</span>
+          </div>
+          <div class="mbti-bar-track">
+            <div class="mbti-bar-fill mbti-bar-a" style="width: ${pctA}%"></div>
+            <div class="mbti-bar-fill mbti-bar-b" style="width: ${pctB}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    function submitForm() {
+      const name = getVal('name');
+      const mbti = getMBTI();
+      const mbtiBarHtml = getMBTIBarHtml();
+      const now = new Date();
+      const dateStr = now.getFullYear() + '' + String(now.getMonth()+1).padStart(2,'0') + '' + String(now.getDate()).padStart(2,'0') + '_' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+      const safeName = (name || '익명').replace(/[\\/:*?"<>|]/g, '_');
+      const fileName = '면접제출_' + safeName + '_' + dateStr + '.html';
+
+      const skills = { excel: '엑셀', ppt: '파워포인트', word: '워드', photoshop: '포토샵', illustrator: '일러스트', video: '동영상편집', blog: '블로그', premiere: '프리미어' };
+      let skillsStr = '';
+      document.querySelectorAll('input[name="skill"]:checked').forEach(c => {
+        skillsStr += (skills[c.value] || c.value) + ', ';
+      });
+      skillsStr = skillsStr.replace(/,\s*$/, '');
+
+      const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>면접 제출서 - ${escapeHtml(name || '익명')}</title>
+  <style>
+    body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.7; color: #333; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; color: #1e40af; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { width: 140px; font-weight: 600; color: #475569; background: #f8fafc; }
+    .summary-box { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; white-space: pre-wrap; }
+    .mbti { font-size: 1.25rem; font-weight: 700; color: #3b82f6; }
+    .mbti-chart { margin: 1.25rem 0; }
+    .mbti-bar-item { margin-bottom: 1.25rem; }
+    .mbti-bar-dim { font-size: 0.8rem; color: #64748b; margin-bottom: 0.25rem; font-weight: 500; }
+    .mbti-bar-labels { display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.9rem; font-weight: 600; color: #475569; }
+    .mbti-bar-track { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #e2e8f0; }
+    .mbti-bar-fill { height: 100%; transition: width 0.3s ease; }
+    .mbti-bar-a { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .mbti-bar-b { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+    .meta { font-size: 0.85rem; color: #64748b; margin-bottom: 2rem; }
+    .contract-export .contract-title { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+    .contract-export .contract-article { margin-bottom: 1.25rem; }
+    .contract-export .contract-article h4 { font-size: 0.95rem; margin-bottom: 0.5rem; color: #1e40af; }
+    .contract-export .contract-article p, .contract-export .contract-article ol { margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .contract-export .contract-article ol { padding-left: 1.5rem; }
+    .contract-export .contract-value { border-bottom: 1px solid #94a3b8; padding: 0 2px; }
+    .contract-export .contract-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+    .contract-export .contract-sig-block { padding: 1rem; background: #fff; border-radius: 6px; font-size: 0.9rem; }
+    .contract-export .contract-closing { margin: 1rem 0; font-size: 0.9rem; }
+    .contract-export .contract-date { margin-bottom: 1rem; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>면접 제출서</h1>
+  <p class="meta">제출일시: ${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</p>
+
+  <h2>1. 인적사항</h2>
+  <table>
+    ${row('이름', name)}
+    ${row('면접 일시', getVal('interviewDate'))}
+    ${row('근무 시작 희망일', getVal('startDate'))}
+    ${row('근무 가능 기간', getVal('availableMonths'))}
+    ${row('회사 홈페이지 확인', getVal('websiteViewed'))}
+    ${row('지원 분야', getVal('supportField'))}
+    ${row('통근 소요 시간', getVal('commuteTime'))}
+    ${row('생년월일', getVal('birthDate'))}
+    ${row('나이', getVal('age'))}
+    ${row('경력', getVal('experience'))}
+    ${row('운전 가능', getVal('driving'))}
+    ${row('차량 소유', getVal('carOwned'))}
+    ${row('종교', getVal('religion'))}
+    ${row('PT 가능', getVal('pt'))}
+    ${row('가족 관계', getVal('family'))}
+    ${row('결혼 여부', getVal('marriage'))}
+    ${row('자녀', getVal('children'))}
+    ${row('컴퓨터 능력', skillsStr)}
+    ${row('영어 능력', getVal('english'))}
+    ${row('월요일', getVal('mon'))}
+    ${row('화요일', getVal('tue'))}
+    ${row('수요일', getVal('wed'))}
+    ${row('목요일', getVal('thu'))}
+    ${row('금요일', getVal('fri'))}
+  </table>
+
+  <h2>2. 성격 검사 결과</h2>
+  <p><span class="mbti">${escapeHtml(mbti)}</span></p>
+  ${mbtiBarHtml ? '<div class="mbti-chart">' + mbtiBarHtml + '</div>' : ''}
+
+  <h2>3. 영상 시청 요약</h2>
+  <h3>영상 1</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary1')) || '(미작성)'}</div>
+  <h3>영상 2</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary2')) || '(미작성)'}</div>
+  <h3>영상 3</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary3')) || '(미작성)'}</div>
+
+  <h2>4. 서류첨부</h2>
+  <table>
+    ${row('이력서', getDocFiles('docResume'))}
+    ${row('포트폴리오/자격증', getDocFiles('docPortfolio'))}
+    ${row('기타 서류', getDocFiles('docEtc'))}
+  </table>
+
+  <h2>5. 출근 후 교육 피드백</h2>
+  ${getEduFeedbackHtml() ? '<div class="summary-box">' + getEduFeedbackHtml() + '</div>' : '<p>(없음)</p>'}
+
+  <h2>6. 전문직(개발자) 근로계약서</h2>
+  <div class="contract-export" style="margin-top:1rem; padding:1.5rem; background:#f8fafc; border-radius:8px; font-size:0.95rem; line-height:1.8; border:1px solid #e2e8f0;">
+    ${getContractHtml()}
+  </div>
+</body>
+</html>`;
+
+      // 서버에 데이터 저장
+      submitToServer(html);
+      alert('제출이 완료되었습니다.');
+    }
+
+    async function submitToServer(generatedHtml) {
+      try {
+        const formData = new FormData();
+        formData.append('form_type', 'professional');
+        formData.append('name', getVal('name'));
+        formData.append('interview_date', getVal('interviewDate'));
+        formData.append('start_date', getVal('startDate'));
+        formData.append('available_months', getVal('availableMonths'));
+        formData.append('website_viewed', getVal('websiteViewed'));
+        formData.append('support_field', getVal('supportField'));
+        formData.append('commute_time', getVal('commuteTime'));
+        formData.append('birth_date', getVal('birthDate'));
+        formData.append('age', getVal('age'));
+        formData.append('experience', getVal('experience'));
+        formData.append('driving', getVal('driving'));
+        formData.append('car_owned', getVal('carOwned'));
+        formData.append('religion', getVal('religion'));
+        formData.append('pt', getVal('pt'));
+        formData.append('family', getVal('family'));
+        formData.append('marriage', getVal('marriage'));
+        formData.append('children', getVal('children'));
+        formData.append('english', getVal('english'));
+        formData.append('schedule_mon', getVal('mon'));
+        formData.append('schedule_tue', getVal('tue'));
+        formData.append('schedule_wed', getVal('wed'));
+        formData.append('schedule_thu', getVal('thu'));
+        formData.append('schedule_fri', getVal('fri'));
+        formData.append('summary1', getVal('summary1'));
+        formData.append('summary2', getVal('summary2'));
+        formData.append('summary3', getVal('summary3'));
+
+        const skills = [];
+        document.querySelectorAll('input[name="skill"]:checked').forEach(c => skills.push(c.value));
+        formData.append('skills', JSON.stringify(skills));
+
+        formData.append('mbti', getMBTI());
+        const dims = getMBTIDims();
+        formData.append('mbti_scores', JSON.stringify(dims));
+
+        formData.append('submitted_html', generatedHtml);
+
+        const resumeEl = document.querySelector('input[name="docResume"]');
+        if (resumeEl?.files?.[0]) formData.append('docResume', resumeEl.files[0]);
+        const portfolioEl = document.querySelector('input[name="docPortfolio"]');
+        if (portfolioEl?.files?.[0]) formData.append('docPortfolio', portfolioEl.files[0]);
+        const etcEl = document.querySelector('input[name="docEtc"]');
+        if (etcEl?.files?.[0]) formData.append('docEtc', etcEl.files[0]);
+
+        const res = await fetch('/api/interviews', { method: 'POST', body: formData });
+        const result = await res.json();
+        if (result.success) console.log('서버 저장 완료, ID:', result.id);
+        else console.error('서버 저장 실패:', result.error);
+      } catch (e) {
+        console.error('서버 전송 오류:', e);
+      }
+    }
+  </script>
+<script src="/master-nav.js"></script>
+</body>
+</html>

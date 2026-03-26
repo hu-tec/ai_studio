@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Premium AI Platform - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 필요 시 Tailwind 또는 직접 CSS 연결 -->
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background-color: #f5f7fb;
+        color: #0f172a;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      header {
+        border-bottom: 1px solid rgba(226, 232, 240, 1);
+        backdrop-filter: blur(14px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.95),
+          rgba(255, 255, 255, 0.85),
+          rgba(255, 255, 255, 0.7)
+        );
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
+      }
+      header .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+      }
+      header .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 20% 20%, #5ee7ff, #4c2fff);
+      }
+      .logo-text-main {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      .logo-text-sub {
+        font-size: 0.75rem;
+        color: #9ca3af;
+      }
+      header .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+      header .nav-links a:hover {
+        color: #111827;
+      }
+      header .nav-cta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .btn-outline {
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        font-size: 0.85rem;
+        background: #ffffff;
+        color: #0f172a;
+      }
+      .btn-outline:hover {
+        background: #eef2ff;
+        border-color: rgba(129, 140, 248, 0.9);
+      }
+      .btn-primary {
+        padding: 0.5rem 1.3rem;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 18px 45px rgba(79, 70, 229, 0.5);
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #818cf8, #4f46e5);
+      }
+
+      /* Hero */
+      .hero {
+        padding: 4.5rem 0 3.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 1);
+      }
+      .hero-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 3rem;
+        align-items: center;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid rgba(191, 219, 254, 1);
+        font-size: 0.7rem;
+        color: #1d4ed8;
+        background: #eff6ff;
+        margin-bottom: 1rem;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+        line-height: 1.15;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin-bottom: 1rem;
+        color: #0f172a;
+      }
+      .hero-title span.highlight {
+        background: linear-gradient(120deg, #a855f7, #6366f1, #22d3ee);
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .hero-desc {
+        font-size: 0.95rem;
+        color: #6b7280;
+        max-width: 30rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+      }
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+      .hero-subnote {
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+      .hero-metrics {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        font-size: 0.8rem;
+      }
+      .metric-label {
+        color: #6b7280;
+        margin-bottom: 0.2rem;
+      }
+      .metric-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      .hero-visual {
+        border-radius: 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 1);
+        background: radial-gradient(
+          circle at 10% 0%,
+          rgba(129, 140, 248, 0.25),
+          transparent 55%
+        );
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(148, 163, 184, 0.3);
+      }
+      .hero-visual-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+      .hero-visual-body {
+        border-radius: 1.2rem;
+        border: 1px solid rgba(209, 213, 219, 1);
+        background: #ffffff;
+        padding: 1.5rem;
+        min-height: 220px;
+      }
+
+      /* 아래 섹션 공통 */
+      section {
+        padding: 3.5rem 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 1);
+      }
+      section h2 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      section p.section-desc {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 2rem;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+      }
+      .card {
+        border-radius: 1rem;
+        border: 1px solid rgba(226, 232, 240, 1);
+        background: linear-gradient(
+          135deg,
+          #ffffff,
+          #f9fafb
+        );
+        padding: 1.25rem;
+        font-size: 0.85rem;
+        box-shadow: 0 18px 40px rgba(148, 163, 184, 0.25);
+      }
+      .card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+      }
+      .card p {
+        color: #6b7280;
+        line-height: 1.6;
+      }
+
+      footer {
+        padding: 1.5rem 0 2rem;
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+      footer .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      footer .footer-links {
+        display: flex;
+        gap: 1.3rem;
+      }
+
+      @media (max-width: 900px) {
+        .hero-inner {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header (HomePage Header 컴포넌트 대체) -->
+    <header>
+      <div class="container nav">
+        <div class="nav-left">
+          <div class="logo-mark"></div>
+          <div>
+            <div class="logo-text-main">Premium AI Platform</div>
+            <div class="logo-text-sub">Enterprise Knowledge · Legal AI</div>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="#services">서비스</a>
+          <a href="#experts">전문가 네트워크</a>
+          <a href="#team">내부 운영팀</a>
+        </nav>
+        <div class="nav-cta">
+          <button class="btn-outline">로그인</button>
+          <!-- 여기 버튼이 Dashboard로 가는 링크 -->
+          <a href="dashboard.html">
+            <button class="btn-primary">대시보드 바로가기</button>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- HeroSection -->
+      <section class="hero">
+        <div class="container hero-inner">
+          <div>
+            <div class="hero-badge">
+              <span>PREMIUM AI PLATFORM</span>
+              <span>정책 · 계약 · 운영 문서 자동화</span>
+            </div>
+            <h1 class="hero-title">
+              사내 모든 문서를<br />
+              <span class="highlight">하나의 AI 워크스페이스</span>로
+            </h1>
+            <p class="hero-desc">
+              사내 규정, 계약서, 매뉴얼, 고객 응대 스크립트까지. 조직의 지식을
+              한 곳에 모으고, AI로 검색·요약·작성까지 한 번에 처리하세요.
+            </p>
+
+            <div class="hero-actions">
+              <!-- 이 버튼도 Dashboard로 이동 -->
+              <a href="dashboard.html">
+                <button class="btn-primary">대시보드에서 바로 테스트하기</button>
+              </a>
+              <button class="btn-outline">솔루션 소개서 다운로드</button>
+            </div>
+
+            <div class="hero-subnote">
+              신용카드 정보 없이 14일 체험 · 최대 5명까지 공동 작업
+            </div>
+
+            <div class="hero-metrics">
+              <div>
+                <div class="metric-label">도입 기업</div>
+                <div class="metric-value">120+곳</div>
+              </div>
+              <div>
+                <div class="metric-label">문서 처리 시간 절감</div>
+                <div class="metric-value">-68%</div>
+              </div>
+              <div>
+                <div class="metric-label">CS 응답 시간 단축</div>
+                <div class="metric-value">-55%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-visual-header">
+              <span>실시간 문서 생성 패널</span>
+              <span>Draft · Review · Final</span>
+            </div>
+            <div class="hero-visual-body">
+              <!-- 여기에는 Dashboard에서 할 작업의 축소판 느낌으로 표현 -->
+              <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 0.75rem;">
+                좌측에서 카테고리를 선택하고, 우측에서 AI가 문서를 생성/수정합니다.
+              </p>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1.1fr;
+                  gap: 1rem;
+                  font-size: 0.8rem;
+                "
+              >
+                <div
+                  style="
+                    border-radius: 0.75rem;
+                    border: 1px solid rgba(55, 65, 81, 0.9);
+                    padding: 0.75rem;
+                    background: rgba(15, 23, 42, 0.95);
+                  "
+                >
+                  <div style="margin-bottom: 0.5rem; color: #e5e7eb;">
+                    카테고리
+                  </div>
+                  <ul
+                    style="
+                      list-style: none;
+                      padding: 0;
+                      margin: 0;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 0.35rem;
+                    "
+                  >
+                    <li>인사 · HR 규정</li>
+                    <li>보안 · 컴플라이언스</li>
+                    <li>대외 공지 · 안내문</li>
+                    <li>계약 · 합의서</li>
+                  </ul>
+                </div>
+                <div
+                  style="
+                    border-radius: 0.75rem;
+                    border: 1px solid rgba(55, 65, 81, 0.9);
+                    padding: 0.75rem;
+                    background: rgba(15, 23, 42, 0.98);
+                  "
+                >
+                  <div style="margin-bottom: 0.4rem; color: #e5e7eb;">
+                    생성된 문서 초안
+                  </div>
+                  <div
+                    style="
+                      border-radius: 0.6rem;
+                      border: 1px dashed rgba(75, 85, 99, 0.9);
+                      padding: 0.6rem;
+                      color: #9ca3af;
+                      line-height: 1.5;
+                    "
+                  >
+                    “귀사의 개인정보 처리방침은 국내법과 GDPR을 함께 고려하여
+                    설계되었습니다.…”
+                  </div>
+                  <div style="margin-top: 0.6rem; text-align: right;">
+                    <button
+                      class="btn-primary"
+                      style="
+                        padding: 0.35rem 0.9rem;
+                        font-size: 0.75rem;
+                        box-shadow: none;
+                      "
+                    >
+                      전체 화면에서 편집하기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ServicesSection -->
+      <section id="services">
+        <div class="container">
+          <h2>조직 맞춤형 문서 자동화 서비스</h2>
+          <p class="section-desc">
+            팀마다 다른 업무 흐름에 맞춰, 정책 문서·계약서·메뉴얼을 자동으로
+            생성·관리합니다.
+          </p>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>정책 · 규정 문서 자동 생성</h3>
+              <p>
+                HR·보안·개인정보 등 자주 업데이트되는 정책 문서를, 법령·내부
+                규정을 반영해 자동으로 생성합니다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>계약서 템플릿 관리</h3>
+              <p>
+                표준계약서, 특약 조항, 고객사별 커스텀 조항까지 한 번에 관리하고
+                버전 히스토리를 추적합니다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>CS 응대 스크립트 자동 추천</h3>
+              <p>
+                문의 유형에 따라 가장 적절한 답변 스크립트를 AI가 추천하고, 담당자는
+                검수만 진행하면 됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ExpertsSection -->
+      <section id="experts">
+        <div class="container">
+          <h2>외부 전문가 네트워크와 연동</h2>
+          <p class="section-desc">
+            필요한 경우 변호사, 노무사, 세무사 등 외부 전문가의 검토 프로세스까지
+            연결합니다.
+          </p>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>법률 자문 워크플로우</h3>
+              <p>
+                계약서 초안을 AI가 작성하고, 민감한 조항은 외부 법률 자문으로 직접
+                연계합니다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>규정 변경 모니터링</h3>
+              <p>
+                노동법·개인정보 보호법 등 주요 규정 변경 시, 기존 문서를 자동으로
+                스캔해 영향도를 분석합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- InternalTeamSection -->
+      <section id="team">
+        <div class="container">
+          <h2>내부 운영팀을 위한 협업 환경</h2>
+          <p class="section-desc">
+            운영·HR·법무·CS 팀이 하나의 워크스페이스에서 문서와 지식을 함께
+            관리합니다.
+          </p>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>역할별 접근 권한</h3>
+              <p>
+                팀/직무/레벨에 따라 볼 수 있는 문서를 세밀하게 나누어, 보안을
+                유지하면서도 협업을 가볍게 만듭니다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>버전 관리 & 변경 이력</h3>
+              <p>
+                누가 언제 어떤 문장을 변경했는지 추적 가능하여, 내부 감사에도 바로
+                대응할 수 있습니다.
+              </p>
+            </div>
+            <div class="card">
+              <h3>알림 & 승인 프로세스</h3>
+              <p>
+                문서 발행 전 승인 단계를 설정하고, 담당자에게 자동으로 알림을
+                보내어 실수를 줄입니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container footer-inner">
+        <div>© 2026 Premium AI Platform. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">이용약관</a>
+          <a href="#">개인정보 처리방침</a>
+          <a href="#">문의하기</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>업무일지 | 월별 달력</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.08);
+      --color-success: #10b981;
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-main); background: var(--color-bg); color: var(--color-text); line-height: 1.7; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    .app-container { display: flex; min-height: 100vh; }
+
+    /* ===== SIDEBAR (면접과 동일) ===== */
+    .sidebar {
+      width: 400px;
+      min-width: 300px;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-title { font-size: 1.125rem; font-weight: 700; color: var(--color-text); }
+    .sidebar-subtitle { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem; }
+    .type-badge {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+    .type-badge.instructor {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .step-nav { list-style: none; }
+    .step-nav-item { margin: 0.25rem 0.75rem; border-radius: var(--radius-sm); overflow: hidden; }
+    .step-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s var(--ease);
+    }
+    .step-nav-link:hover { background: var(--color-surface-alt); color: var(--color-text); }
+    .step-nav-link.active { background: var(--color-accent-soft); color: var(--color-accent); }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-surface-alt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .step-nav-link.active .step-number { background: var(--color-accent); color: white; }
+    .sidebar-back.hidden { display: none !important; }
+    .sidebar-submit {
+      padding: 1rem 1.5rem;
+      margin-top: auto;
+      border-top: 1px solid var(--color-border);
+    }
+    .sidebar nav { flex: 1; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 2rem 4rem 4rem;
+      max-width: 1500px;
+      min-width: 0;
+    }
+    .step-section { display: none; }
+    .step-section.active { display: block; animation: fadeIn 0.5s var(--ease) forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .step-header { margin-bottom: 2rem; }
+    .step-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .step-title { font-size: 1.75rem; font-weight: 700; color: var(--color-text); }
+
+    .content-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ===== CALENDAR ===== */
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .calendar-title { font-size: 1.25rem; font-weight: 700; }
+    .calendar-nav {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      font-family: inherit;
+    }
+    .btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .btn-primary { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+
+    .work-calendar {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      table-layout: fixed;
+    }
+    .work-calendar th,
+    .work-calendar td {
+      border: 1px solid var(--color-border);
+      padding: 0.5rem;
+      vertical-align: top;
+      min-height: 80px;
+    }
+    .work-calendar thead th {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      text-align: center;
+      padding: 0.6rem;
+    }
+    .work-calendar .day-header {
+      background: #fefce8;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.75rem;
+    }
+    .work-calendar .date-cell {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .work-calendar .date-cell:hover {
+      background: var(--color-accent-soft);
+    }
+    .work-calendar .date-cell.has-entry {
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .work-calendar .date-num {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+    .work-calendar .day-task {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+      margin-bottom: 0.15rem;
+    }
+    .work-calendar .day-task .val { color: var(--color-accent); font-weight: 600; }
+    .work-calendar .week-total {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      text-align: right;
+      padding-right: 0.75rem;
+      font-size: 0.8rem;
+    }
+    .work-calendar .empty-cell { background: #f8fafc; }
+
+    /* ===== CALENDAR FOOTER (다음달 할일, 그외) ===== */
+    .calendar-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .footer-section {
+      background: var(--color-surface-alt);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .footer-section h4 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .footer-task {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+    .footer-task { gap: 0.5rem; align-items: center; }
+    .footer-task input { flex: 1; border: none; background: transparent; padding: 0.2rem 0; font-family: inherit; min-width: 0; }
+    .footer-task input.footer-val { width: 40px; text-align: right; flex: none; }
+    .footer-total { font-weight: 600; margin-top: 0.5rem; font-size: 0.85rem; }
+
+    /* ===== DAILY DETAIL PAGE (메인 영역 전체) ===== */
+    .detail-page-section .detail-header {
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .detail-page-section .detail-header h2 { font-size: 1.25rem; }
+    .detail-page-section .detail-body { padding: 0; max-width: none; }
+    .detail-page-section .detail-table { font-size: 0.95rem; }
+    .detail-page-section .detail-table th,
+    .detail-page-section .detail-table td { padding: 0.75rem 1rem; }
+    .detail-page-section .detail-table textarea { min-height: 140px; resize: vertical; }
+    .detail-page-section .detail-table .col-task { width: 100%; }
+    .detail-page-section .prompt-textarea { min-height: 240px; }
+    .detail-page-section .basic-info-field textarea { min-height: 100px; }
+
+    /* 세부 업무 보고 상단: 홈페이지 | 부서 필터 (대·중·소 3열 형식) */
+    .detail-filter-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .filter-block {
+      flex: 1;
+      min-width: 0;
+    }
+    .filter-block-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .filter-three-col {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      table-layout: fixed;
+    }
+    .filter-three-col thead th {
+      text-align: center;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-alt);
+    }
+    .filter-three-col thead th:nth-child(1) { width: 28%; }
+    .filter-three-col thead th:nth-child(2) { width: 42%; }
+    .filter-three-col thead th:nth-child(3) { width: 30%; }
+    .filter-three-col tbody td {
+      border: 1px solid var(--color-border);
+      padding: 0.75rem 1rem;
+      vertical-align: top;
+    }
+    .filter-three-col .filter-col-large,
+    .filter-three-col .filter-col-medium {
+      min-height: 100px;
+    }
+    .filter-three-col .filter-col-small {
+      min-height: 120px;
+      background: var(--color-surface-alt);
+    }
+    .filter-three-col .filter-col-dynamic {
+      min-height: 80px;
+    }
+    .filter-block .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.75rem;
+    }
+    .filter-block .checkbox-label {
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .detail-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .detail-header h2 { font-size: 1.1rem; }
+    .detail-body { padding: 1.5rem; }
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      table-layout: fixed;
+    }
+    .detail-table th,
+    .detail-table td {
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 0.75rem;
+      vertical-align: middle;
+    }
+    .detail-table thead th {
+      background: #fefce8;
+      font-weight: 600;
+      text-align: center;
+    }
+    .detail-table .col-date { background: #fefce8; text-align: center; font-weight: 500; }
+    .detail-table .notes-header { background: #fefce8; text-align: center; font-weight: 600; vertical-align: middle; }
+    .detail-table .col-task { width: 70%; }
+    .detail-table .col-val { width: 80px; text-align: center; }
+    .detail-table input,
+    .detail-table textarea {
+      width: 100%;
+      border: none;
+      padding: 0.35rem 0;
+      font-family: inherit;
+      font-size: inherit;
+    }
+    .detail-table input:focus,
+    .detail-table textarea:focus { outline: none; }
+    .detail-table .total-row { background: var(--color-surface-alt); font-weight: 600; }
+    .detail-table .total-row td { text-align: center; }
+    .detail-table textarea { min-height: 60px; resize: vertical; }
+    .detail-table .notes-cell { vertical-align: top; }
+    .detail-notes {
+      margin-top: 1rem;
+    }
+    .detail-notes label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .detail-notes textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    .detail-add-row { margin-top: 1rem; }
+    .basic-info-form {
+      margin-top: 1rem;
+      padding: 1.25rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .basic-info-form.hidden { display: none; }
+    .basic-info-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-text); }
+    .basic-info-field { margin-bottom: 1rem; }
+    .basic-info-field > label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); margin-bottom: 0.4rem; }
+    .basic-info-field textarea {
+      width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 0.9rem; resize: vertical;
+    }
+    .prompt-textarea { min-height: 200px; font-size: 0.85rem; line-height: 1.5; }
+    .prompt-layout-toggle {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .prompt-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .prompt-layout-horizontal {
+      flex-direction: row;
+    }
+    .prompt-layout-horizontal .help-field-wrap {
+      flex: 1;
+    }
+    .field-label-row { display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.4rem; position: relative; }
+    .field-label-row label { font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); margin: 0; }
+    .field-label-row .help-btn {
+      width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--color-border);
+      background: var(--color-surface); color: var(--color-text-muted); font-size: 0.75rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .field-label-row .help-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); border-color: var(--color-accent); }
+    .help-popover {
+      position: absolute; left: 0; top: 100%; margin-top: 0.25rem; z-index: 50;
+      max-width: 420px; max-height: 320px; overflow-y: auto;
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      box-shadow: var(--shadow); padding: 1rem; font-size: 0.8rem; line-height: 1.6;
+      white-space: pre-wrap; color: var(--color-text);
+    }
+    .help-popover.hidden { display: none; }
+    .help-popover { cursor: default; }
+    .result-before-after { display: flex; gap: 1.5rem; }
+    .result-col { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+    .result-label { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); }
+    .result-col input[type="file"] { font-size: 0.8rem; }
+    .result-preview { min-height: 120px; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--color-text-muted); font-size: 0.8rem; }
+    .result-preview img { max-width: 100%; max-height: 200px; object-fit: contain; }
+    .one-line-fields { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .inline-field { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.35rem; }
+    .inline-field label { font-size: 0.8rem; font-weight: 500; color: var(--color-text-muted); }
+    .inline-field input[type="text"] { padding: 0.4rem 0.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+    .inline-field input[type="file"] { font-size: 0.75rem; }
+    .file-name { font-size: 0.75rem; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; }
+    .checkbox-label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; cursor: pointer; }
+    .checkbox-label input[type="checkbox"] { cursor: pointer; }
+    .basic-info-title-time {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .basic-info-title-time .inline-field { flex: 1; min-width: 160px; }
+    .basic-info-title-time .inline-field:last-child { flex: 0 1 auto; min-width: 120px; }
+    .basic-info-title-time select {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: var(--color-surface);
+    }
+    .basic-info-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .task-row .remove-task-btn { margin-left: 0.25rem; flex-shrink: 0; }
+    .detail-table .col-task { display: flex; align-items: center; gap: 0.25rem; }
+    .detail-table .col-task input { flex: 1; min-width: 0; }
+    .detail-table .empty-placeholder { background: var(--color-surface-alt); min-height: 60px; }
+    .detail-table .task-row.selected { background: var(--color-accent-soft); }
+    .detail-table .cell-text { font-size: 0.9rem; color: var(--color-text); }
+    .detail-table .cell-text.muted { color: var(--color-text-muted); }
+    .detail-table .time-text { font-weight: 600; color: var(--color-accent); }
+    .detail-table .col-task { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .detail-table .col-task .cell-text { flex: 1; min-width: 0; word-break: break-word; }
+    .detail-table .notes-cell textarea,
+    .detail-table .notes-cell input.notes-input { width: 100%; border: none; padding: 0.35rem 0; font-family: inherit; font-size: inherit; }
+    .detail-table .notes-cell textarea:focus,
+    .detail-table .notes-cell input.notes-input:focus { outline: none; }
+    .detail-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      justify-content: flex-end;
+    }
+    .add-task-btn {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      margin-top: 0.5rem;
+      background: var(--color-surface-alt);
+      border: 1px dashed var(--color-border);
+    }
+    .remove-task-btn { color: #ef4444; cursor: pointer; padding: 0.25rem; font-size: 1rem; }
+    .remove-task-btn:hover { background: #fef2f2; border-radius: 4px; }
+
+    .basic-info-view {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .basic-info-view.hidden { display: none; }
+    .basic-info-view-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .basic-info-view-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    .basic-info-view-content dl {
+      margin: 0;
+    }
+    .basic-info-view-content dt {
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+      color: var(--color-text);
+    }
+    .basic-info-view-content dd {
+      margin: 0 0 0.35rem 0;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 1024px) {
+      .app-container { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; padding: 1rem; border-right: none; border-bottom: 1px solid var(--color-border); }
+      .main-content { padding: 1.5rem; }
+      .work-calendar { font-size: 0.75rem; }
+      .calendar-footer { grid-template-columns: 1fr; }
+      .prompt-layout-horizontal { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">업무일지</h2>
+        <p class="sidebar-subtitle">월별 달력 · 세부 업무 보고</p>
+        <span class="type-badge instructor">업무일지</span>
+      </div>
+      <nav>
+        <ul class="step-nav">
+          <li class="step-nav-item">
+            <a href="#calendar" class="step-nav-link active" id="navCalendar">
+              <span class="step-number">1</span>
+              월별 달력
+            </a>
+          </li>
+          <li class="step-nav-item sidebar-back hidden" id="sidebarBack">
+            <a href="#" class="step-nav-link" onclick="closeDetail(); return false;" title="달력으로 돌아가기">
+              <span class="step-number">←</span>
+              달력으로 돌아가기
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-submit">
+        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="exportData()">데이터 내보내기</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section id="calendar" class="step-section active">
+        <div class="step-header">
+          <span class="step-badge">업무일지</span>
+          <h1 class="step-title" id="calendarTitle">2026년 12월</h1>
+        </div>
+
+        <div class="content-card">
+          <div class="calendar-header">
+            <span class="calendar-title" id="monthLabel">2026년 12월</span>
+            <div class="calendar-nav">
+              <button type="button" class="btn" id="prevMonth">← 이전달</button>
+              <button type="button" class="btn" id="nextMonth">다음달 →</button>
+              <button type="button" class="btn btn-primary" id="goToday">오늘</button>
+            </div>
+          </div>
+
+          <table class="work-calendar" id="workCalendar">
+            <thead>
+              <tr>
+                <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+                <th style="width:80px;">주차 합</th>
+              </tr>
+            </thead>
+            <tbody id="calendarBody"></tbody>
+          </table>
+
+          <div class="calendar-footer">
+            <div class="footer-section">
+              <h4>다음달 할일</h4>
+              <div id="nextMonthTasks"></div>
+              <button type="button" class="btn add-task-btn" onclick="addFooterTask('nextMonth')">+ 추가</button>
+              <div class="footer-total">총 <span id="nextMonthTotal">0</span></div>
+            </div>
+            <div class="footer-section">
+              <h4>그외</h4>
+              <div id="etcTasks"></div>
+              <button type="button" class="btn add-task-btn" onclick="addFooterTask('etc')">+ 추가</button>
+              <div class="footer-total">총 <span id="etcTotal">0</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 세부 업무 보고 페이지 (날짜 클릭 시 메인 영역에 전체 표시) -->
+      <section id="detailPage" class="step-section detail-page-section">
+        <div class="step-header">
+          <span class="step-badge">세부 업무</span>
+          <h1 class="step-title" id="detailPageTitle">세부 업무 보고</h1>
+        </div>
+        <div class="content-card">
+          <!-- 홈페이지(왼쪽) | 부서(오른쪽) 대·중·소 3열 형식 -->
+          <div class="detail-filter-row">
+            <div class="filter-block filter-homepage">
+              <h3 class="filter-block-title">홈페이지</h3>
+              <table class="filter-three-col">
+                <thead>
+                  <tr>
+                    <th>대</th>
+                    <th>중</th>
+                    <th>소</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="filter-col-large">
+                      <div class="checkbox-group" id="hp_large_group">
+                        <label class="checkbox-label"><input type="checkbox" name="hp_large" value="교육"> 교육</label>
+                        <label class="checkbox-label"><input type="checkbox" name="hp_large" value="번역"> 번역</label>
+                        <label class="checkbox-label"><input type="checkbox" name="hp_large" value="문서"> 문서</label>
+                        <label class="checkbox-label"><input type="checkbox" name="hp_large" value="전시회"> 전시회</label>
+                        <label class="checkbox-label"><input type="checkbox" name="hp_large" value="전문가매칭"> 전문가 매칭</label>
+                      </div>
+                    </td>
+                    <td class="filter-col-medium">
+                      <div id="hp_medium_box" class="filter-col-dynamic checkbox-group"></div>
+                    </td>
+                    <td class="filter-col-small">
+                      <div id="hp_small_box" class="filter-col-dynamic"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="filter-block filter-department">
+              <h3 class="filter-block-title">부서</h3>
+              <table class="filter-three-col">
+                <thead>
+                  <tr>
+                    <th>대</th>
+                    <th>중</th>
+                    <th>소</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="filter-col-large">
+                      <div class="checkbox-group" id="dept_large_group">
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="기획"> 기획</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="홈피"> 홈피</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="영업"> 영업</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="마케팅"> 마케팅</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="회계"> 회계</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="인사"> 인사</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="관리"> 관리</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="상담"> 상담</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="총무"> 총무</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="강사"> 강사</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="커리큘럼"> 커리큘럼</label>
+                        <label class="checkbox-label"><input type="checkbox" name="dept_large" value="문제은행"> 문제은행</label>
+                      </div>
+                    </td>
+                    <td class="filter-col-medium">
+                      <div id="dept_medium_box" class="filter-col-dynamic checkbox-group"></div>
+                    </td>
+                    <td class="filter-col-small">
+                      <div id="dept_small_box" class="filter-col-dynamic"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="detail-header">
+            <h2 id="detailDateLabel">세부 업무 보고</h2>
+          </div>
+          <div class="detail-body">
+            <table class="detail-table">
+              <colgroup>
+                <col style="width: 40px;">
+                <col>
+                <col style="width: 80px;">
+                <col style="width: 40px;">
+                <col>
+                <col style="width: 80px;">
+                <col style="width: 26%;">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th colspan="3">오늘 한일</th>
+                  <th colspan="3">내일 할일</th>
+                  <th rowspan="3" class="notes-header">특이사항<br><small>주간/월간 중요한일, 비고</small></th>
+                </tr>
+                <tr>
+                  <th colspan="3">
+                    <span id="todayDow">-</span>
+                    <span id="todayDate">-</span>
+                  </th>
+                  <th colspan="3">
+                    <span id="tomorrowDow">-</span>
+                    <span id="tomorrowDate">-</span>
+                  </th>
+                </tr>
+                <tr>
+                  <th>번호</th>
+                  <th>내용</th>
+                  <th>시간</th>
+                  <th>번호</th>
+                  <th>내용</th>
+                  <th>시간</th>
+                </tr>
+              </thead>
+              <tbody id="detailTaskBody">
+                <!-- 동적으로 렌더링됨 -->
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td>총</td>
+                  <td></td>
+                  <td id="todayTotal">0</td>
+                  <td>총</td>
+                  <td></td>
+                  <td id="tomorrowTotal">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="detail-notes">
+              <label for="detailNote">세부 내용</label>
+              <textarea id="detailNote" rows="4" placeholder="세부 내용을 입력하세요"></textarea>
+            </div>
+            <div class="detail-add-row">
+              <span style="font-size: 0.8rem; color: var(--color-text-muted);">
+                각 행의 + 버튼을 눌러 세부 정보를 입력·수정할 수 있습니다.
+              </span>
+            </div>
+            <div class="basic-info-form hidden" id="basicInfoForm">
+              <h4 class="basic-info-title">기본 정보</h4>
+              <div class="basic-info-field">
+                <label>작업 유형</label>
+                <div class="checkbox-group" id="workTypeGroup">
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="문서"> 문서</label>
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="코드"> 코드</label>
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="기획"> 기획</label>
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="디자인"> 디자인</label>
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="데이터"> 데이터</label>
+                  <label class="checkbox-label"><input type="checkbox" name="workType" value="기타"> 기타</label>
+                </div>
+              </div>
+              <div class="basic-info-field">
+                <label>업무지시사항</label>
+                <textarea id="basicInstructions" placeholder="업무 지시 내용을 입력하세요" rows="3"></textarea>
+              </div>
+              <div class="basic-info-field">
+                <label>사용 AI</label>
+                <div class="checkbox-group" id="usedAIGroup">
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="ChatGPT"> ChatGPT</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="Claude"> Claude</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="Gemini"> Gemini</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="Copilot"> Copilot</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="Cursor"> Cursor</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="Midjourney"> Midjourney</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="DALL-E"> DALL-E</label>
+                  <label class="checkbox-label"><input type="checkbox" name="usedAI" value="기타"> 기타</label>
+                </div>
+              </div>
+              <div class="basic-info-field">
+                <div class="prompt-layout-toggle">
+                  <button type="button" class="btn" onclick="setPromptLayout('vertical')">위/아래 보기</button>
+                  <button type="button" class="btn" onclick="setPromptLayout('horizontal')">나란히 보기</button>
+                </div>
+                <div id="promptContainer" class="prompt-layout prompt-layout-horizontal">
+                  <div class="help-field-wrap">
+                    <div class="field-label-row">
+                      <label>1차 프롬프트</label>
+                      <button type="button" class="help-btn" onclick="toggleHelpPopover('helpPopover1', event)" title="도움말">?</button>
+                      <button type="button" class="help-btn" onclick="fillPromptFromPlaceholder('prompt1')" title="샘플 자동 입력">+</button>
+                      <div class="help-popover hidden" id="helpPopover1" onclick="event.stopPropagation()">샘플은 참고용으로 쓰시고 내용작성도 참고용입니다. 샘플을 고려해서 각자 자기가 프롬프트 작성하는 스타일이나 노하우가  있으면 작성하셔도 됩니다 . 
+
+[지시사항 재정리]
+1. 개발자 AI 업무일지 UI 설계
+2. 체크박스 중심 웹 관리자 페이지
+3. 20분 내 작성 가능한 간결 구조
+4. 작업 범위
+- 포함: 1차/2차 단계 구분, 최종 정리 프롬프트 영역
+- 제외: 통계 대시보드, 관리자 분석 기능
+
+[필요 기능]
+1. (Must) 체크박스 기반 입력
+2. (Must) 1차/2차 단계 구분
+3. (Should) AI툴 비교 영역
+
+[고려사항]
+1. 스크롤 최소화
+2. 반복 입력 최소화
+3. 모바일에서도 가독성 유지
+[진행 시 가장 중요한 것]
+1. 범위를 벗어나지 말 것
+2. 구조를 먼저 확정할 것
+3. 사용자 관점에서 판단할 것
+
+[회사 고정 규정 – 반드시 적용]
+- 간격: 16px
+- 색상: Primary #000000
+- 숫자 구조: 1,2,3 통일
+- 이모지: 제목 앞 🔹 사용
+- 적용 범위: 전체 섹션 제목
+
+위 조건을 반영하여 1차 구조 설계만 작성해줘.</div>
+                    </div>
+                    <textarea id="prompt1" class="prompt-textarea" rows="18" placeholder="1차 프롬프트 지시사항
+1.
+2.
+3.
+4. 작업 범위
+- 포함:
+- 제외:
+
+[필요 기능]
+1. (Must)
+2. (Must)
+3. (Should)
+
+[고려사항]
+1.
+2.
+3.
+
+( 진행할때 가장중요한것)
+1.
+2.
+3.
+
+[회사 고정 규정 – 반드시 적용]- 이건 항상 프롬프트가 인지 해야하는내용입니다 
+- 간격:
+- 색상:
+- 형식:
+- 이모지:
+- 톤:
+- 적용 범위:
+([준 규정]  
+([선택 규정]  
+
+
+위 조건을 반영하여 1차 구조 설계로 작성해줘.
+완성본이 아니라 구조 중심으로."></textarea>
+                  </div>
+                  <div class="help-field-wrap">
+                    <div class="field-label-row">
+                      <label>2차 프롬프트</label>
+                      <button type="button" class="help-btn" onclick="toggleHelpPopover('helpPopover2', event)" title="도움말">?</button>
+                      <button type="button" class="help-btn" onclick="fillPromptFromPlaceholder('prompt2')" title="샘플 자동 입력">+</button>
+                      <div class="help-popover hidden" id="helpPopover2" onclick="event.stopPropagation()">샘플은 참고용으로 쓰시고 내용작성도 참고용입니다. 샘플을 고려해서 각자 자기가 프롬프트 작성하는 스타일이나 노하우가  있으면 작성하셔도 됩니다 .
+
+[지시사항 재정리]
+1. AI 감시 감독 교육 홈페이지 메인 구조 설계
+2. 반응형 웹 UI 구조
+3. 직장인 대상, 직관적 구성
+4. 작업 범위
+- 포함: 메인 히어로 섹션, 과정 설명, CTA 버튼
+- 제외: 결제 시스템, 관리자 페이지
+
+[필요 기능]
+1. (Must) 과정 단계 설명 섹션
+2. (Must) CTA 버튼 반복 노출
+3. (Should) 차별성 강조 카드형 영역
+
+[고려사항]
+1. 첫 화면 10초 내 메시지 전달
+2. 모바일 우선 설계
+3. 텍스트 과다 방지
+[진행 시 가장 중요한 것]
+1.모바일 기준으로 판단할 것
+2. 정보 과다 배치 금지
+3. CTA 동선 명확하게 유지
+[회사 고정 규정 – 반드시 적용]
+- 간격: 16px 기준
+- 색상: 회사 Primary 컬러 사용
+- 숫자 구조: 1,2,3 사용
+- 이모지: 과도 사용 금지
+- 적용 범위: 전체 페이지
+
+1차 구조 설계로 작성해줘.
+완성 디자인은 제외.</div>
+                    </div>
+                    <textarea id="prompt2" class="prompt-textarea" rows="18" placeholder="2차 프롬프트 지시사항 
+위 1차 구조를 기반으로 UX 흐름을 개선해줘.
+
+[보완 요청]
+1.
+2.
+3.
+
+[유지해야 할 요소]
+1.
+2.
+3.
+( 진행할때 가장중요한것)
+1.
+2.
+3.
+회사 고정, 준고정, 선택 규정은 그대로 유지.
+완성 코드가 아니라 UX 개선 중심으로 작성."></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="basic-info-field">
+                <label>결과물</label>
+                <div class="result-before-after">
+                  <div class="result-col">
+                    <span class="result-label">Before</span>
+                    <input type="file" id="resultBefore" accept="image/*" onchange="previewResultImage('resultBefore','previewBefore')">
+                    <div class="result-preview" id="previewBefore"><span class="preview-placeholder">이미지 선택 시 미리보기</span></div>
+                  </div>
+                  <div class="result-col">
+                    <span class="result-label">After</span>
+                    <input type="file" id="resultAfter" accept="image/*" onchange="previewResultImage('resultAfter','previewAfter')">
+                    <div class="result-preview" id="previewAfter"><span class="preview-placeholder">이미지 선택 시 미리보기</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="basic-info-field">
+                <label>보안 프롬프트</label>
+                <div class="prompt-layout prompt-layout-horizontal">
+                  <div class="help-field-wrap">
+                    <div class="field-label-row">
+                      <label>1차 보안 프롬프트</label>
+                    </div>
+                    <textarea id="securityPrompt1" class="prompt-textarea" rows="6" placeholder="1차 보안 관련 프롬프트를 입력하세요"></textarea>
+                  </div>
+                  <div class="help-field-wrap">
+                    <div class="field-label-row">
+                      <label>2차 보안 프롬프트</label>
+                    </div>
+                    <textarea id="securityPrompt2" class="prompt-textarea" rows="6" placeholder="2차 보안 관련 프롬프트를 입력하세요"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="basic-info-field one-line-fields">
+                <div class="inline-field">
+                  <label>문제점</label>
+                  <input type="text" id="problems" placeholder="문제점">
+                </div>
+                <div class="inline-field">
+                  <label>장점</label>
+                  <input type="text" id="advantages" placeholder="장점">
+                </div>
+                <div class="inline-field">
+                  <label>기타첨부파일</label>
+                  <input type="file" id="etcAttachment" onchange="updateEtcFileName()">
+                  <span class="file-name" id="etcFileName"></span>
+                </div>
+                <div class="inline-field">
+                  <label>비고</label>
+                  <input type="text" id="remarks" placeholder="비고">
+                </div>
+              </div>
+              <div class="basic-info-actions">
+                <button type="button" class="btn btn-primary" onclick="confirmAddDetailRow()">행 추가</button>
+                <button type="button" class="btn" onclick="cancelBasicInfoForm()">취소</button>
+              </div>
+            </div>
+            <div class="basic-info-view hidden" id="basicInfoView">
+              <div class="basic-info-view-title">선택한 행의 세부 정보</div>
+              <div class="basic-info-view-content" id="basicInfoViewContent"></div>
+            </div>
+            <div class="detail-actions">
+              <button type="button" class="btn" onclick="closeDetail()">달력으로 돌아가기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const DAYS = ['일','월','화','수','목','금','토'];
+    let currentYear = 2026;
+    let currentMonth = 11; // 0-indexed
+    let selectedDate = null;
+    let workData = {}; // { "2026-12-01": { today: [...], tomorrow: [...], shortNotes: [7], detailNote: "" }, _nextMonth: [...], _etc: [...] }
+    let editingType = null;   // 'today' | 'tomorrow'
+    let editingIndex = null;  // 0 ~ 6
+
+    // 대·중·소 계층: 대 선택 시 해당 중만 표시, 중 선택 시 해당 소만 표시 (소 없으면 비움)
+    const HP_HIER = {
+      '교육': [],
+      '번역': ['아랍어 번역', '영상번역', '웹툰번역'],
+      '문서': ['비즈문서', '법률문서', '의학문서'],
+      '전시회': ['박물관', '전시회', '관광지'],
+      '전문가매칭': ['영업전문', '번역가', '전문가', '신입', '경력 1년차']
+    };
+    const DEPT_HIER = {
+      '기획': ['홈피', '상담', '관리'],
+      '홈피': ['홈페이지', '메뉴얼', '개발', '내부용기획'],
+      '영업': [],
+      '마케팅': [],
+      '회계': [],
+      '인사': [],
+      '관리': [],
+      '상담': [],
+      '총무': [],
+      // 강사(대) - 테솔, 프롬프트, 윤리, 번역(중)
+      '강사': ['테솔', '프롬프트', '윤리', '번역'],
+      // 커리큘럼, 문제은행은 각각 별도의 대분류 (중분류 없음)
+      '커리큘럼': [],
+      '문제은행': []
+    };
+    const HP_SMALL = {};  // 중 → [소 목록]. 현재 전부 비움
+    const DEPT_SMALL = {}; // 중 → [소 목록]. 현재 전부 비움
+
+    function updateFilterMedium(isHomepage) {
+      const largeName = isHomepage ? 'hp_large' : 'dept_large';
+      const mediumBoxId = isHomepage ? 'hp_medium_box' : 'dept_medium_box';
+      const hier = isHomepage ? HP_HIER : DEPT_HIER;
+      const mediumName = isHomepage ? 'hp_medium' : 'dept_medium';
+      const box = document.getElementById(mediumBoxId);
+      const checkedLarge = Array.from(document.querySelectorAll(`input[name="${largeName}"]:checked`)).map(el => el.value);
+      const prevChecked = Array.from(document.querySelectorAll(`input[name="${mediumName}"]:checked`)).map(el => el.value);
+      let list = [];
+      checkedLarge.forEach(lg => {
+        (hier[lg] || []).forEach(label => {
+          const val = isHomepage ? `${lg}_${label}` : (lg === '기획' || lg === '홈피' ? `${lg}_${label}` : label);
+          if (!list.some(x => x.value === val)) list.push({ value: val, label: label });
+        });
+      });
+      box.innerHTML = list.map(({ value, label }) =>
+        `<label class="checkbox-label"><input type="checkbox" name="${mediumName}" value="${value}"> ${label}</label>`
+      ).join('');
+      box.querySelectorAll('input').forEach(inp => {
+        if (prevChecked.includes(inp.value)) inp.checked = true;
+        inp.addEventListener('change', () => {
+          if (isHomepage) updateFilterSmall(true);
+          else updateFilterSmall(false);
+        });
+      });
+      if (isHomepage) updateFilterSmall(true);
+      else updateFilterSmall(false);
+    }
+
+    function updateFilterSmall(isHomepage) {
+      const smallBoxId = isHomepage ? 'hp_small_box' : 'dept_small_box';
+      const mediumName = isHomepage ? 'hp_medium' : 'dept_medium';
+      const smallHier = isHomepage ? HP_SMALL : DEPT_SMALL;
+      const box = document.getElementById(smallBoxId);
+      const checkedMedium = Array.from(document.querySelectorAll(`input[name="${mediumName}"]:checked`)).map(el => el.value);
+      let list = [];
+      checkedMedium.forEach(mv => {
+        (smallHier[mv] || []).forEach(label => list.push({ value: `${mv}_${label}`, label }));
+      });
+      box.innerHTML = list.length
+        ? list.map(({ value, label }) =>
+            `<label class="checkbox-label"><input type="checkbox" name="${isHomepage ? 'hp_small' : 'dept_small'}" value="${value}"> ${label}</label>`
+          ).join('')
+        : '';
+      if (!box.classList.contains('checkbox-group') && list.length) box.classList.add('checkbox-group');
+      else if (list.length === 0) box.classList.remove('checkbox-group');
+    }
+
+    function initFilterCascade() {
+      document.querySelectorAll('input[name="hp_large"]').forEach(inp => {
+        inp.addEventListener('change', () => updateFilterMedium(true));
+      });
+      document.querySelectorAll('input[name="dept_large"]').forEach(inp => {
+        inp.addEventListener('change', () => updateFilterMedium(false));
+      });
+    }
+
+    function loadData() {
+      try {
+        const s = localStorage.getItem('workLog_260225');
+        if (s) workData = JSON.parse(s);
+      } catch (e) {}
+    }
+    function saveData() {
+      localStorage.setItem('workLog_260225', JSON.stringify(workData));
+    }
+
+    function key(y, m, d) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${y}-${pad(m+1)}-${pad(d)}`;
+    }
+
+    function renderCalendar() {
+      const tbody = document.getElementById('calendarBody');
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const startDow = firstDay.getDay();
+      const totalDays = lastDay.getDate();
+      const weeks = Math.ceil((startDow + totalDays) / 7);
+
+      document.getElementById('calendarTitle').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+      document.getElementById('monthLabel').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+
+      let html = '';
+      let dayIdx = 1 - startDow;
+      for (let w = 0; w < weeks; w++) {
+        html += '<tr>';
+        let weekSum = 0;
+        for (let d = 0; d < 7; d++) {
+          const dateNum = dayIdx + d;
+          if (dateNum < 1 || dateNum > totalDays) {
+            html += '<td class="empty-cell"></td>';
+          } else {
+            const k = key(currentYear, currentMonth, dateNum);
+            const entry = workData[k];
+            const dayOfWeek = (startDow + dateNum - 1) % 7;
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const dayTotal = entry ? (entry.today || []).reduce((s, t) => s + (parseFloat(t.val) || 0), 0) : 0;
+            weekSum += dayTotal;
+            const tasksHtml = entry && entry.today && entry.today.length
+              ? entry.today.slice(0, 4).map(t => {
+                  const title = (t.basicInfo && t.basicInfo.title) ? t.basicInfo.title : (t.desc || '');
+                  return `<div class="day-task">${escapeHtml(title)} <span class="val">${t.val || 0}</span></div>`;
+                }).join('')
+              : '';
+            const hasEntry = entry && ((entry.today && entry.today.some(t=>t.desc||t.val)) || entry.notes || (entry.shortNotes && entry.shortNotes.some(n=>n)));
+            html += `<td class="date-cell ${hasEntry ? 'has-entry' : ''} ${isWeekend ? 'day-header' : ''}" 
+              data-year="${currentYear}" data-month="${currentMonth}" data-day="${dateNum}">
+              <div class="date-num">${currentMonth + 1}월 ${String(dateNum).padStart(2,'0')}일</div>
+              <div class="day-tasks">${tasksHtml}</div>
+            </td>`;
+          }
+        }
+        html += `<td class="week-total">${w+1}주차 합 ${weekSum}</td></tr>`;
+        dayIdx += 7;
+      }
+      tbody.innerHTML = html;
+
+      tbody.querySelectorAll('.date-cell[data-year]').forEach(cell => {
+        cell.addEventListener('click', () => openDetail(
+          parseInt(cell.dataset.year),
+          parseInt(cell.dataset.month),
+          parseInt(cell.dataset.day)
+        ));
+      });
+      renderFooter();
+    }
+
+    function renderFooter() {
+      const nextList = workData._nextMonth || DEFAULT_NEXT;
+      const etcList = workData._etc || DEFAULT_ETC;
+      renderFooterSection('nextMonthTasks', 'nextMonthTotal', nextList);
+      renderFooterSection('etcTasks', 'etcTotal', etcList);
+    }
+    function renderFooterSection(containerId, totalId, list) {
+      const container = document.getElementById(containerId);
+      const type = containerId === 'nextMonthTasks' ? 'nextMonth' : 'etc';
+      let html = '';
+      let sum = 0;
+      (workData['_' + type] || list).forEach((t, i) => {
+        const v = parseFloat(t.val) || 0;
+        sum += v;
+        html += `<div class="footer-task">
+          <input type="text" data-type="${type}" data-idx="${i}" value="${escapeHtml(t.desc || '')}" placeholder="업무 내용" onchange="saveFooterTasks()">
+          <input type="number" class="footer-val" data-type="${type}" data-idx="${i}" step="0.5" value="${t.val || ''}" placeholder="0" onchange="saveFooterTasks()">
+          <button type="button" class="remove-task-btn" onclick="removeFooterTask('${type}', ${i})">×</button>
+        </div>`;
+      });
+      container.innerHTML = html;
+      document.getElementById(totalId).textContent = sum;
+    }
+    function addFooterTask(type) {
+      const key = '_' + type;
+      if (!workData[key]) workData[key] = [];
+      workData[key].push({ desc: '', val: '' });
+      saveData();
+      renderFooter();
+    }
+    const DEFAULT_NEXT = [{ desc: '핀란드 버스 조사', val: '3' }, { desc: '로바니에미 렌터카 & 택시 가격 조사', val: '4' }, { desc: '영어, 스페인어, 피아노, 테니스 강사 구인', val: '2' }, { desc: '중고 피아노 검색', val: '2' }];
+    const DEFAULT_ETC = [{ desc: '핀란드 버스 조사', val: '1' }];
+    function removeFooterTask(type, idx) {
+      const key = '_' + type;
+      workData[key] = JSON.parse(JSON.stringify(workData[key] || (type === 'nextMonth' ? DEFAULT_NEXT : DEFAULT_ETC)));
+      workData[key].splice(idx, 1);
+      saveData();
+      renderFooter();
+    }
+    function saveFooterTasks() {
+      ['nextMonth', 'etc'].forEach(type => {
+        const key = '_' + type;
+        const container = document.getElementById(key === '_nextMonth' ? 'nextMonthTasks' : 'etcTasks');
+        const tasks = [];
+        container.querySelectorAll('.footer-task').forEach(row => {
+          const descInp = row.querySelector('input[type="text"]');
+          const valInp = row.querySelector('input[type="number"]');
+          tasks.push({ desc: descInp?.value || '', val: valInp?.value || '' });
+        });
+        workData[key] = tasks;
+      });
+      saveData();
+      renderFooter();
+    }
+    function exportData() {
+      const blob = new Blob([JSON.stringify(workData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `업무일지_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function ensureSevenRows(entry, type) {
+      entry[type] = entry[type] || [];
+      if (entry[type].length !== 7) {
+        const original = entry[type];
+        entry[type] = Array.from({ length: 7 }, (_, i) => {
+          const src = original[i] || {};
+          return {
+            desc: src.desc || '',
+            val: src.val || src.time || '',
+            basicInfo: src.basicInfo || {}
+          };
+        });
+      }
+    }
+
+    function renderDetailTable(entry) {
+      const tbody = document.getElementById('detailTaskBody');
+      if (!tbody) return;
+
+      entry = entry || {};
+      ensureSevenRows(entry, 'today');
+      ensureSevenRows(entry, 'tomorrow');
+
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const todayRow = entry.today[i] || { desc: '', val: '', basicInfo: {} };
+        const tomorrowRow = entry.tomorrow[i] || { desc: '', val: '', basicInfo: {} };
+
+        html += `<tr data-idx="${i}">
+          <td>${i + 1}</td>
+          <td class="col-task">
+            <input type="text"
+                   placeholder="내용 입력"
+                   value="${escapeHtml(todayRow.desc || '')}"
+                   data-type="today"
+                   data-field="desc"
+                   data-idx="${i}">
+            <button type="button"
+                    class="btn add-task-btn"
+                    data-type="today"
+                    data-idx="${i}"
+                    title="세부 정보 입력/수정">+</button>
+          </td>
+          <td class="col-val">
+            <input type="number"
+                   step="0.5"
+                   min="0"
+                   placeholder="0"
+                   value="${todayRow.val || ''}"
+                   data-type="today"
+                   data-field="val"
+                   data-idx="${i}">
+          </td>
+          <td>${i + 1}</td>
+          <td class="col-task">
+            <input type="text"
+                   placeholder="내용 입력"
+                   value="${escapeHtml(tomorrowRow.desc || '')}"
+                   data-type="tomorrow"
+                   data-field="desc"
+                   data-idx="${i}">
+            <button type="button"
+                    class="btn add-task-btn"
+                    data-type="tomorrow"
+                    data-idx="${i}"
+                    title="세부 정보 입력/수정">+</button>
+          </td>
+          <td class="col-val">
+            <input type="number"
+                   step="0.5"
+                   min="0"
+                   placeholder="0"
+                   value="${tomorrowRow.val || ''}"
+                   data-type="tomorrow"
+                   data-field="val"
+                   data-idx="${i}">
+          </td>
+          <td class="notes-cell">
+            <input type="text"
+                   class="notes-input"
+                   placeholder="특이사항"
+                   value="${escapeHtml(entry.shortNotes?.[i] ?? (i === 0 ? (entry.shortNote ?? entry.notes ?? '') : '') ?? '')}"
+                   data-note-idx="${i}">
+          </td>
+        </tr>`;
+      }
+
+      tbody.innerHTML = html;
+
+      // 입력 값 변경 시 저장
+      tbody.querySelectorAll('input[data-type]').forEach(inp => {
+        inp.addEventListener('change', onCellChange);
+      });
+
+      // + 버튼 → 세부 정보 폼 열기
+      tbody.querySelectorAll('.add-task-btn').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const type = btn.dataset.type;
+          const idx = parseInt(btn.dataset.idx, 10);
+          openBasicInfoForm(type, idx);
+        });
+      });
+
+      // 특이사항(행별) 및 세부 내용
+      tbody.querySelectorAll('input.notes-input').forEach(inp => {
+        inp.addEventListener('input', onShortNoteChange);
+        inp.addEventListener('change', onShortNoteChange);
+      });
+
+      const detailNoteEl = document.getElementById('detailNote');
+      if (detailNoteEl) {
+        detailNoteEl.value = entry.detailNote || '';
+        detailNoteEl.addEventListener('input', onDetailNoteChange);
+      }
+
+      // 세부 정보 패널 초기화
+      const view = document.getElementById('basicInfoView');
+      if (view) {
+        view.classList.add('hidden');
+        const content = document.getElementById('basicInfoViewContent');
+        if (content) content.innerHTML = '';
+      }
+
+      updateDetailTotals(entry);
+    }
+
+    function onCellChange(ev) {
+      if (!selectedDate) return;
+      const target = ev.target;
+      const type = target.dataset.type;
+      const field = target.dataset.field;
+      const idx = parseInt(target.dataset.idx, 10);
+      if (!type || !field || Number.isNaN(idx)) return;
+
+      const { year, month, day } = selectedDate;
+      const k = key(year, month, day);
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+
+      ensureSevenRows(entry, type);
+      entry[type][idx] = entry[type][idx] || { desc: '', val: '', basicInfo: {} };
+      entry[type][idx][field] = target.value;
+
+      saveData();
+      updateDetailTotals(entry);
+      renderCalendar();
+    }
+
+    function onShortNoteChange(ev) {
+      if (!selectedDate) return;
+      const idx = parseInt(ev.target.dataset.noteIdx, 10);
+      if (Number.isNaN(idx)) return;
+      const { year, month, day } = selectedDate;
+      const k = key(year, month, day);
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+      entry.shortNotes = entry.shortNotes || Array(7).fill('');
+      entry.shortNotes[idx] = ev.target.value;
+      saveData();
+      renderCalendar();
+    }
+
+    function onDetailNoteChange(ev) {
+      if (!selectedDate) return;
+      const { year, month, day } = selectedDate;
+      const k = key(year, month, day);
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+      entry.detailNote = ev.target.value;
+      saveData();
+    }
+
+    function toggleHelpPopover(popoverId, ev) {
+      ev.stopPropagation();
+      const popover = document.getElementById(popoverId);
+      const isHidden = popover.classList.contains('hidden');
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+      if (isHidden) popover.classList.remove('hidden');
+    }
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+    });
+
+    function fillPromptFromPlaceholder(textareaId) {
+      const el = document.getElementById(textareaId);
+      if (!el) return;
+      const placeholder = el.getAttribute('placeholder') || '';
+      if (!el.value.trim()) {
+        el.value = placeholder;
+      }
+      el.focus();
+    }
+
+    function setPromptLayout(mode) {
+      const container = document.getElementById('promptContainer');
+      if (!container) return;
+      container.classList.remove('prompt-layout-vertical', 'prompt-layout-horizontal');
+      if (mode === 'horizontal') {
+        container.classList.add('prompt-layout-horizontal');
+      } else {
+        container.classList.add('prompt-layout-vertical');
+      }
+    }
+
+    function toggleBasicInfoForm() {
+      // 기존 전역 토글 버튼은 사용하지 않음
+      // 각 행의 + 버튼에서 openBasicInfoForm을 사용
+    }
+    function cancelBasicInfoForm() {
+      document.getElementById('basicInfoForm').classList.add('hidden');
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+      editingType = null;
+      editingIndex = null;
+    }
+    function updateEtcFileName() {
+      const input = document.getElementById('etcAttachment');
+      const span = document.getElementById('etcFileName');
+      span.textContent = input.files?.[0]?.name || '';
+    }
+    function previewResultImage(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      preview.innerHTML = '';
+      const file = input.files?.[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+    function clearBasicInfoForm() {
+      document.querySelectorAll('#workTypeGroup input, #usedAIGroup input').forEach(cb => cb.checked = false);
+      document.getElementById('basicInstructions').value = '';
+      document.getElementById('prompt1').value = '';
+      document.getElementById('prompt2').value = '';
+      document.getElementById('resultBefore').value = '';
+      document.getElementById('resultAfter').value = '';
+      document.getElementById('previewBefore').innerHTML = '<span class="preview-placeholder">이미지 선택 시 미리보기</span>';
+      document.getElementById('previewAfter').innerHTML = '<span class="preview-placeholder">이미지 선택 시 미리보기</span>';
+      document.getElementById('securityPrompt1').value = '';
+      document.getElementById('securityPrompt2').value = '';
+      document.getElementById('problems').value = '';
+      document.getElementById('advantages').value = '';
+      document.getElementById('remarks').value = '';
+      document.getElementById('etcAttachment').value = '';
+      document.getElementById('etcFileName').textContent = '';
+      editingType = null;
+      editingIndex = null;
+    }
+    function readFileAsDataURL(file) {
+      return new Promise((resolve) => {
+        if (!file) { resolve(''); return; }
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => resolve('');
+        r.readAsDataURL(file);
+      });
+    }
+    function initBasicInfoTimeSelect() {
+      const sel = document.getElementById('basicInfoTime');
+      if (!sel || sel.options.length > 0) return;
+      for (let i = 0; i <= 24; i++) {
+        const val = (i * 0.5).toString();
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val === '1' ? '1시간' : val + '시간';
+        sel.appendChild(opt);
+      }
+      sel.value = '1';
+    }
+
+    function fillBasicInfoForm(basicInfo) {
+      clearBasicInfoForm();
+      if (!basicInfo) return;
+
+      (basicInfo.workType || []).forEach(v => {
+        const cb = document.querySelector(`#workTypeGroup input[value="${v}"]`);
+        if (cb) cb.checked = true;
+      });
+      document.getElementById('basicInstructions').value = basicInfo.instructions || '';
+      (basicInfo.usedAI || []).forEach(v => {
+        const cb = document.querySelector(`#usedAIGroup input[value="${v}"]`);
+        if (cb) cb.checked = true;
+      });
+      document.getElementById('prompt1').value = basicInfo.prompt1 || '';
+      document.getElementById('prompt2').value = basicInfo.prompt2 || '';
+      document.getElementById('securityPrompt1').value = basicInfo.securityPrompt1 || basicInfo.securityPrompt || '';
+      document.getElementById('securityPrompt2').value = basicInfo.securityPrompt2 || '';
+      document.getElementById('problems').value = basicInfo.problems || '';
+      document.getElementById('advantages').value = basicInfo.advantages || '';
+      document.getElementById('remarks').value = basicInfo.remarks || '';
+      // 파일/이미지는 저장된 base64를 다시 미리보기로 복원하려면 추가 구현 필요하지만,
+      // 현재는 새로 업로드하는 흐름으로 사용
+    }
+    async function getBasicInfoFromForm() {
+      const workType = Array.from(document.querySelectorAll('input[name="workType"]:checked')).map(cb => cb.value);
+      const instructions = document.getElementById('basicInstructions').value.trim();
+      const usedAI = Array.from(document.querySelectorAll('input[name="usedAI"]:checked')).map(cb => cb.value);
+      const prompt1 = document.getElementById('prompt1').value;
+      const prompt2 = document.getElementById('prompt2').value;
+      const securityPrompt1 = document.getElementById('securityPrompt1').value;
+      const securityPrompt2 = document.getElementById('securityPrompt2').value;
+      const problems = document.getElementById('problems').value;
+      const advantages = document.getElementById('advantages').value;
+      const remarks = document.getElementById('remarks').value;
+      const beforeFile = document.getElementById('resultBefore').files?.[0];
+      const afterFile = document.getElementById('resultAfter').files?.[0];
+      const etcFile = document.getElementById('etcAttachment').files?.[0];
+      const [resultBefore, resultAfter, etcAttachment] = await Promise.all([
+        (beforeFile && beforeFile.type.startsWith('image/')) ? readFileAsDataURL(beforeFile) : Promise.resolve(''),
+        (afterFile && afterFile.type.startsWith('image/')) ? readFileAsDataURL(afterFile) : Promise.resolve(''),
+        etcFile ? readFileAsDataURL(etcFile) : Promise.resolve('')
+      ]);
+      return {
+        workType,
+        instructions,
+        usedAI,
+        prompt1,
+        prompt2,
+        resultBefore,
+        resultAfter,
+        securityPrompt1,
+        securityPrompt2,
+        problems,
+        advantages,
+        remarks,
+        etcAttachment
+      };
+    }
+    async function confirmAddDetailRow() {
+      if (!selectedDate || editingType === null || editingIndex === null) {
+        return;
+      }
+      const basicInfo = await getBasicInfoFromForm();
+      addDetailTaskRow(basicInfo);
+      clearBasicInfoForm();
+      document.getElementById('basicInfoForm').classList.add('hidden');
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+      editingType = null;
+      editingIndex = null;
+    }
+
+    function buildTaskDescFromBasicInfo(basicInfo) {
+      const title = (basicInfo.title || '').trim();
+      const instructions = (basicInfo.instructions || '').trim();
+      if (title) return title;
+      if (instructions) return instructions;
+      return '(업무 내용 없음)';
+    }
+
+    function addDetailTaskRow(basicInfo) {
+      basicInfo = basicInfo || { workType: [], instructions: '', usedAI: [] };
+      const desc = buildTaskDescFromBasicInfo(basicInfo);
+      // 시간은 테이블 행의 입력값 유지 (상세 폼에 시간 필드 없음)
+      const timeInput = document.querySelector(`input[data-type="${editingType}"][data-field="val"][data-idx="${editingIndex}"]`);
+      const timeVal = timeInput ? timeInput.value : '';
+      if (!selectedDate || editingType === null || editingIndex === null) return;
+      const { year, month, day } = selectedDate;
+      const k = key(year, month, day);
+
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+      ensureSevenRows(entry, editingType);
+
+      entry[editingType][editingIndex] = {
+        desc,
+        val: timeVal,
+        basicInfo
+      };
+
+      saveData();
+      renderCalendar();
+      renderDetailTable(entry);
+    }
+
+    function openBasicInfoForm(type, idx) {
+      if (!selectedDate) return;
+      editingType = type;
+      editingIndex = idx;
+
+      const form = document.getElementById('basicInfoForm');
+      if (!form) return;
+
+      const { year, month, day } = selectedDate;
+      const k = key(year, month, day);
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+      ensureSevenRows(entry, type);
+
+      const row = entry[type][idx] || { basicInfo: {} };
+      fillBasicInfoForm(row.basicInfo || {});
+
+      form.classList.remove('hidden');
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+    }
+
+    function showBasicInfoDetails(basicInfo) {
+      const view = document.getElementById('basicInfoView');
+      const content = document.getElementById('basicInfoViewContent');
+      if (!view || !content) return;
+
+      if (!basicInfo || Object.keys(basicInfo).length === 0) {
+        view.classList.add('hidden');
+        content.innerHTML = '';
+        return;
+      }
+
+      const title = basicInfo.title || '';
+      const time = basicInfo.time || '';
+      const workType = (basicInfo.workType || []).join(', ');
+      const usedAI = (basicInfo.usedAI || []).join(', ');
+      const instructions = basicInfo.instructions || '';
+      const prompt1 = basicInfo.prompt1 || '';
+      const prompt2 = basicInfo.prompt2 || '';
+      const securityPrompt1 = basicInfo.securityPrompt1 || basicInfo.securityPrompt || '';
+      const securityPrompt2 = basicInfo.securityPrompt2 || '';
+      const problems = basicInfo.problems || '';
+      const advantages = basicInfo.advantages || '';
+      const remarks = basicInfo.remarks || '';
+      const hasBefore = !!(basicInfo.resultBefore);
+      const hasAfter = !!(basicInfo.resultAfter);
+      const hasEtc = !!(basicInfo.etcAttachment);
+
+      content.innerHTML = `
+        <dl>
+          <dt>제목</dt>
+          <dd>${escapeHtml(title)}</dd>
+        </dl>
+        <dl>
+          <dt>시간(소요)</dt>
+          <dd>${escapeHtml(time ? time + '시간' : '')}</dd>
+        </dl>
+        <dl>
+          <dt>작업 유형</dt>
+          <dd>${escapeHtml(workType)}</dd>
+        </dl>
+        <dl>
+          <dt>사용 AI</dt>
+          <dd>${escapeHtml(usedAI)}</dd>
+        </dl>
+        <dl>
+          <dt>업무지시사항</dt>
+          <dd>${escapeHtml(instructions)}</dd>
+        </dl>
+        <dl>
+          <dt>1차 프롬프트</dt>
+          <dd>${escapeHtml(prompt1)}</dd>
+        </dl>
+        <dl>
+          <dt>2차 프롬프트</dt>
+          <dd>${escapeHtml(prompt2)}</dd>
+        </dl>
+        <dl>
+          <dt>보안 프롬프트 1차</dt>
+          <dd>${escapeHtml(securityPrompt1)}</dd>
+        </dl>
+        <dl>
+          <dt>보안 프롬프트 2차</dt>
+          <dd>${escapeHtml(securityPrompt2)}</dd>
+        </dl>
+        <dl>
+          <dt>문제점</dt>
+          <dd>${escapeHtml(problems)}</dd>
+        </dl>
+        <dl>
+          <dt>장점</dt>
+          <dd>${escapeHtml(advantages)}</dd>
+        </dl>
+        <dl>
+          <dt>비고</dt>
+          <dd>${escapeHtml(remarks)}</dd>
+        </dl>
+        <dl>
+          <dt>첨부 상태</dt>
+          <dd>
+            ${hasBefore ? 'Before 이미지 있음' : 'Before 이미지 없음'} /
+            ${hasAfter ? 'After 이미지 있음' : 'After 이미지 없음'} /
+            ${hasEtc ? '기타 첨부 있음' : '기타 첨부 없음'}
+          </dd>
+        </dl>
+      `;
+
+      view.classList.remove('hidden');
+    }
+
+    function openDetail(y, m, d) {
+      selectedDate = { year: y, month: m, day: d };
+      const k = key(y, m, d);
+      workData[k] = workData[k] || {};
+      const entry = workData[k];
+
+      // 기존 notes/shortNote 필드가 있으면 shortNotes[0]로 이전
+      if ((entry.notes || entry.shortNote) && !(entry.shortNotes && entry.shortNotes.length)) {
+        entry.shortNotes = Array(7).fill('');
+        entry.shortNotes[0] = entry.shortNote || entry.notes || '';
+      }
+
+      ensureSevenRows(entry, 'today');
+      ensureSevenRows(entry, 'tomorrow');
+
+      document.getElementById('detailDateLabel').textContent = `${y}년 ${m+1}월 ${d}일 세부 업무 보고`;
+      const titleEl = document.getElementById('detailPageTitle');
+      if (titleEl) titleEl.textContent = `${y}년 ${m+1}월 ${d}일 세부 업무 보고`;
+
+      // 요일 / 날짜 라벨
+      const dateObj = new Date(y, m, d);
+      const dow = dateObj.getDay();
+      const tomorrowObj = new Date(y, m, d + 1);
+      const tdow = tomorrowObj.getDay();
+
+      const todayDowEl = document.getElementById('todayDow');
+      const todayDateEl = document.getElementById('todayDate');
+      const tomorrowDowEl = document.getElementById('tomorrowDow');
+      const tomorrowDateEl = document.getElementById('tomorrowDate');
+
+      if (todayDowEl) todayDowEl.textContent = DAYS[dow];
+      if (todayDateEl) todayDateEl.textContent = `${m+1}월 ${String(d).padStart(2,'0')}일`;
+      if (tomorrowDowEl) tomorrowDowEl.textContent = DAYS[tdow];
+      if (tomorrowDateEl) {
+        const tm = tomorrowObj.getMonth();
+        const td = tomorrowObj.getDate();
+        tomorrowDateEl.textContent = `${tm+1}월 ${String(td).padStart(2,'0')}일`;
+      }
+
+      renderDetailTable(entry);
+
+      document.getElementById('basicInfoForm').classList.add('hidden');
+      document.querySelectorAll('.help-popover').forEach(p => p.classList.add('hidden'));
+
+      document.getElementById('calendar').classList.remove('active');
+      document.getElementById('detailPage').classList.add('active');
+      document.getElementById('sidebarBack').classList.remove('hidden');
+      document.getElementById('navCalendar').classList.remove('active');
+    }
+
+    function updateDetailTotals(entry) {
+      if (!entry) {
+        if (!selectedDate) return;
+        const { year, month, day } = selectedDate;
+        const k = key(year, month, day);
+        entry = workData[k] || {};
+      }
+
+      ensureSevenRows(entry, 'today');
+      ensureSevenRows(entry, 'tomorrow');
+
+      const todaySum = (entry.today || []).reduce((s, t) => s + (parseFloat(t.val) || 0), 0);
+      const tomorrowSum = (entry.tomorrow || []).reduce((s, t) => s + (parseFloat(t.val) || 0), 0);
+
+      const todayTotalEl = document.getElementById('todayTotal');
+      const tomorrowTotalEl = document.getElementById('tomorrowTotal');
+
+      if (todayTotalEl) todayTotalEl.textContent = todaySum;
+      if (tomorrowTotalEl) tomorrowTotalEl.textContent = tomorrowSum;
+    }
+
+    function closeDetail() {
+      document.getElementById('detailPage').classList.remove('active');
+      document.getElementById('calendar').classList.add('active');
+      document.getElementById('sidebarBack').classList.add('hidden');
+      document.getElementById('navCalendar').classList.add('active');
+      document.getElementById('basicInfoForm').classList.add('hidden');
+      const view = document.getElementById('basicInfoView');
+      if (view) {
+        view.classList.add('hidden');
+        const content = document.getElementById('basicInfoViewContent');
+        if (content) content.innerHTML = '';
+      }
+      selectedDate = null;
+    }
+
+    document.getElementById('prevMonth').onclick = () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    };
+    document.getElementById('nextMonth').onclick = () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar();
+    };
+    document.getElementById('goToday').onclick = () => {
+      const n = new Date();
+      currentYear = n.getFullYear();
+      currentMonth = n.getMonth();
+      renderCalendar();
+    };
+
+    // 기존: 상세 행 클릭 시 하단 패널에 세부 정보 표시
+    // 현재는 각 행의 + 버튼을 통해 세부 정보를 입력/수정하도록 변경
+
+    loadData();
+    initFilterCascade();
+    initBasicInfoTimeSelect();
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth();
+    renderCalendar();
+  </script>
+</body>
+</html>

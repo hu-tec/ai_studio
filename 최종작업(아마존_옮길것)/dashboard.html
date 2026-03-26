@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>시온 프로세스 대시보드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --color-bg: #f3f6fb;
+        --color-surface: #ffffff;
+        --color-surface-alt: #f1f5f9;
+        --color-text: #1e293b;
+        --color-text-muted: #64748b;
+        --color-accent: #3b82f6;
+        --color-accent-hover: #2563eb;
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-info: #0ea5e9;
+        --color-purple: #8b5cf6;
+        --color-teal: #14b8a6;
+        --color-border: #e2e8f0;
+        --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+        --shadow-card: 0 10px 40px -10px rgba(15,23,42,0.12);
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: var(--font-main);
+        background: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      a { text-decoration: none; color: inherit; }
+
+      .dash-wrap {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ===== 헤더 ===== */
+      .dash-header {
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 1px 0 var(--color-border);
+        flex-shrink: 0;
+      }
+      .dash-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .dash-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #5ee7ff, #4c2fff);
+      }
+      .dash-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-text);
+      }
+      .dash-header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+      }
+      .dash-header .btn-text {
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-text);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.8rem;
+      }
+      .dash-header .btn-text:hover {
+        background: var(--color-surface-alt);
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+      }
+      .dash-header .btn-primary {
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .dash-header .avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* ===== 메인 스크롤 영역 ===== */
+      .dash-main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.25rem 1.5rem 2rem;
+      }
+      .dash-container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      /* ===== 새 대시보드 (직군 카드 6개) ===== */
+      .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .page-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .page-subtitle {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        margin-top: 0.25rem;
+      }
+      .page-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .dash-block {
+        margin-bottom: 1.25rem;
+      }
+      .block-surface {
+        background: rgba(255,255,255,0.65);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem;
+      }
+      .block-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+      }
+      .block-title {
+        font-size: 1.1rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+      .block-subtitle {
+        font-size: 0.82rem;
+        color: var(--color-text-muted);
+        margin-top: 0.2rem;
+      }
+      .span-all { grid-column: 1 / -1; }
+      .empty-card {
+        background: var(--color-surface);
+        border: 1px dashed rgba(148,163,184,0.7);
+        border-radius: var(--radius);
+        padding: 1rem;
+        color: var(--color-text);
+      }
+      .empty-card h3 {
+        font-size: 0.95rem;
+        font-weight: 900;
+        margin-bottom: 0.35rem;
+      }
+      .empty-card p {
+        font-size: 0.82rem;
+        color: var(--color-text-muted);
+      }
+      .empty-actions {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .btn-mini {
+        padding: 0.38rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-border);
+        background: rgba(255,255,255,0.9);
+        color: var(--color-text);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 1px 0 rgba(15,23,42,0.04);
+      }
+      .btn-mini:hover {
+        background: var(--color-surface-alt);
+        border-color: rgba(59,130,246,0.45);
+        color: var(--color-accent-hover);
+      }
+      .btn-mini:active { transform: translateY(1px); }
+      .btn-mini.primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+        color: #fff;
+        box-shadow: 0 10px 25px -14px rgba(37,99,235,0.55);
+      }
+      .btn-mini.primary:hover { filter: brightness(1.02); }
+      .btn-mini.ghost {
+        background: rgba(241,245,249,0.9);
+      }
+      .btn-mini:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .job-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .job-tools-left {
+        font-size: 0.74rem;
+        color: var(--color-text-muted);
+        font-weight: 700;
+      }
+      .job-tools-right {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .job-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+      .job-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-card);
+        padding: 0.8rem 0.9rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        min-height: 190px;
+      }
+      .job-card.disabled {
+        opacity: 0.6;
+      }
+      .job-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .job-name {
+        font-size: 0.98rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      .job-meta {
+        margin-top: 0.2rem;
+        font-size: 0.74rem;
+        color: var(--color-text-muted);
+      }
+      .job-badges {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .badge {
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: var(--color-text);
+        white-space: nowrap;
+      }
+      .badge.ok { background: #d1fae5; border-color: #a7f3d0; color: #047857; }
+      .badge.todo { background: #fef3c7; border-color: #fde68a; color: #b45309; }
+      .badge.none { background: #e2e8f0; border-color: #cbd5e1; color: #475569; }
+
+      .phase-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+      .phase-pill {
+        border: 1px solid var(--color-border);
+        background: rgba(248,250,252,0.9);
+        border-radius: 10px;
+        padding: 0.42rem 0.5rem;
+        min-height: 50px;
+      }
+      .phase-pill-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .phase-pill-sub {
+        font-size: 0.7rem;
+        color: var(--color-text-muted);
+        margin-top: 0.15rem;
+      }
+      .phase-pill.off {
+        opacity: 0.55;
+      }
+
+      .job-progress {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+      .mini-progress {
+        flex: 1;
+        height: 8px;
+        background: var(--color-surface-alt);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+      .mini-progress > div {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-accent), var(--color-purple));
+        width: 0%;
+      }
+      .mini-progress-text {
+        font-size: 0.78rem;
+        color: var(--color-text-muted);
+        white-space: nowrap;
+      }
+
+      .job-details {
+        display: grid;
+        gap: 0.5rem;
+      }
+      details.job-detail {
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: rgba(248,250,252,0.8);
+        overflow: hidden;
+      }
+      details.job-detail > summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.48rem 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      details.job-detail > summary::-webkit-details-marker { display: none; }
+      .detail-sub {
+        font-size: 0.72rem;
+        color: var(--color-text-muted);
+        font-weight: 600;
+      }
+      .detail-body {
+        padding: 0 0.6rem 0.55rem;
+        border-top: 1px solid var(--color-border);
+      }
+      .step-list {
+        margin-top: 0.45rem;
+        display: grid;
+        gap: 0.3rem;
+        font-size: 0.78rem;
+        color: var(--color-text);
+      }
+      .step-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+      .step-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #94a3b8;
+        margin-top: 0.45rem;
+        flex-shrink: 0;
+      }
+      .step-item a {
+        color: var(--color-accent);
+        font-weight: 700;
+      }
+      .step-item a:hover { text-decoration: underline; }
+
+      @media (max-width: 1200px) {
+        .job-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 768px) {
+        .job-grid { grid-template-columns: 1fr; }
+        .phase-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .page-head { align-items: flex-start; flex-direction: column; }
+      }
+
+      /* ===== 상단 요약 카드 5개 ===== */
+      .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .summary-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--color-border);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+      }
+      .summary-card .icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+      .summary-card .icon.yellow { background: #fef3c7; color: #d97706; }
+      .summary-card .icon.green { background: #d1fae5; color: #059669; }
+      .summary-card .icon.blue { background: #dbeafe; color: #2563eb; }
+      .summary-card .icon.teal { background: #ccfbf1; color: #0d9488; }
+      .summary-card .icon.purple { background: #ede9fe; color: #7c3aed; }
+      .summary-card .num {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-text);
+        line-height: 1.2;
+      }
+      .summary-card .label {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        margin-top: 0.2rem;
+      }
+      .summary-card .progress-wrap {
+        margin-top: 0.5rem;
+      }
+      .summary-card .progress-bar {
+        height: 6px;
+        background: var(--color-surface-alt);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .summary-card .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-purple), #a78bfa);
+        border-radius: 999px;
+        width: 50%;
+      }
+
+      /* ===== 분야+급수 교차 / 강사-급수 교차 2열 ===== */
+      .two-col-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+      .panel-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--color-border);
+      }
+      .panel-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--color-text);
+      }
+      .category-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+      }
+      .category-tag {
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      .category-tag.doc { background: #dbeafe; color: #1d4ed8; }
+      .category-tag.dev { background: #d1fae5; color: #047857; }
+      .category-tag.video { background: #fce7f3; color: #be185d; }
+      .cross-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+        table-layout: fixed;
+      }
+      .cross-table th,
+      .cross-table td {
+        border: 1px solid var(--color-border);
+        padding: 0.4rem 0.5rem;
+        vertical-align: top;
+      }
+      .cross-table thead th {
+        background: var(--color-surface-alt);
+        font-weight: 600;
+        text-align: center;
+      }
+      .cross-table tbody td:first-child {
+        font-weight: 500;
+        background: rgba(248,250,252,0.8);
+      }
+      .grade-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+      }
+      .grade-table th,
+      .grade-table td {
+        border: 1px solid var(--color-border);
+        padding: 0.4rem 0.35rem;
+        text-align: center;
+      }
+      .grade-table thead th {
+        background: var(--color-surface-alt);
+        font-weight: 600;
+      }
+      .grade-table tbody td:first-child {
+        text-align: left;
+        font-weight: 500;
+        padding-left: 0.5rem;
+      }
+      .grade-tag {
+        display: inline-block;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+      .grade-tag.prompt { background: #dbeafe; color: #1d4ed8; }
+      .grade-tag.lecture { background: #d1fae5; color: #047857; }
+      .grade-tag.trans { background: #fef3c7; color: #b45309; }
+      .grade-tag.trust { background: #ede9fe; color: #6d28d9; }
+      .total-row {
+        font-weight: 700;
+        background: var(--color-surface-alt) !important;
+      }
+
+      /* ===== 데이터 분포 막대 차트 영역 (3열) ===== */
+      .chart-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+      .chart-card {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--color-border);
+      }
+      .chart-card .chart-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--color-text);
+      }
+      .chart-list {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .chart-bar-item {
+        margin-bottom: 0.5rem;
+        font-size: 0.78rem;
+      }
+      .chart-bar-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.2rem;
+        color: var(--color-text);
+      }
+      .chart-bar-track {
+        height: 8px;
+        background: var(--color-surface-alt);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .chart-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        min-width: 4px;
+      }
+      .chart-bar-fill.c1 { background: #3b82f6; }
+      .chart-bar-fill.c2 { background: #10b981; }
+      .chart-bar-fill.c3 { background: #f59e0b; }
+      .chart-bar-fill.c4 { background: #8b5cf6; }
+      .chart-bar-fill.c5 { background: #ec4899; }
+      .chart-bar-fill.c6 { background: #14b8a6; }
+
+      /* ===== 하단 3열 차트 ===== */
+      .chart-row-bottom {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      /* ===== 가장 최근 등록 테이블 ===== */
+      .recent-section {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--color-border);
+      }
+      .recent-section .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--color-text);
+      }
+      .recent-table-wrap {
+        overflow-x: auto;
+      }
+      .recent-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      .recent-table th,
+      .recent-table td {
+        border: 1px solid var(--color-border);
+        padding: 0.5rem 0.6rem;
+        vertical-align: middle;
+      }
+      .recent-table thead th {
+        background: var(--color-surface-alt);
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .recent-table tbody td {
+        color: var(--color-text);
+      }
+      .recent-table .tag-mini {
+        display: inline-block;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 500;
+      }
+      .recent-table .tag-mini.prompt { background: #dbeafe; color: #1d4ed8; }
+      .recent-table .tag-mini.lecture { background: #d1fae5; color: #047857; }
+      .recent-table .tag-mini.trans { background: #fef3c7; color: #b45309; }
+      .recent-table .tag-mini.trust { background: #ede9fe; color: #6d28d9; }
+
+      @media (max-width: 1200px) {
+        .summary-cards { grid-template-columns: repeat(3, 1fr); }
+        .two-col-grid { grid-template-columns: 1fr; }
+        .chart-row, .chart-row-bottom { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 768px) {
+        .summary-cards { grid-template-columns: 1fr 1fr; }
+        .dash-header { flex-wrap: wrap; gap: 0.5rem; }
+      }
+    </style>
+  </head>
+  <body class="dash-wrap">
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <div class="dash-logo"></div>
+        <h1 class="dash-title">시온 프로세스 대시보드</h1>
+      </div>
+      <div class="dash-header-right">
+        <a href="home.html" class="btn-text">홈으로</a>
+        <a href="면접_main.html" class="btn-text">면접 안내</a>
+        <a href="메뉴얼_메인.html" class="btn-text">메뉴얼 관리</a>
+        <span style="color: var(--color-success); font-weight: 500;">저장 완료</span>
+        <button type="button" class="btn-text">데이터 새로고침</button>
+        <span style="color: var(--color-text-muted);">시온 (운영팀)</span>
+        <div class="avatar">SJ</div>
+      </div>
+    </header>
+
+    <main class="dash-main">
+      <div class="dash-container">
+        <!-- ===== 면접 ===== -->
+        <section class="dash-block">
+          <div class="block-surface">
+            <div class="block-head">
+              <div>
+                <div class="block-title">면접</div>
+                <div class="block-subtitle">직군별 면접/업무 단계 구성 현황 (사이드바 기준)</div>
+              </div>
+              <div class="page-actions">
+                <button type="button" class="btn-mini ghost" id="expandAllBtn" title="면접 섹션 전체 펼치기">▾ 전체 펼치기</button>
+                <button type="button" class="btn-mini ghost" id="collapseAllBtn" title="면접 섹션 전체 접기">▸ 전체 접기</button>
+                <button type="button" class="btn-mini primary" id="refreshBtn" title="면접 카드 새로 그리기">⟲ 새로고침</button>
+              </div>
+            </div>
+
+            <div id="jobGrid" class="job-grid"></div>
+          </div>
+        </section>
+
+        <!-- ===== 메뉴얼 ===== -->
+        <section class="dash-block">
+          <div class="block-surface">
+            <div class="block-head">
+              <div>
+                <div class="block-title">메뉴얼</div>
+                <div class="block-subtitle">부서 “대분류” 기준으로 정리</div>
+              </div>
+              <div class="page-actions">
+                <button type="button" class="btn-mini ghost" id="expandAllManualBtn" title="메뉴얼 섹션 전체 펼치기">▾ 전체 펼치기</button>
+                <button type="button" class="btn-mini ghost" id="collapseAllManualBtn" title="메뉴얼 섹션 전체 접기">▸ 전체 접기</button>
+              </div>
+            </div>
+
+            <div class="job-grid" id="manualGrid"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const PHASES = [
+        { key: "interview", label: "면접" },
+        { key: "work1", label: "업무1차" },
+        { key: "work2", label: "업무2차" },
+        { key: "work3", label: "업무3차" },
+      ];
+
+      // 사이드바 기준으로 “있는 항목”을 그대로 매핑 (직접 추출)
+      const JOBS = [
+        {
+          key: "alba",
+          name: "알바",
+          href: "면접_알바.html",
+          phases: {
+            interview: ["면접 과정 안내", "인적사항", "성격 검사", "영상 시청 및 요약"],
+            work1: [
+              "계약서",
+              "출근 후 교육 안내",
+              "서류첨부",
+              { text: "메뉴얼", sub: ["회사배경", "업무방식", "1차(면접 시)", "2차(수습)", "3차(수습통과)"] },
+            ],
+            work2: [],
+            work3: [],
+          },
+        },
+        {
+          key: "instructor",
+          name: "강사(윤리ver)",
+          href: "면접_강사_윤리ver.html",
+          phases: {
+            interview: ["면접 과정 안내", "인적사항", "성격 검사", "영상 시청 및 요약"],
+            work1: ["계약서", "커리큘럼", "3번 규정"],
+            work2: [],
+            work3: [],
+          },
+        },
+        {
+          key: "pro",
+          name: "전문직(개발자)",
+          href: "면접_전문직.html",
+          phases: {
+            interview: ["면접 과정 안내", "인적사항", "성격 검사", "영상 시청 및 요약"],
+            work1: ["계약서", "출근 후 교육 안내", "서류첨부", { text: "개발 규정", href: "면접_전문직_규정.html" }],
+            work2: [],
+            work3: [],
+          },
+        },
+        {
+          key: "staff",
+          name: "직원",
+          href: "면접_직원.html",
+          phases: {
+            interview: ["면접 과정 안내", "인적사항", "성격 검사", "영상 시청 및 요약"],
+            work1: [
+              "계약서",
+              "출근 후 교육 안내",
+              "서류첨부",
+              { text: "메뉴얼", sub: ["회사배경", "업무방식", "1차(면접 시)", "2차(수습)", "3차(수습통과)"] },
+            ],
+            work2: [],
+            work3: ["취업 규칙"],
+          },
+        },
+        {
+          key: "freelancer",
+          name: "프리랜서",
+          href: null,
+          phases: { interview: [], work1: [], work2: [], work3: [] },
+        },
+        {
+          key: "gov",
+          name: "정부지원",
+          href: null,
+          phases: { interview: [], work1: [], work2: [], work3: [] },
+        },
+      ];
+
+      // 메뉴얼_메인.html의 부서 대/중/소 구조 (직접 추출)
+      const MANUAL_DEPT_HIER = {
+        "기획": ["홈피", "상담", "관리"],
+        "홈피": ["홈페이지", "메뉴얼", "개발", "내부용기획"],
+        "영업": [],
+        "마케팅": [],
+        "회계": [],
+        "인사": [],
+        "관리": ["통합", "조수연", "연세대-이소윤", "타임스-송영란", "메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)", "메뉴얼(메뉴얼 260304저녁 ~)", "메뉴얼 260308(~ 10. 기획서)", "메뉴얼 260308(nia ~)"],
+        "상담": [],
+        "총무": [],
+        "강사": ["테솔", "프롬프트", "윤리", "번역"],
+        "커리큘럼": [],
+        "문제은행": [],
+      };
+
+      const MANUAL_DEPT_SMALL = {
+        "통합": ["인사/총무", "재무/회계", "IT", "마케팅", "운영·번역", "기획", "강사/교무", "교육/자격검정팀", "교육/연구팀", "법무지원팀", "데이터구축팀", "영업팀", "경영지원팀"],
+        "조수연": ["인사/총무", "재무/회계", "IT/개발팀", "AI/운영팀", "교육/자격검정팀", "기획/마케팅팀", "법무지원팀"],
+        "연세대-이소윤": ["인사/총무", "행정/기획", "강사/교무", "마케팅/영업", "IT/보안"],
+        "메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)": ["인사/총무팀", "재무/회계팀", "마케팅/디자인팀", "운영/번역팀", "IT/시스템관리팀", "경영기획/신사업팀"],
+        "메뉴얼(메뉴얼 260304저녁 ~)": ["서비스기획팀", "IT개발팀", "영업팀", "마케팅/디자인팀", "운영관리부", "인사팀", "번역운영팀", "데이터구축팀"],
+        "메뉴얼 260308(~ 10. 기획서)": ["경영기획팀", "IT지원팀", "영업/마케팅팀", "교육/연구팀", "경영지원팀"],
+        "메뉴얼 260308(nia ~)": ["경영지원팀", "영업/운영팀", "기획/사업팀", "서비스기획팀", "IT/개발팀", "마케팅/디자인팀"],
+      };
+
+      const MANUAL_DEPT_HAS_CONTENT = new Set(["마케팅", "관리", "강사"]);
+
+      function countEnabledPhases(job) {
+        return PHASES.reduce((acc, p) => acc + ((job.phases?.[p.key]?.length || 0) > 0 ? 1 : 0), 0);
+      }
+
+      function badgeForJob(job) {
+        if (!job.href) return { cls: "none", text: "페이지 없음" };
+        const enabled = countEnabledPhases(job);
+        if (enabled >= 3) return { cls: "ok", text: "구성됨" };
+        if (enabled >= 1) return { cls: "todo", text: "부분 구성" };
+        return { cls: "none", text: "비어있음" };
+      }
+
+      function renderPhasePills(job) {
+        return PHASES.map((p) => {
+          const items = job.phases?.[p.key] || [];
+          const on = items.length > 0;
+          return `
+            <div class="phase-pill ${on ? "" : "off"}">
+              <div class="phase-pill-title">${p.label}</div>
+              <div class="phase-pill-sub">${on ? `${items.length}개 항목` : "없음"}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderStepItem(item) {
+        if (typeof item === "string") {
+          return `<div class="step-item"><span class="step-dot"></span><div>${escapeHtml(item)}</div></div>`;
+        }
+        if (item && typeof item === "object" && item.href) {
+          return `<div class="step-item"><span class="step-dot"></span><div><a href="${item.href}">${escapeHtml(item.text)}</a></div></div>`;
+        }
+        if (item && typeof item === "object" && Array.isArray(item.sub)) {
+          const subs = item.sub.map((s) => `<div class="step-item"><span class="step-dot"></span><div>${escapeHtml(s)}</div></div>`).join("");
+          return `
+            <div class="step-item"><span class="step-dot"></span><div><strong>${escapeHtml(item.text)}</strong></div></div>
+            <div style="margin-left: 1.2rem; margin-top: 0.2rem; display: grid; gap: 0.35rem;">${subs}</div>
+          `;
+        }
+        return "";
+      }
+
+      function renderPhaseDetail(job, phaseKey) {
+        const phase = PHASES.find((p) => p.key === phaseKey);
+        const items = job.phases?.[phaseKey] || [];
+        const on = items.length > 0;
+        const titleRight = on ? `${items.length}개` : "없음";
+        const body = on
+          ? `<div class="step-list">${items.map(renderStepItem).join("")}</div>`
+          : `<div class="step-list"><div class="step-item"><span class="step-dot"></span><div>아직 항목이 없습니다.</div></div></div>`;
+
+        return `
+          <details class="job-detail" ${phaseKey === "interview" ? "open" : ""}>
+            <summary>
+              <span>${phase.label}</span>
+              <span class="detail-sub">${titleRight}</span>
+            </summary>
+            <div class="detail-body">${body}</div>
+          </details>
+        `;
+      }
+
+      function renderCard(job) {
+        const enabled = countEnabledPhases(job);
+        const total = PHASES.length;
+        const pct = Math.round((enabled / total) * 100);
+        const badge = badgeForJob(job);
+        const disabledCls = job.href ? "" : "disabled";
+        const linkHtml = job.href
+          ? `<a class="btn-text" href="${job.href}" style="padding: 0.35rem 0.75rem;">바로가기</a>`
+          : `<span class="badge none">준비 중</span>`;
+
+        return `
+          <article class="job-card ${disabledCls}" data-job="${escapeHtml(job.key)}">
+            <div class="job-card-top">
+              <div>
+                <div class="job-name">${escapeHtml(job.name)}</div>
+                <div class="job-meta">${job.href ? escapeHtml(job.href) : "페이지 미생성"}</div>
+              </div>
+              <div class="job-badges">
+                <span class="badge ${badge.cls}">${badge.text}</span>
+                ${linkHtml}
+              </div>
+            </div>
+
+            <div class="job-progress">
+              <div class="mini-progress" aria-label="진행률">
+                <div style="width:${pct}%;"></div>
+              </div>
+              <div class="mini-progress-text">${enabled}/${total} 단계</div>
+            </div>
+
+            <div class="phase-row">
+              ${renderPhasePills(job)}
+            </div>
+
+            <div class="job-tools">
+              <div class="job-tools-left">세부 항목</div>
+              <div class="job-tools-right">
+                <button type="button" class="btn-mini ghost" data-action="expand-card" ${job.href ? "" : "disabled"}>▾ 펼치기</button>
+                <button type="button" class="btn-mini ghost" data-action="collapse-card" ${job.href ? "" : "disabled"}>▸ 접기</button>
+              </div>
+            </div>
+
+            <div class="job-details">
+              ${PHASES.map((p) => renderPhaseDetail(job, p.key)).join("")}
+            </div>
+          </article>
+        `;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function render() {
+        const grid = document.getElementById("jobGrid");
+        grid.innerHTML = JOBS.map(renderCard).join("");
+      }
+
+      function renderManualMediumTree(deptKey) {
+        const mediums = MANUAL_DEPT_HIER[deptKey] || [];
+        if (!mediums.length) {
+          return `
+            <div class="step-list">
+              <div class="step-item"><span class="step-dot"></span><div>중분류가 없습니다.</div></div>
+            </div>
+          `;
+        }
+
+        const items = mediums.map((m) => {
+          const smalls = MANUAL_DEPT_SMALL[m] || [];
+          const smallHtml = smalls.length
+            ? `
+              <div style="margin-left: 1.2rem; margin-top: 0.2rem; display: grid; gap: 0.3rem;">
+                ${smalls.map((s) => `<div class="step-item"><span class="step-dot"></span><div>${escapeHtml(s)}</div></div>`).join("")}
+              </div>
+            `
+            : `
+              <div style="margin-left: 1.2rem; margin-top: 0.2rem;">
+                <div class="step-item"><span class="step-dot"></span><div style="color: var(--color-text-muted);">소분류 없음</div></div>
+              </div>
+            `;
+
+          return `
+            <div class="step-item"><span class="step-dot"></span><div><strong>${escapeHtml(m)}</strong></div></div>
+            ${smallHtml}
+          `;
+        }).join("");
+
+        return `<div class="step-list">${items}</div>`;
+      }
+
+      function renderManualCard(deptKey) {
+        const hasContent = MANUAL_DEPT_HAS_CONTENT.has(deptKey);
+        const badge = hasContent ? `<span class="badge ok">내용 있음</span>` : `<span class="badge none">정리 필요</span>`;
+        const mediums = MANUAL_DEPT_HIER[deptKey] || [];
+        const smallCount = mediums.reduce((acc, m) => acc + ((MANUAL_DEPT_SMALL[m] || []).length), 0);
+
+        return `
+          <article class="job-card" data-manual-dept="${escapeHtml(deptKey)}">
+            <div class="job-card-top">
+              <div>
+                <div class="job-name">${escapeHtml(deptKey)}</div>
+                <div class="job-meta">부서 대분류</div>
+              </div>
+              <div class="job-badges">
+                ${badge}
+                <a class="btn-text" href="메뉴얼_메인.html" style="padding: 0.35rem 0.75rem;">열기</a>
+              </div>
+            </div>
+
+            <div class="job-tools" style="margin-top: 0.1rem;">
+              <div class="job-tools-left">세부 항목</div>
+              <div class="job-tools-right">
+                <button type="button" class="btn-mini ghost" data-action="expand-manual-card">▾ 펼치기</button>
+                <button type="button" class="btn-mini ghost" data-action="collapse-manual-card">▸ 접기</button>
+              </div>
+            </div>
+
+            <div class="job-details">
+              <details class="job-detail" open>
+                <summary>
+                  <span>중분류 · 소분류</span>
+                  <span class="detail-sub">${mediums.length} / ${smallCount}</span>
+                </summary>
+                <div class="detail-body">
+                  ${renderManualMediumTree(deptKey)}
+                </div>
+              </details>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderManual() {
+        const grid = document.getElementById("manualGrid");
+        if (!grid) return;
+        const keys = Object.keys(MANUAL_DEPT_HIER);
+        grid.innerHTML = keys.map(renderManualCard).join("");
+      }
+
+      function setAllDetailsOpen(open) {
+        document.querySelectorAll("#jobGrid details.job-detail").forEach((d) => {
+          d.open = open;
+        });
+      }
+
+      function setAllManualDetailsOpen(open) {
+        document.querySelectorAll("#manualGrid details.job-detail").forEach((d) => {
+          d.open = open;
+        });
+      }
+
+      function setCardDetailsOpen(cardEl, open) {
+        if (!cardEl) return;
+        cardEl.querySelectorAll("details.job-detail").forEach((d) => {
+          d.open = open;
+        });
+      }
+
+      function setManualCardDetailsOpen(cardEl, open) {
+        if (!cardEl) return;
+        cardEl.querySelectorAll("details.job-detail").forEach((d) => {
+          d.open = open;
+        });
+      }
+
+      document.getElementById("refreshBtn")?.addEventListener("click", render);
+      document.getElementById("expandAllBtn")?.addEventListener("click", () => setAllDetailsOpen(true));
+      document.getElementById("collapseAllBtn")?.addEventListener("click", () => setAllDetailsOpen(false));
+      document.getElementById("expandAllManualBtn")?.addEventListener("click", () => setAllManualDetailsOpen(true));
+      document.getElementById("collapseAllManualBtn")?.addEventListener("click", () => setAllManualDetailsOpen(false));
+      // 헤더의 "데이터 새로고침" 버튼(기존)을 눌러도 동일하게 갱신
+      [...document.querySelectorAll(".dash-header-right .btn-text")].find((el) => el.textContent?.includes("새로고침"))?.addEventListener("click", render);
+
+      document.getElementById("jobGrid")?.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.("button[data-action]");
+        if (!btn) return;
+        const card = btn.closest(".job-card");
+        const action = btn.getAttribute("data-action");
+        if (action === "expand-card") setCardDetailsOpen(card, true);
+        if (action === "collapse-card") setCardDetailsOpen(card, false);
+      });
+
+      document.getElementById("manualGrid")?.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.("button[data-action]");
+        if (!btn) return;
+        const card = btn.closest(".job-card");
+        const action = btn.getAttribute("data-action");
+        if (action === "expand-manual-card") setManualCardDetailsOpen(card, true);
+        if (action === "collapse-manual-card") setManualCardDetailsOpen(card, false);
+      });
+      render();
+      renderManual();
+    </script>
+  </body>
+</html>

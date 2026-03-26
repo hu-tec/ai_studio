@@ -1,0 +1,5270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>업무 메뉴얼 메인</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.08);
+      --color-success: #10b981;
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 40px -10px rgba(15,23,42,0.18);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top left, #e0f2fe 0, #f8fafc 40%, #f9fafb 100%);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .page-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-layout {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+    .page-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .page-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      margin-bottom: 0.4rem;
+    }
+    .page-subtitle {
+      font-size: 0.92rem;
+      color: var(--color-text-muted);
+    }
+
+    .content-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .content-card {
+      background: rgba(255,255,255,0.92);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.75rem 1.5rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
+    .section-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    /* 직군 토글 */
+    .category-toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .category-btn {
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-alt);
+      color: var(--color-text-muted);
+      border-radius: 999px;
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.18s var(--ease);
+    }
+    .category-btn:hover {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+      color: var(--color-accent-hover);
+    }
+    .category-btn.active {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 10px 25px -10px rgba(37, 99, 235, 0.7);
+    }
+    .selected-role-badge {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: var(--color-surface-alt);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      white-space: nowrap;
+    }
+    .selected-role-badge strong {
+      color: var(--color-accent-hover);
+      font-weight: 600;
+    }
+
+    /* 내용 있음 표시 (뱃지·점) */
+    .content-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--color-success);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 999px;
+      padding: 0.2rem 0.5rem;
+      margin-left: 0.35rem;
+      white-space: nowrap;
+    }
+    .category-btn .content-badge {
+      font-size: 0.6rem;
+      padding: 0.15rem 0.4rem;
+    }
+    .content-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-success);
+      font-size: 0.75rem;
+      margin-left: 0.25rem;
+    }
+    .checkbox-label .content-badge {
+      margin-left: 0.25rem;
+    }
+
+    /* 직원(직군) 전용: 세부 링크 버튼 */
+    .role-extra-links {
+      margin-top: 0.9rem;
+    }
+    .role-extra-links .link-btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .role-extra-links .link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.6rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.08));
+      color: var(--color-accent-hover);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.18s var(--ease);
+      white-space: nowrap;
+    }
+    .role-extra-links .link-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37, 99, 235, 0.75);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(37, 99, 235, 0.12));
+      box-shadow: 0 10px 25px -12px rgba(37, 99, 235, 0.55);
+    }
+    .role-extra-links .link-btn:active {
+      transform: translateY(0);
+    }
+    .role-extra-links .link-btn[aria-expanded="true"] {
+      border-color: rgba(37, 99, 235, 0.85);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.14));
+      box-shadow: 0 10px 25px -12px rgba(37, 99, 235, 0.55);
+    }
+    .role-extra-links .role-extra-detail-panels {
+      margin-top: 0.85rem;
+      display: grid;
+      gap: 0.65rem;
+    }
+    .role-extra-links .role-extra-detail-panel {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 12px;
+      background: rgba(248, 250, 252, 0.9);
+      padding: 0.75rem 0.9rem;
+    }
+    .role-extra-links .role-extra-detail-panel h4 {
+      margin: 0 0 0.4rem;
+      font-size: 0.92rem;
+      color: var(--color-accent-hover);
+    }
+    .role-extra-links .role-extra-detail-panel .detail-link-btn {
+      margin-left: 0;
+      margin-bottom: 0.65rem;
+    }
+    .role-extra-links .role-extra-detail-panel ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      display: grid;
+      gap: 0.25rem;
+      color: var(--color-text-muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    /* 세부 업무 보고 상단: 홈페이지 | 부서 필터 (대·중·소 3열 형식) - 업무일지와 동일 구조 */
+    .detail-filter-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .filter-block {
+      flex: 1;
+      min-width: 0;
+    }
+    .filter-block-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .filter-three-col {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      table-layout: fixed;
+    }
+    .filter-three-col thead th {
+      text-align: center;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-alt);
+    }
+    .filter-three-col thead th:nth-child(1) { width: 28%; }
+    .filter-three-col thead th:nth-child(2) { width: 42%; }
+    .filter-three-col thead th:nth-child(3) { width: 30%; }
+    .filter-three-col tbody td {
+      border: 1px solid var(--color-border);
+      padding: 0.75rem 1rem;
+      vertical-align: top;
+    }
+    .filter-three-col .filter-col-large,
+    .filter-three-col .filter-col-medium {
+      min-height: 100px;
+    }
+    .filter-three-col .filter-col-small {
+      min-height: 120px;
+      background: var(--color-surface-alt);
+    }
+    .filter-three-col .filter-col-dynamic {
+      min-height: 80px;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-accent);
+    }
+    .filter-block .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.75rem;
+    }
+    .filter-block .checkbox-label {
+      font-size: 0.8rem;
+      white-space: normal;
+    }
+
+    /* 세부 내용 패널 */
+    .detail-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .detail-panel-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .detail-panel-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .detail-panel-title-row h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .detail-dept-badge {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .detail-panel-desc {
+      font-size: 0.84rem;
+      color: var(--color-text-muted);
+    }
+
+    .detail-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .detail-tab-btn {
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      background: var(--color-surface-alt);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.18s var(--ease);
+    }
+    .detail-tab-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent-hover);
+      background: var(--color-accent-soft);
+    }
+    .detail-tab-btn.active {
+      background: var(--color-accent);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .detail-panel-body {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.6);
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+    }
+    .detail-panel-body h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.4rem;
+    }
+    .detail-panel-body ul {
+      padding-left: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+    .detail-panel-body li {
+      margin-bottom: 0.25rem;
+    }
+    .detail-panel-body .sub-note {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 0.35rem;
+    }
+    .empty-message {
+      font-size: 0.86rem;
+      color: var(--color-text-muted);
+    }
+
+    /* TESOL 전용 표 스타일 */
+    .tesol-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    .tesol-table th,
+    .tesol-table td {
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 0.75rem;
+      vertical-align: top;
+    }
+    .tesol-table thead th {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      text-align: center;
+    }
+    .tesol-table td:nth-child(5) input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.4rem;
+      font-size: 0.8rem;
+    }
+    .tesol-table td:nth-child(6) input[type="file"] {
+      font-size: 0.8rem;
+    }
+    .tesol-feedback {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .tesol-feedback label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+    .tesol-feedback textarea {
+      width: 100%;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+
+    /* 개별 표(테솔/번역/마케팅) 내 대·중분류 필터용 공통 스타일 */
+    .table-filter-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .table-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+    .table-filter-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      margin-bottom: 0.15rem;
+    }
+    .filter-reset-btn {
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      padding: 0.25rem 0.75rem;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.16s var(--ease);
+    }
+    .filter-reset-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent-hover);
+      background: var(--color-accent-soft);
+    }
+    .filter-clear-btn {
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      padding: 0.25rem 0.75rem;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.16s var(--ease);
+      margin-left: 0.4rem;
+    }
+    .filter-clear-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent-hover);
+      background: var(--color-accent-soft);
+    }
+    .detail-link-btn {
+      border-radius: 999px;
+      border: 1px solid var(--color-accent);
+      background: var(--color-accent);
+      padding: 0.25rem 0.9rem;
+      font-size: 0.78rem;
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: 0.4rem;
+      transition: all 0.16s var(--ease);
+    }
+    .detail-link-btn:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+    }
+    .table-filter-result {
+      margin-top: 0.2rem;
+    }
+    /* 대분류 / 중분류를 나란한 칸(박스) 형태로 */
+    .filter-major-group,
+    .filter-middle-group {
+      flex: 1 1 0;
+      min-width: 0;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .filter-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.1rem;
+    }
+    .filter-major-group .checkbox-label,
+    .filter-middle-group .checkbox-label {
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .selected-filter-summary {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-bottom: 0.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+    .selected-filter-summary strong {
+      color: var(--color-accent-hover);
+      font-weight: 600;
+    }
+
+    @media (max-width: 960px) {
+      .main-layout {
+        padding: 1.75rem 1.25rem 2.5rem;
+      }
+    }
+    @media (max-width: 768px) {
+      .detail-filter-row {
+        grid-template-columns: 1fr;
+      }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .detail-panel-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .selected-role-badge {
+        margin-top: 0.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <main class="main-layout">
+      <header class="page-header">
+        <span class="page-badge">MANUAL</span>
+        <h1 class="page-title">업무 메뉴얼 메인</h1>
+        <p class="page-subtitle">
+          알바 · 강사 · 전문직 · 직원 · 프리랜서 · 정부지원까지, 직군·부서·홈페이지별 업무 매뉴얼을 한 번에 정리합니다.
+        </p>
+      </header>
+
+      <div class="content-grid">
+        <!-- 1. 직군(알바/강사/전문직/직원/프리랜서/정부지원) 선택 영역 -->
+        <section class="content-card">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title">직군 선택</h2>
+              <p class="section-desc">현재 어떤 직군의 매뉴얼을 보고 있는지 선택해 주세요. 내용 필터링의 기준이 됩니다.</p>
+            </div>
+            <span class="selected-role-badge">
+              현재 선택: <strong id="selectedRoleLabel">알바</strong>
+            </span>
+          </div>
+          <div class="category-toggle-group" id="roleToggleGroup">
+            <button type="button" class="category-btn active" data-role="알바">알바</button>
+            <button type="button" class="category-btn" data-role="강사">강사</button>
+            <button type="button" class="category-btn" data-role="전문직">전문직</button>
+            <button type="button" class="category-btn" data-role="직원">직원 <span class="content-badge" aria-label="내용 있음">✓</span></button>
+            <button type="button" class="category-btn" data-role="프리랜서">프리랜서</button>
+            <button type="button" class="category-btn" data-role="정부지원">정부지원</button>
+          </div>
+        </section>
+
+        <!-- 2. 홈페이지 / 부서 필터 -->
+        <section class="content-card">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title">홈페이지 · 부서 필터</h2>
+              <p class="section-desc">
+                업무가 속한 홈페이지와 부서를 선택하면, 아래 세부 내용 필드에서 해당 조합에 맞는 매뉴얼을 볼 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="detail-filter-row">
+            <div class="filter-block filter-homepage">
+              <h3 class="filter-block-title">홈페이지</h3>
+              <table class="filter-three-col">
+                <thead>
+                  <tr>
+                    <th>대</th>
+                    <th>중</th>
+                    <th>소</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="filter-col-large">
+                      <div class="checkbox-group" id="hp_large_group">
+                        <label class="checkbox-label"><input type="radio" name="hp_large" value="교육"> 교육</label>
+                        <label class="checkbox-label"><input type="radio" name="hp_large" value="번역"> 번역</label>
+                        <label class="checkbox-label"><input type="radio" name="hp_large" value="문서"> 문서</label>
+                        <label class="checkbox-label"><input type="radio" name="hp_large" value="전시회"> 전시회</label>
+                        <label class="checkbox-label"><input type="radio" name="hp_large" value="전문가매칭"> 전문가 매칭</label>
+                      </div>
+                    </td>
+                    <td class="filter-col-medium">
+                      <div id="hp_medium_box" class="filter-col-dynamic checkbox-group"></div>
+                    </td>
+                    <td class="filter-col-small">
+                      <div id="hp_small_box" class="filter-col-dynamic"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="filter-block filter-department">
+              <h3 class="filter-block-title">부서</h3>
+              <table class="filter-three-col">
+                <thead>
+                  <tr>
+                    <th>대</th>
+                    <th>중</th>
+                    <th>소</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="filter-col-large">
+                      <div class="checkbox-group" id="dept_large_group">
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="기획"> 기획</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="홈피"> 홈피</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="영업"> 영업</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="마케팅"> 마케팅 <span class="content-badge" aria-label="내용 있음">✓</span></label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="회계"> 회계</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="인사"> 인사</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="관리"> 관리 <span class="content-badge" aria-label="내용 있음">✓</span></label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="상담"> 상담</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="총무"> 총무</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="강사"> 강사 <span class="content-badge" aria-label="내용 있음">✓</span></label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="커리큘럼"> 커리큘럼</label>
+                        <label class="checkbox-label"><input type="radio" name="dept_large" value="문제은행"> 문제은행</label>
+                      </div>
+                    </td>
+                    <td class="filter-col-medium">
+                      <div id="dept_medium_box" class="filter-col-dynamic checkbox-group"></div>
+                    </td>
+                    <td class="filter-col-small">
+                      <div id="dept_small_box" class="filter-col-dynamic"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. 세부 내용 필드 (부서 선택에 따라 변경) -->
+        <section class="content-card">
+          <div class="detail-panel">
+            <div class="detail-panel-header">
+              <div class="detail-panel-title-row">
+                <h3>세부 내용 필드</h3>
+                <span class="detail-dept-badge" id="selectedDeptLabel">부서를 선택해 주세요</span>
+              </div>
+              <p class="detail-panel-desc" id="detailPanelDesc">
+                왼쪽에서 부서를 선택하면, 부서별로 정리한 업무 매뉴얼 템플릿이 이 영역에 표시됩니다.
+              </p>
+              <div id="roleExtraLinks" class="role-extra-links" aria-live="polite"></div>
+            </div>
+
+            <div id="detailTabs" class="detail-tabs"></div>
+
+            <div id="deptDetailContent" class="detail-panel-body">
+              <p class="empty-message">
+                아직 부서가 선택되지 않았습니다. 위의 부서 목록에서 먼저 하나를 선택하세요.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function renderRoleExtras(role) {
+      const box = document.getElementById('roleExtraLinks');
+      if (!box) return;
+
+      if (role === '직원') {
+        box.innerHTML = `
+          <div class="link-btn-group" role="navigation" aria-label="직원 세부 링크">
+            <button type="button" class="link-btn" data-role-extra="itt" aria-expanded="false" aria-controls="roleExtraDetailItt">
+              ITT시험 <span class="content-dot" aria-hidden="true">✓</span>
+            </button>
+            <button type="button" class="link-btn" data-role-extra="hr" aria-expanded="false" aria-controls="roleExtraDetailHr">
+              인사메뉴얼 <span class="content-dot" aria-hidden="true">✓</span>
+            </button>
+            <button type="button" class="link-btn" data-role-extra="etc" aria-expanded="false" aria-controls="roleExtraDetailEtc">
+              기타메뉴얼 <span class="content-dot" aria-hidden="true">✓</span>
+            </button>
+          </div>
+          <div class="role-extra-detail-panels" aria-live="polite">
+            <section id="roleExtraDetailItt" class="role-extra-detail-panel" data-role-extra-panel="itt" hidden>
+              <h4>ITT시험 세부사항</h4>
+              <a class="detail-link-btn" href="https://notebooklm.google.com/notebook/309a2117-cb21-4839-a069-13c3e44e879f" target="_blank" rel="noopener noreferrer">
+                세부사항 바로가기
+              </a>
+              <table class="tesol-table">
+                <thead>
+                  <tr>
+                    <th>대분류</th>
+                    <th>중분류</th>
+                    <th>소분류 (자료 제목)</th>
+                    <th>세부내용</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>콘텐츠 저작권 및 출판 계약</td>
+                    <td>기업 간 교재 라이선스 계약 (KGIC-TM)</td>
+                    <td>Content Licensing Agreement.pdf</td>
+                    <td>KGIC와 타임스미디어(TM) 간 ITT/ITK 교재 독점 라이선스 및 프로그램 판권 계약. 초기 판권비 $20,000 부과, 교재 정가의 20%(수정본 5%) 로열티 지급. 수업료 수익 분배(TM 90%, KGIC 10%) 및 최초 3년 계약(2년 연장 가능) 규정.</td>
+                  </tr>
+                  <tr>
+                    <td>콘텐츠 저작권 및 출판 계약</td>
+                    <td>기업 간 교재 라이선스 계약 (KGIC-TM)</td>
+                    <td>KGIC-Times Media Content Licensing Agreement ( Draft ) 번역본 포함.pdf</td>
+                    <td>앞선 라이선스 계약의 국·영문 혼용 초안. 재정적 검토 조항, 입학 및 수익 추적 등을 위한 관리 시스템 구축 등 세부 협력 항목 명시.</td>
+                  </tr>
+                  <tr>
+                    <td>콘텐츠 저작권 및 출판 계약</td>
+                    <td>기업 간 교재 라이선스 계약 (KGIC-TM)</td>
+                    <td>저작권 계약서.docx</td>
+                    <td>KGIC 개발 교재 저작권 소유권 명시 및 로열티 지급 규정. 원본 판매 시 정가의 15%, 20% 이상 수정·보완본 판매 시 5%의 로열티를 매 분기말 지급 (영문 계약과 요율 차이 존재).</td>
+                  </tr>
+                  <tr>
+                    <td>콘텐츠 저작권 및 출판 계약</td>
+                    <td>개인 저자 인세 계약</td>
+                    <td>Royalty Agreement 인세 계약서 TM Christine Kim.pdf</td>
+                    <td>저자(Christine Kim)와 TM 간 ITT 전문 및 비즈니스 한영번역 교재 전 세계 독점 출판권 이양 계약 스캔본. 분기별 교재 소매가 2%(수정본 1%)의 인세 지급.</td>
+                  </tr>
+                  <tr>
+                    <td>콘텐츠 저작권 및 출판 계약</td>
+                    <td>개인 저자 인세 계약</td>
+                    <td>royalty_agreement_contract_ 인세 계약서.pdf</td>
+                    <td>개인 인세 계약서의 텍스트 원문. 3년 만기 후 2년 연장 가능. TM이 60일 이상 인세 지급을 체납할 경우 계약이 자동 해제되며, 저자는 미지급 인세 및 법적 비용 배상 청구 가능.</td>
+                  </tr>
+                  <tr>
+                    <td>ITT 시험 대행 및 운영 계약</td>
+                    <td>국내 시험 대행처 계약</td>
+                    <td>GC계약서.docx</td>
+                    <td>타임스미디어(갑)와 국내 대행처(을) 간 ITT 시험 대행 계약. 수료증, 자격증, 교재 제공에 따른 구체적 비용 분담금액 명시. 계약기간 2년 및 1년 단위 자동 연장 조항 포함.</td>
+                  </tr>
+                  <tr>
+                    <td>ITT 시험 대행 및 운영 계약</td>
+                    <td>해외 시험센터 지정 계약</td>
+                    <td>해외시험 ITT-2017수정 박이사.docx</td>
+                    <td>타임스미디어와 해외 시험센터(명칭 미상) 간 지정 계약. 연간 응시생 200명 보장, 응시료 수익 50% 분배, 교재 정가 20% 지급. 시험 5일 전까지 반액 환불 등 비용 반환 기준 명시.</td>
+                  </tr>
+                  <tr>
+                    <td>ITT 시험 대행 및 운영 계약</td>
+                    <td>해외 시험센터 지정 계약</td>
+                    <td>해외시험 ITT.docx</td>
+                    <td>타임스미디어와 'ESL 에듀케이션' 간 해외 시험센터 지정 계약. 연간 응시생 500명 보장 규정. 자격증 응시료 및 교재 배분율 조정, 전자계산서 발행 및 지정 입금 계좌 상세 기재.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+            <section id="roleExtraDetailHr" class="role-extra-detail-panel" data-role-extra-panel="hr" hidden>
+              <h4>인사메뉴얼 세부사항</h4>
+              <a class="detail-link-btn" href="https://notebooklm.google.com/notebook/7f3dcb12-96d1-43dc-bfbb-fe471b80b8a8" target="_blank" rel="noopener noreferrer">
+                세부사항 바로가기
+              </a>
+              <table class="tesol-table">
+                <thead>
+                  <tr>
+                    <th>분류</th>
+                    <th>부서명</th>
+                    <th>배정 파일 수 (그룹 기준)</th>
+                    <th>주요 담당 업무 및 파일 요약</th>
+                    <th>관련 협업 부서</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td>마케팅팀</td>
+                    <td>13개 그룹<br>(세부 십수 개)</td>
+                    <td>온/오프라인 광고 기획, 키워드 검색광고 성과 분석, 블로그/카페 운영 지침</td>
+                    <td>재무팀 (광고비 결산)</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>인사/교육팀</td>
+                    <td>20개 그룹<br>(세부 수십 개)</td>
+                    <td>내외국인 근로계약서, 취업규칙/사내규정, 신입직원 온보딩 매뉴얼, 인사평가, 인수인계</td>
+                    <td>교무팀, 법무팀</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td>영업/상담팀</td>
+                    <td>3개</td>
+                    <td>테솔/번역사 과정 신규 고객 유치 및 레벨테스트 유도를 위한 전화 상담 스크립트</td>
+                    <td>마케팅팀, 교무팀</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td>법무팀</td>
+                    <td>4개</td>
+                    <td>법률고문계약, 수강료 환불 관련 법적 자문, 소송 관련 법원 제출 위임장</td>
+                    <td>재무팀, 상담팀</td>
+                  </tr>
+                  <tr>
+                    <td>5</td>
+                    <td>총무/디자인팀</td>
+                    <td>3개</td>
+                    <td>임직원 명함 디자인 및 발주, 사무실 이전(이사) 인력 배치, 사내 서류/비품 관리 양식</td>
+                    <td>인사팀</td>
+                  </tr>
+                  <tr>
+                    <td>6</td>
+                    <td>교무/학사관리팀</td>
+                    <td>1개</td>
+                    <td>강사 평가, 학칙, 입학/장학 행정 등 학사 전반을 관리하기 위한 문서 목차</td>
+                    <td>인사팀, 영업/상담팀</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+            <section id="roleExtraDetailEtc" class="role-extra-detail-panel" data-role-extra-panel="etc" hidden>
+              <h4>기타메뉴얼 세부사항</h4>
+              <a class="detail-link-btn" href="https://notebooklm.google.com/notebook/2a5066f7-8b02-4360-9026-2db508bfbf3d" target="_blank" rel="noopener noreferrer">
+                세부사항 바로가기
+              </a>
+              <table class="tesol-table">
+                <thead>
+                  <tr>
+                    <th>분류 부서명</th>
+                    <th>배정된 파일 수</th>
+                    <th>주요 업무 내용 및 특징</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>영업/마케팅팀</td>
+                    <td>7개</td>
+                    <td>대외용 회사/서비스 소개서, SNS 홍보 기획, 마케팅 브로셔, 공공/민간 입찰 제안서 작성 및 영업 공문 발송</td>
+                  </tr>
+                  <tr>
+                    <td>경영지원팀</td>
+                    <td>4개</td>
+                    <td>근태 및 급여 관리, 회계 처리(세금계산서, 은행업무), 비품/임대료 관리, 신입 교육 매뉴얼 및 인수인계</td>
+                  </tr>
+                  <tr>
+                    <td>기획/전략팀</td>
+                    <td>4개</td>
+                    <td>타사/경쟁사 시장 조사, 자사 비즈니스 강점 분석, 신규 웹서비스(GPT 연동 등) 기획 및 포털 모델 업그레이드 기획</td>
+                  </tr>
+                  <tr>
+                    <td>디자인팀</td>
+                    <td>4개</td>
+                    <td>AI 번역 플랫폼, 집단지성 설문, 커리어 폼, 통독 서비스 등의 웹/모바일 UI/UX 시각 디자인 및 프로토타입 제작</td>
+                  </tr>
+                  <tr>
+                    <td>기술연구소</td>
+                    <td>2개</td>
+                    <td>통합번역플랫폼 AI 모델 연동 및 개발 R&amp;D 계획, 대화형 AI(Bard 등) 프롬프트 생성 기준 및 알고리즘 연구</td>
+                  </tr>
+                  <tr>
+                    <td>교육/자격검정팀</td>
+                    <td>3개</td>
+                    <td>프롬프트 언어전문가 및 엔지니어 민간 자격증 커리큘럼 개발, 검정 기준 수립, 시험 운영 규정 및 자격증 관리</td>
+                  </tr>
+                  <tr>
+                    <td><strong>총 계</strong></td>
+                    <td><strong>24개</strong></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        `;
+      } else {
+        box.innerHTML = '';
+      }
+    }
+
+    function setupRoleExtraLinks() {
+      const box = document.getElementById('roleExtraLinks');
+      if (!box) return;
+
+      box.addEventListener('click', (event) => {
+        const btn = event.target.closest('.link-btn[data-role-extra]');
+        if (!btn || !box.contains(btn)) return;
+
+        const targetKey = btn.dataset.roleExtra;
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+        const buttons = box.querySelectorAll('.link-btn[data-role-extra]');
+        const panels = box.querySelectorAll('.role-extra-detail-panel');
+
+        buttons.forEach((item) => item.setAttribute('aria-expanded', 'false'));
+        panels.forEach((panel) => {
+          panel.hidden = true;
+        });
+
+        if (!isExpanded) {
+          btn.setAttribute('aria-expanded', 'true');
+          const targetPanel = box.querySelector(`.role-extra-detail-panel[data-role-extra-panel="${targetKey}"]`);
+          if (targetPanel) {
+            targetPanel.hidden = false;
+          }
+        }
+      });
+    }
+
+    // 직군 토글: 활성/비활성 버튼
+    function setupCategoryToggles() {
+      const group = document.getElementById('roleToggleGroup');
+      const label = document.getElementById('selectedRoleLabel');
+      if (!group) return;
+
+      group.addEventListener('click', (event) => {
+        const btn = event.target.closest('.category-btn');
+        if (!btn) return;
+
+        group.querySelectorAll('.category-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const role = btn.dataset.role || btn.textContent.trim();
+        if (label) {
+          label.textContent = role;
+        }
+
+        renderRoleExtras(role);
+      });
+    }
+
+    // 홈페이지/부서 필터 - 업무일지와 동일한 대·중·소 계층 구조
+    const HP_HIER = {
+      '교육': [],
+      '번역': ['아랍어 번역', '영상번역', '웹툰번역'],
+      '문서': ['비즈문서', '법률문서', '의학문서'],
+      '전시회': ['박물관', '전시회', '관광지'],
+      '전문가매칭': ['영업전문', '번역가', '전문가', '신입', '경력 1년차']
+    };
+    const DEPT_HIER = {
+      '기획': ['홈피', '상담', '관리'],
+      '홈피': ['홈페이지', '메뉴얼', '개발', '내부용기획'],
+      '영업': [],
+      '마케팅': [],
+      '회계': [],
+      '인사': [],
+      '관리': ['통합', '조수연', '연세대-이소윤', '타임스-송영란', '메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)', '메뉴얼(메뉴얼 260304저녁 ~)', '메뉴얼 260308(~ 10. 기획서)', '메뉴얼 260308(nia ~)'],
+      '상담': [],
+      '총무': [],
+      // 강사(대) - 테솔, 프롬프트, 윤리, 번역(중)
+      '강사': ['테솔', '프롬프트', '윤리', '번역'],
+      // 커리큘럼, 문제은행은 각각 별도의 대분류
+      '커리큘럼': [],
+      '문제은행': []
+    };
+    const HP_SMALL = {};
+    const DEPT_SMALL = {};
+    // 부서 소분류: 관리(대) > 통합(중) - 그룹/단독 소분류 (기존 표는 유지, 표시만 통합 필터로 처리)
+    DEPT_SMALL['통합'] = [
+      '인사/총무',
+      '재무/회계',
+      'IT',
+      '마케팅',
+      '운영·번역',
+      '기획',
+      '강사/교무',
+      '교육/자격검정팀',
+      '교육/연구팀',
+      '법무지원팀',
+      '데이터구축팀',
+      '영업팀',
+      '경영지원팀'
+    ];
+    // 부서 소분류: 관리(대) > 조수연(중) 선택 시 노출될 항목
+    DEPT_SMALL['조수연'] = [
+      '인사/총무',
+      '재무/회계',
+      'IT/개발팀',
+      'AI/운영팀',
+      '교육/자격검정팀',
+      '기획/마케팅팀',
+      '법무지원팀'
+    ];
+    // 부서 소분류: 관리(대) > 연세대-이소윤(중) 선택 시 노출될 항목
+    DEPT_SMALL['연세대-이소윤'] = [
+      '인사/총무',
+      '행정/기획',
+      '강사/교무',
+      '마케팅/영업',
+      'IT/보안'
+    ];
+    // 부서 소분류: 관리(대) > 메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)(중) 선택 시 노출될 항목
+    DEPT_SMALL['메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)'] = [
+      '인사/총무팀',
+      '재무/회계팀',
+      '마케팅/디자인팀',
+      '운영/번역팀',
+      'IT/시스템관리팀',
+      '경영기획/신사업팀'
+    ];
+    // 부서 소분류: 관리(대) > 메뉴얼(메뉴얼 260304저녁 ~)(중) 선택 시 노출될 항목
+    DEPT_SMALL['메뉴얼(메뉴얼 260304저녁 ~)'] = [
+      '서비스기획팀',
+      'IT개발팀',
+      '영업팀',
+      '마케팅/디자인팀',
+      '운영관리부',
+      '인사팀',
+      '번역운영팀',
+      '데이터구축팀'
+    ];
+    // 부서 소분류: 관리(대) > 메뉴얼 260308(~ 10. 기획서)(중) 선택 시 노출될 항목
+    DEPT_SMALL['메뉴얼 260308(~ 10. 기획서)'] = [
+      '경영기획팀',
+      'IT지원팀',
+      '영업/마케팅팀',
+      '교육/연구팀',
+      '경영지원팀'
+    ];
+    // 부서 소분류: 관리(대) > 메뉴얼 260308(nia ~)(중) 선택 시 노출될 항목
+    DEPT_SMALL['메뉴얼 260308(nia ~)'] = [
+      '경영지원팀',
+      '영업/운영팀',
+      '기획/사업팀',
+      '서비스기획팀',
+      'IT/개발팀',
+      '마케팅/디자인팀'
+    ];
+
+    function updateFilterMedium(isHomepage) {
+      const largeName = isHomepage ? 'hp_large' : 'dept_large';
+      const mediumBoxId = isHomepage ? 'hp_medium_box' : 'dept_medium_box';
+      const hier = isHomepage ? HP_HIER : DEPT_HIER;
+      const mediumName = isHomepage ? 'hp_medium' : 'dept_medium';
+      const box = document.getElementById(mediumBoxId);
+      const checkedLarge = Array.from(document.querySelectorAll(`input[name="${largeName}"]:checked`)).map(el => el.value);
+      const prevChecked = Array.from(document.querySelectorAll(`input[name="${mediumName}"]:checked`)).map(el => el.value);
+      let list = [];
+      checkedLarge.forEach(lg => {
+        (hier[lg] || []).forEach(label => {
+          const val = isHomepage ? `${lg}_${label}` : (lg === '기획' || lg === '홈피' ? `${lg}_${label}` : label);
+          if (!list.some(x => x.value === val)) list.push({ value: val, label });
+        });
+      });
+      box.innerHTML = list.map(({ value, label }) => {
+        const showBadge =
+          !isHomepage &&
+          (
+            (checkedLarge.includes('강사') && value === '테솔') ||
+            (checkedLarge.includes('관리') && (value === '통합' || value === '조수연' || value === '연세대-이소윤' || value === '타임스-송영란' || value === '메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)' || value === '메뉴얼(메뉴얼 260304저녁 ~)' || value === '메뉴얼 260308(~ 10. 기획서)' || value === '메뉴얼 260308(nia ~)'))
+          );
+
+        return `<label class="checkbox-label"><input type="radio" name="${mediumName}" value="${value}"> ${label}${showBadge ? ' <span class="content-badge" aria-label="내용 있음">✓</span>' : ''}</label>`;
+      }).join('');
+      box.querySelectorAll('input').forEach(inp => {
+        if (prevChecked.includes(inp.value)) inp.checked = true;
+        inp.addEventListener('change', () => {
+          if (isHomepage) {
+            updateFilterSmall(true);
+          } else {
+            updateFilterSmall(false);
+            handleDeptMediumSelection();
+          }
+        });
+      });
+      if (isHomepage) {
+        updateFilterSmall(true);
+      } else {
+        updateFilterSmall(false);
+        handleDeptMediumSelection();
+      }
+    }
+
+    function updateFilterSmall(isHomepage) {
+      const smallBoxId = isHomepage ? 'hp_small_box' : 'dept_small_box';
+      const mediumName = isHomepage ? 'hp_medium' : 'dept_medium';
+      const smallHier = isHomepage ? HP_SMALL : DEPT_SMALL;
+      const box = document.getElementById(smallBoxId);
+      const checkedMedium = Array.from(document.querySelectorAll(`input[name="${mediumName}"]:checked`)).map(el => el.value);
+      let list = [];
+      checkedMedium.forEach(mv => {
+        (smallHier[mv] || []).forEach(label => list.push({ value: `${mv}_${label}`, label }));
+      });
+      box.innerHTML = list.length
+        ? list.map(({ value, label }) =>
+            `<label class="checkbox-label"><input type="radio" name="${isHomepage ? 'hp_small' : 'dept_small'}" value="${value}"> ${label}</label>`
+          ).join('')
+        : '';
+      if (!box.classList.contains('checkbox-group') && list.length) box.classList.add('checkbox-group');
+      else if (list.length === 0) box.classList.remove('checkbox-group');
+
+      // 부서 소분류 선택 변화가 세부 내용에 반영되도록 연결
+      if (!isHomepage) {
+        box.querySelectorAll('input[name="dept_small"]').forEach((inp) => {
+          inp.addEventListener('change', () => {
+            handleDeptMediumSelection();
+          });
+        });
+      }
+    }
+
+    function initFilterCascade() {
+      document.querySelectorAll('input[name="hp_large"]').forEach(inp => {
+        inp.addEventListener('change', () => updateFilterMedium(true));
+      });
+      document.querySelectorAll('input[name="dept_large"]').forEach(inp => {
+        inp.addEventListener('change', () => updateFilterMedium(false));
+      });
+    }
+
+    function normalizeTeamLabelFromSmallLabel(label) {
+      const v = (label || '').trim();
+      if (!v) return '';
+      if (v.endsWith('팀')) return v;
+      return `${v}팀`;
+    }
+
+    function extractTeamLabelFromMinor(minorText) {
+      const text = (minorText || '').trim();
+      const match = text.match(/^\[([^\]]+)\]/);
+      return match ? match[1].trim() : '';
+    }
+
+    const ADMIN_UNIFIED_GROUPS = {
+      '인사/총무': ['인사/총무팀', '인사팀'],
+      '재무/회계': ['재무/회계팀'],
+      'IT': ['IT/개발팀', 'IT개발팀', 'IT지원팀', 'IT/시스템관리팀', 'IT/보안'],
+      '마케팅': ['기획/마케팅팀', '마케팅/영업', '마케팅/디자인팀', '영업/마케팅팀'],
+      '운영·번역': ['AI/운영팀', '운영/번역팀', '번역운영팀', '영업/운영팀', '운영관리부'],
+      '기획': ['행정/기획', '서비스기획팀', '기획/사업팀', '경영기획팀', '경영기획/신사업팀'],
+      // 단독 항목도 그룹처럼 매핑(필터 로직 통일)
+      '강사/교무': ['강사/교무'],
+      '교육/자격검정팀': ['교육/자격검정팀'],
+      '교육/연구팀': ['교육/연구팀'],
+      '법무지원팀': ['법무지원팀'],
+      '데이터구축팀': ['데이터구축팀'],
+      '영업팀': ['영업팀'],
+      '경영지원팀': ['경영지원팀']
+    };
+
+    function buildUnifiedAdminRows() {
+      const sources = [
+        { key: '조수연', html: ADMIN_JOSUYEON_TABLE_HTML },
+        { key: '연세대-이소윤', html: ADMIN_YONSEI_ISOYUN_TABLE_HTML },
+        { key: '메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)', html: ADMIN_MANUAL_ITT_TABLE_HTML },
+        { key: '메뉴얼(메뉴얼 260304저녁 ~)', html: ADMIN_MANUAL_2603_TABLE_HTML },
+        { key: '메뉴얼 260308(~ 10. 기획서)', html: ADMIN_MANUAL_260308_TABLE_HTML },
+        { key: '메뉴얼 260308(nia ~)', html: ADMIN_MANUAL_260308_NIA_TABLE_HTML }
+      ];
+      const rows = [];
+      sources.forEach(({ key, html }) => {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const table = tmp.querySelector('table');
+        if (!table) return;
+        const trs = Array.from(table.querySelectorAll('tbody tr'));
+        trs.forEach((tr) => {
+          const cloned = tr.cloneNode(true);
+          const originTd = document.createElement('td');
+          originTd.textContent = key;
+          // (대분류, 중분류) 다음에 삽입: [대, 중, 원본중분류, 소, 세부, 비고, 첨부]
+          const insertPoint = cloned.children[2] || null;
+          cloned.insertBefore(originTd, insertPoint);
+          rows.push(cloned);
+        });
+      });
+      return rows;
+    }
+
+    function renderAdminUnifiedByGroup(containerEl) {
+      if (!containerEl) return;
+
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const groupKey = (selectedSmallLabel || '').trim();
+
+      const allowedTeams = ADMIN_UNIFIED_GROUPS[groupKey] || [];
+      const showAll = !groupKey || allowedTeams.length === 0;
+
+      const rows = buildUnifiedAdminRows();
+      const filtered = showAll
+        ? rows
+        : rows.filter((tr) => {
+            const tds = Array.from(tr.querySelectorAll('td'));
+            // buildUnifiedAdminRows에서 원본중분류 컬럼을 추가했으므로 소분류 인덱스가 2 -> 3으로 이동
+            const minorText = tds[3]?.textContent || '';
+            const team = extractTeamLabelFromMinor(minorText);
+            return allowedTeams.includes(team);
+          });
+
+      const headerNote = showAll
+        ? '소분류(그룹)를 선택하면 해당 그룹 항목만 표시됩니다. 선택이 없으면 전체를 보여 줍니다.'
+        : `선택된 그룹: ${groupKey}`;
+
+      const tableEl = document.createElement('table');
+      tableEl.className = 'tesol-table';
+
+      tableEl.innerHTML = `
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>원본 중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+
+      const tbody = tableEl.querySelector('tbody');
+      filtered.forEach((tr) => tbody.appendChild(tr));
+
+      containerEl.innerHTML = `
+        <p class="empty-message" style="margin-bottom: 10px;">${headerNote}</p>
+      `;
+      containerEl.appendChild(tableEl);
+    }
+
+    function renderAdminJosuyeonByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/a50f717d-825c-4d2d-b5db-90dff1d33b6e';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['조수연']) ? DEPT_SMALL['조수연'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_JOSUYEON_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_JOSUYEON_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      // 상단: 상세 매뉴얼 보기 버튼
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    function renderAdminYonseiIsoyunByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/d188a6de-f082-427c-866a-20d4c778eab2';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['연세대-이소윤']) ? DEPT_SMALL['연세대-이소윤'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_YONSEI_ISOYUN_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_YONSEI_ISOYUN_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      // 상단: 상세 매뉴얼 보기 버튼
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    function renderAdminManualIttByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/8f4759d7-31b4-4db7-a964-9b8f9f5e2c6b';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)']) ? DEPT_SMALL['메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_MANUAL_ITT_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_MANUAL_ITT_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      // 상단: 상세 매뉴얼 보기 버튼
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    function renderAdminManual2603ByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/33f3c342-5483-4ce4-a0ad-2603d72176da';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['메뉴얼(메뉴얼 260304저녁 ~)']) ? DEPT_SMALL['메뉴얼(메뉴얼 260304저녁 ~)'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_MANUAL_2603_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_MANUAL_2603_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      // 상단: 상세 매뉴얼 보기 버튼
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    function renderAdminManual260308ByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/5e2d2b4b-88e2-40f6-a81b-6e717a3599c7';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['메뉴얼 260308(~ 10. 기획서)']) ? DEPT_SMALL['메뉴얼 260308(~ 10. 기획서)'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_MANUAL_260308_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_MANUAL_260308_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      // 상단: 상세 매뉴얼 보기 버튼
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    function renderAdminManual260308NiaByTeam(containerEl) {
+      if (!containerEl) return;
+
+      const detailLink = 'https://notebooklm.google.com/notebook/9d352388-8fa6-49f8-aaee-528c3144f8d4';
+      const selectedSmall = document.querySelector('input[name="dept_small"]:checked')?.value || '';
+      const selectedSmallLabel = selectedSmall.includes('_') ? selectedSmall.split('_').slice(1).join('_') : '';
+      const selectedTeam = normalizeTeamLabelFromSmallLabel(selectedSmallLabel);
+
+      const order = Array.isArray(DEPT_SMALL['메뉴얼 260308(nia ~)']) ? DEPT_SMALL['메뉴얼 260308(nia ~)'] : [];
+      const orderedTeams = order.map(normalizeTeamLabelFromSmallLabel);
+
+      const tmp = document.createElement('div');
+      tmp.innerHTML = ADMIN_MANUAL_260308_NIA_TABLE_HTML;
+      const baseTable = tmp.querySelector('table');
+      if (!baseTable) {
+        containerEl.innerHTML = ADMIN_MANUAL_260308_NIA_TABLE_HTML;
+        return;
+      }
+
+      const rows = Array.from(baseTable.querySelectorAll('tbody tr'));
+      const headerHtml = baseTable.querySelector('thead')?.innerHTML || '';
+
+      const grouped = new Map();
+      rows.forEach((tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return;
+        const team = extractTeamLabelFromMinor(tds[2]?.textContent || '');
+        const key = team || '기타';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(tr);
+      });
+
+      containerEl.innerHTML = '';
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'table-filter-toolbar';
+      toolbar.innerHTML = `
+        <a href="${detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+          상세 메뉴얼 보기
+        </a>
+      `;
+      containerEl.appendChild(toolbar);
+
+      const teamsToRender = selectedTeam
+        ? [selectedTeam]
+        : (orderedTeams.length ? orderedTeams : Array.from(grouped.keys()));
+
+      teamsToRender.forEach((team) => {
+        const teamRows = grouped.get(team) || [];
+        if (!teamRows.length) return;
+
+        const section = document.createElement('section');
+        section.className = 'team-table-section';
+
+        const title = document.createElement('h4');
+        title.textContent = `[${team}]`;
+        section.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'tesol-table';
+        table.innerHTML = `<thead>${headerHtml}</thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+        teamRows.forEach((tr) => tbody.appendChild(tr.cloneNode(true)));
+
+        section.appendChild(table);
+        containerEl.appendChild(section);
+      });
+
+      if (!containerEl.childElementCount) {
+        containerEl.innerHTML = '<p class="empty-message">선택된 소분류(팀)에 해당하는 항목이 없습니다.</p>';
+      }
+    }
+
+    // TESOL(강사 - 테솔) 전용 표 HTML
+    const TESOL_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류 (Major)</th>
+            <th>중분류 (Middle)</th>
+            <th>소분류 (Minor)</th>
+            <th>요점 정리 (Content)</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. 프로그램 개요 및 행정</td>
+            <td>1.1 과정 소개</td>
+            <td>1.1.1 프로그램 개요 및 목표</td>
+            <td>
+              TESOL, EPT, TESOL-C 등 목적별 코스 목표와 레슨 플랜 작성, 학급 경영 등
+              실무 기술 습득 목표를 제시한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>1. 프로그램 개요 및 행정</td>
+            <td>1.1 과정 소개</td>
+            <td>1.1.2 수강생 오리엔테이션 및 첫 수업 가이드</td>
+            <td>
+              출석 등 행정 안내 후 정보 카드(이름, 경력, 취미 등)를 작성하게 하고,
+              라포 형성을 위한 아이스브레이킹 활동을 진행한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>1. 프로그램 개요 및 행정</td>
+            <td>1.2 학사 관리</td>
+            <td>1.2.1 출석, 과제 및 성적 평가 기준</td>
+            <td>
+              85% 이상 출석, 70% 이상 성적을 기준으로 하며, 마이크로 티칭(45%), 에세이,
+              레슨 플랜, 퀴즈 등으로 종합 평가한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>1. 프로그램 개요 및 행정</td>
+            <td>1.2 학사 관리</td>
+            <td>1.2.2 수료 및 졸업식 진행 가이드</td>
+            <td>
+              수료증 및 우수 학생 시상, 사진 촬영을 진행하고, 강사는 학기 중 기록한
+              학생 장점을 바탕으로 맞춤형 코멘트를 전달한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>2. TESOL 핵심 이론 및 방법론</td>
+            <td>2.1 언어와 학습</td>
+            <td>2.1.1 성인 학습자의 특징 및 다중지능 이론</td>
+            <td>
+              성인 학습자는 자기 주도적이며 목표·연관성 지향적이고, 기존 삶의 경험을
+              바탕으로 학습한다. 다중지능 이론을 활용해 수업을 설계한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>2. TESOL 핵심 이론 및 방법론</td>
+            <td>2.1 언어와 학습</td>
+            <td>2.1.2 제1·2언어 습득 이론</td>
+            <td>
+              모국어(L1)와 제2언어(L2) 습득 과정의 차이와, 동기·불안·노출량 등
+              언어 학습에 영향을 미치는 요인을 분석한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>2. TESOL 핵심 이론 및 방법론</td>
+            <td>2.2 교수 방법론</td>
+            <td>2.2.1 전통적 교수법과 현대적 교수법 비교</td>
+            <td>
+              교사 유형(설명자, 참여 유도자, 조력자)과 교수법에 따른 학습자 기억
+              유지율 차이를 비교·분석한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>2. TESOL 핵심 이론 및 방법론</td>
+            <td>2.2 교수 방법론</td>
+            <td>2.2.2 다양한 교수법의 이해</td>
+            <td>
+              문법 번역식(GTM), 직접 교수법(Direct), 청각 구두식(ALM), 전신 반응(TPR),
+              의사소통 중심(CLT) 등 다양한 교수법의 특성과 활용법을 이해한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>2. TESOL 핵심 이론 및 방법론</td>
+            <td>2.3 언어학 기초</td>
+            <td>2.3.1 음운론 및 발음 교육 기법</td>
+            <td>
+              국제음성기호(IPA), 조음 기관, 분절음/초분절음 개념을 이해하고, 발음 오류
+              교정 기법을 실제 수업에 적용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3. 학급 경영 및 수업 기술</td>
+            <td>3.1 학급 경영</td>
+            <td>3.1.1 학급 경영의 이해와 상호작용 극대화</td>
+            <td>
+              좌석 배치, 그룹 편성, 교사 발화 축소 등을 통해 학생 간 상호작용(S-S)을
+              극대화하는 학급 경영 전략을 다룬다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3. 학급 경영 및 수업 기술</td>
+            <td>3.1 학급 경영</td>
+            <td>3.1.2 교사의 역할 및 효과적인 지시어</td>
+            <td>
+              명확하고 천천히 지시(Chunking)하고, 모호한 질문 대신 개념 확인 질문(CCQ)과
+              유도 기법(Eliciting)을 활용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3. 학급 경영 및 수업 기술</td>
+            <td>3.2 아이스브레이킹</td>
+            <td>3.2.1 아이스브레이킹의 목적과 기획 단계</td>
+            <td>
+              팀 응집력 강화를 위해 수업 초반에 실시하며, 단순한 규칙(KISS), 움직임,
+              본 수업과의 연계(Lead-in)를 고려해 기획한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3. 학급 경영 및 수업 기술</td>
+            <td>3.2 아이스브레이킹</td>
+            <td>3.2.2 아이스브레이킹 활동 실전 예시</td>
+            <td>
+              '나는 누구인가(Who Am I?)', 훌륭한 교사의 조건 토의, '나의 세계(My World)'
+              등 실제 활동 예시를 적용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>4. 레슨 플랜 작성 가이드</td>
+            <td>4.1 레슨 플랜 기초</td>
+            <td>4.1.1 레슨 플랜의 필요성과 기본 구조</td>
+            <td>
+              레슨 플랜은 대체 교사 및 관리자를 위한 필수 문서로, 목표·대상·시간과
+              언어 기술/시스템을 명확히 명시한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>4. 레슨 플랜 작성 가이드</td>
+            <td>4.1 레슨 플랜 기초</td>
+            <td>4.1.2 레슨 플랜 작성의 단계별 접근법</td>
+            <td>
+              도입 ➔ 준비(Pre) ➔ 본 활동(Main) ➔ 정리(Post) 및 비상용 SOS 플랜까지
+              포함한 5단계 기획법을 활용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>4. 레슨 플랜 작성 가이드</td>
+            <td>4.2 영역별 템플릿</td>
+            <td>4.2.1 수용적 기능 레슨 플랜 양식</td>
+            <td>
+              듣기/읽기 수업을 위해 사전·본·사후 활동과 예상 오류(Anticipated Errors)를
+              구조화한 템플릿을 사용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>4. 레슨 플랜 작성 가이드</td>
+            <td>4.2 영역별 템플릿</td>
+            <td>4.2.2 표현적 기능 및 문법 레슨 플랜 양식</td>
+            <td>
+              말하기/문법 수업을 위해 제시(Presentation)–연습(Practice)–발화(Production)
+              중심 구조로 계획한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.1 수용적 기능 교육</td>
+            <td>5.1.1 듣기 지도 (Teaching Listening)</td>
+            <td>
+              듣기와 청취의 차이, 상향식·하향식 처리, 실제 생활과 유사한 듣기 활동
+              절차를 포함해 지도한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.1 수용적 기능 교육</td>
+            <td>5.1.2 읽기 지도 (Teaching Reading)</td>
+            <td>
+              스키밍·스캐닝 기술, 집중적/확장적 읽기, 텍스트 이해도 4단계 평가
+              방법을 다룬다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.2 표현적 기능 교육</td>
+            <td>5.2.1 말하기 지도 (Teaching Speaking)</td>
+            <td>
+              의사소통 목적의 과제, 롤플레이, 효과적인 구두 오류 수정 기법을 활용해
+              말하기 수업을 설계한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.2 표현적 기능 교육</td>
+            <td>5.2.2 쓰기 지도 (Teaching Writing)</td>
+            <td>
+              쓰기 전 활동(Pre-writing), 통제된 쓰기, 창의적 글쓰기, 오류 수정 기호
+              사용법을 통해 쓰기를 지도한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.3 언어 형식 교육</td>
+            <td>5.3.1 문법 지도 (Teaching Grammar)</td>
+            <td>
+              귀납적/연역적 문법 제시, 의미와 형태 분석, 대체 표 및 반복 연습(Drilling)
+              기법을 활용한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>5. 언어 영역별 교수법</td>
+            <td>5.3 언어 형식 교육</td>
+            <td>5.3.2 신규 어휘 지도법 (Presenting Vocab)</td>
+            <td>
+              실물(Realia), 시각 자료, 문맥 유추, 유의어 활용 등을 통해 학습자가
+              스스로 의미를 유추하도록 돕는다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>6. 마이크로 티칭 및 평가</td>
+            <td>6.1 마이크로 티칭 가이드</td>
+            <td>6.1.1 실습 준비 및 진행 시 유의사항</td>
+            <td>
+              단정한 복장, 다양한 시각 자료, 명확한 지시어(CCQ 포함), 교실 내 이동성을
+              고려하여 마이크로 티칭을 준비한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>6. 마이크로 티칭 및 평가</td>
+            <td>6.2 평가 및 피드백 양식</td>
+            <td>6.2.1 교사 평가 기준 (Teacher's Evaluation)</td>
+            <td>
+              교사의 존재감, 학급 경영, 교사 발화(TT), 시각 자료, 레슨 플랜 등
+              다섯 영역을 점수화해 평가한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>6. 마이크로 티칭 및 평가</td>
+            <td>6.2 평가 및 피드백 양식</td>
+            <td>6.2.2 동료 평가 및 자기 성찰 (Self-Reflection)</td>
+            <td>
+              동료 피드백과 함께, 자신의 수업을 설명(Retell)–연관(Relate)–성찰(Reflect)
+              하는 3R 로그를 작성한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>6. 마이크로 티칭 및 평가</td>
+            <td>6.3 시험 및 과제</td>
+            <td>6.3.1 에세이 작성 가이드 및 채점 기준</td>
+            <td>
+              과거 학습 경험을 이론과 결합하여 500~750단어 에세이를 작성하고,
+              하버드/APA 스타일로 출처를 표기한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>6. 마이크로 티칭 및 평가</td>
+            <td>6.3 시험 및 과제</td>
+            <td>6.3.2 중간고사 및 기말고사 대비</td>
+            <td>
+              문법/어휘 지도 절차, 미니 레슨 플랜, 이해도 질문 제작 등 서술형
+              응용문제를 중심으로 시험을 대비한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>7. 취업 준비 및 경력 개발</td>
+            <td>7.1 영문 이력서</td>
+            <td>7.1.1 영문 이력서 작성 가이드</td>
+            <td>
+              상단에 교육 철학 프로필을 명시하고, 학위·TESOL 수료 이력·티칭 경험·
+              컴퓨터 및 어학 능력을 직무 키워드에 맞춰 정리한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>7. 취업 준비 및 경력 개발</td>
+            <td>7.1 영문 이력서</td>
+            <td>7.1.2 영문 이력서 양식 및 샘플</td>
+            <td>
+              다양한 직무 경험이 포함된 전문적인 캐나다식 이력서(Resume) 샘플을
+              참고하여 자신의 이력서를 작성한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>7. 취업 준비 및 경력 개발</td>
+            <td>7.2 면접 준비</td>
+            <td>7.2.1 영어 면접 예상 질문 및 가이드</td>
+            <td>
+              프로다운 복장과 어조를 유지하고, 교육 철학·오류 수정법 등에 대한 답변과
+              강사가 역으로 질문할 리스트를 준비한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>7. 취업 준비 및 경력 개발</td>
+            <td>7.2 면접 준비</td>
+            <td>7.2.2 구직 방법 및 채용 정보 탐색</td>
+            <td>
+              인터넷 웹사이트, 사설·체인 어학원, 공립 기관, 자원봉사 프로그램,
+              리크루팅 에이전시 등을 활용해 채용 정보를 탐색한다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>7. 취업 준비 및 경력 개발</td>
+            <td>7.3 교사 역량 개발</td>
+            <td>7.3.1 TESOL 추천 도서 목록</td>
+            <td>
+              Scrivener, Larsen-Freeman 등 각 모듈별 심화 학습을 위한 추천 도서를
+              참고하여 자기 개발 계획을 세운다.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tesol-feedback">
+        <label for="tesol_overall_feedback">전체 피드백</label>
+        <textarea id="tesol_overall_feedback" rows="4" placeholder="TESOL 프로그램 전반에 대한 메모, 개선 사항 등을 기록하세요."></textarea>
+      </div>
+    `;
+
+    // 번역(강사 - 번역) 전용 표 HTML
+    const TRANSLATION_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부 내용</th>
+            <th>비고</th>
+            <th>첨부 파일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>수강생 모집 및 관리</td>
+            <td>상담 및 등록</td>
+            <td>1_상담~등록-1_(공통) 상담에서 등록까지.pdf</td>
+            <td>
+              전화/방문 상담 기본 절차, 스크립트 및 학생 응대 요령을 요약한 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 모집 및 관리</td>
+            <td>상담 및 등록</td>
+            <td>1_상담등록-2(통번역) 레벨테스트후상담등록.pdf</td>
+            <td>
+              레벨테스트(통역/번역) 평가 기준, 결과 안내 요령, 인트라넷 정보 입력 및 등록/결제 절차를 정리한 문서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 모집 및 관리</td>
+            <td>상담 및 등록</td>
+            <td>1_상담~등록-2(통번역)상담자료.pdf</td>
+            <td>
+              비즈니스/전문 번역 레벨테스트 예문, 모범 답안지 및 과정 커리큘럼(Syllabus)이 포함된 상담용 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 모집 및 관리</td>
+            <td>설명회 운영</td>
+            <td>3_설명회_1. (통번역) 설명회준비~마무리.pdf</td>
+            <td>
+              설명회 전 물품 체크리스트, 인트라넷 홍보 등록, 당일 진행 순서 및 레벨테스트 안내 절차를 정리한 파일.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 모집 및 관리</td>
+            <td>설명회 운영</td>
+            <td>3_설명회_2. (통번역) 설명회 PT.pdf</td>
+            <td>
+              ITT 과정 개요, 특징, 커리큘럼 및 수강생 혜택 안내를 위한 프레젠테이션 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>개강 및 수료</td>
+            <td>2_개강~종강_1. (통번역) 개강.pdf</td>
+            <td>
+              개강 전 교재 준비, 수강생 안내(전화/문자), OT 서류 배부 및 인트라넷 활용 체크리스트가 포함된 개강 가이드.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>개강 및 수료</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-1 비즈니스) 개강계획,보고,종강보고서.pdf</td>
+            <td>
+              과정 개설 현황, 인원, 할인 내역 및 개강/종강 관련 본부 제출용 보고 서식.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>개강 및 수료</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-3 ITT) 개강안내문.pdf</td>
+            <td>
+              학사 일정, 필수 제출 서류(증명사진, 여권사본 등) 및 강사/직원 문의처를 안내하는 개강 안내문.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>개강 및 수료</td>
+            <td>2_개강~종강_대학센터자료_(SAMPLE) ITT 수료증신청_종강3일전.pdf</td>
+            <td>
+              이수 기간, 수강생 영문 이름, 생년월일이 포함된 수료증 신청 명단 샘플.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>오리엔테이션 및 수강생 활동</td>
+            <td>2_개강~종강_1-3. (통번역) OT영상-1.mp4</td>
+            <td>
+              과정 개요, 실무 위주 수업 특징 및 수료 기준(출석/성적)을 설명하는 오리엔테이션 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>오리엔테이션 및 수강생 활동</td>
+            <td>2_개강~종강_1-3. (통번역) OT영상-3.mp4</td>
+            <td>
+              결석/조퇴 등 출결 관리 규정, 모듈별 시험/프레젠테이션 및 홈페이지 가입 의무를 설명하는 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>오리엔테이션 및 수강생 활동</td>
+            <td>2_개강~종강_참고파일(개강서류)_비즈니스) 오리엔테이션.pdf</td>
+            <td>
+              비즈니스 통번역 과정 목표, 자격증 취득 요건 및 취업 연계 혜택을 정리한 OT 프레젠테이션 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>오리엔테이션 및 수강생 활동</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-4 ITT) 수강생 온라인 활동대장.pdf</td>
+            <td>
+              수강생의 카페/홈페이지 과제 업로드 및 온라인 의무 활동을 점검하는 기록표.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>평가 및 설문</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-5 ITT) SURVEY 취합보고용.pdf</td>
+            <td>
+              수강생 설문 결과를 수치화하여 다음 기수 등록 예상 인원 등을 파악하는 취합용 서식.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 및 관리</td>
+            <td>평가 및 설문</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-5 ITT) SURVEY 학생용.pdf</td>
+            <td>
+              과정, 강사, 직원 지원 및 만족도를 평가하는 수강생용 세부 설문지.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>강사 관리</td>
+            <td>업무 및 계약</td>
+            <td>6_강사_1. (통번역) 강사 개강~종강.pdf</td>
+            <td>
+              강사의 레벨테스트 채점 지원, 실라버스 제출, 모듈별 채점표 작성 등 학사 관리 의무 사항을 정리한 문서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>강사 관리</td>
+            <td>업무 및 계약</td>
+            <td>6_강사_3. (통번역) 강사_영남권(170705).pdf</td>
+            <td>
+              파트타임 강사의 근무 시간, 급여 지급 기준, 복무 태도 및 계약 해지 규정을 명시한 계약서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>강사 관리</td>
+            <td>급여 정산</td>
+            <td>6_강사_2. (공통) 급여계산법.pdf</td>
+            <td>
+              통번역(파트타임)/테솔(풀타임) 강사의 출퇴근 기록 대장 작성 및 월별 급여 계산/보고 기준을 안내하는 문서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>강사 관리</td>
+            <td>급여 정산</td>
+            <td>6_강사_강사급여1.mp4</td>
+            <td>
+              테솔 풀타임 강사의 근태 기록, 연차, 보강 내역 및 하우징비 지급 관련 업무 안내 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>강사 관리</td>
+            <td>급여 정산</td>
+            <td>6_강사_강사급여2.mp4</td>
+            <td>
+              통번역 파트타임 강사의 쉬는 시간 포함 여부, 시간당 페이 계산 및 급여 보고서 업로드 방법 안내 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>홍보 및 마케팅</td>
+            <td>온라인 마케팅</td>
+            <td>5_마케팅_1. 고정업무.pdf</td>
+            <td>
+              홈페이지/카페 내 QnA 답변, 구인구직 정보 등록, 공지사항 작성 및 포토갤러리 사진 업로드 요령을 정리한 문서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>홍보 및 마케팅</td>
+            <td>온라인 마케팅</td>
+            <td>5_마케팅_1-1. 고정업무 (홈페이지,카페).mp4</td>
+            <td>
+              홈페이지/카페 게시판 관리 시 노출률을 높이기 위한 키워드·태그 작성 실무 요령을 다룬 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>홍보 및 마케팅</td>
+            <td>온라인 마케팅</td>
+            <td>5_마케팅_2. 인스타그램.pdf</td>
+            <td>
+              인스타그램 계정 개설, 프로필 세팅, 정보 입력 및 모바일 앱을 활용한 홍보 게시물 작성 가이드.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>홍보 및 마케팅</td>
+            <td>오프라인 마케팅</td>
+            <td>5_마케팅_3. 오프라인마케팅.pdf</td>
+            <td>
+              대학·지하철역 포스터 부착, 아르바이트 전단지 배포 등 오프라인 홍보 활동 가이드.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_30일보고서_1-2 센터 문서 체크 리스트.pdf</td>
+            <td>
+              학사기획, 마케팅, 설명회, 강좌 행정, 강사 관리 등 센터 전반 문서의 관리 상태를 점검하는 체크리스트.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>2_개강~종강_참고파일(개강서류)_4-12 (공통)센터상황보고 (매니저).pdf</td>
+            <td>
+              본부 보고를 위한 센터별 주요 현안, 처리 사항 및 건의사항을 기록하는 센터 상황 보고서 양식.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_30일보고서_4-1 비즈니스) 개강계획,보고,종강보고서.pdf</td>
+            <td>
+              개강 전후 수강생 변동, 특이사항, 마케팅 내역 및 종강 이슈를 종합해 보고하는 비즈니스 과정 보고서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_25일보고서_2-3 (부산) 마케팅 체크리스트.pdf</td>
+            <td>
+              온/오프라인 홍보 매체별 업무 진행 기간 및 결과 보고를 점검하는 마케팅 체크리스트.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_25일보고서_2-3 (부산) 온라인 검색 페이지 노출 (통번역).pdf</td>
+            <td>
+              포털 사이트 내 주요 키워드별 블로그·카페·사이트 검색 노출 여부를 주차별로 점검하는 표.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_25일보고서_2-3 (부산) 월 목표 및 마케팅 계획.pdf</td>
+            <td>
+              캘린더 형식으로 작성된 일별 온·오프라인 마케팅 실행 계획표.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_30일보고서_4-1 CLASS 보고서(계획개강종강)+기안하기.avi</td>
+            <td>
+              개강 2주 전 계획서 작성과 종강 후 보고서를 인트라넷에 기안하는 방법을 설명하는 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_30일보고서_4-4 수강생 온라인 활동대장.avi</td>
+            <td>
+              통번역/테솔 수강생의 카페 과제 업로드 내역을 수합하여 보고서에 올리는 요령을 안내하는 영상.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 행정, 보고 및 규정</td>
+            <td>정기 보고서 및 서류</td>
+            <td>8_보고서_30일보고서_6-7 (부산) 주말조교_윤경민.pdf</td>
+            <td>
+              주말/평일 조교들의 시간대별 세부 업무(청소, 온라인 홍보, 수업 보조, 비품 관리 등)를 기록한 일지.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>1일차 고정업무</td>
+            <td>9_신입_1. 1일차_고정업무.pdf</td>
+            <td>
+              1일차 교육: 회사 소개, 홈페이지(QnA, 구인구직) 및 카페를 활용한 온라인 고정 업무 기본 교육 내용.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>2일차 전화상담</td>
+            <td>9_신입_2. 2일차_전화상담.pdf</td>
+            <td>
+              육하원칙 기반 전화 상담 요령, 학생 정보 파악 및 인트라넷 DB 입력 방법 교육 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>3일차 설명회</td>
+            <td>9_신입_3. 3일차_설명회.pdf</td>
+            <td>
+              설명회 운영을 위한 행사 전 홍보, 물품 준비 체크리스트 및 결과 보고 절차를 다룬 교육 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>3일차 설명회(PT)</td>
+            <td>9_신입_3. 3일차_설명회(pt).pdf</td>
+            <td>
+              설명회 당일 지원자에게 제공되는 ITT 과정 소개 및 혜택 안내 프레젠테이션 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>4일차 방문상담</td>
+            <td>9_신입_4. 4일차_방문상담.pdf</td>
+            <td>
+              방문 고객 응대 준비물, 결제 처리, 무료지급확인서 발행 및 방문 상담 스크립트 교육 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>5일차 개강</td>
+            <td>9_신입_5. 5일차_개강.pdf</td>
+            <td>
+              개강 1주일 전 전화/문자 안내, 인트라넷 개강 서식 출력, 수강생 명단 정리 절차를 담은 교육 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>6일차 회사규율</td>
+            <td>9_신입_6. 6일차_회사규율.pdf</td>
+            <td>
+              주차별 피드백, 휴가 규정, 결재 보고 체계, 전화 예절 및 신입 교육 일정표 안내 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>신입 사원 교육</td>
+            <td>7일차 회계</td>
+            <td>9_신입_7. 7일차_회계.pdf</td>
+            <td>
+              교재 현금 수납 팁, 영수증/법인카드 내역 관리 및 지출결의서 작성 등 회계 업무 교육 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>회사 규정 및 평가</td>
+            <td>회사 규정 및 평가</td>
+            <td>5_회사규정(임원용)_업무보고용 (추진계획)-목차.pdf</td>
+            <td>
+              전사적 현안 문제 개선 방안, 문서 보존 연한 기준 및 각종 규정 리스트가 포함된 업무 계획 목차.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>회사 규정 및 평가</td>
+            <td>회사 규정 및 평가</td>
+            <td>5_회사규정(임원용)_인 사 규 정.pdf</td>
+            <td>
+              직원 교육 훈련, 포상/징계 기준 및 인사고과 실시 등에 관한 사내 인사 규정을 정리한 문서.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>회사 규정 및 평가</td>
+            <td>회사 규정 및 평가</td>
+            <td>5_회사규정(임원용)_직원들의 공정한 능력 평가.pdf</td>
+            <td>
+              직원의 대인관계, 기획력, 책임감 등을 종합적으로 평가하기 위한 항목표 및 인트라넷 개선 방안이 포함된 자료.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>회사 규정 및 평가</td>
+            <td>회사 규정 및 평가</td>
+            <td>5_회사규정(임원용)_직원별체크한것06년.pdf</td>
+            <td>
+              부서별 업무 진행 능력, 자기 관리, 학사/마케팅 실무 실적 등을 구체적으로 체크하는 직원 평가표.
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>회사 규정 및 평가</td>
+            <td>회사 규정 및 평가</td>
+            <td>5_회사규정(임원용)_근무규칙.pdf</td>
+            <td>
+              임직원이 숙지하고 준수해야 하는 근무 규칙을 안내하는 규정 문서(서명란 포함).
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tesol-feedback">
+        <label for="translation_overall_feedback">전체 피드백</label>
+        <textarea id="translation_overall_feedback" rows="4" placeholder="통번역 센터 운영 전반에 대한 메모, 개선 사항 등을 기록하세요."></textarea>
+      </div>
+    `;
+
+    // 관리(대) - 조수연(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_JOSUYEON_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>행정 및 조직 관리</td>
+            <td>기업 인허가 및 증빙</td>
+            <td>[인사/총무팀] No.01_회사 기본 서류 및 정관</td>
+            <td>사업자등록증, 정관, 등기부등본 등 법인 운영 필수 서류 보관</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>행정 및 조직 관리</td>
+            <td>기업 인허가 및 증빙</td>
+            <td>[인사/총무팀] No.03_기업부설연구소 및 기술신용평가</td>
+            <td>연구소 인정서, 기업 기술신용평가 및 마케팅/조직 역량 개요 파악</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>임직원 행정</td>
+            <td>4대보험 및 재직/임원 관리</td>
+            <td>[인사/총무팀] No.02_임직원 4대보험 및 재직/임원 관리</td>
+            <td>4대보험 가입 명부 및 임원 변경, 재직 관리에 필요한 행정 문서 처리.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인력 및 프로젝트 관리</td>
+            <td>프리랜서 및 강사 채용</td>
+            <td>[인사/총무팀] No.04_프리랜서 번역가 면접/평가 설문지</td>
+            <td>번역 전문가 채용 면접, 번역 가능 언어/분야 파악 및 업무 성향 평가</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인력 및 프로젝트 관리</td>
+            <td>프리랜서 및 강사 채용</td>
+            <td>[인사/총무팀] No.06_강사 및 프리랜서 채용·계약 관리</td>
+            <td>테솔 강사 계약, 번역 에디터 구인 공고 및 프리랜서 위촉 계약서 작성</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인력 및 프로젝트 관리</td>
+            <td>작업자 근태 및 정산</td>
+            <td>[인사/총무팀] No.05_프로젝트 작업자 근태 및 정산 가이드</td>
+            <td>구글 바드 프로젝트 참여자 업무 기록, 작업량 보고 방식 및 급여 정산 공지</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인력 및 프로젝트 관리</td>
+            <td>작업자 근태 및 정산</td>
+            <td>[인사/총무팀] No.07_외부 프로젝트 작업자 근태 트래킹</td>
+            <td>바드 프로젝트 작업자의 일별/분 단위 업무 수행 시간 트래킹</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인력 및 프로젝트 관리</td>
+            <td>작업자 근태 및 정산</td>
+            <td>[인사/총무팀] No.08_프로젝트 작업 시간 정산 및 데이터 검증</td>
+            <td>자체 취합된 근무 시간과 고객사 데이터 비교 분석 및 차이 검증</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>법인 결산 및 세무</td>
+            <td>재무제표 및 부가세</td>
+            <td>[재무/회계팀] No.01_연도별 표준재무제표 증명원</td>
+            <td>국세청 발급 연도별 재무상태표 및 손익계산서 증명 내역 보관.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법인 결산 및 세무</td>
+            <td>재무제표 및 부가세</td>
+            <td>[재무/회계팀] No.06_법인 결산 재무제표 및 부가세 증명</td>
+            <td>당해 연도 결산 재무제표 및 부가가치세 과세표준 증명 내역 확인.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법인 결산 및 세무</td>
+            <td>세금 및 공과금 납부</td>
+            <td>[재무/회계팀] No.05_지방세 및 4대보험료 납부 고지서</td>
+            <td>등록면허세, 고용/산재 보험료 및 과태료 고지서 납부 처리.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자금 및 지출 관리</td>
+            <td>금융소득 원천징수</td>
+            <td>[재무/회계팀] No.03_금융기관 이자/배당소득 원천징수 명세</td>
+            <td>시중 은행 이자/배당 소득에 대한 원천징수 영수증 기본 내역 취합</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자금 및 지출 관리</td>
+            <td>금융소득 원천징수</td>
+            <td>[재무/회계팀] No.07_금융소득 종합과세(이자/배당) 원천징수</td>
+            <td>은행 및 증권사 금융소득 종합과세 신고용 상세 원천징수 명세 기록.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자금 및 지출 관리</td>
+            <td>증빙 및 결제 관리</td>
+            <td>[재무/회계팀] No.02_법인카드 사용 및 지출 내역</td>
+            <td>법인카드 사용에 따른 가맹점별, 월별 지출 상세 내역 확인</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자금 및 지출 관리</td>
+            <td>증빙 및 결제 관리</td>
+            <td>[재무/회계팀] No.04_미등록 거래처 전자세금계산서 처리</td>
+            <td>근질권 설정, 소프트웨어 개발 관련 등 미등록 거래처 세금계산서 발급</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 리소스</td>
+            <td>시스템 계정 관리</td>
+            <td>[IT/개발팀] No.01_시스템 및 협업툴 공용 계정 관리</td>
+            <td>줌 회의, 구글 스프레드시트, 웹사이트 등 프로젝트별 공용 계정 및 링크 관리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 리소스</td>
+            <td>개발 리소스 기획</td>
+            <td>[IT/개발팀] No.02_웹/시스템 개발 일정 및 리소스 관리</td>
+            <td>피그마 기획안 공유, 시험/통번역 사이트 기능 단위별 개발 일정표 및 DB 설계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 리소스</td>
+            <td>서버 장애 유지보수</td>
+            <td>[IT/개발팀] No.03_서버 오류 복구 및 클라우드 이전 일지</td>
+            <td>시험 및 통번역 호스팅 서버 오류 시 DB 복구, 프로그램 수정 및 클라우드 세팅 지원</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>프롬프트 품질 및 평가</td>
+            <td>모델 평가 지침</td>
+            <td>[AI/운영팀] No.01_AI 챗봇(구글 바드) 응답 평가 지침</td>
+            <td>답변의 명확성, 정확성, 윤리성 등을 평가하기 위한 대화형 AI 기본 평가 기준.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>프롬프트 품질 및 평가</td>
+            <td>모델 평가 지침</td>
+            <td>[AI/운영팀] No.02_AI 프롬프트 평가 모범 답안 및 작성 요령</td>
+            <td>좋은 질문과 나쁜 질문의 구분, 정보성/유창성 등 모범 답안 작성 사례</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>프롬프트 품질 및 평가</td>
+            <td>프롬프트 데이터셋</td>
+            <td>[AI/운영팀] No.03_대화형 AI 테스트용 프롬프트 데이터셋</td>
+            <td>문학, 과학, 일상 등 분야별 엑셀 프롬프트 테스트 데이터 취합</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>프롬프트 품질 및 평가</td>
+            <td>프롬프트 데이터셋</td>
+            <td>[AI/운영팀] No.06_분야별 AI 챗봇 테스트 프롬프트 문제 은행</td>
+            <td>고등학교 정보, 클라우드 설명 등 분야별 사실 확인 및 비교 프롬프트 데이터</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>기계번역 검수(MTPE)</td>
+            <td>사후편집 가이드</td>
+            <td>[AI/운영팀] No.04_기계번역 사후편집(MTPE) 가이드라인</td>
+            <td>발행 가능한 품질과 목적 부합 품질을 구분하는 원시 MT 결과물 편집 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>기계번역 검수(MTPE)</td>
+            <td>상세 교정 지침</td>
+            <td>[AI/운영팀] No.05_AI 챗봇 및 기계번역(MT) 상세 교정 가이드</td>
+            <td>포맷 오류, 내용 부적합, 언어 부적합 등 부적합 유형별 피드백 및 교정 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>자격시험 기획 및 운영</td>
+            <td>시험 운영 규정</td>
+            <td>[교육/자격검정팀] No.01_AI 프롬프트 자격시험 운영 규정</td>
+            <td>생성형 프롬프트 전문가(일반/비즈니스/전문/교육) 등급별 검정 기준 및 합격선 규정</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자격시험 기획 및 운영</td>
+            <td>시험 문항 설계</td>
+            <td>[교육/자격검정팀] No.02_자격시험 학습 요점 및 종합 출제 문항</td>
+            <td>과목별(윤리/객관식/프롬프트/단답형) 배점, 등급별 문제 혼합 방식 및 요점 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>자격시험 기획 및 운영</td>
+            <td>채점 및 시스템 구축</td>
+            <td>[교육/자격검정팀] No.03_자격시험 문제 은행 구축 및 채점 시스템</td>
+            <td>출제자/채점자/관리자별 화면 구성, 난이도별(상/중/하) 문제 분배 및 자동/휴먼 채점 로직 설계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>시장 분석 및 제안</td>
+            <td>[기획/마케팅팀] No.01_경쟁사 번역 서비스 단가 분석</td>
+            <td>타사 영상/문서 등 언어별 번역 및 감수 요율표 비교 데이터</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>시장 분석 및 제안</td>
+            <td>[기획/마케팅팀] No.03_B2B 솔루션 제안 템플릿 및 품질/환경 규격</td>
+            <td>문제 정의, 성과 도출 등 기업 간 컨설팅 및 제안을 위한 표준 템플릿</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>웹 기획 및 홍보</td>
+            <td>[기획/마케팅팀] No.04_메타트랜스 및 통번역 웹사이트 기획안</td>
+            <td>AI 번역 대결 이력, 통독 서비스, 제휴 현황 등 웹페이지 구성안 설계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>웹 기획 및 홍보</td>
+            <td>[기획/마케팅팀] No.05_프롬프트 및 AI 번역시험 랜딩페이지 기획</td>
+            <td>타겟 대상자(법률, 비즈니스, 크리에이터)별 맞춤형 프롬프트 자격증 랜딩페이지 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>웹 기획 및 홍보</td>
+            <td>[기획/마케팅팀] No.06_번역/AI 서비스 홍보 영상 스크립트 및 타겟팅</td>
+            <td>검색엔진 키워드, 초중고/직장인 등 연령별 숏폼 홍보 영상 기획 및 스크립트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획 및 마케팅</td>
+            <td>웹 기획 및 홍보</td>
+            <td>[기획/마케팅팀] No.08_AI 서비스 및 자격시험 랜딩페이지 기획</td>
+            <td>번역 방식(STT, TTS, STS, TTT) 및 산업별 AI 번역 시험 랜딩페이지 블록 설계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>품질 규격 (ISO 표준)</td>
+            <td>국제 표준 원문/번역</td>
+            <td>[기획/마케팅팀] No.02_ISO 17100 번역 서비스 표준 규격(영/국문)</td>
+            <td>번역 인력 자격, 번역/교열/감수 등 번역 과정 전반의 ISO 17100 품질 요구사항 문서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>품질 규격 (ISO 표준)</td>
+            <td>국제 표준 원문/번역</td>
+            <td>[기획/마케팅팀] No.07_ISO 통·번역 품질 국제 표준(원문/번역) 종합</td>
+            <td>ISO 9001(품질), 14001(환경), 20771(법률 번역), 18587(포스트에디팅) 원문 및 체계 정리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>법무 행정 및 소송</td>
+            <td>법인 등기</td>
+            <td>[법무지원팀] No.01_신규 주식회사 설립 등기 신청</td>
+            <td>새로운 법인 창립을 위한 발기인 서류, 주식 발행 내역 및 등기 신청서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법무 행정 및 소송</td>
+            <td>법인 등기</td>
+            <td>[법무지원팀] No.04_임원 등기(취임/인감) 및 소송 집행권원 신청</td>
+            <td>법인 정관 등록, 임원 취임 서류, 인감 신고 및 소송 관련 행정 문서 취합</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법무 행정 및 소송</td>
+            <td>소송 및 분쟁 대응</td>
+            <td>[법무지원팀] No.02_법원 전자소송 및 집행문 부여 신청</td>
+            <td>지방법원 전자소송 납부 내역 및 소송 수행을 위한 재도/수통 집행문 부여 신청</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법무 행정 및 소송</td>
+            <td>소송 및 분쟁 대응</td>
+            <td>[법무지원팀] No.03_자격시험 전형료 환불 관련 법률 자문</td>
+            <td>시험 및 자격증 운영 시 전형료 환불 분쟁에 대비하기 위한 변호사 검토 의견 내역</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 관리(대) - 연세대-이소윤(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_YONSEI_ISOYUN_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>조직 관리 및 교육</td>
+            <td>신규 인력 온보딩</td>
+            <td>[인사/총무팀] No.01_신입사원 직무 및 기본 소양 교육</td>
+            <td>업무일지 작성, 문서 및 엑셀 관리, 중간 보고 및 전화 응대 요령 등 신입사원 필수 지침 요약</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>센터 운영 전략</td>
+            <td>센터 운영 전략</td>
+            <td>[인사/총무팀] No.02_매니저 워크샵 및 센터 관리 방안</td>
+            <td>수강생 등록 저조 개선안, 연기/환불 등 동의서 처리법, 컴플레인 대처 등 관리자 롤플레잉 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>학사 운영 실무</td>
+            <td>조교 업무 관리</td>
+            <td>[행정/기획팀] No.01_조교 업무 매뉴얼 및 체크리스트</td>
+            <td>사무실 청소, 출결 관리, 카페/블로그 홍보 게시물 업로드 등 주중/주말 조교의 고정 및 비고정 업무 체크리스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 실무</td>
+            <td>일정표 운영</td>
+            <td>[행정/기획팀] No.02_연간 학사일정표</td>
+            <td>각 대학교 센터(연대, 동대, 한림대 등)의 주중/주말반 연간 강의 스케줄표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 실무</td>
+            <td>일정표 운영</td>
+            <td>[행정/기획팀] No.03_수강 상담용 강의 시간표</td>
+            <td>수강 상담 시 안내할 센터별 세부 강의 시간 배정표 및 강의실 정보</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 운영 실무</td>
+            <td>일정표 운영</td>
+            <td>[행정/기획팀] No.07_수강 상담용 강의 시간표 (강남_통번역)</td>
+            <td>강남센터 통번역 과정 시간표, 수강료, 결제 수단 및 준비 서류(여권사본 등) 안내</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 데이터 관리</td>
+            <td>피드백 및 만족도</td>
+            <td>[행정/기획팀] No.04_수강생 만족도 설문조사</td>
+            <td>교재, 커리큘럼, 과제, 교강사 편파성 등 학사 전반에 대한 수강생 중간/기말 평가 양식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 데이터 관리</td>
+            <td>피드백 및 만족도</td>
+            <td>[행정/기획팀] No.08_수강생 사전 설문조사 양식</td>
+            <td>개강 전 수강생의 학습 성향, 등록 동기, 목표 등을 파악하는 영문 설문지 (Intro Questionnaire)</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 데이터 관리</td>
+            <td>학사 DB 취합</td>
+            <td>[행정/기획팀] No.05_수강생 및 졸업생 DB 관리 (기본)</td>
+            <td>M.T.E, 테솔 등 주요 과정의 수료생 및 미수료생 기본 인적 사항 데이터베이스</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수강생 데이터 관리</td>
+            <td>학사 DB 취합</td>
+            <td>[행정/기획팀] No.09_과정별 수강/미수강/졸업생 종합 DB</td>
+            <td>동국대, 연세대 등 센터별 테솔 및 통번역 과정 미수강생, LT(레벨테스트) 완료자 전체 명단 및 이메일 연락처</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>교육 기획 및 행사</td>
+            <td>신규 커리큘럼</td>
+            <td>[행정/기획팀] No.06_신규 교육과정 기획안 (트라도스)</td>
+            <td>트라도스, 멤소스 등 CAT 툴 실습 및 번역회사 창업 과정을 위한 월별 커리큘럼 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>학사 마무리</td>
+            <td>학사 마무리</td>
+            <td>[행정/기획팀] No.10_수료 및 졸업식 행사 브로셔 기획안</td>
+            <td>테솔(TESOL) 수강생 수료증 수여 및 강사 축사 등 졸업식 행사 식순 브로셔</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>수업 및 학사 지침</td>
+            <td>강의 가이드</td>
+            <td>[강사/교무팀] No.01_통번역 강사 학사운영 가이드</td>
+            <td>실래버스 제출, 레벨테스트 채점 지원, 시험 후 1:1 피드백 진행 등 강사 준수 사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수업 및 학사 지침</td>
+            <td>강의 가이드</td>
+            <td>[강사/교무팀] No.02_테솔(TESOL) 수강생 오리엔테이션 패키지</td>
+            <td>기관 소개, 커리큘럼 개요 및 테솔 수강 규정 동의를 받기 위한 오리엔테이션 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>평가 및 성적 산출</td>
+            <td>레벨테스트</td>
+            <td>[강사/교무팀] No.03_영어 구술 레벨테스트 진행 가이드</td>
+            <td>신규 수강생의 구술 의사소통 능력을 측정하기 위한 스피킹 테스트 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>평가 및 성적 산출</td>
+            <td>수강생 성적 관리</td>
+            <td>[강사/교무팀] No.04_통번역 과정 수강생 성적 처리부</td>
+            <td>중간, 기말, 과제, 출석 점수를 합산하여 최종 통번역 ITT 시험 성적을 기록하는 내부 양식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수업 및 학사 지침</td>
+            <td>커리큘럼 세부안</td>
+            <td>[강사/교무팀] No.05_M.T.Editor 강의 실래버스</td>
+            <td>4주간 주중/주말 진행되는 Memsource 활용 실습, 경제/법규 문서 번역 및 통역 진도표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>평가 기준 (MTE)</td>
+            <td>평가 기준 (MTE)</td>
+            <td>[강사/교무팀] No.06_M.T.Editor 3기 평가 시험 지침서</td>
+            <td>Termbase 1순위 적용, 경어체 사용 등 번역 지침과 Memsource 프로젝트 생성 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>수업 및 학사 지침</td>
+            <td>커리큘럼 세부안</td>
+            <td>[강사/교무팀] No.07_기계번역(MT) 및 포스트 에디팅(PE) 교육 자료</td>
+            <td>SMT/NMT 비교, 구두점, 용어, 직역 오류 등 포스트 에디팅 시 필수 수정 사항 교육 슬라이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>평가 기준 (MTE)</td>
+            <td>평가 기준 (MTE)</td>
+            <td>[강사/교무팀] No.08_M.T.Editor 1기 평가 시험 지침서</td>
+            <td>오역(Mistranslation), 언어 품질, 포맷팅 등 Critical/Major/Minor 수준별 오류 허용치 및 채점 기준표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>마케팅 채널 운영</td>
+            <td>온라인 마케팅</td>
+            <td>[마케팅/영업팀] No.01_SNS 마케팅 운영 및 일정 매뉴얼</td>
+            <td>요일별(월~금) 유튜브/네이버tv 영상 업로드, 블로그 포스팅, 카페 관리 등 SNS 채널별 마케팅 스케줄</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 채널 운영</td>
+            <td>온라인 마케팅</td>
+            <td>[마케팅/영업팀] No.02_웹사이트 및 홍보 디자인 가이드</td>
+            <td>워드프레스 관리자 계정 로그인, 팝업/게시판 관리, 메뉴 카테고리 편집 등 자사 웹사이트 수정 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>실무 및 계획</td>
+            <td>실무 및 계획</td>
+            <td>[마케팅/영업팀] No.07_마케팅 담당자 일일 업무일지 양식</td>
+            <td>인터넷 선 연결, 설문지 제작, 번역가 컨택, 인스타 업로드 등 담당자(김지빈)의 시간 단위 업무 기록</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>실무 및 계획</td>
+            <td>실무 및 계획</td>
+            <td>[마케팅/영업팀] No.08_월간 마케팅 목표 및 운영 계획안</td>
+            <td>트래픽 증대 및 온라인 홍보 등 ㈜휴텍씨 마케팅 월간 추진 방향 및 세부 계획안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>실무 및 계획</td>
+            <td>실무 및 계획</td>
+            <td>[마케팅/영업팀] No.12_오즈메일러(뉴스레터) 제작 및 발송 가이드</td>
+            <td>AI 시대 번역가 생존 전략 특강, GALA 컨퍼런스 참가 등 매월 고객에게 발송하는 자사 소식 뉴스레터 시안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>과정 홍보/설명회</td>
+            <td>교육 과정 소개</td>
+            <td>[마케팅/영업팀] No.03_테솔(TESOL) 설명회 자료</td>
+            <td>테솔 과정 커리큘럼 특장점, 취업 연계성 등을 설명하는 예비 수강생 대상 오프라인 발표 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>과정 홍보/설명회</td>
+            <td>교육 과정 소개</td>
+            <td>[마케팅/영업팀] No.04_통번역 과정 소개 자료</td>
+            <td>ITT 자격증 취득 목적 및 비즈니스/전문 통번역 과정의 강점을 소개하는 홍보 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>과정 홍보/설명회</td>
+            <td>교육 과정 소개</td>
+            <td>[마케팅/영업팀] No.05_M.T.Editor 홍보 리플렛</td>
+            <td>인공지능 기반 번역 교육 및 MTE 자격증 취득을 홍보하는 브로슈어 및 리플렛 시안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>과정 홍보/설명회</td>
+            <td>교육 과정 소개</td>
+            <td>[마케팅/영업팀] No.06_M.T.Editor 과정 소개 및 설명회 자료</td>
+            <td>CAT 툴 기초, Memsource 번역 실습 등 MTE 교육과정 세부 일정 및 ITT 자격증 안내 발표용 PPT</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>영업 및 오프라인 행사</td>
+            <td>행사 기획</td>
+            <td>[마케팅/영업팀] No.09_오프라인 행사(영어박람회) 준비 매뉴얼</td>
+            <td>배너/컴퓨터 설치, 박람회 부스 운영, 영수증 처리 및 행사 종료 후 등록 보고서 작성 체크리스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>B2B 및 레퍼런스</td>
+            <td>B2B 및 레퍼런스</td>
+            <td>[마케팅/영업팀] No.10_마케팅 레퍼런스 (기사 및 홍보 채널 모음)</td>
+            <td>4차 산업 번역 기사 링크 및 취업 준비생 타깃 마케팅을 위한 온라인 커뮤니티 주소 목록</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>B2B 및 레퍼런스</td>
+            <td>B2B 및 레퍼런스</td>
+            <td>[마케팅/영업팀] No.11_B2B 통번역 영업용 기업/기관 거래처 DB</td>
+            <td>대학교, 공공기관 및 사기업 담당자 이메일과 연락처가 취합된 통번역 의뢰 영업용 주소록</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>계정 및 자산 관리</td>
+            <td>보안 및 접속 정보</td>
+            <td>[IT/보안팀] No.01_온라인 계정 및 비밀번호 관리 대장</td>
+            <td>네이버/다음 카페, 구인구직(잡코리아), 메일 발송(뿌리오) 등 사내외 업무 관련 주요 사이트 접속 ID 및 비밀번호</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 관리(대) - 메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_MANUAL_ITT_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>사내 행정 및 조직 관리</td>
+            <td>인트라넷 및 포털 운영</td>
+            <td>[인사/총무팀] No.01_전직원 인트라넷 기초 사용법</td>
+            <td>전직원 대상 근태, 일정, 기안, 서식 등 인트라넷 시스템 기본 사용법 안내</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사내 행정 및 조직 관리</td>
+            <td>기업 행정 사이클</td>
+            <td>[인사/총무팀] No.02_기업 연간 인사/총무 사이클 가이드</td>
+            <td>시무식, 연말정산, 워크샵, 인사평가, 승진 등 월별 필수 행정 주기 및 구비 문서 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사내 행정 및 조직 관리</td>
+            <td>대외 조직 확장</td>
+            <td>[인사/총무팀] No.03_해외 지사 설립 및 법무 연락망</td>
+            <td>해외 지사 설립 시 필요한 구비서류 안내 및 협업 가능한 해외 법무 변호사 연락망 리스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>인적 자원 및 역량 평가</td>
+            <td>사원 관리 시스템 (UI)</td>
+            <td>[인사/총무팀] No.04_사원 관리 시스템 UI 참조 (1)</td>
+            <td>전산 시스템 상의 사원 조회 및 관리 페이지 화면 구성 캡처 (1)</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인적 자원 및 역량 평가</td>
+            <td>사원 관리 시스템 (UI)</td>
+            <td>[인사/총무팀] No.05_사원 관리 시스템 UI 참조 (2)</td>
+            <td>전산 시스템 상의 사원 조회 및 관리 페이지 화면 구성 캡처 (2)</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인적 자원 및 역량 평가</td>
+            <td>사원 관리 시스템 (UI)</td>
+            <td>[인사/총무팀] No.06_인트라넷 사원 관리 페이지 화면 구성</td>
+            <td>인트라넷 내 일반 회원, ID, 거주지, 등급 등을 확인할 수 있는 사원 조회 리스트 UI 구조</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인적 자원 및 역량 평가</td>
+            <td>직무 역량 평가</td>
+            <td>[인사/총무팀] No.07_온라인 직무 역량 평가 시스템 가이드</td>
+            <td>Mettl 플랫폼을 활용한 직무별(개발, 재무 등) 역량 테스트 문항 구성 및 평가 대시보드 운영 지침.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>재무/회계 관리</td>
+            <td>기초 회계 운영</td>
+            <td>[재무/회계팀] No.01_기초 회계 및 수납 관리 매뉴얼</td>
+            <td>출퇴근 시간 기록, 교재 판매대장 작성, 현금 수납 확인 및 지출결의서 작성 규정</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>재무/회계 관리</td>
+            <td>세무 및 자금 결산</td>
+            <td>[재무/회계팀] No.02_연말정산 및 세무/자금 관리 가이드</td>
+            <td>보험료 납입증명서 등 연말정산 서류, 성실신고, 세금계산서 등 연간 결산/자금 관리 일정</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>브랜드 홍보 및 자원 관리</td>
+            <td>마케팅 채널 운영</td>
+            <td>[마케팅/디자인팀] No.01_월간 마케팅 일정 및 홍보 매뉴얼</td>
+            <td>일별/월별 마케팅 일정표, 집중 키워드, 메일 발송 내역 및 지식iN/카페를 활용한 홍보 관리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>브랜드 홍보 및 자원 관리</td>
+            <td>디자인 인프라 관리</td>
+            <td>[마케팅/디자인팀] No.02_디자인 자원 및 도메인 관리</td>
+            <td>대표 도메인 만기일 및 FTP 계정 설정 정보, 사이트 관리자 정보, 인쇄물 및 물품 주문 절차</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>번역 프로젝트 관리</td>
+            <td>실무 및 정산 프로세스</td>
+            <td>[운영/번역팀] No.01_통번역사 구인 및 프로젝트 프로세스</td>
+            <td>통번역사 컨택, 요율 책정, NAS 작업지시서 업로드 및 피드백 등 프로젝트 시작 단계 절차</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 프로젝트 관리</td>
+            <td>실무 및 정산 프로세스</td>
+            <td>[운영/번역팀] No.02_번역물 감수 및 비용 정산 매뉴얼</td>
+            <td>2차 원어민 감수 요청, 프로젝트 완료계 제출, 계산서 발행 및 사후 입금 확인 프로세스</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 품질 및 표준 규격</td>
+            <td>번역 품질 및 표준 규격</td>
+            <td>[운영/번역팀] No.03_ISO 17100 번역 작업 흐름 요약</td>
+            <td>ISO 17100 기준에 따른 번역, 교열, 감수, 교정, 최종 검증 등 생산 과정 작업 흐름 요약</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 품질 및 표준 규격</td>
+            <td>번역 품질 및 표준 규격</td>
+            <td>[운영/번역팀] No.04_ISO 17100 번역 서비스 표준 규격서</td>
+            <td>번역 프로젝트 관리자 역량 평가 및 언어 명세서 등 국제 표준 규격(ISO 17100) 요구 사항 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 품질 및 표준 규격</td>
+            <td>번역 품질 및 표준 규격</td>
+            <td>[운영/번역팀] No.05_MTPE 품질평가(LQA) 가이드</td>
+            <td>기계번역 후편집(MTPE) 진행 시 포맷, 용어, 스타일 오류를 측정하기 위한 LQA 세부 평가 기준.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>플랫폼 의뢰 및 매칭</td>
+            <td>[운영/번역팀] No.06_회원 및 전문가 매칭 통합 관리</td>
+            <td>기업 및 개인 회원 데이터 관리와 문서 감수/번역 요청에 따른 전문가 매칭 관리 현황표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>플랫폼 의뢰 및 매칭</td>
+            <td>[운영/번역팀] No.07_홈페이지 번역/서식 의뢰 결제 관리</td>
+            <td>일반회원 구독/충전 현황 및 서식 의뢰 진행(환불, 정산, 리뷰) 상세 결제 정보</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>플랫폼 의뢰 및 매칭</td>
+            <td>[운영/번역팀] No.08_전문가 판매 및 업무 진행 관리</td>
+            <td>전문가 서비스(번역, 행정대행 등) 상품 리스트, 수익률 상태 변경 및 소통(F/B) 내역 관리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>벤더 현황 및 시간 분석</td>
+            <td>[운영/번역팀] No.09_통역사 프로필 및 참고 이미지</td>
+            <td>통번역사 인력 풀(Pool) 등록 및 관리를 위해 활용되는 통역사 프로필 참고 이미지</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>벤더 현황 및 시간 분석</td>
+            <td>[운영/번역팀] No.10_A사 번역/작업 시간 분석 및 데이터 대조</td>
+            <td>특정 벤더사(A사) 작업자의 일자별/세션별 작업 투입 시간(분 단위) 추적 및 총합 분석표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 운영 및 인력 관리</td>
+            <td>벤더 현황 및 시간 분석</td>
+            <td>[운영/번역팀] No.11_구글 벤더 작업 시간 취합 및 오류 검증</td>
+            <td>작업 계정(이메일)별 세션 처리 시간, 누락건 식별 및 자체 취합 데이터와 고객 데이터 간의 차이 비교</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>기본 사이트 세팅</td>
+            <td>[IT/시스템관리팀] No.01_게시판 및 문제 세팅 기초 관리</td>
+            <td>ITT 홈페이지 및 인트라넷 메뉴 내 게시판 생성, 삭제 및 기본 문제 관리 페이지 구성 체계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>기본 사이트 세팅</td>
+            <td>[IT/시스템관리팀] No.06_홈페이지 및 게시판 기본 세팅</td>
+            <td>홈페이지 전체 화면 레이아웃 구성 및 관리자가 직접 통제할 수 있는 게시판 카테고리 세팅 현황.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>기본 사이트 세팅</td>
+            <td>[IT/시스템관리팀] No.07_홈페이지 문제 관리 및 명단 세팅</td>
+            <td>홈페이지 인트라넷의 수강생 응시/미응시 현황, 채점 관리 및 출제자 명단 세팅 화면 구성</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>운영 환경 및 DB 관리</td>
+            <td>[IT/시스템관리팀] No.02_통합메시지함 및 FAQ 관리자 매뉴얼</td>
+            <td>쪽지, Q&A, 서비스 신청, 게시중단 요청 등 통합메시지함 및 FAQ 등록/답변 관리 기능</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>운영 환경 및 DB 관리</td>
+            <td>[IT/시스템관리팀] No.03_문서 카테고리 및 환경설정 관리</td>
+            <td>통독 서비스 내 감수, 번역, 행정대행 등 문서 카테고리 분류 및 기본/전문가 수수료율 설정</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>플랫폼 환경 및 수강 관리</td>
+            <td>운영 환경 및 DB 관리</td>
+            <td>[IT/시스템관리팀] No.04_수강 및 강좌 통합 시스템 관리</td>
+            <td>교재, VOD 강좌 등록, 수강생 신청 내역 및 국제학교 설명회 등 수강 현황 전반의 백엔드 메뉴 트리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>UI/UX 개발 개선</td>
+            <td>[IT/시스템관리팀] No.05_인트라넷 UI 고도화 및 세부 관리</td>
+            <td>결재 라인 개선, 온라인 미팅, 근태 조회 등 인트라넷 UI/UX 수정 요구사항 및 엑셀 다운로드 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>[IT/시스템관리팀] No.08_홈페이지 개발/수정 작업 현황</td>
+            <td>메타 서비스 홈페이지 신규 개발건, 작업 진행 중, 작업 완료 내역 등 상태별 전체 개발 현황표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>서버 연동 및 에러 QA</td>
+            <td>[IT/시스템관리팀] No.09_메타 서비스 서버 및 결제 인수인계서</td>
+            <td>개발자 인수인계를 위한 서버 접속 디렉토리, SSL 인증서, PG 결제 연동 및 로그 파일 경로 사항.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>서버 연동 및 에러 QA</td>
+            <td>[IT/시스템관리팀] No.10_메타 서비스 형식별 업로드 테스트 양식</td>
+            <td>문서(Word, PDF 등), 음성, 영상 확장자별 업로드 속도 및 AI 번역 파일 정상 다운로드 여부 검증표.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>서버 연동 및 에러 QA</td>
+            <td>[IT/시스템관리팀] No.11_메타 서비스 UI 및 기능 오류 리포트 (1)</td>
+            <td>파일 분석 무한 로딩, 서비스 유형(STT 등) 선택 오류, 번역 결과 다운로드 실패 등 사이트 기능 결함 내역.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 개발 및 QA 테스트</td>
+            <td>서버 연동 및 에러 QA</td>
+            <td>[IT/시스템관리팀] No.12_메타 서비스 파일 업로드 및 AI 번역 오류 (2)</td>
+            <td>Xls 파일 크기 초과, 유튜브 URL 인식 불가 등 특정 포맷에서 반복적으로 발생하는 AI 번역 에러 식별 현황.</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>기업 비전 및 신규 기획</td>
+            <td>사업 IR 및 대외 기획</td>
+            <td>[경영기획/신사업팀] No.01_휴텍시 IR 발표 자료</td>
+            <td>투자자 유치 및 기업 대외 홍보(IR) 목적으로 작성된 프레젠테이션 기본 템플릿 문서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>기업 비전 및 신규 기획</td>
+            <td>AI 신규 비즈니스</td>
+            <td>[경영기획/신사업팀] No.02_프롬프트 엔지니어 자격과정 기획안</td>
+            <td>대화형 AI 품질 검증 및 활용 능력 극대화를 위한 급수별 프롬프트 엔지니어 자격과정 분류/제안서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>기업 비전 및 신규 기획</td>
+            <td>AI 신규 비즈니스</td>
+            <td>[경영기획/신사업팀] No.03_프롬프트 엔지니어링 실습 데이터</td>
+            <td>구글 바드를 활용한 리뷰 작성, 블로그 포스팅, 항목 비교 분석 등 실무 맞춤형 AI 프롬프트 명령 예제 모음</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 관리(대) - 메뉴얼(메뉴얼 260304저녁 ~)(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_MANUAL_2603_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>비전 및 구조</td>
+            <td>[서비스기획팀] No.01_사업 개요도 및 비전</td>
+            <td>레쥬미, 메타트랜스 등 주요 서비스의 전체 사업 구조도</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>비전 및 구조</td>
+            <td>[서비스기획팀] No.13_전체 사업 연혁 및 요약 정리</td>
+            <td>연도별 서비스 런칭 일정 및 사업 확장 모델 요약</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>비전 및 구조</td>
+            <td>[서비스기획팀] No.16_사업 개요도 및 비전 (추가본)</td>
+            <td>통독, 레쥬미, 시스트란 자격증 사업 구조 및 수익 모델 추가본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>시장 분석 및 아이디어</td>
+            <td>[서비스기획팀] No.02_경쟁사 분석 및 개선 아이디어</td>
+            <td>타사 카테고리 구성 분석 및 초기 웹사이트 수정 필요사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>시장 분석 및 아이디어</td>
+            <td>[서비스기획팀] No.11_특허 분석 및 신규 서비스 기획안</td>
+            <td>STT/TTS 기반 다국어 번역 서비스 구상 및 사업계획 노트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>사용자 프론트엔드(UI/UX)</td>
+            <td>[서비스기획팀] No.03_일반 사용자 WEB 화면 설계서</td>
+            <td>통독 서비스 고객용 웹페이지 UI/UX 및 기능 명세 스토리보드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>사용자 프론트엔드(UI/UX)</td>
+            <td>[서비스기획팀] No.04_AI 번역 서비스 상세 기획안</td>
+            <td>자동 문서 작성, 영상 번역 등 세부 서비스 화면 설계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>사용자 프론트엔드(UI/UX)</td>
+            <td>[서비스기획팀] No.12_집단지성 서비스 마이페이지 설계안</td>
+            <td>자동 완성 템플릿 및 사용자 내 문서 리스트 관리 UI 구상도</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>관리자 백오피스</td>
+            <td>[서비스기획팀] No.08_관리자 페이지 세부 구상도</td>
+            <td>제휴사 현황, 거래/매출 등 관리자 툴 상세 레이아웃</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>관리자 백오피스</td>
+            <td>[서비스기획팀] No.10_ITT 시험 관리자 WEB 화면 설계서</td>
+            <td>ITT 시험 접수 및 견적 등 관리자 웹페이지 레이아웃 명세</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>시스템 및 프로세스</td>
+            <td>[서비스기획팀] No.05_서비스 전체 사이트맵</td>
+            <td>사용자, 관리자, 전문가 관점의 메뉴 트리 및 사이트맵 구조</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 플랫폼 설계</td>
+            <td>시스템 및 프로세스</td>
+            <td>[서비스기획팀] No.06_시스템 프로세스 흐름도</td>
+            <td>회원가입부터 견적, 번역, 결제까지의 데이터 흐름도</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>시스템 요구사항 및 DB 설계</td>
+            <td>데이터 항목 및 권한</td>
+            <td>[서비스기획팀] No.07_DB 및 관리항목 설정안</td>
+            <td>일반/기업 회원 및 작업 이력 관리를 위한 백오피스 DB 정의</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 요구사항 및 DB 설계</td>
+            <td>데이터 항목 및 권한</td>
+            <td>[서비스기획팀] No.14_관리자 페이지 등급 및 권한 설정안</td>
+            <td>최고/부관리자별 메뉴 접근 권한 및 번역 작업 할당 명세</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 요구사항 및 DB 설계</td>
+            <td>데이터 항목 및 권한</td>
+            <td>[서비스기획팀] No.15_시험 출제/채점 시스템 DB 구조화</td>
+            <td>시험일, 과목, 문제 유형에 따른 출제 및 채점 폼 데이터 구조</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>시스템 요구사항 및 DB 설계</td>
+            <td>기능 요구사항 검수</td>
+            <td>[서비스기획팀] No.09_통합 요구사항 확인 및 체크리스트</td>
+            <td>권한별 필수 구현 기능 및 시스템 검수 리스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>시스템 개발 및 구축</td>
+            <td>AI 솔루션 도입</td>
+            <td>[IT개발팀] No.01_AI 번역 솔루션(MTPE) 도입 및 구축 계획서</td>
+            <td>MTPE 시스템, 원천데이터 추출, 학습 데이터 구축 일정 및 아키텍처</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>제휴 및 영업 관리</td>
+            <td>영업 프로세스</td>
+            <td>[영업팀] No.01_영업 및 매칭 프로세스 맵</td>
+            <td>상품 공급자와 영업 사원 간 가입, 조건 설정, 매칭 흐름도</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>제휴 및 영업 관리</td>
+            <td>고객사 발굴 및 관리</td>
+            <td>[영업팀] No.02_고객사 콜드콜 영업 현황판</td>
+            <td>타겟 고객사 연락처, 콜드콜 통화 내역 및 피드백 정리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>제휴 및 영업 관리</td>
+            <td>시장 수요 조사</td>
+            <td>[영업팀] No.03_대학 타겟 AITe 시험 수요 설문 보고서</td>
+            <td>대학 관련 학과 대상 인공지능 통번역 시험 관심도 조사 결과</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>마케팅 전략 및 운영</td>
+            <td>SNS 및 캠페인 기획</td>
+            <td>[마케팅/디자인팀] No.02_SNS 채널별 마케팅 운영 기획안</td>
+            <td>유튜브, 인스타그램 타겟별 프로모션 이벤트 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 전략 및 운영</td>
+            <td>SNS 및 캠페인 기획</td>
+            <td>[마케팅/디자인팀] No.03_자사 소셜 계정 운영 및 캠페인 전략</td>
+            <td>서비스 인지도 향상을 위한 소셜 마케팅 및 체험단 운영 전략</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 전략 및 운영</td>
+            <td>SNS 및 캠페인 기획</td>
+            <td>[마케팅/디자인팀] No.05_브랜드 캠페인 광고 소재 기획안</td>
+            <td>기존 번역 오류 상황을 풀어낸 브랜드 캠페인 광고 메시지 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 전략 및 운영</td>
+            <td>대행사 및 광고 계정</td>
+            <td>[마케팅/디자인팀] No.06_마케팅 대행사 선정 요청서(RFP)</td>
+            <td>번역사 모집 및 홍보를 위한 광고 대행사 입찰 제안 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 전략 및 운영</td>
+            <td>대행사 및 광고 계정</td>
+            <td>[마케팅/디자인팀] No.08_구글 광고(바드) 계정 관리 대장</td>
+            <td>마케팅 집행을 위한 구글 광고 계정명 및 연락처 목록</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>브랜드 홍보 자산</td>
+            <td>공식 홍보물 기획</td>
+            <td>[마케팅/디자인팀] No.04_메타트랜스 서비스 홍보 브로슈어</td>
+            <td>AI 번역 특장점 안내 공식 홍보 브로슈어</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>브랜드 홍보 자산</td>
+            <td>공식 홍보물 기획</td>
+            <td>[마케팅/디자인팀] No.07_유튜브 홍보 영상 썸네일 기획안</td>
+            <td>109개 언어 번역을 상징하는 시각 디자인 및 캐릭터 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>브랜드 홍보 자산</td>
+            <td>디자인 소스 및 로고</td>
+            <td>[마케팅/디자인팀] No.01_시즌별 마케팅 클립아트 모음</td>
+            <td>이벤트 프로모션에 활용할 시즌 디자인 소스 모음</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>브랜드 홍보 자산</td>
+            <td>디자인 소스 및 로고</td>
+            <td>[마케팅/디자인팀] No.09_브랜드 및 제휴사 로고 에셋 모음</td>
+            <td>타임스미디어 및 제휴 기관 공식 로고 디자인 모음</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>조직 및 정책 관리</td>
+            <td>내부 규정 및 조직도</td>
+            <td>[운영관리부] No.01_조직도 및 내부 관리 규정</td>
+            <td>기획부, 운영부 조직 역할 및 통번역 시험 위원회 체계</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>조직 및 정책 관리</td>
+            <td>시험 운영 정책</td>
+            <td>[운영관리부] No.02_시험 운영 정책 및 가이드</td>
+            <td>시험 접수, 진행 방식, 평가 기준 등 세부 운영 정책</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>조직 및 정책 관리</td>
+            <td>시험 운영 정책</td>
+            <td>[운영관리부] No.03_ITT 시험 언어별 민간자격 운영 규정 통합본</td>
+            <td>다국어 ITT 시험 문항수, 시간, 감독 규정 등 운영 규정 통합본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>조직 및 정책 관리</td>
+            <td>현장 테스트 관리</td>
+            <td>[운영관리부] No.04_시험장(코엑스) 시스템 테스트 가이드</td>
+            <td>코엑스 시험장 진행 중 채점 페이지 시스템 UI 연동 테스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>인적 자원 관리</td>
+            <td>이력 및 경력 관리</td>
+            <td>[인사팀] No.01_핵심 인력 이력서 관리</td>
+            <td>조직 주요 인력의 학력, 경력, 자격증 등 상세 이력 사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>기초 작업 가이드</td>
+            <td>[번역운영팀] No.01_번역 및 감수 작업 가이드북</td>
+            <td>용어 등록, QA 검사 등 실무자용 기초 영상 매뉴얼 목록</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>기초 작업 가이드</td>
+            <td>[번역운영팀] No.04_번역물 기초 작업 및 비식별화 가이드</td>
+            <td>고유명사 처리, 데이터 비식별화(마스킹) 처리 세부 매뉴얼</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>기초 작업 가이드</td>
+            <td>[번역운영팀] No.07_번역물 기초 작업 가이드 (간편본)</td>
+            <td>작업자를 위한 고유명사, 띄어쓰기 오류 수정 등 요약 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>MTPE 세부 지침</td>
+            <td>[번역운영팀] No.06_기계번역 후편집(MTPE) 2차 감수 지침서</td>
+            <td>한영 기계번역 결과물의 원문 오류 및 2차 집중 감수 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>MTPE 세부 지침</td>
+            <td>[번역운영팀] No.09_한영 MTPE 2차 감수 지침 (231013)</td>
+            <td>원문 모호성 처리, 공식 명칭 확인 등 후편집 감수 규칙</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>번역 및 편집 지침</td>
+            <td>MTPE 세부 지침</td>
+            <td>[번역운영팀] No.10_한영 MTPE 2차 감수 지침 (업데이트)</td>
+            <td>대소문자 구분 규칙 등 기존 지침 업데이트 최종본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>품질 평가(QA)</td>
+            <td>품질 평가 기준</td>
+            <td>[번역운영팀] No.03_AI 번역 품질 평가(QA) 문항지</td>
+            <td>웹툰, 드라마 대사를 활용한 O/X 판단 및 객관식 문제지</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>품질 평가(QA)</td>
+            <td>품질 평가 기준</td>
+            <td>[번역운영팀] No.05_프롬프트 및 번역 품질 평가 문항지</td>
+            <td>윤리성, 명료성 등 AI 프롬프트 평가 기준 및 객관식 문항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>품질 평가(QA)</td>
+            <td>품질 평가 기준</td>
+            <td>[번역운영팀] No.08_AI 프롬프트 평가 기준 및 세부 문항</td>
+            <td>프롬프트 평가 지표(Criteria) 상세 정의 및 채점 세부 문항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>품질 평가(QA)</td>
+            <td>번역사 역량 테스트</td>
+            <td>[번역운영팀] No.02_번역사 테스트 샘플 문제</td>
+            <td>인문사회 등 다양한 주제의 번역 품질 및 역량 인물 평가 샘플</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>일반 및 전문 분야</td>
+            <td>[데이터구축팀] No.01_학습용 번역 원천 데이터(일반)</td>
+            <td>AI 학습용 일반 상식 분야 번역 텍스트 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>일반 및 전문 분야</td>
+            <td>[데이터구축팀] No.03_학습용 번역 원천 데이터(전문분야)</td>
+            <td>의료, 법률 등 전문 서적 기반 텍스트 원천 데이터</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>일반 및 전문 분야</td>
+            <td>[데이터구축팀] No.09_학습용 번역 원천 데이터(기업소개)</td>
+            <td>비즈니스 문서 및 특정 기업 소개 번역 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.02_학습용 번역 원천 데이터(미디어)</td>
+            <td>드라마 자막 및 대사 기반 구어체 데이터 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.04_강의 영상 학습 데이터 연동</td>
+            <td>대학 강의 영상 기반 학습용 한국어 음성 데이터 링크</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.06_학습용 번역 원천 데이터(VLOG)</td>
+            <td>한국 브이로그 영상 기반 다국어 번역 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.07_학습용 번역 원천 데이터(엔터테인먼트)</td>
+            <td>유튜브 예능 콘텐츠 화자 대화 기반 번역 데이터</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.10_학습용 번역 원천 데이터(영화)</td>
+            <td>영화 대본(독전 등) 기반 다국어 번역 텍스트 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.11_학습용 번역 원천 데이터(다큐멘터리)</td>
+            <td>다큐멘터리 영상 대화 및 자막 번역 텍스트 말뭉치</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>영상 및 미디어 콘텐츠</td>
+            <td>[데이터구축팀] No.12_학습용 번역 원천 데이터(드라마 추가본)</td>
+            <td>드라마 대사를 활용한 다국어 번역 말뭉치 추가본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>AI 학습 원천 데이터</td>
+            <td>고전문헌</td>
+            <td>[데이터구축팀] No.08_학습용 번역 원천 데이터(고전문헌)</td>
+            <td>세종실록 등 고전 한국어 문헌 기계번역 학습 데이터</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>AI 성능 평가 데이터</td>
+            <td>대화 및 인지 테스트</td>
+            <td>[데이터구축팀] No.05_상황 인지 대화형 테스트 데이터</td>
+            <td>일정, 회의 지시 등 상황별 챗봇 대응 평가용 스크립트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 관리(대) - 메뉴얼 260308(~ 10. 기획서)(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_MANUAL_260308_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>정부지원 및 R&D 사업계획</td>
+            <td>[경영기획팀] No.01_초기창업 사업계획서(휴텍씨)</td>
+            <td>초기창업패키지 지원용 기업 개요, 인사 및 사업 추진 전략 명시</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>정부지원 및 R&D 사업계획</td>
+            <td>[경영기획팀] No.02_사업수행계획서(타임스미디어)</td>
+            <td>AI 번역 모델 학습 데이터 가공 및 플랫폼 개발 세부 일정 요약</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>정부지원 및 R&D 사업계획</td>
+            <td>[경영기획팀] No.13_글로벌 액셀러레이팅 창업기업 모집 공고</td>
+            <td>글로벌 액셀러레이팅 프로그램 지원 기준 및 제외 대상 안내</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>정부지원 및 R&D 사업계획</td>
+            <td>[경영기획팀] No.16_창업성장 R&D 사업계획서(디딤돌)</td>
+            <td>하이브리드 AI 통역 플랫폼 구축 관련 기술개발사업 세부 계획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.03_자동서식플랫폼 사업소개(자격증)</td>
+            <td>인공지능 기반 문서 통독서비스 소개 및 자격증 사업 배경</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.04_자동서식플랫폼 사업계획(교사양성)</td>
+            <td>교사 양성 타겟의 3C, SWOT, 4P 등 비즈니스 분석 및 마케팅 전략</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.05_자동서식플랫폼 차별화전략(커리어)</td>
+            <td>경쟁사 비교 및 NMT(신경망 기계번역) 기반 커리어 모델 차별화 방안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.06_설문지 서비스 사업계획안</td>
+            <td>설문지 사업 추진을 위한 SWOT 분석 및 중장기 전략 기획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.07_전자출판 서비스 사업계획안</td>
+            <td>전자출판 플랫폼 환경 분석 및 세부 마케팅 실행 전략</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.08_화상통역서비스 사업계획서</td>
+            <td>신규 비대면 화상통역서비스 구축 전략 및 서비스 플로우</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 전략</td>
+            <td>신규 플랫폼 및 서비스 기획</td>
+            <td>[경영기획팀] No.11_언택트 시대 O2O 서비스 비전</td>
+            <td>전문가 감수 기반 언택트 O2O 플랫폼 서비스 비전 및 목표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>비즈니스 모델 및 투자유치(IR)</td>
+            <td>[경영기획팀] No.09_휴텍씨 투자유치(IR) 기획서</td>
+            <td>주요 목표 시장, 수익 모델 구조 및 B2B 자금 조달 계획 정리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>비즈니스 모델 및 투자유치(IR)</td>
+            <td>[경영기획팀] No.10_AI 번역 및 MTPE 비즈니스 모델</td>
+            <td>AI 번역 후 전문가가 교정하는 MTPE 기반 워크플로우 분석</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>프로젝트 및 인력 관리</td>
+            <td>[경영기획팀] No.12_다국어 프로젝트 및 팀원 관리 방안</td>
+            <td>다국어 프로젝트 과부하 방지를 위한 행정 지원 및 팀원 교육 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>프로젝트 및 인력 관리</td>
+            <td>[경영기획팀] No.14_팀원 관리 및 번역대결 관련 발표</td>
+            <td>업무 과부하 방지를 위한 행정 업무 담당자 양성 지침</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>프로젝트 및 인력 관리</td>
+            <td>[경영기획팀] No.15_다국어 프로젝트 및 팀원 관리 방안_v2</td>
+            <td>4차 산업혁명 인재상 및 팀원 행정/업무 부하 관리 지침 수정본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 운영 및 관리</td>
+            <td>프로젝트 및 인력 관리</td>
+            <td>[경영기획팀] No.17_다국어 프로젝트 관리 및 행정 인력 양성 발표</td>
+            <td>다국어 프로젝트 과부하 해소 및 팀원 교육을 위한 발표 요약</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 아키텍처 및 기술</td>
+            <td>[IT지원팀] No.06_온라인 플랫폼 시스템 아키텍처</td>
+            <td>서버/DB 구조 및 자동번역 수집부터 평가까지의 워크플로우 도식화</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 아키텍처 및 기술</td>
+            <td>[IT지원팀] No.08_신경망(Neural) MT 기술 및 자동문서 개발 구조</td>
+            <td>문서 원스톱 생성, 전자서명 및 딥러닝 번역 프레임워크 화면</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 아키텍처 및 기술</td>
+            <td>[IT지원팀] No.09_음성 통역시스템(STT/TTS) Flow</td>
+            <td>구글 Open API 활용 음성-텍스트 변환 및 통역 파이프라인</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>플랫폼 개발 및 운영 관리</td>
+            <td>[IT지원팀] No.05_홈페이지 및 인트라넷 구조 가이드</td>
+            <td>ITT 웹사이트 및 사내 인트라넷의 전반적 서비스 화면/메뉴 구조</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>플랫폼 개발 및 운영 관리</td>
+            <td>[IT지원팀] No.07_플랫폼 개발 및 인력 일정표</td>
+            <td>기획, DB설계, 타사 API 연계 등 단계별 플랫폼 개발 타임라인</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>사내 협업 및 관리 도구</td>
+            <td>[IT지원팀] No.01_사내 협업툴(WAPL) 사용 매뉴얼</td>
+            <td>와플(WAPL) 메일, 드라이브, 캘린더 등 클라우드 협업툴 핵심 기능</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>사내 협업 및 관리 도구</td>
+            <td>[IT지원팀] No.02_클라우드 서비스 도입 점검표</td>
+            <td>티맥스와플, 도디오 등 사내 도입 클라우드 SW 및 시스템 점검 사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>평가 및 에디팅 시스템 가이드</td>
+            <td>[IT지원팀] No.03_시험 관리자 및 채점 시스템 매뉴얼</td>
+            <td>수험생 정답 채점, 분류 코드 등록, 관리자 마이페이지 UI/UX 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>평가 및 에디팅 시스템 가이드</td>
+            <td>[IT지원팀] No.04_MTPE 번역 에디터 사용 가이드</td>
+            <td>자동 번역 후 전문가(Editing) 리뷰 시스템 로그인 및 다운로드 매뉴얼</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 테스트 및 접근성</td>
+            <td>[IT지원팀] No.11_수험생 테스트 영상(긴 영상 1)</td>
+            <td>시스템 채점 및 평가 구동 테스트용 수험생 긴 음성/영상 파일</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 테스트 및 접근성</td>
+            <td>[IT지원팀] No.12_수험생 테스트 영상(긴 영상 2)</td>
+            <td>시스템 채점 및 평가 구동 테스트용 수험생 긴 음성/영상 파일</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 테스트 및 접근성</td>
+            <td>[IT지원팀] No.13_수험생 테스트 영상(짧은 영상)</td>
+            <td>시스템 채점 및 평가 구동 테스트용 수험생 단문 음성/영상 파일</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 테스트 및 접근성</td>
+            <td>[IT지원팀] No.14_메타 플랫폼 테스트 영상(짧은 영상 합본)</td>
+            <td>플랫폼 시스템 테스트 및 구동 점검을 위한 짧은 영상 합본 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 인프라 및 시스템 구축</td>
+            <td>시스템 테스트 및 접근성</td>
+            <td>[IT지원팀] No.10_TTS 시각장애인용 지원 영상</td>
+            <td>텍스트 음성 변환(TTS) 기술 적용 시각장애인 영상 구동 확인</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 서비스 신청 서류</td>
+            <td>[경영지원팀] No.01_클라우드서비스 이용 신청서(아이티티)</td>
+            <td>(주)아이티티 법인 와플 등 클라우드 바우처 신규 신청 서류</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 서비스 신청 서류</td>
+            <td>[경영지원팀] No.02_클라우드서비스 이용 신청서(중앙통번역)</td>
+            <td>중앙통번역센터 법인 수요기업 클라우드 서비스 신청 서류</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 서비스 신청 서류</td>
+            <td>[경영지원팀] No.05_클라우드서비스 신규 이용 신청서 양식</td>
+            <td>정부지원 클라우드 서비스 도입을 위한 수요기업 신청서 원본 서식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 서비스 신청 서류</td>
+            <td>[경영지원팀] No.06_클라우드서비스 신규 이용 신청서(아이티티)</td>
+            <td>(주)아이티티 명의의 신규 클라우드 바우처 지원사업 신청서 사본</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.03_클라우드 바우처 수요기업 및 계약 현황</td>
+            <td>솔루션 계약금액, 수요기업 부담금, 정부지원금 처리 기준 내역</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.07_클라우드서비스 이용계획서(아이티티)</td>
+            <td>외부 및 재택근무 효율성 향상을 위한 클라우드 활용 목적 및 계획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.08_클라우드 도입컨설팅 사전 진단표(중통)</td>
+            <td>중앙통번역센터 클라우드 도입 컨설팅을 위한 기업 정보 진단표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.09_클라우드 도입컨설팅 사전 진단표 이미지</td>
+            <td>기업 현황 및 서비스 이용 파악을 위한 사전 진단표 서식 이미지</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.10_클라우드 이용 세부사항 점검표(아이티티)</td>
+            <td>현재 이용 중인 서비스 내역 및 활용 목적에 대한 아이티티 점검표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>클라우드 바우처 도입 및 행정</td>
+            <td>클라우드 계약 및 진단 평가</td>
+            <td>[경영지원팀] No.11_클라우드 이용 세부사항 점검표(중통)</td>
+            <td>현재 이용 중인 서비스 내역 및 활용 목적에 대한 중통 세부 점검표</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>법무 및 정보 보안</td>
+            <td>개인정보 활용 동의</td>
+            <td>[경영지원팀] No.04_개인정보 수집 및 이용 동의서 양식</td>
+            <td>플랫폼 및 서비스 이용을 위한 기본 개인정보 처리 방침 양식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법무 및 정보 보안</td>
+            <td>개인정보 활용 동의</td>
+            <td>[경영지원팀] No.12_개인정보 수집 이용 동의서(아이티티)</td>
+            <td>클라우드 사업 참여를 위한 (주)아이티티 임직원 개인정보 동의서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>법무 및 정보 보안</td>
+            <td>개인정보 활용 동의</td>
+            <td>[경영지원팀] No.13_개인정보 수집 이용 동의서(중통)</td>
+            <td>클라우드 사업 참여를 위한 (주)중앙통번역센터 임직원 개인정보 동의서</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 관리(대) - 메뉴얼 260308(nia ~)(중) 전용 표 HTML (요청 데이터 기반)
+    const ADMIN_MANUAL_260308_NIA_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부내용</th>
+            <th>비고</th>
+            <th>첨부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>경영지원</td>
+            <td>공통 및 인수인계</td>
+            <td>[경영지원팀] No.01_인사·총무·재무 통합 인수인계 가이드</td>
+            <td>법인인감, 통장, 급여, 계약서, 사무실 임대 및 비품 관리 등 회사 운영 전반 인수인계 사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>영업 및 운영</td>
+            <td>번역 실무 및 툴 관리</td>
+            <td>[영업/운영팀] No.01_번역 툴(에버트란) 사용 기초 매뉴얼</td>
+            <td>VISUALTRAN MATE 툴 활용 기계 및 직접 번역 작업 기초 가이드</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>영업 및 운영</td>
+            <td>번역 요청 및 플랫폼 관리</td>
+            <td>[영업/운영팀] No.02_번역 플랫폼(숨고) 요청 내역 관리대장</td>
+            <td>학술, IT, 비즈니스 등 분야별 출발/도착 언어 고객 번역 요청 리스트 관리</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>영업 및 운영</td>
+            <td>아웃바운드 및 대외 영업</td>
+            <td>[영업/운영팀] No.03_아웃바운드 영업 콜리스트 및 응대 매뉴얼</td>
+            <td>공공기관 및 기업 대상 번역 제안 영업 전화 리스트 및 응대 이력</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>영업 및 운영</td>
+            <td>오프라인 및 인바운드 영업</td>
+            <td>[영업/운영팀] No.04_오프라인 전시회(엑스포) 고객 리드 및 응대 내역</td>
+            <td>엑스포 수집 고객 명함 및 번역/에디터 수요 응대 이력</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>영업 및 운영</td>
+            <td>오프라인 및 인바운드 영업</td>
+            <td>[영업/운영팀] No.05_고객 번역 문의 및 상담 양식(공군)</td>
+            <td>공군 등 고객 번역 논의 및 상담 접수용 연락처 기재 서식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>사업 기획 및 지원</td>
+            <td>지원사업 기획 및 서식</td>
+            <td>[기획/사업팀] No.01_바우처 지원사업 계획서 작성 가이드</td>
+            <td>바우처 사업용 기업현황, 추진목표, 자본 및 인력현황 작성 양식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 지원</td>
+            <td>신규 사업 기획</td>
+            <td>[기획/사업팀] No.02_신규 사업(교사 양성) 추진 기획서</td>
+            <td>무들(Moodle) 기반 온라인 교사 양성 사업 추진 전략 및 운영 계획</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 지원</td>
+            <td>지원사업 기획 및 서식</td>
+            <td>[기획/사업팀] No.03_정부지원사업 첨부서류(국세/지방세) 가이드</td>
+            <td>클라우드 서비스 등 지원사업 제출용 국세 및 지방세 완납증명 첨부 내역</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>사업 기획 및 지원</td>
+            <td>지원사업 기획 및 서식</td>
+            <td>[기획/사업팀] No.04_지원사업 참여기관 참여의사 확인서 서식</td>
+            <td>정부 및 지원사업 참여기관 의사 확인서 기본 양식</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>공공 제안 및 사양 관리</td>
+            <td>공공 RFP 분석</td>
+            <td>[기획/사업팀] No.05_공공기관 RFP 분석(여성가족부)</td>
+            <td>아이돌봄 시스템 운영 유지관리 요구사항 및 산출물 관리 방안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>공공 제안 및 사양 관리</td>
+            <td>공공 RFP 분석</td>
+            <td>[기획/사업팀] No.06_공공기관 RFP 분석(외교부)</td>
+            <td>노후서버 교체 사업 관련 보안 준수사항 및 하도급 계획 행정 서식 리스트</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>공공 제안 및 사양 관리</td>
+            <td>공공 RFP 분석</td>
+            <td>[기획/사업팀] No.07_공공기관 RFP 분석(지역정보개발원)</td>
+            <td>온-나라 문서, 클라우드 업무환경 등 정보시스템 유지관리 요구사항</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>공공 제안 및 사양 관리</td>
+            <td>시스템 사양 관리</td>
+            <td>[기획/사업팀] No.08_고객사(영남대의료원) 시스템 사양서</td>
+            <td>고객사(의료원) 시스템 도입 및 구축 필요 세부 사양 정보</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>서비스 기획</td>
+            <td>플랫폼 컨셉 기획</td>
+            <td>[서비스기획팀] No.01_신규 서비스(레쥬미) 컨셉 기획서</td>
+            <td>맞춤형 이력서 자동완성, AI 번역, 메타버스 포트폴리오 등 신규 기능 컨셉</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>서비스 기획</td>
+            <td>UI/UX 상세 기획</td>
+            <td>[서비스기획팀] No.02_자격증 플랫폼 관리자/사용자 상세 기획서</td>
+            <td>자격증 출제/채점 시스템 UI 구성 및 응시자 관리 기능 상세 기획안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>IT 개발 및 유지보수</td>
+            <td>퍼블리싱 및 코드 관리</td>
+            <td>[IT/개발팀] No.01_웹페이지 퍼블리싱(HTML/CSS) 수정 가이드</td>
+            <td>웹 화면 깨짐 해결(display:flex 등) 및 CSS/HTML 코드 수정 이력</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>IT 개발 및 유지보수</td>
+            <td>웹사이트 유지보수</td>
+            <td>[IT/개발팀] No.02_홈페이지 유지보수(지도/주소) 수정 요청서</td>
+            <td>서비스 홈페이지 내 잘못 기재된 지도 및 주소 정보 변경 요청 내역</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+
+          <tr>
+            <td>마케팅 기획 및 관리</td>
+            <td>에셋 및 폴더 관리</td>
+            <td>[마케팅/디자인팀] No.01_마케팅 에셋 폴더 구조 및 활용 기초</td>
+            <td>유튜브, 인스타, 블로그 등 디자인 소스 폴더 위치 및 에셋 활용법</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인 기획</td>
+            <td>웹 및 UI 디자인</td>
+            <td>[마케팅/디자인팀] No.02_웹사이트 디자인 레퍼런스 분석</td>
+            <td>타사 벤치마킹 링크 및 스크롤 레이아웃 등 웹사이트 기획 참고 자료</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인 기획</td>
+            <td>웹 및 UI 디자인</td>
+            <td>[마케팅/디자인팀] No.03_통번역 서비스 UI 디자인 시안</td>
+            <td>통번역 서비스 관련 웹페이지 시각적 UI 디자인 스케치 시안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인 기획</td>
+            <td>홍보물 디자인</td>
+            <td>[마케팅/디자인팀] No.04_서비스 홍보 브로셔 디자인 가이드</td>
+            <td>AI 번역 및 폼 기반 자동 문서 작성 홍보용 브로셔 시각 디자인 시안</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>마케팅 기획 및 관리</td>
+            <td>전시회 홍보 전략</td>
+            <td>[마케팅/디자인팀] No.05_오프라인 전시회 홍보 마케팅 전략</td>
+            <td>전시회용 AI 텍스트 번역 및 STT/TTS 기술 홍보 스크립트 마케팅 전략</td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // 마케팅(대분류 마케팅) 전용 표 HTML
+    const MARKETING_TABLE_HTML = `
+      <table class="tesol-table">
+        <thead>
+          <tr>
+            <th>대분류 (파일명)</th>
+            <th>중분류</th>
+            <th>소분류</th>
+            <th>세부 내용</th>
+            <th>비고</th>
+            <th>첨부 파일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>3월워크샵-지선1(자주하는질문).pdf</td>
+            <td>업무 사이트<br>로그인 정보</td>
+            <td>1. 타임스미디어/알바몬<br>2. 코레일 예매</td>
+            <td>
+              • e-campus 및 알바몬(기업회원) 계정 정보<br>
+              • 코레일 예매 시 회원할인 폐지로 인한 승차권 구입 요청 절차
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3월워크샵-지선2(신규업무일지).pdf</td>
+            <td>신규 업무일지<br>시스템 사용법</td>
+            <td>1. 작성 형식<br>2. 기안서 연동</td>
+            <td>
+              • 2주 단위 업무 작성, 소요시간(1시간=1) 표기 및 완료 체크 방법<br>
+              • 작성된 일지를 기안서로 보고하여 일일/주간 계획을 동시에 해결하는 방법
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>3월워크샵-지선4(보고문서).pdf</td>
+            <td>행정 및 재고<br>관리 대장</td>
+            <td>1. 교재 및 상품권 대장<br>2. 강좌 행정 보고</td>
+            <td>
+              • 주교재/부교재 입출고 및 재고 누적 관리, 백화점/문화 상품권 관리 대장 작성<br>
+              • 개/종강 보고서 양식 통일, 온라인 활동 대장 및 Survey 파일 관리
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>각종홍보물특징정리.pdf</td>
+            <td>오프라인 홍보물<br>디자인 분석</td>
+            <td>1. 접지 및 지하철 광고<br>2. 오프라인 배너</td>
+            <td>
+              • TESOL, 미국 캘리포니아 주립대, 자격증 이미지, 국비지원 등의 강조 요소 분석<br>
+              • 전화번호 시인성에 따른 디자인의 좋은 예와 나쁜 예 비교
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인물정리-오프라인-브로셔.pdf</td>
+            <td>브로셔 디자인<br>가이드 및 사례</td>
+            <td>1. 자사 브랜드 브로셔<br>2. 제휴 기관 브로셔</td>
+            <td>
+              • 타임스미디어 연혁, 타임스 테솔, 출강, ITT 시험 브로셔 구성<br>
+              • 국내 대학(동국대, 단국대 등) 테솔, EBUS(국제전형), ICS(국제학교) 브로셔 내용
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인물정리-오프라인_1.pdf</td>
+            <td>기타 오프라인<br>홍보 인쇄물</td>
+            <td>1. 3단/반접지 및 전단지<br>2. 포스터 및 현수막</td>
+            <td>
+              • 레벨테스트 문어발 쿠폰 활용, 대학별 장점 부각 전단지<br>
+              • 원거리 시인성을 위한 굵은 테두리 및 큰 전화번호 적용 가이드
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>디자인물정리-온라인.pdf</td>
+            <td>온라인 홍보물<br>이미지 관리</td>
+            <td>1. 웹 배너 홍보 소스<br>2. 커뮤니티(카페) 이미지</td>
+            <td>
+              • 설명회, 개강 안내 및 공통 이벤트(댓글 응원, 텀블러 증정 등) 배너 제작<br>
+              • 네이버 카페 대문(탑 이미지) 교체용 템플릿 관리
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>인트라 문제점.pdf</td>
+            <td>사내 시스템<br>오류 증상</td>
+            <td>1. 인트라넷 화면 오류</td>
+            <td>
+              • 인트라넷에서 다른 작업 수행 후 메인 화면으로 복귀 시 빈 화면이 노출되는 문제 현상 보고
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+          <tr>
+            <td>홈페이지교육.pdf</td>
+            <td>홈페이지<br>관리 시스템</td>
+            <td>1. 학사 및 설명회 관리<br>2. 페이지 편집 기능</td>
+            <td>
+              • 인트라넷을 통한 기수 일정 등록 및 설명회 진행/종료 상태 관리<br>
+              • 팝업창 이미지 적용 및 서브페이지 내 텍스트 메뉴 직접 편집 방법
+            </td>
+            <td><input type="text" placeholder="메모를 입력하세요" /></td>
+            <td><input type="file" /></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tesol-feedback">
+        <label for="marketing_overall_feedback">전체 피드백</label>
+        <textarea id="marketing_overall_feedback" rows="4" placeholder="마케팅 관련 전체 피드백, 개선 사항 등을 기록하세요."></textarea>
+      </div>
+    `;
+
+    // 부서별 세부 내용 설정 (현재는 공통 메시지 + TESOL/번역 전용만 사용)
+    const deptDetailConfig = {};
+
+    // 개별 표(테솔/번역/마케팅)에서 대분류·중분류 기준으로 행을 필터링해
+    // 소분류/세부 내용/비고/첨부만 모은 새로운 표를 보여 주는 공통 함수
+    function setupPerTableFilter(tableElement, options = {}) {
+      if (!tableElement) return;
+
+      const rows = Array.from(tableElement.querySelectorAll('tbody tr'));
+      if (!rows.length) return;
+
+      const data = rows.map(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 6) return null;
+        return {
+          major: tds[0].textContent.trim(),   // 대분류
+          middle: tds[1].textContent.trim(),  // 중분류
+          minor: tds[2].textContent.trim(),   // 소분류
+          detail: tds[3].innerHTML,           // 세부 내용 (HTML 유지)
+          note: tds[4].innerHTML,             // 비고
+          attach: tds[5].innerHTML            // 첨부
+        };
+      }).filter(Boolean);
+
+      if (!data.length) return;
+
+      const majors = Array.from(new Set(data.map(r => r.major)));
+
+      // 필터/결과를 감싸는 래퍼 생성 (원본 표는 데이터 소스로만 사용)
+      const wrapper = document.createElement('div');
+      wrapper.className = 'table-filter-wrapper';
+      const parent = tableElement.parentNode;
+      if (!parent) return;
+      parent.insertBefore(wrapper, tableElement);
+      wrapper.appendChild(tableElement);
+      // 큰 원본 표는 숨기고, 아래 결과 표만 보여 주도록 처리
+      tableElement.style.display = 'none';
+
+      // 필터 바 (대분류 / 중분류 체크박스 그룹)
+      const filterBar = document.createElement('div');
+      filterBar.className = 'table-filter-bar';
+      filterBar.innerHTML = `
+        <div class="table-filter-toolbar">
+          <button type="button" class="filter-reset-btn">전체 보기</button>
+          <button type="button" class="filter-clear-btn">전체 해제</button>
+          ${
+            options.detailLink
+              ? `<a href="${options.detailLink}" class="detail-link-btn" target="_blank" rel="noopener noreferrer">
+                   상세 매뉴얼 보기
+                 </a>`
+              : ''
+          }
+        </div>
+        <div class="filter-major-group">
+          <span class="filter-label">대분류</span>
+          ${majors
+            .map(
+              m => `
+                <label class="checkbox-label">
+                  <input type="checkbox" class="filter-major" value="${m}"> ${m}
+                </label>
+              `
+            )
+            .join('')}
+        </div>
+        <div class="filter-middle-group">
+          <span class="filter-label">중분류</span>
+        </div>
+      `;
+      wrapper.insertBefore(filterBar, tableElement);
+
+      const resultBox = document.createElement('div');
+      resultBox.className = 'table-filter-result';
+      wrapper.appendChild(resultBox);
+
+      const majorCheckboxes = Array.from(filterBar.querySelectorAll('input.filter-major'));
+      const middleGroupEl = filterBar.querySelector('.filter-middle-group');
+      const resetButton = filterBar.querySelector('.filter-reset-btn');
+      const clearButton = filterBar.querySelector('.filter-clear-btn');
+
+      function getSelectedMajors() {
+        return majorCheckboxes
+          .filter(cb => cb.checked)
+          .map(cb => cb.value);
+      }
+
+      function getSelectedMiddles() {
+        const middleCheckboxes = Array.from(
+          middleGroupEl.querySelectorAll('input.filter-middle')
+        );
+        return middleCheckboxes
+          .filter(cb => cb.checked)
+          .map(cb => cb.value);
+      }
+
+      function updateMiddleOptions() {
+        const selectedMajors = getSelectedMajors();
+        const prevSelectedMiddles = getSelectedMiddles();
+
+        // 대분류를 하나도 선택하지 않은 경우: 중분류/표 모두 안내만 표시
+        if (!selectedMajors.length) {
+          middleGroupEl.innerHTML = `
+            <span class="filter-label">중분류</span>
+            <span style="font-size:0.8rem; color:#94a3b8; margin-left:0.5rem;">
+              먼저 대분류를 선택해 주세요.
+            </span>
+          `;
+          resultBox.innerHTML =
+            '<p class="empty-message">대분류를 선택하면, 해당 항목의 중분류와 표가 표시됩니다.</p>';
+          return;
+        }
+
+        const middles = Array.from(
+          new Set(
+            data
+              .filter(r => selectedMajors.includes(r.major))
+              .map(r => r.middle)
+          )
+        );
+
+        middleGroupEl.innerHTML = `
+          <span class="filter-label">중분류</span>
+          ${
+            middles
+              .map(
+                m => `
+                  <label class="checkbox-label">
+                    <input type="checkbox" class="filter-middle" value="${m}"> ${m}
+                  </label>
+                `
+              )
+              .join('')
+          }
+        `;
+
+        const middleCheckboxes = Array.from(
+          middleGroupEl.querySelectorAll('input.filter-middle')
+        );
+        middleCheckboxes.forEach(cb => {
+          if (prevSelectedMiddles.includes(cb.value)) {
+            cb.checked = true;
+          }
+          cb.addEventListener('change', renderResult);
+        });
+      }
+
+      function renderResult() {
+        const selectedMajors = getSelectedMajors();
+        const selectedMiddles = getSelectedMiddles();
+
+        // 1) 대분류가 하나도 선택되지 않은 경우: 표 숨기고 안내만
+        if (!selectedMajors.length) {
+          resultBox.innerHTML =
+            '<p class="empty-message">대분류를 먼저 선택해 주세요.</p>';
+          return;
+        }
+
+        // 2) 중분류가 하나도 선택되지 않은 경우: 표 숨기고 안내만
+        if (!selectedMiddles.length) {
+          resultBox.innerHTML =
+            '<p class="empty-message">중분류를 선택하면 해당 항목만 표로 보여 드립니다.</p>';
+          return;
+        }
+
+        // 3) 둘 다 선택된 경우에만 실제 데이터 필터링
+        const filtered = data.filter(r =>
+          selectedMajors.includes(r.major) &&
+          selectedMiddles.includes(r.middle)
+        );
+
+        if (!filtered.length) {
+          resultBox.innerHTML = '<p class="empty-message">조건에 맞는 항목이 없습니다.</p>';
+          return;
+        }
+
+        const baseHeaders = options.headers || {};
+        const headers = {
+          major: baseHeaders.major || '대분류',
+          middle: baseHeaders.middle || '중분류',
+          minor: baseHeaders.minor || '소분류',
+          detail: baseHeaders.detail || '세부 내용',
+          note: baseHeaders.note || '비고',
+          attach: baseHeaders.attach || '첨부'
+        };
+
+        resultBox.innerHTML = `
+          <table class="tesol-table">
+            <thead>
+              <tr>
+                <th>${headers.major}</th>
+                <th>${headers.middle}</th>
+                <th>${headers.minor}</th>
+                <th>${headers.detail}</th>
+                <th>${headers.note}</th>
+                <th>${headers.attach}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered
+                .map(
+                  r => `
+                    <tr>
+                      <td>${r.major}</td>
+                      <td>${r.middle}</td>
+                      <td>${r.minor}</td>
+                      <td>${r.detail}</td>
+                      <td>${r.note}</td>
+                      <td>${r.attach}</td>
+                    </tr>
+                  `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      majorCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          updateMiddleOptions();
+          renderResult();
+        });
+      });
+
+      // 전체 보기: 모든 대분류/중분류를 선택해 한 번에 표시
+      if (resetButton) {
+        resetButton.addEventListener('click', () => {
+          // 모든 대분류 체크
+          majorCheckboxes.forEach(cb => {
+            cb.checked = true;
+          });
+          // 선택된 대분류 기준으로 중분류 목록 갱신
+          updateMiddleOptions();
+          // 생성된 모든 중분류 체크
+          const middleCheckboxes = Array.from(
+            middleGroupEl.querySelectorAll('input.filter-middle')
+          );
+          middleCheckboxes.forEach(cb => {
+            cb.checked = true;
+          });
+          // 전체 행 표시
+          renderResult();
+        });
+      }
+
+      // 전체 해제: 모든 선택을 해제하고 초기 안내 상태로 되돌림
+      if (clearButton) {
+        clearButton.addEventListener('click', () => {
+          // 모든 대분류 체크 해제
+          majorCheckboxes.forEach(cb => {
+            cb.checked = false;
+          });
+          // 대분류 선택이 없으므로, 중분류/표는 updateMiddleOptions 내부 안내 상태로 초기화
+          updateMiddleOptions();
+          renderResult();
+        });
+      }
+
+      // 초기 렌더링: "전체" 상태에서 모든 행을 보여 준 뒤, 이후 선택값에 따라 필터링
+      updateMiddleOptions();
+      renderResult();
+    }
+
+    function handleDeptMediumSelection() {
+      const mediumChecked = Array.from(document.querySelectorAll('input[name="dept_medium"]:checked')).map(el => el.value);
+      const largeChecked = Array.from(document.querySelectorAll('input[name="dept_large"]:checked')).map(el => el.value);
+      const label = document.getElementById('selectedDeptLabel');
+      const desc = document.getElementById('detailPanelDesc');
+      const tabs = document.getElementById('detailTabs');
+      const body = document.getElementById('deptDetailContent');
+
+      // 관리(대) + 통합(중) 조합: 여러 표를 합쳐 소분류(그룹) 기준으로 필터링해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('통합')) {
+        if (label) label.textContent = '선택: 관리 - 통합';
+        if (desc) desc.textContent = '소분류(그룹)를 선택하면 해당 그룹 항목만 표시됩니다. 선택이 없으면 전체를 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminUnifiedByGroup(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 조수연(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('조수연')) {
+        if (label) label.textContent = '선택: 관리 - 조수연';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminJosuyeonByTeam(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 연세대-이소윤(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('연세대-이소윤')) {
+        if (label) label.textContent = '선택: 관리 - 연세대-이소윤';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminYonseiIsoyunByTeam(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)')) {
+        if (label) label.textContent = '선택: 관리 - 메뉴얼(3월 6일 2차 메뉴얼 ~ ITT 메뉴얼)';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminManualIttByTeam(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 메뉴얼(메뉴얼 260304저녁 ~)(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('메뉴얼(메뉴얼 260304저녁 ~)')) {
+        if (label) label.textContent = '선택: 관리 - 메뉴얼(메뉴얼 260304저녁 ~)';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminManual2603ByTeam(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 메뉴얼 260308(~ 10. 기획서)(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('메뉴얼 260308(~ 10. 기획서)')) {
+        if (label) label.textContent = '선택: 관리 - 메뉴얼 260308(~ 10. 기획서)';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminManual260308ByTeam(body);
+        }
+        return;
+      }
+
+      // 관리(대) + 메뉴얼 260308(nia ~)(중) 조합: 소분류(팀)별 표로 분리해 표시
+      if (largeChecked.includes('관리') && mediumChecked.includes('메뉴얼 260308(nia ~)')) {
+        if (label) label.textContent = '선택: 관리 - 메뉴얼 260308(nia ~)';
+        if (desc) desc.textContent = '소분류(팀)를 선택하면 해당 팀 표만 표시됩니다. 선택이 없으면 전체 팀 표를 모두 보여 줍니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          renderAdminManual260308NiaByTeam(body);
+        }
+        return;
+      }
+
+      // 대분류 마케팅 선택 시 마케팅 워크숍/홍보/인트라/홈페이지 표 노출
+      if (largeChecked.includes('마케팅')) {
+        if (label) label.textContent = '선택: 마케팅';
+        if (desc) desc.textContent = '마케팅 워크숍 자료, 오프라인·온라인 홍보물, 인트라·홈페이지 관리 관련 매뉴얼 요약입니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          body.innerHTML = MARKETING_TABLE_HTML;
+          const marketingTable = body.querySelector('table.tesol-table');
+          setupPerTableFilter(marketingTable, {
+            headers: {
+              minor: '소분류',
+              detail: '세부 내용',
+              note: '비고',
+              attach: '첨부 파일'
+            },
+            detailLink: 'https://notebooklm.google.com/notebook/fb360ef5-6d47-4346-9069-06a4994d03e3'
+          });
+        }
+        return;
+      }
+
+      // 강사(대) + 테솔(중) 조합일 때 TESOL 표 노출
+      if (largeChecked.includes('강사') && mediumChecked.includes('테솔')) {
+        if (label) label.textContent = '선택: 강사 - TESOL 프로그램';
+        if (desc) desc.textContent = 'TESOL 프로그램 매뉴얼 종합 목차 및 요점 정리입니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          body.innerHTML = TESOL_TABLE_HTML;
+          const tesolTable = body.querySelector('table.tesol-table');
+          setupPerTableFilter(tesolTable, {
+            headers: {
+              minor: '소분류 (Minor)',
+              detail: '요점 정리 (Content)',
+              note: '비고',
+              attach: '첨부'
+            },
+            detailLink: 'https://notebooklm.google.com/notebook/e4c67e48-ab2f-4a9d-bce3-62fd82ce84ba'
+          });
+        }
+        return;
+      }
+
+      // 강사(대) + 번역(중) 조합일 때 번역/센터 운영 표 노출
+      if (largeChecked.includes('관리') && mediumChecked.includes('타임스-송영란')) {
+        if (label) label.textContent = '선택: 강사 - 번역/센터 운영';
+        if (desc) desc.textContent = '통번역 센터 수강생 모집, 학사·강사·마케팅·행정 운영 매뉴얼 요약입니다.';
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          body.innerHTML = TRANSLATION_TABLE_HTML;
+          const translationTable = body.querySelector('table.tesol-table');
+          setupPerTableFilter(translationTable, {
+            headers: {
+              minor: '소분류',
+              detail: '세부 내용',
+              note: '비고',
+              attach: '첨부 파일'
+            },
+            detailLink: 'https://notebooklm.google.com/notebook/48774f81-a743-4c65-866f-050cbe1718e3'
+          });
+        }
+        return;
+      }
+
+      // 그 외에는 기존 부서 선택 로직으로 복귀
+      if (largeChecked.length > 0) {
+        updateDeptDetail(largeChecked[0]);
+      } else {
+        clearDeptDetail();
+      }
+    }
+
+    function clearDeptDetail() {
+      const label = document.getElementById('selectedDeptLabel');
+      const desc = document.getElementById('detailPanelDesc');
+      const tabs = document.getElementById('detailTabs');
+      const body = document.getElementById('deptDetailContent');
+
+      if (label) label.textContent = '부서를 선택해 주세요';
+      if (desc) {
+        desc.textContent = '왼쪽 부서를 선택하면, 해당 부서에 맞는 매뉴얼이 이 영역에 표시됩니다.';
+      }
+      if (tabs) tabs.innerHTML = '';
+      if (body) {
+        body.innerHTML = '<p class="empty-message">아직 부서가 선택되지 않았습니다. 위의 부서 목록에서 먼저 하나를 선택하세요.</p>';
+      }
+    }
+
+    function renderDeptTabs(deptKey) {
+      const config = deptDetailConfig[deptKey];
+      const tabs = document.getElementById('detailTabs');
+      const body = document.getElementById('deptDetailContent');
+      if (!config || !tabs || !body) return;
+
+      tabs.innerHTML = '';
+
+      config.sections.forEach((section, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'detail-tab-btn' + (index === 0 ? ' active' : '');
+        btn.textContent = section.label;
+        btn.dataset.sectionId = section.id;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.detail-tab-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          body.innerHTML = section.content;
+        });
+        tabs.appendChild(btn);
+      });
+
+      // 첫 번째 탭 내용 기본 표시
+      if (config.sections[0]) {
+        body.innerHTML = config.sections[0].content;
+      }
+    }
+
+    function updateDeptDetail(deptValue) {
+      const label = document.getElementById('selectedDeptLabel');
+      const desc = document.getElementById('detailPanelDesc');
+
+      if (!deptValue) {
+        clearDeptDetail();
+        return;
+      }
+
+      if (label) {
+        label.textContent = `선택된 부서: ${deptValue}`;
+      }
+
+      if (deptDetailConfig[deptValue]) {
+        const config = deptDetailConfig[deptValue];
+        if (desc) desc.textContent = config.description;
+        renderDeptTabs(deptValue);
+      } else {
+        if (desc) {
+          desc.textContent = '해당 부서의 전용 매뉴얼은 아직 준비 중입니다. 공통 기준 또는 다른 부서 매뉴얼을 참고해 주세요.';
+        }
+        const tabs = document.getElementById('detailTabs');
+        const body = document.getElementById('deptDetailContent');
+        if (tabs) tabs.innerHTML = '';
+        if (body) {
+          body.innerHTML = '<p class="empty-message">이 부서는 아직 세부 템플릿이 없습니다. 필요한 항목을 정리해서 추가해 주세요.</p>';
+        }
+      }
+    }
+
+    function setupDeptFilter() {
+      const container = document.getElementById('dept_large_group');
+      if (!container) return;
+
+      container.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!target || target.name !== 'dept_large') return;
+
+        // 하나만 선택되도록 처리 + 세부 내용 연동
+        if (target.checked) {
+          container.querySelectorAll('input[name="dept_large"]').forEach((cb) => {
+            if (cb !== target) cb.checked = false;
+          });
+          // 대분류 변경 시에도 공통 처리 로직 사용
+          handleDeptMediumSelection();
+        } else {
+          clearDeptDetail();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupCategoryToggles();
+      setupRoleExtraLinks();
+      initFilterCascade();   // 업무일지와 동일한 필터 동작
+      setupDeptFilter();     // 부서 선택에 따른 세부 내용 연동
+      clearDeptDetail();
+      renderRoleExtras(document.getElementById('selectedRoleLabel')?.textContent?.trim() || '알바');
+    });
+  </script>
+<script src="/master-nav.js"></script>
+</body>
+</html>
+

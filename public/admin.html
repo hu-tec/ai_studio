@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>데이터 관리 대시보드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f3f6fb; --surface: #fff; --alt: #f8fafc; --text: #1e293b; --muted: #64748b;
+      --accent: #3b82f6; --green: #10b981; --orange: #f59e0b; --purple: #8b5cf6; --teal: #14b8a6; --info: #0ea5e9;
+      --border: #e2e8f0; --font: 'Pretendard', -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.45; }
+    a { text-decoration: none; color: inherit; }
+
+    /* 헤더 */
+    .hd { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); box-shadow: 0 1px 0 var(--border); position: sticky; top: 0; z-index: 100; }
+    .hd-left { display: flex; align-items: center; gap: 6px; }
+    .hd-logo { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, #5ee7ff, #4c2fff); }
+    .hd-title { font-size: 14px; font-weight: 700; }
+    .hd-nav { display: flex; gap: 2px; }
+    .hd-nav a { padding: 3px 8px; border-radius: 4px; font-size: 12px; color: var(--muted); }
+    .hd-nav a:hover { background: var(--alt); color: var(--text); }
+
+    /* 메인 */
+    .main { max-width: 1440px; margin: 0 auto; padding: 8px 10px; }
+
+    /* 요약 바 - 한 줄 인라인 */
+    .sum-bar { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+    .sum-item { display: flex; align-items: center; gap: 4px; background: var(--surface); border-radius: 6px; padding: 4px 10px; border-left: 3px solid var(--accent); font-size: 12px; }
+    .sum-item.g { border-left-color: var(--green); } .sum-item.p { border-left-color: var(--purple); }
+    .sum-item.o { border-left-color: var(--orange); } .sum-item.t { border-left-color: var(--teal); }
+    .sum-item.i { border-left-color: var(--info); }
+    .sum-label { color: var(--muted); font-weight: 500; }
+    .sum-val { font-weight: 700; font-size: 15px; }
+
+    /* 탭 + 필터 한 줄 */
+    .ctrl-bar { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+    .tab-btn { padding: 4px 12px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+    .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .ctrl-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .ctrl-bar input, .ctrl-bar select { font-family: var(--font); font-size: 12px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); outline: none; }
+    .ctrl-bar input:focus, .ctrl-bar select:focus { border-color: var(--accent); }
+    .ctrl-bar input[type="text"] { width: 140px; }
+    .ctrl-bar input[type="date"] { width: 120px; }
+    .ctrl-count { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 500; }
+    .btn-sm { padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-family: var(--font); font-size: 11px; cursor: pointer; color: var(--muted); }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* 테이블 */
+    .panel { background: var(--surface); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 5px 8px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--alt); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+    th:hover { color: var(--accent); }
+    td { padding: 4px 8px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr { cursor: pointer; transition: background .1s; }
+    tbody tr:hover { background: #f0f4ff; }
+    tbody tr.exp { background: #eef2ff; }
+
+    /* 뱃지 */
+    .b { display: inline-block; padding: 1px 6px; border-radius: 99px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .b-al { background: #dbeafe; color: #1d4ed8; } .b-em { background: #d1fae5; color: #065f46; }
+    .b-pr { background: #fef3c7; color: #92400e; } .b-in { background: #ede9fe; color: #5b21b6; }
+
+    /* 펼침 상세 - 고밀도 4열 */
+    .det td { padding: 0; }
+    .det-wrap { padding: 6px 10px; background: var(--alt); border-bottom: 2px solid var(--accent); }
+    .det-sec { font-size: 11px; font-weight: 700; color: var(--accent); margin: 6px 0 2px; padding-bottom: 2px; border-bottom: 1px solid var(--border); }
+    .det-sec:first-child { margin-top: 0; }
+    .det-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px 12px; }
+    .det-grid.wide { grid-template-columns: 1fr; }
+    .di { display: flex; gap: 4px; font-size: 11px; padding: 1px 0; }
+    .dl { font-weight: 600; color: var(--muted); min-width: 60px; flex-shrink: 0; }
+    .dv { color: var(--text); word-break: break-all; }
+    .dv a { color: var(--accent); }
+
+    /* 업무일지 테이블 */
+    .wl-summary { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wl-det { display: none; }
+    .wl-det.open { display: table-row; }
+    .wl-pre { font-size: 11px; background: var(--alt); padding: 6px; border-radius: 4px; overflow-x: auto; max-height: 200px; margin: 4px 0; white-space: pre-wrap; word-break: break-all; }
+
+    /* 빈 상태 */
+    .empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 900px) { .det-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .det-grid { grid-template-columns: 1fr; } .ctrl-bar { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header class="hd">
+    <div class="hd-left"><div class="hd-logo"></div><span class="hd-title">데이터 관리</span></div>
+    <nav class="hd-nav">
+      <a href="/app/">AI Studio</a><a href="home.html">홈</a><a href="dashboard.html">프로세스</a><a href="면접_main.html">면접</a><a href="업무일지_260225.html">업무일지</a><a href="메뉴얼_메인.html">메뉴얼</a>
+    </nav>
+  </header>
+  <div class="main">
+    <!-- 요약 바 -->
+    <div class="sum-bar">
+      <div class="sum-item"><span class="sum-label">전체</span><span class="sum-val" id="sTotal">-</span></div>
+      <div class="sum-item g"><span class="sum-label">알바</span><span class="sum-val" id="sAlba">-</span></div>
+      <div class="sum-item p"><span class="sum-label">강사</span><span class="sum-val" id="sInst">-</span></div>
+      <div class="sum-item o"><span class="sum-label">전문직</span><span class="sum-val" id="sProf">-</span></div>
+      <div class="sum-item t"><span class="sum-label">직원</span><span class="sum-val" id="sEmp">-</span></div>
+      <div class="sum-item i"><span class="sum-label">업무일지</span><span class="sum-val" id="sWL">-</span></div>
+      <div class="sum-item p"><span class="sum-label">TESOL</span><span class="sum-val" id="sTesol">-</span></div>
+      <div class="sum-item g"><span class="sum-label">레벨테스트</span><span class="sum-val" id="sLT">-</span></div>
+      <div class="sum-item o"><span class="sum-label">서약서</span><span class="sum-val" id="sPL">-</span></div>
+    </div>
+    <!-- 탭 + 필터 한 줄 -->
+    <div class="ctrl-bar">
+      <button class="tab-btn active" onclick="switchTab('iv')">면접</button>
+      <button class="tab-btn" onclick="switchTab('wl')">업무일지</button>
+      <button class="tab-btn" onclick="switchTab('ts')">TESOL</button>
+      <button class="tab-btn" onclick="switchTab('lt')">레벨테스트</button>
+      <button class="tab-btn" onclick="switchTab('pl')">서약서</button>
+      <button class="tab-btn" onclick="switchTab('gn')">범용DB</button>
+      <div class="ctrl-sep"></div>
+      <select id="fType" onchange="applyF()"><option value="">전체유형</option><option value="alba">알바</option><option value="employee">직원</option><option value="professional">전문직</option><option value="instructor_prompt">강사(프롬프트)</option><option value="instructor_ethics">강사(윤리)</option><option value="instructor_tesol">강사(테솔)</option><option value="instructor_translator">강사(번역)</option></select>
+      <input type="text" id="fName" placeholder="이름 검색" oninput="applyF()" />
+      <input type="date" id="fFrom" onchange="applyF()" />
+      <input type="date" id="fTo" onchange="applyF()" />
+      <span class="ctrl-count" id="fCnt"></span>
+      <button class="btn-sm" onclick="loadAll()">새로고침</button>
+    </div>
+    <!-- 면접 -->
+    <div id="tabIV">
+      <div class="panel">
+        <table>
+          <thead><tr>
+            <th onclick="sortBy('id')">#</th><th onclick="sortBy('form_type')">유형</th><th onclick="sortBy('name')">이름</th>
+            <th onclick="sortBy('birth_date')">생년월일</th><th onclick="sortBy('age')">나이</th>
+            <th onclick="sortBy('support_field')">지원분야</th><th onclick="sortBy('mbti')">MBTI</th>
+            <th onclick="sortBy('interview_date')">면접일</th><th onclick="sortBy('created_at')">제출</th><th>파일</th>
+          </tr></thead>
+          <tbody id="ivBody"></tbody>
+        </table>
+        <div class="empty" id="ivEmpty" style="display:none;">제출된 면접 데이터가 없습니다. 면접 폼에서 제출하면 여기에 표시됩니다.</div>
+      </div>
+    </div>
+    <!-- 업무일지 -->
+    <div id="tabWL" style="display:none;">
+      <div class="panel">
+        <table>
+          <thead><tr><th>날짜</th><th>업무 건수</th><th>총 시간</th><th>업무 요약</th></tr></thead>
+          <tbody id="wlBody"></tbody>
+        </table>
+        <div class="empty" id="wlEmpty" style="display:none;">기록된 업무일지가 없습니다.</div>
+      </div>
+    </div>
+    <!-- TESOL -->
+    <div id="tabTS" style="display:none;">
+      <div class="panel">
+        <table>
+          <thead><tr>
+            <th>ID</th><th>이름</th><th>이메일</th><th>전화</th><th>과정</th><th>직업</th><th>상태</th><th>신청일</th>
+          </tr></thead>
+          <tbody id="tsBody"></tbody>
+        </table>
+        <div class="empty" id="tsEmpty" style="display:none;">TESOL 신청 데이터가 없습니다.</div>
+      </div>
+    </div>
+    <!-- 레벨테스트 -->
+    <div id="tabLT" style="display:none;">
+      <div class="panel">
+        <table><thead><tr><th>ID</th><th>데이터 요약</th><th>생성일</th></tr></thead><tbody id="ltBody"></tbody></table>
+        <div class="empty" id="ltEmpty" style="display:none;">레벨테스트 데이터가 없습니다.</div>
+      </div>
+    </div>
+    <!-- 서약서 -->
+    <div id="tabPL" style="display:none;">
+      <div class="panel">
+        <table><thead><tr><th>ID</th><th>데이터 요약</th><th>생성일</th></tr></thead><tbody id="plBody"></tbody></table>
+        <div class="empty" id="plEmpty" style="display:none;">서약서 데이터가 없습니다.</div>
+      </div>
+    </div>
+    <!-- 범용 DB 뷰어 -->
+    <div id="tabGN" style="display:none;">
+      <div class="ctrl-bar" style="margin-bottom:6px;">
+        <select id="gnModule" onchange="loadGeneric()" style="font-size:12px;padding:3px 6px;">
+          <option value="attendance">출퇴근</option>
+          <option value="meetings">미팅</option>
+          <option value="outbound-calls">거래처아웃콜</option>
+          <option value="photos">사진모음</option>
+          <option value="schedules">강의시간표</option>
+          <option value="rules">규정</option>
+          <option value="eval-criteria">평가기준</option>
+          <option value="lesson-plans">레슨플랜</option>
+        </select>
+        <span class="ctrl-count" id="gnCnt"></span>
+      </div>
+      <div class="panel">
+        <table><thead><tr><th>ID</th><th>데이터 요약</th><th>수정일</th></tr></thead><tbody id="gnBody"></tbody></table>
+        <div class="empty" id="gnEmpty" style="display:none;">데이터가 없습니다.</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let ivs=[], fivs=[], wls={}, tesols=[], genericData=[], sf='created_at', sd=-1, expId=null, tsExpId=null;
+
+    let ltData=[], plData=[];
+    async function loadAll() {
+      await Promise.all([loadIV(), loadWL(), loadTS(), loadLT(), loadPL()]);
+      updSum();
+    }
+    async function loadLT() {
+      try { const r=await fetch('/api/level-tests'); ltData=await r.json(); renderGenList('lt',ltData,'test_id'); } catch(e){}
+    }
+    async function loadPL() {
+      try { const r=await fetch('/api/pledges'); plData=await r.json(); renderGenList('pl',plData,'pledge_id'); } catch(e){}
+    }
+    async function loadGeneric() {
+      const mod=q('#gnModule').value;
+      try {
+        const r=await fetch('/api/'+mod); genericData=await r.json();
+        q('#gnCnt').textContent=genericData.length+'건';
+        const tb=q('#gnBody'), em=q('#gnEmpty');
+        if(!genericData.length){ tb.innerHTML=''; em.style.display=''; return; }
+        em.style.display='none';
+        let h='';
+        for(const d of genericData){
+          const id=Object.values(d).find(v=>typeof v==='string'&&v.length<50)||d.id;
+          const summary=typeof d.data==='object'?JSON.stringify(d.data).slice(0,120)+'...':String(d.data).slice(0,120);
+          h+=`<tr onclick="this.nextElementSibling.classList.toggle('open')"><td>${esc(String(id))}</td><td>${esc(summary)}</td><td>${d.updated_at||d.created_at||'-'}</td></tr>`;
+          h+=`<tr class="wl-det"><td colspan="3"><pre class="wl-pre">${esc(JSON.stringify(d,null,2))}</pre></td></tr>`;
+        }
+        tb.innerHTML=h;
+      } catch(e){ console.error(e); }
+    }
+    function renderGenList(prefix,data,idCol){
+      const tb=q('#'+prefix+'Body'), em=q('#'+prefix+'Empty');
+      if(!data.length){ tb.innerHTML=''; em.style.display=''; return; }
+      em.style.display='none';
+      let h='';
+      for(const d of data){
+        const id=d[idCol]||d.id;
+        const summary=typeof d.data==='object'?JSON.stringify(d.data).slice(0,120)+'...':String(d.data||'').slice(0,120);
+        h+=`<tr onclick="this.nextElementSibling.classList.toggle('open')"><td>${esc(String(id))}</td><td>${esc(summary)}</td><td>${d.created_at||d.updated_at||'-'}</td></tr>`;
+        h+=`<tr class="wl-det"><td colspan="3"><pre class="wl-pre">${esc(JSON.stringify(d,null,2))}</pre></td></tr>`;
+      }
+      tb.innerHTML=h;
+    }
+    async function loadIV() {
+      try {
+        const r = await fetch('/api/interviews'); ivs = await r.json();
+        for (let i=0;i<ivs.length;i++) {
+          if(!ivs[i]._d) try { const d=await fetch('/api/interviews/'+ivs[i].id); ivs[i]._d=await d.json(); } catch(e){}
+        }
+        applyF();
+      } catch(e){ console.error(e); }
+    }
+    async function loadWL() {
+      try { const r=await fetch('/api/worklogs'); wls=await r.json(); renderWL(); } catch(e){ console.error(e); }
+    }
+    async function loadTS() {
+      try { const r=await fetch('/api/tesol'); tesols=await r.json(); renderTS(); } catch(e){ console.error(e); }
+    }
+    function updSum() {
+      q('#sTotal').textContent=ivs.length;
+      q('#sAlba').textContent=ivs.filter(i=>i.form_type==='alba').length;
+      q('#sInst').textContent=ivs.filter(i=>(i.form_type||'').startsWith('instructor')).length;
+      q('#sProf').textContent=ivs.filter(i=>i.form_type==='professional').length;
+      q('#sEmp').textContent=ivs.filter(i=>i.form_type==='employee').length;
+      q('#sWL').textContent=Object.keys(wls).length;
+      q('#sTesol').textContent=tesols.length;
+      q('#sLT').textContent=ltData.length;
+      q('#sPL').textContent=plData.length;
+    }
+    function switchTab(t) {
+      const tabs=['iv','wl','ts','lt','pl','gn'];
+      document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+        b.classList.toggle('active',tabs[i]===t);
+      });
+      tabs.forEach(tab=>{
+        const el=q('#tab'+tab.toUpperCase());
+        if(el) el.style.display=tab===t?'':'none';
+      });
+      if(t==='gn') loadGeneric();
+    }
+    function applyF() {
+      const tp=q('#fType').value, nm=q('#fName').value.toLowerCase(), df=q('#fFrom').value, dt=q('#fTo').value;
+      fivs=ivs.filter(i=>{
+        if(tp&&i.form_type!==tp) return false;
+        if(nm&&!(i.name||'').toLowerCase().includes(nm)) return false;
+        if(df&&(i.interview_date||'')<df) return false;
+        if(dt&&(i.interview_date||'')>dt) return false;
+        return true;
+      });
+      fivs.sort((a,b)=>{ const va=a[sf]||'',vb=b[sf]||''; return va<vb?-sd:va>vb?sd:0; });
+      renderIV();
+      q('#fCnt').textContent=`${fivs.length} / ${ivs.length}건`;
+    }
+    function sortBy(f){ if(sf===f)sd*=-1; else{sf=f;sd=-1;} applyF(); }
+
+    function tBadge(t) {
+      const m={alba:['알바','b-al'],employee:['직원','b-em'],professional:['전문직','b-pr'],
+        instructor_prompt:['강사(프)',b='b-in'],instructor_ethics:['강사(윤)','b-in'],
+        instructor_tesol:['강사(테)','b-in'],instructor_translator:['강사(번)','b-in']};
+      const[l,c]=m[t]||[t,'']; return `<span class="b ${c}">${l}</span>`;
+    }
+
+    function renderIV() {
+      const tb=q('#ivBody'), em=q('#ivEmpty');
+      if(!fivs.length){ tb.innerHTML=''; em.style.display=''; return; }
+      em.style.display='none';
+      let h='';
+      for(const iv of fivs){
+        const d=iv._d||iv, fs=(d.files||[]).length, ex=expId===iv.id;
+        h+=`<tr class="${ex?'exp':''}" onclick="togDet(${iv.id})">
+          <td>${iv.id}</td><td>${tBadge(iv.form_type)}</td><td><b>${esc(iv.name)||'-'}</b></td>
+          <td>${esc(d.birth_date)||'-'}</td><td>${esc(d.age)||'-'}</td>
+          <td>${esc(iv.support_field)||'-'}</td><td><b>${esc(iv.mbti)||'-'}</b></td>
+          <td>${iv.interview_date||'-'}</td><td>${fmtDt(iv.created_at)}</td>
+          <td>${fs?`<span class="b b-al">${fs}</span>`:'-'}</td></tr>`;
+        if(ex) h+=`<tr class="det"><td colspan="10"><div class="det-wrap">${detHTML(d)}</div></td></tr>`;
+      }
+      tb.innerHTML=h;
+    }
+    function togDet(id){ expId=expId===id?null:id; renderIV(); }
+
+    function detHTML(d) {
+      let h='';
+      h+=`<div class="det-sec">1. 인적사항</div><div class="det-grid">`;
+      h+=di('이름',d.name)+di('생년월일',d.birth_date)+di('나이',d.age)+di('면접일',d.interview_date);
+      h+=di('시작희망',d.start_date)+di('근무기간',d.available_months)+di('지원분야',d.support_field)+di('근무형태',d.work_type);
+      h+=di('통근수단',d.commute_method)+di('통근시간',d.commute_time)+di('홈피확인',d.website_viewed)+di('경력',d.experience);
+      h+=di('운전',d.driving)+di('차량',d.car_owned)+di('종교',d.religion)+di('PT',d.pt);
+      h+=di('가족',d.family)+di('결혼',d.marriage)+di('자녀',d.children)+di('영어',d.english);
+      h+=di('강의형태',d.lecture_type);
+      h+=`</div>`;
+
+      h+=`<div class="det-sec">2. 스킬 / 스케줄</div><div class="det-grid">`;
+      h+=di('스킬',fmtJ(d.skills))+di('월',d.schedule_mon)+di('화',d.schedule_tue)+di('수',d.schedule_wed);
+      h+=di('목',d.schedule_thu)+di('금',d.schedule_fri);
+      h+=`</div>`;
+
+      h+=`<div class="det-sec">3. MBTI</div><div class="det-grid">`;
+      h+=di('유형',d.mbti)+di('점수',fmtJ(d.mbti_scores));
+      h+=`</div>`;
+
+      if(d.summary1||d.summary2||d.summary3){
+        h+=`<div class="det-sec">4. 영상요약</div><div class="det-grid wide">`;
+        h+=di('영상1',d.summary1)+di('영상2',d.summary2)+di('영상3',d.summary3);
+        h+=`</div>`;
+      }
+      if(d.edu_feedback){
+        h+=`<div class="det-sec">5. 교육피드백</div><div class="det-grid">`;
+        const fb=jp(d.edu_feedback);
+        if(fb) for(const[k,v]of Object.entries(fb)){ if(v)h+=di(k,v); }
+        else h+=di('내용',d.edu_feedback);
+        h+=`</div>`;
+      }
+      if(d.files&&d.files.length){
+        h+=`<div class="det-sec">6. 첨부파일</div><div class="det-grid">`;
+        for(const f of d.files){ const u=f.s3_url&&f.s3_url!=='local_only'?f.s3_url:'#'; h+=di(f.file_type,`<a href="${u}" target="_blank">${esc(f.original_name)}</a>`); }
+        h+=`</div>`;
+      }
+      return h;
+    }
+    function di(l,v){ if(!v||v==='null'||v==='undefined')return''; return `<div class="di"><span class="dl">${esc(l)}</span><span class="dv">${v}</span></div>`; }
+
+    function renderWL() {
+      const tb=q('#wlBody'), em=q('#wlEmpty'), ks=Object.keys(wls).sort().reverse();
+      if(!ks.length){ tb.innerHTML=''; em.style.display=''; return; }
+      em.style.display='none';
+      let h='';
+      for(const k of ks){
+        const d=wls[k], ts=d.today||[], tot=ts.reduce((s,t)=>s+(parseFloat(t.val)||0),0);
+        const summary=ts.slice(0,3).map(t=>(t.task||t.label||'-')).join(' / ');
+        h+=`<tr onclick="togWL(this)"><td><b>${esc(k)}</b></td><td>${ts.length}건</td><td>${tot}h</td><td class="wl-summary">${esc(summary)}${ts.length>3?' ...':''}</td></tr>`;
+        h+=`<tr class="wl-det"><td colspan="4"><pre class="wl-pre">${esc(JSON.stringify(d,null,2))}</pre></td></tr>`;
+      }
+      tb.innerHTML=h;
+    }
+    function togWL(tr){ const det=tr.nextElementSibling; det.classList.toggle('open'); }
+
+    // TESOL 렌더링
+    function renderTS() {
+      const tb=q('#tsBody'), em=q('#tsEmpty');
+      if(!tesols.length){ tb.innerHTML=''; em.style.display=''; return; }
+      em.style.display='none';
+      let h='';
+      for(const t of tesols){
+        const b=t.basic||{}, ex=tsExpId===t.applicant_id;
+        const stBadge = t.status==='approved'?'b-em':t.status==='rejected'?'b-pr':'b-al';
+        const stLabel = t.status==='approved'?'승인':t.status==='rejected'?'거절':'대기';
+        h+=`<tr class="${ex?'exp':''}" onclick="togTS('${esc(t.applicant_id)}')">
+          <td>${esc(t.applicant_id).slice(0,12)}</td><td><b>${esc(b.name)||'-'}</b></td>
+          <td>${esc(b.email)||'-'}</td><td>${esc(b.phone)||'-'}</td>
+          <td>${esc(b.course)||'-'}</td><td>${esc(b.job)||'-'}</td>
+          <td><span class="b ${stBadge}">${stLabel}</span></td>
+          <td>${fmtDt(t.applied_at)}</td></tr>`;
+        if(ex){
+          const app=t.application||{}, ext=t.extra||{};
+          h+=`<tr class="det"><td colspan="8"><div class="det-wrap">`;
+          h+=`<div class="det-sec">1. 기본정보</div><div class="det-grid">`;
+          h+=di('이름',b.name)+di('이메일',b.email)+di('전화',b.phone)+di('생년월일',b.birthDate);
+          h+=di('과정',b.course)+di('직업',b.job);
+          h+=`</div>`;
+          h+=`<div class="det-sec">2. 자기소개</div><div class="det-grid wide">`;
+          h+=di('소개',b.introduction);
+          h+=`</div>`;
+          h+=`<div class="det-sec">3. 신청정보</div><div class="det-grid">`;
+          h+=di('언어',fmtArr(app.available_languages))+di('가능시간',app.available_time);
+          h+=di('경력',app.experience)+di('직종',fmtArr(app.occupation));
+          h+=di('학력',app.education)+di('통화시간',app.call_time);
+          h+=`</div>`;
+          h+=`<div class="det-sec">4. 기타정보</div><div class="det-grid">`;
+          h+=di('목표',fmtArr(ext.work_goals))+di('자격증',fmtArr(ext.language_certs));
+          h+=di('해외경험',ext.overseas_experience)+di('MT경험',ext.mt_experience);
+          h+=`</div>`;
+          if(t.rejection_reason){ h+=`<div class="det-sec">거절사유</div><div class="det-grid wide">`+di('사유',t.rejection_reason)+`</div>`; }
+          h+=`</div></td></tr>`;
+        }
+      }
+      tb.innerHTML=h;
+    }
+    function togTS(id){ tsExpId=tsExpId===id?null:id; renderTS(); }
+    function fmtArr(a){ if(!a)return''; if(Array.isArray(a))return a.join(', '); return String(a); }
+
+    function q(s){ return document.querySelector(s); }
+    function esc(s){ if(!s)return''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+    function fmtDt(d){ return d?(d+'').replace('T',' ').slice(0,16):'-'; }
+    function fmtJ(s){ if(!s)return''; try{const a=JSON.parse(s); return Array.isArray(a)?a.join(', '):typeof a==='object'?JSON.stringify(a):String(a);}catch{return String(s);} }
+    function jp(s){ try{return JSON.parse(s);}catch{return null;} }
+
+    loadAll();
+  </script>
+<script src="/master-nav.js"></script>
+</body>
+</html>

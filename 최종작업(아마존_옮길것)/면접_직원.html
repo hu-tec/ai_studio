@@ -1,0 +1,3113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>면접 안내 | 직원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-text: #1e293b;
+      --color-text-muted: #64748b;
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      --color-accent-soft: rgba(59, 130, 246, 0.08);
+      --color-success: #10b981;
+      --color-border: #e2e8f0;
+      --font-main: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 40px -10px rgba(0,0,0,0.1);
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== LAYOUT ===== */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR NAV ===== */
+    .sidebar {
+      width: 400px;
+      min-width: 300px;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .home-icon-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      transition: all 0.2s var(--ease);
+      flex-shrink: 0;
+    }
+    .home-icon-link:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-accent);
+    }
+    .home-icon-link svg {
+      width: 20px;
+      height: 20px;
+    }
+    .sidebar-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .sidebar-subtitle {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    .phase-buttons {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0 1.5rem;
+    }
+    .phase-btn {
+      flex: 1;
+      min-width: 0;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+    .phase-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .phase-btn.active {
+      background: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+    }
+    .phase-hidden { display: none !important; }
+    .step-nav {
+      list-style: none;
+    }
+    .step-nav-item {
+      margin: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .step-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s var(--ease);
+    }
+    .step-nav-link:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-text);
+    }
+    .step-nav-link.active {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+    }
+    .step-nav-link.completed {
+      color: var(--color-success);
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-surface-alt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .step-nav-link.active .step-number {
+      background: var(--color-accent);
+      color: white;
+    }
+    .step-nav-link.completed .step-number {
+      background: var(--color-success);
+      color: white;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 2rem 4rem 4rem;
+      max-width: 1500px;
+      min-width: 0;
+    }
+    .main-content:has(#step2.active) { max-width: 1700px; }
+    .step-section {
+      display: none;
+    }
+    .step-section.active {
+      display: block;
+      animation: fadeIn 0.5s var(--ease) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      margin-bottom: 2rem;
+    }
+    .step-badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .step-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .content-card {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .content-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .content-card .card-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+    }
+    .content-card p, .content-card li {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .content-card ul {
+      padding-left: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, var(--color-accent-soft) 0%, rgba(59, 130, 246, 0.04) 100%);
+      border-left: 4px solid var(--color-accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 1rem 0;
+    }
+    .type-badge {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+    .type-badge.instructor {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    /* ===== FORMS ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem 1.5rem;
+    }
+    .form-grid.full {
+      grid-template-columns: 1fr;
+    }
+    .form-grid-5 { grid-template-columns: repeat(5, 1fr); }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group-half {
+      display: flex;
+      flex-direction: column;
+      gap: 0.17rem;
+    }
+    .form-group-inline {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .form-label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+    .form-input, .form-select, .form-textarea {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .file-input {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      background: var(--color-surface);
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .checkbox-item input {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ===== PERSONALITY TEST ===== */
+    .personality-section {
+      margin-top: 1rem;
+    }
+    .personality-tests-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .personality-test-card {
+      margin-bottom: 0;
+      padding: 0.9rem 1rem;
+    }
+    .personality-test-card h3 {
+      margin-bottom: 0.5rem;
+      font-size: 0.88rem;
+    }
+    .personality-intro {
+      background: var(--color-surface-alt);
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+    }
+    .personality-question {
+      padding: 0.5rem 0.75rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .personality-question:hover {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 1px var(--color-accent-soft);
+    }
+    .personality-question .q-line {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    .personality-question .q-line .q-num {
+      flex-shrink: 0;
+    }
+    .personality-question .q-num {
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+    .personality-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      margin-top: 0.35rem;
+    }
+    .personality-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.35rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+    .personality-option:hover {
+      border-color: var(--color-accent);
+    }
+    .personality-option.selected {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+    .personality-option input {
+      margin-top: 2px;
+      width: 14px;
+      height: 14px;
+    }
+    .personality-result {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, var(--color-accent-soft) 0%, rgba(59, 130, 246, 0.03) 100%);
+      border-radius: var(--radius);
+      display: none;
+    }
+    .personality-result.show {
+      display: block;
+      animation: fadeIn 0.4s var(--ease);
+    }
+    .personality-result h4 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .mbti-display {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.1em;
+    }
+    .personality-scores { margin-top: 1rem; font-size: 0.9rem; }
+    .score-row { margin: 0.35rem 0; }
+    .scale-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+    .scale-bar label {
+      font-size: 0.8rem;
+      min-width: 70px;
+    }
+    .scale-track {
+      flex: 1;
+      height: 8px;
+      background: var(--color-surface-alt);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .scale-fill {
+      height: 100%;
+      background: var(--color-accent);
+      border-radius: 4px;
+      transition: width 0.5s var(--ease);
+    }
+
+    /* ===== VIDEO SECTION ===== */
+    .video-block {
+      margin-bottom: 2rem;
+    }
+    .video-placeholder {
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+      position: relative;
+      max-width: 480px;
+    }
+    #step4 .video-block .form-textarea {
+      min-height: 200px;
+    }
+    .video-placeholder .video-link {
+      position: absolute;
+      inset: 0;
+      text-decoration: none;
+    }
+    .video-placeholder .video-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .video-placeholder .video-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 48px;
+      background: rgba(255,0,0,0.9);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .video-placeholder .video-play-btn:hover { background: #ff0000; }
+    .video-placeholder .video-play-btn::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 12px 0 12px 20px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px;
+    }
+
+    /* ===== EDUCATION TABLE ===== */
+    .edu-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .edu-table th, .edu-table td {
+      padding: 0.875rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .edu-table th {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .edu-table tr:hover td {
+      background: rgba(59, 130, 246, 0.03);
+    }
+    .edu-table td:first-child {
+      font-weight: 500;
+      min-width: 140px;
+    }
+    .edu-table td:nth-child(2) {
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    .edu-table .feedback-cell {
+      min-width: 120px;
+      max-width: 200px;
+    }
+    .edu-table .feedback-cell input,
+    .edu-table .feedback-cell textarea {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    .edu-table .feedback-cell textarea {
+      min-height: 36px;
+      resize: vertical;
+    }
+    .feedback-form-section {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .feedback-form-section h3 {
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+    .feedback-form-section > p {
+      margin-bottom: 0.6rem !important;
+    }
+    .feedback-category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-bottom: 0.6rem;
+      align-items: center;
+    }
+    .feedback-category-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .feedback-category-item label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .feedback-category-item select {
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      min-width: 100px;
+    }
+    .feedback-form-section .form-group:last-child {
+      margin-top: 0.5rem;
+    }
+    .feedback-form-section .form-group:last-child .form-label {
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+    .feedback-form-section .form-textarea {
+      min-height: 70px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+
+    /* ===== CONTRACT ===== */
+    .contract-doc {
+      font-size: 0.95rem;
+      line-height: 1.9;
+    }
+    .contract-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .contract-intro {
+      margin-bottom: 1.5rem;
+    }
+    .contract-article {
+      margin-bottom: 1.75rem;
+    }
+    .contract-article h4 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--color-text);
+    }
+    .contract-article p, .contract-article ol {
+      margin-bottom: 0.6rem;
+      line-height: 1.8;
+    }
+    .contract-article p {
+      overflow-wrap: break-word;
+    }
+    .contract-article ol {
+      padding-left: 1.5rem;
+    }
+    .contract-input {
+      display: inline-block;
+      min-width: 80px;
+      padding: 0.2rem 0.4rem;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      background: transparent;
+      font-size: inherit;
+      font-family: inherit;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .contract-input.tiny {
+      width: 44px;
+      min-width: 44px;
+      max-width: 44px;
+      text-align: center;
+    }
+    .contract-input[type="number"]::-webkit-outer-spin-button,
+    .contract-input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .contract-input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    .contract-input.inline {
+      min-width: 100px;
+    }
+    .contract-input.wide {
+      min-width: 200px;
+    }
+    .contract-input:focus {
+      outline: none;
+      border-bottom-color: var(--color-accent);
+    }
+    .contract-closing {
+      margin: 1.5rem 0;
+    }
+    .contract-date {
+      margin-bottom: 2rem;
+    }
+    .contract-signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .contract-sig-block {
+      padding: 1rem;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+    }
+    .contract-sig-block input {
+      min-width: 120px;
+    }
+    .contract-salary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    .contract-salary-table th,
+    .contract-salary-table td {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+    }
+    .contract-salary-table th {
+      background: var(--color-surface-alt);
+      font-weight: 600;
+      text-align: center;
+    }
+    .contract-salary-table .salary-input {
+      width: 100%;
+      min-width: 100px;
+    }
+    .employment-rules-body h3 { font-size:1.1rem; margin:1.5rem 0 0.75rem; color:var(--color-text); border-bottom:1px solid var(--color-border); padding-bottom:0.35rem; }
+    .employment-rules-body h4 { font-size:0.95rem; margin:1rem 0 0.4rem; color:var(--color-text); }
+    .employment-rules-body p { margin-bottom:0.5rem; }
+    .employment-rules-body ol { padding-left:1.5rem; margin:0.5rem 0 1rem; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--color-accent);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .btn-secondary:hover {
+      background: var(--color-surface-alt);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+    .btn-submit {
+      background: var(--color-success);
+      color: white;
+    }
+    .btn-submit:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .sidebar-submit {
+      padding: 1rem 1.5rem;
+      margin-top: auto;
+      border-top: 1px solid var(--color-border);
+    }
+    .sidebar nav { flex: 1; }
+    .nav-buttons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    /* ===== PROGRESS INDICATOR ===== */
+    .progress-bar {
+      height: 4px;
+      background: var(--color-surface-alt);
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-accent), #60a5fa);
+      border-radius: 2px;
+      transition: width 0.6s var(--ease);
+    }
+
+    /* ===== STEP 2 COMPACT (구분 유지, 촘촘한 레이아웃) ===== */
+    #step2 .content-card {
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    #step2 .content-card h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    #step2 .content-card .card-desc { font-size: 0.8rem; margin-bottom: 0.75rem; }
+    #step2 .form-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem 0.9rem;
+    }
+    #step2 .form-grid.form-grid-5 {
+      grid-template-columns: 1fr 0.6fr 0.8fr 1.2fr 1fr;
+    }
+    #step2 .form-grid.form-grid-5 .form-group {
+      min-width: 0;
+    }
+    #step2 .form-grid.form-grid-5 .form-input,
+    #step2 .form-grid.form-grid-5 .form-select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #step2 .form-group { gap: 0.2rem; }
+    #step2 .form-label { font-size: 0.8rem; }
+    #step2 .form-input, #step2 .form-select {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.85rem;
+    }
+    #step2 .checkbox-group { gap: 0.5rem; }
+    #step2 .checkbox-item { font-size: 0.82rem; }
+    #step2 .form-group.span-2 { grid-column: span 2; }
+    #step2 .form-group.span-3 { grid-column: span 3; }
+    #step2 .form-group.full-width { grid-column: 1 / -1; }
+    #step2 .form-grid .form-grid {
+      grid-template-columns: repeat(5, minmax(0, 72px));
+      gap: 0.25rem 0.4rem;
+      margin-top: 0.25rem;
+      width: fit-content;
+    }
+    #step2 .form-grid .form-grid .form-group { gap: 0.1rem; }
+    #step2 .form-grid .form-grid .form-input {
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 1100px) {
+      #step2 .form-grid { grid-template-columns: repeat(3, 1fr); }
+      #step2 .form-grid.form-grid-5 { grid-template-columns: repeat(3, 1fr); }
+      #step2 .form-group.span-2 { grid-column: span 2; }
+      #step2 .form-group.span-3 { grid-column: span 3; }
+    }
+    @media (max-width: 1024px) {
+      #step2 .form-grid { grid-template-columns: 1fr; }
+      #step2 .form-grid.form-grid-5 { grid-template-columns: 1fr; }
+      #step2 .form-group.span-2, #step2 .form-group.span-3 { grid-column: 1; }
+      #step2 .form-grid .form-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 500px) {
+      #step2 .form-grid .form-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .personality-tests-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .app-container { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .step-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .step-nav-item { margin: 0; }
+      .main-content { padding: 1.5rem; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-top">
+          <h2 class="sidebar-title">면접 안내</h2>
+          <a href="면접_main.html" class="home-icon-link" title="메인으로" aria-label="메인으로">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </a>
+        </div>
+        <p class="sidebar-subtitle">5단계 프로세스</p>
+        <span class="type-badge instructor">직원</span>
+      </div>
+
+      <div class="phase-buttons">
+        <button type="button" class="btn btn-secondary phase-btn active" data-phase="interview" onclick="switchPhase('interview')">면접</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work1" onclick="switchPhase('work1')">업무1차</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work2" disabled>업무2차</button>
+        <button type="button" class="btn btn-secondary phase-btn" data-phase="work3" onclick="switchPhase('work3')">업무3차</button>
+      </div>
+
+      <nav>
+        <ul class="step-nav">
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step1" class="step-nav-link active" data-step="1">
+              <span class="step-number">1</span>
+              면접 과정 안내
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step2" class="step-nav-link" data-step="2">
+              <span class="step-number">2</span>
+              인적사항
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step3" class="step-nav-link" data-step="3">
+              <span class="step-number">3</span>
+              성격 검사
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="interview">
+            <a href="#step4" class="step-nav-link" data-step="4">
+              <span class="step-number">4</span>
+              영상 시청 및 요약
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step6" class="step-nav-link" data-step="5">
+              <span class="step-number">1</span>
+              계약서
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step5" class="step-nav-link" data-step="6">
+              <span class="step-number">2</span>
+              출근 후 교육 안내
+            </a>
+          </li>
+          <li class="step-nav-item" data-phase="work1">
+            <a href="#step7" class="step-nav-link" data-step="7">
+              <span class="step-number">3</span>
+              서류첨부
+            </a>
+          </li>
+          <li class="step-nav-item work1-side-group" data-phase="work1">
+            <div class="work1-side-header">
+              <a href="#step9" class="step-nav-link" data-step="9">
+                <span class="step-number">4</span>
+                메뉴얼
+              </a>
+            </div>
+            <div class="work1-side-options">
+              <label>
+                <input type="checkbox" class="work1-side-check" value="회사배경">
+                회사배경
+              </label>
+              <label>
+                <input type="checkbox" class="work1-side-check" value="업무방식">
+                업무방식
+              </label>
+              <label>
+                <input type="checkbox" class="work1-side-check" value="1차(면접 시)">
+                1차(면접 시)
+              </label>
+              <label>
+                <input type="checkbox" class="work1-side-check" value="2차(수습)">
+                2차(수습)
+              </label>
+              <label>
+                <input type="checkbox" class="work1-side-check" value="3차(수습통과)">
+                3차(수습통과)
+              </label>
+            </div>
+          </li>
+          <li class="step-nav-item" data-phase="work3">
+            <a href="#step8" class="step-nav-link" data-step="8">
+              <span class="step-number">1</span>
+              취업 규칙
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-submit">
+        <button type="button" class="btn btn-submit" style="width: 100%;" onclick="submitForm()">제출</button>
+        <a href="업무일지_260225.html" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem; display: block; text-align: center;">업무일지</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <section id="step1" class="step-section active" data-step="1" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 1</span>
+          <h1 class="step-title">직원 면접 과정 안내</h1>
+        </div>
+
+        <div class="content-card">
+          <p style="font-size: 1.05rem; margin-bottom: 1rem;">안녕하세요, 직원 지원 면접에 참여해주셔서 감사드립니다.</p>
+          <p>아래에 직원 면접 순서와 각 단계별 구체적인 내용을 안내드립니다. 편안한 마음으로 진행해 주시기 바랍니다.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📋 직원 면접 순서</h3>
+          <ul>
+            <li><strong>1단계: 서류 작성과 성향검사 진행</strong> — 약 20분 (서류 작성 2가지는 모두 작성해 주세요)</li>
+            <li><strong>2단계: 영상을 통한 회사소개</strong> — 약 10분 (영상 3개 시청 후 주요 포인트 요약)</li>
+            <li><strong>3단계: 개별 질문과 답변</strong> — 약 10분 / 면접 후 업무를 간단히 진행하면서 회사 파악</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>업무 진행 시간</strong>에 대해 급여(원천징수)로 지급됩니다.
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h3>💡 직원 면접 및 업무 스타일에 대해</h3>
+          <p>저희 회사 직원 면접은 지원자분이 업무를 하시면서 회사 스타일의 업무를 확인하시는 것에 포인트가 있으니, 기분 상하거나 당황하시지 말아 주세요.</p>
+          <p>사람이 중요한 시대, 업무보다 즐겁게 함께 일할 수 있는 스타일을 서로 확인하는 것입니다. 일단 진행해 보시고 담당자와 이야기해 주시면 됩니다.</p>
+          <p>업무를 해보는 것이 면접이며, 회사에 관한 내용과 업무 스타일은 일을 하면서 중간중간 담당자들이 이야기해 드릴 것입니다. 궁금한 점은 마지막에 인사 담당이 질문과 답변을 통해 확인해 드립니다.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📌 구체적인 업무 내용</h3>
+          <ul>
+            <li><strong>1. 잔무 (자료조사와 정리, 기획 등)</strong> — 30분<br>
+            <small>엑셀이나 PPT 샘플 포맷 유지. 질보다 양(30분 10~30개 이상), 서술형 아닌 명사형, 문제점 후 개선점 아이디어 작성</small></li>
+            <li><strong>2. 지원 업무에 대한 기획서 작성 또는 업무진행</strong> — 30분</li>
+            <li><strong>3. 지원 업무 피드백 후 다시 진행</strong> — 30분</li>
+            <li><strong>4. 회사에 제안 혹은 문서 작성</strong> — 30분</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>중요:</strong> 30분 단위로 업무 진행합니다. 마무리되지 않아도 다음 업무로 꼭 넘어가 주세요. 잘하는 것보다 <strong>시간 관리</strong>가 포인트이며, 결과물보다 <strong>업무 양이나 스타일</strong>을 중요하게 생각합니다.
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h3>⚠️ 유의사항</h3>
+          <p>업무를 함에 불편하거나 어려움이 있으면 바로 이야기하기보다, 일단 이해한 만큼만 30분 정도 업무 진행해 보신 후 담당자에게 불편함을 말씀해 주시면 확인 후 설명해 드리겠습니다. 걱정 마시고 편안하게 진행해 주세요.</p>
+        </div>
+
+        <div class="content-card">
+          <h3>📞 면접 후 안내</h3>
+          <p>면접을 보신 후, <strong>지원하신 분이 먼저 입사 희망 여부를 문자로 알려 주시면</strong> 담당자가 연락을 드립니다. 추후 질문은 문자로 부탁드리며, 직원 지원 면접에 참여해 주셔서 감사드립니다. 즐겁게 면접을 봐 주시기 바랍니다.</p>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-primary" onclick="goToStep(2)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="step-section" data-step="2" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 2</span>
+          <h1 class="step-title">인적사항</h1>
+        </div>
+
+        <form id="personalForm">
+          <!-- 기본 정보 -->
+          <div class="content-card">
+            <h3>기본 정보</h3>
+            <p class="card-desc">면접 및 입사 관련 기본 정보를 입력해 주세요.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">이름 <span class="required">*</span></label>
+                <input type="text" class="form-input" name="name" placeholder="이름" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">면접 일시</label>
+                <input type="date" class="form-input" name="interviewDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">입사 희망일</label>
+                <input type="date" class="form-input" name="startDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">희망 근무 기간</label>
+                <input type="text" class="form-input" name="availableMonths" placeholder="예: 1년 이상, 장기" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">회사 홈페이지 확인 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="Y" /> Y</label>
+                  <label class="checkbox-item"><input type="radio" name="websiteViewed" value="N" /> N</label>
+                </div>
+              </div>
+              <div class="form-group span-2">
+                <label class="form-label">지원 부서 / 희망 직무</label>
+                <input type="text" class="form-input" name="supportField" placeholder="예: 사무행정, 기획, 마케팅 등" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">근무 형태</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="workType" value="정규직" /> 정규직</label>
+                  <label class="checkbox-item"><input type="radio" name="workType" value="계약직" /> 계약직</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">통근 수단</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="commuteMethod" value="지하철" /> 지하철</label>
+                  <label class="checkbox-item"><input type="radio" name="commuteMethod" value="버스" /> 버스</label>
+                  <label class="checkbox-item"><input type="radio" name="commuteMethod" value="자가" /> 자가</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">집에서 사무실까지 소요 시간</label>
+                <input type="text" class="form-input" name="commuteTime" placeholder="예: 40분" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">생년월일</label>
+                <input type="date" class="form-input" name="birthDate" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">나이</label>
+                <input type="number" class="form-input" name="age" placeholder="만 나이" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">경력</label>
+                <input type="text" class="form-input" name="experience" placeholder="경력 사항" />
+              </div>
+              <div class="form-group form-group-inline">
+                <div class="form-group-half">
+                  <label class="form-label">운전 가능 여부</label>
+                  <div class="form-row">
+                    <label class="checkbox-item"><input type="radio" name="driving" value="Y" /> Y</label>
+                    <label class="checkbox-item"><input type="radio" name="driving" value="N" /> N</label>
+                  </div>
+                </div>
+                <div class="form-group-half">
+                  <label class="form-label">차량 소유 여부</label>
+                  <div class="form-row">
+                    <label class="checkbox-item"><input type="radio" name="carOwned" value="Y" /> Y</label>
+                    <label class="checkbox-item"><input type="radio" name="carOwned" value="N" /> N</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 기타 여부 -->
+          <div class="content-card">
+            
+            <div class="form-grid form-grid-5">
+
+              <div class="form-group">
+                <label class="form-label">종교</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="religion" value="기독교" /> 기독교</label>
+                  <label class="checkbox-item"><input type="radio" name="religion" value="불교" /> 불교</label>
+                  <label class="checkbox-item"><input type="radio" name="religion" value="그외" /> 그외</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">PT 가능 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="pt" value="Y" /> Y</label>
+                  <label class="checkbox-item"><input type="radio" name="pt" value="N" /> N</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">가족 관계</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="family" value="동거" /> 동거</label>
+                  <label class="checkbox-item"><input type="radio" name="family" value="비동거" /> 비동거</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">결혼 여부</label>
+                <div class="form-row">
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="미혼" /> 미혼</label>
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="기혼" /> 기혼</label>
+                  <label class="checkbox-item"><input type="radio" name="marriage" value="계획중" /> 계획 중</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">자녀 수 및 나이</label>
+                <input type="text" class="form-input" name="children" placeholder="예: 1명, 5세" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 업무 능력 및 가능 시간 -->
+          <div class="content-card">
+            <h3>업무 능력 및 희망 근무</h3>
+            <p class="card-desc">컴퓨터·영어 능력과 희망 근무 조건을 입력해 주세요.</p>
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label class="form-label">컴퓨터 능력</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="excel" /> 엑셀</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="ppt" /> 파워포인트</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="word" /> 워드</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="photoshop" /> 포토샵</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="illustrator" /> 일러스트</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="video" /> 동영상 편집</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="blog" /> 블로그</label>
+                  <label class="checkbox-item"><input type="checkbox" name="skill" value="premiere" /> 프리미어</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">영어 능력</label>
+                <select class="form-select" name="english">
+                  <option value="">선택</option>
+                  <option value="상">상</option>
+                  <option value="중">중</option>
+                  <option value="하">하</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label">희망 근무 요일 및 시간</label>
+                <div class="form-grid work-time-row">
+                  <div class="form-group"><input type="text" class="form-input" name="mon" placeholder="월" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="tue" placeholder="화" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="wed" placeholder="수" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="thu" placeholder="목" /></div>
+                  <div class="form-group"><input type="text" class="form-input" name="fri" placeholder="금" /></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(1)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 3 성격 검사 -->
+      <section id="step3" class="step-section" data-step="3" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 3</span>
+          <h1 class="step-title">성격 검사</h1>
+        </div>
+
+        <div class="personality-section">
+          <p class="personality-intro">아래 40개 문항에서 a와 b 중 자신에 가까운 것을 선택해 주세요.</p>
+
+          <div class="personality-tests-grid" id="personalityQuestions">
+            <!-- 블록 1: 외향(E) vs 내향(I) -->
+            <div class="content-card personality-test-card">
+              <h3>E / I</h3>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 말하기를 좋아해 실수 할 때가 종종 있다 (a) / 나는 말이 없어 주변 사람들이 답답해 할 때가 있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q1" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q1" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 새로운 사람을 만나도 어색하지 않다 (a) / 나는 모르는 사람을 만나는 일이 피곤하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q2" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q2" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 말하면서 생각하고 대화도중 결심할 때가 있다 (a) / 나는 의견을 말하기 앞서 신중히 생각하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q3" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q3" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 팀으로 일하는 것이 편하다 (a) / 나는 혼자 혹은 소수로 일하는 것이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q4" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q4" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 나의 견해를 사람들에게 표현하기를 좋아한다 (a) / 나는 대체로 나의 생각, 견해를 내 안에 간직하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q5" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q5" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 6</span> 말을 할 때 제스처가 큰 편이다 (a) / 말을 할 때 제스처를 사용하면 어색한 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q6" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q6" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 7</span> 오랜시간 혼자 일하다 보면 외롭고 지루한 편이다 (a) / 혼자 오랜시간 일을 잘하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q7" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q7" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 8</span> 일할 때 적막한 것보다는 어느정도의 소리가 도움이 된다 (a) / 나는 소음이 있는 곳에서 일을 할 때 일하기가 힘들다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q8" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q8" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 9</span> 말이 빠른편이다 (a) / 목소리가 작고 조용하게 천천히 말하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q9" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q9" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="EI" data-a="E" data-b="I">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 활동적인 편이다 (a) / 나는 집에 있는 것이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q10" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q10" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 2: 감각(S) vs 직관(N) -->
+            <div class="content-card personality-test-card">
+              <h3>S / N</h3>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 현실적이다 (a) / 나는 미래지향적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q11" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q11" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 경험으로 판단한다 (a) / 나는 떠오르는 직관으로 판단한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q12" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q12" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 사실적 묘사를 잘한다 (a) / 나는 추상적 표현을 잘한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q13" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q13" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 구체적이다 (a) / 나는 은유적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q14" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q14" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 상식적이다 (a) / 나는 창의적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q15" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q15" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 갔던 길로 가는 것이 편하다 (a) / 나는 새로운 길이 재밌다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q16" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q16" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 했던 일이 편하다 (a) / 나는 새로운 일이 흥미있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q17" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q17" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 8</span> 나는 약도를 구체적으로 그린다 (a) / 나는 약도를 구체적으로 그리기 어렵다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q18" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q18" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 9</span> 나는 구체적이다 (a) / 나는 비약한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q19" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q19" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="SN" data-a="S" data-b="N">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 실제 경험을 좋아한다 (a) / 나는 공상을 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q20" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q20" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 3: 사고(T) vs 감정(F) -->
+            <div class="content-card personality-test-card">
+              <h3>T / F</h3>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 분석적이다 (a) / 나는 감수성이 풍부하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q21" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q21" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 객관적이다 (a) / 나는 공감적이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q22" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q22" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 감정에 치우치지 않고 의사결정을 한다 (a) / 나는 상황을 생각하며 의사결정을 한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q23" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q23" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 이성과 논리로 행동한다 (a) / 나는 가치관과 사람 중심으로 행동한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q24" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q24" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 능력있다는 소리 듣기를 좋아한다 (a) / 나는 따뜻하다는 소리 듣기를 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q25" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q25" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 경쟁한다 (a) / 나는 양보한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q26" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q26" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 직선적인 말이 편하다 (a) / 나는 배려하는 말이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q27" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q27" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-num">질문 8</div>
+                <div>나는 사건의 원인과 결과를 쉽게 파악한다 (a) / 나는 사람의 기분을 쉽게 파악한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q28" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q28" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 9</span> 사람들이 나를 차갑다고 느끼는 편이다 (a) / 사람들이 나를 따뜻하다고 하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q29" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q29" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="TF" data-a="T" data-b="F">
+                <div class="q-line"><span class="q-num">질문 10</span> 나는 할말은 한다 (a) / 나는 좋게 생각하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q30" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q30" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 블록 4: 판단(J) vs 인식(P) -->
+            <div class="content-card personality-test-card">
+              <h3>J / P</h3>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 1</span> 나는 결정에 대해서 잘 변경하지 않는 편이다 (a) / 나는 결정에 대해서 융통성이 있는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q31" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q31" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 2</span> 나는 계획에 의해서 일을 처리하는 편이다 (a) / 나는 마지막에 임박했을 때에 일을 처리하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q32" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q32" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 3</span> 나는 계획된 여행이 편하다 (a) / 나는 갑자기 떠나는 여행이 편하다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q33" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q33" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 4</span> 나는 정리정돈을 자주 하는 편이다 (a) / 나는 날 잡아서 정리하는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q34" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q34" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 5</span> 나는 조직적인 분위기에 일이 잘된다 (a) / 나는 즐거운 분위기에 일이 잘된다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q35" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q35" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 6</span> 나는 계획적이고 조직적이다 (a) / 나는 나의 순발력을 믿는다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q36" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q36" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 7</span> 나는 규범을 좋아한다 (a) / 나는 자유로운 것을 좋아한다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q37" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q37" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 8</span> 나는 일할 때 친해진다 (a) / 나는 놀 때 친해진다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q38" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q38" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 9</span> 내 책상은 정리가 잘 되어있다 (a) / 내 책상은 편안하게 되어있다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q39" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q39" value="b" /><span>b</span></label>
+                </div>
+              </div>
+              <div class="personality-question" data-dim="JP" data-a="J" data-b="P">
+                <div class="q-line"><span class="q-num">질문 10</span> 쇼핑을 갈 때 적어 가는 편이다 (a) / 쇼핑을 갈 때 적지 않고 그냥 가는 편이다 (b)</div>
+                <div class="personality-options">
+                  <label class="personality-option"><input type="radio" name="q40" value="a" /><span>a</span></label>
+                  <label class="personality-option"><input type="radio" name="q40" value="b" /><span>b</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="personality-result" id="personalityResult">
+            <h4>성격 유형 결과</h4>
+            <div class="mbti-display" id="mbtiResult">-</div>
+            <div class="personality-scores" id="personalityScores"></div>
+            <div id="scaleBars" style="margin-top: 1rem;"></div>
+            <p class="personality-check-msg" style="margin-top: 1rem; font-size: 0.85rem; color: var(--color-text-muted);">각 유형의 합은 10개, 총합은 40개가 나오셨다면 맞게 체크하셨습니다.</p>
+          </div>
+
+          <div class="personality-complete-wrap" style="margin-top: 2rem; text-align: center;">
+            <button type="button" class="btn btn-primary" id="personalityCompleteBtn">테스트 완료</button>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(2)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section id="step4" class="step-section" data-step="4" data-phase="interview">
+        <div class="step-header">
+          <span class="step-badge">Step 4</span>
+          <h1 class="step-title">영상 시청 및 요약</h1>
+        </div>
+
+        <p style="color: var(--color-text-muted); margin-bottom: 2rem;">아래 영상 3개를 시청하신 후, 각 영상에 대한 주요 포인트를 요약하여 작성해 주세요.</p>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 1</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 1 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 1 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary1" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback1" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 2</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 2 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 2 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary2" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback2" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-block">
+          <h3 style="margin-bottom: 0.75rem;">영상 3</h3>
+          <div class="video-placeholder" >
+            <a href="https://www.youtube.com/watch?v=9q0kAZJLO_4" target="_blank" rel="noopener" class="video-link" aria-label="영상 3 재생">
+              <img src="https://img.youtube.com/vi/9q0kAZJLO_4/hqdefault.jpg" alt="영상 3 썸네일" class="video-thumb" onerror="this.src='https://img.youtube.com/vi/9q0kAZJLO_4/default.jpg'">
+              <span class="video-play-btn"></span>
+            </a>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">주요 포인트 요약</label>
+              <textarea class="form-textarea" name="summary3" placeholder="이 영상에서 파악한 주요 내용을 요약하여 작성해 주세요."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">피드백</label>
+              <textarea class="form-textarea" name="feedback3" placeholder="피드백을 작성해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(3)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(6)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <section id="step5" class="step-section" data-step="5" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 5</span>
+          <h1 class="step-title">연봉제 근로계약서</h1>
+        </div>
+
+        <div class="content-card contract-doc">
+          <div class="contract-title">연 봉 제 근 로 계 약 서</div>
+          <p class="contract-date" style="text-align: right; margin-bottom: 2rem;">작성일자 : <input type="number" class="contract-input tiny" name="contractWriteYear" value="2026" style="width:44px"> <input type="number" class="contract-input tiny" name="contractWriteMonth" placeholder="월" min="1" max="12" style="width:36px"> . <input type="number" class="contract-input tiny" name="contractWriteDay" placeholder="일" min="1" max="31" style="width:36px"> .</p>
+
+          <p style="text-align: center; font-weight: 600; margin-bottom: 0.5rem;">(주) 휴텍씨</p>
+          <p style="text-align: center; color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 2rem;">서울시 강남구 서초동</p>
+
+          <div class="contract-title">연 봉 근 로 계 약 서</div>
+          <p class="contract-intro">(주)휴텍씨 (이하 "갑"이라 한다)와 <input type="text" class="contract-input inline" name="contractWorkerName" placeholder="성명"> (이하 "을"이라 한다)은 다음과 같이 연봉근로계약을 체결하고 상호간에 성실히 이행할 것을 확약한다.</p>
+
+          <div class="contract-article">
+            <h4>제 1 조 (계약의 목적)</h4>
+            <p>"갑"은 회사의 효율적인 운영을 위해 "을"을 채용하여 아래 제11조에서 정한 연봉을 지급하고, "을"은 "갑"을 위하여 필요한 기술 및 서비스를 제공함에 있어 이에 관한 의무를 규정함을 목적으로 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 2 조 (성실 의무)</h4>
+            <p>"갑"은 본 계약에서 정한 근로조건으로 "을"을 근로시키며, "을"은 본 계약에 정한 사항과 기타 회사 내 규칙을 성실히 준수할 의무를 가진다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 3 조 (고용 및 직무)</h4>
+            <p>1). "갑"은 "을"을 연봉제 사원으로 고용한다.</p>
+            <p>2). "을"의 담당업무는 <input type="text" class="contract-input wide" name="contractDuty" placeholder="예: 사무업무, 기획 및 업무지원" style="min-width:200px"> 로 한다.</p>
+            <p>3). "을"의 업무수행장소는 "갑"의 사업장과 담당업무의 수행에 필요한 장소로 한다.</p>
+            <p>4). 전항의 규정에도 불구하고 "갑"은 업무상 필요에 따라 "을"의 담당업무 및 업무수행장소를 변경할 수 있다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 4 조 (계약기간)</h4>
+            <p>1). 이 계약의 유효기간은 <input type="number" class="contract-input tiny" name="contractStartYear" value="2026" style="width:44px"> 년 <input type="number" class="contract-input tiny" name="contractStartMonth" placeholder="월" min="1" max="12" style="width:36px"> 월 <input type="number" class="contract-input tiny" name="contractStartDay" placeholder="일" min="1" max="31" style="width:36px"> 일 ~ <input type="number" class="contract-input tiny" name="contractEndYear" value="2026" style="width:44px"> 년 <input type="number" class="contract-input tiny" name="contractEndMonth" placeholder="월" style="width:36px"> 월 <input type="number" class="contract-input tiny" name="contractEndDay" placeholder="일" style="width:36px"> 일까지로 한다.</p>
+            <p>2). 본 계약 기간 만료일까지 새로운 계약이 체결되지 아니한 경우에는 당사자 간 계약은 해지된 것으로 본다.</p>
+            <p>3). 단, 계약기간 도과 후 1개월 이상 계속 근로한 경우 당사자 간 별도의 이의제기가 없으면 자동갱신 된 것으로 본다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 5 조 (제출서류)</h4>
+            <p>본 계약의 체결과 동시에 "을"은 사규에서 규정하고 있는 구비서류를 지체 없이 "갑"에게 제출하여야 하며, 이를 이행하지 아니하여 받는 불이익에 대하여는 "을"의 책임으로 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 6 조 (근로조건)</h4>
+            <p>1). 근로시간 및 시업, 종업, 휴게시간, 휴일 등은 "갑"이 정한 바에 의하며, 담당업무에 따라 조정될 수 있다.</p>
+            <p>2). 근로시간 및 휴게시간</p>
+            <p>1. 근로일은 <input type="text" class="contract-input" name="workDayStart" placeholder="월" style="width:50px"> 요일에서 <input type="text" class="contract-input" name="workDayEnd" placeholder="금" style="width:50px"> 요일 까지로 한다.</p>
+            <p>2. 근로자의 소정근로시간은 휴게시간(1시간)을 제외하고 1일 8시간, 주 40시간을 기준으로 한다.</p>
+            <p>3. 시업시각은 오전 <input type="number" class="contract-input tiny" name="workStartHour" placeholder="9" min="1" max="12" style="width:40px"> 시, 종업시각은 오후 <input type="number" class="contract-input tiny" name="workEndHour" placeholder="6" min="1" max="12" style="width:40px"> 시로 하고, 소정근로시간에 미달하는 부분(주 5시간)에 대하여는 앞에서 정한 근로시간 외에 자유롭게 시간을 배분하여 근무하도록 한다.</p>
+            <p>4. 휴게시간은 12:00 ~ 13:00 로 한다.</p>
+            <p>3). 근태사항 : 지각, 조퇴, 결근과 징계사항은 별도의 규정에 따른다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 7 조 (연장근로)</h4>
+            <p>1). 휴무일 및 국가공휴일의 추가근로는 팀장의 결재를 받아 회계팀에 전달한다. 단, 단체 행사나 정규업무는 제외한다.</p>
+            <p>2). 평일 소정근로시간을 2시간 이상 초과하여 근무할시 저녁식사를 제공한다. (1회 5천원)</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 8 조 (휴일 및 휴가)</h4>
+            <p>1). 1주 동안의 소정근로일을 개근한 자에게는 1일의 주 휴일을 부여한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 9 조 (연차휴가의 대체)</h4>
+            <p>1). "을"은 연차휴가를 특정 근로일에 사용할 것을 동의한다.</p>
+            <p>2). 특정 근로일에 사용한 여름휴가는 연차휴가와 대체된다.</p>
+            <p>3). "갑"은 "을"이 사용하지 아니한 연차휴가에 대해서는 통상임금을 지급한다. 단, 근로기준법 제61조의 "연차 유급휴가 사용 촉진"을 한 경우에는 그러하지 아니하다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 10 조 (교육비 지원)</h4>
+            <p>"갑"은 "을"에게 교육비를 지원할 수 있고, 구체적인 지원 금액은 취업규칙에 따른다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 11 조 (연봉조건)</h4>
+            <p>1). 계약기간 중 "을"의 연봉총금액은 금 <input type="text" class="contract-input inline" name="annualSalaryTotal" placeholder="원" style="min-width:120px"> 원 으로 하며, 연봉내역은 다음과 같다.</p>
+            <table class="contract-salary-table">
+              <thead>
+                <tr><th colspan="2">연 봉 내 역</th></tr>
+              </thead>
+              <tbody>
+                <tr><th>연봉 산정 금액</th><th>금액(원)</th></tr>
+                <tr><td>① 기 본 급</td><td><input type="text" class="contract-input salary-input" name="salaryBasic" placeholder="0"></td></tr>
+                <tr><td>② 연장근로수당</td><td><input type="text" class="contract-input salary-input" name="salaryOvertime" placeholder="0"></td></tr>
+                <tr><td>③ 식 대</td><td><input type="text" class="contract-input salary-input" name="salaryMeal" placeholder="0"></td></tr>
+                <tr><td>④ 상 여 금</td><td><input type="text" class="contract-input salary-input" name="salaryBonus" placeholder="0"></td></tr>
+                <tr><td>⑤ 퇴 직 금</td><td><input type="text" class="contract-input salary-input" name="salarySeverance" placeholder="0"></td></tr>
+                <tr><td>⑥ 기타(<input type="text" class="contract-input" name="salaryEtcName" placeholder="" style="width:80px">)</td><td><input type="text" class="contract-input salary-input" name="salaryEtc" placeholder="0"></td></tr>
+                <tr><th>연봉 총 액</th><th><input type="text" class="contract-input salary-input" name="salaryTotal" placeholder="0원"></th></tr>
+              </tbody>
+            </table>
+            <p>2). 연봉총액 중 금 <input type="text" class="contract-input inline" name="monthlyPay" placeholder="원" style="min-width:120px"> 원을 매월 지급하며, 기타 지급시기 및 방법은 "갑"의 취업규칙과 제규정에 따른다.</p>
+            <p>3). 위 지급액 중 법령 또는 당사자 간 합의에 의한 금액은 공제 후 지급한다. (국민연금보험료, 건강보험료, 고용보험료 기타 법령에 의한 금액)</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 12 조 (중도퇴사)</h4>
+            <p>1). 계약기간 중 퇴사자는 소속장을 경유하여 30일 전에 퇴직원을 제출하여 사전 통보하고, 퇴직승인을 득한 후 퇴직하여야 한다.</p>
+            <p>2). 전항의 규정에 의한 퇴직원을 제출한 자는 회사의 승인이 있을 때까지 종전의 직무에 종사하여야 한다.</p>
+            <p>3). 퇴직자는 퇴직승인을 득한 후 후임자에게 업무인수인계를 분명히 하여, 회사업무에 지장이 없도록 하여야 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 13 조 (연봉계산기간 및 지급일)</h4>
+            <p>연봉액의 월지급액 계산기간은 매월 1일부터 말일까지로 하며 지급일은 익월 <input type="number" class="contract-input tiny" name="payDay" value="10" min="1" max="31" style="width:40px"> 일로 한다. 다만 지급일이 휴일인 경우 그 다음날에 지급하도록 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 14 조 (사무인계)</h4>
+            <p>1). "을"은 전근, 주재, 직무변경, 해고, 퇴직의 경우에는 관장하였던 일절의 도구 및 소모품을 반납하고 업무에 관한 일체의 사항을 정확히 인계하여야 한다.</p>
+            <p>2). "을"은 본인이 사용하였던 이메일과 인트라넷 상의 모든 파일의 내용을 마음대로 삭제할 수 없고, 업무상으로만 사용하여야 하며, 인수인계시 그대로 두어야 한다. 만약 삭제시 복구에 대한 실제 손실 발생 비용을 "갑"에게 지급한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 15 조 (을의 의무)</h4>
+            <p>1). "을"은 본 계약내용 뿐 아니라, 본 계약의 기준이 되는 "연봉제규정"에 나오는 내용도 충분히 숙지하고 이를 준수하여야 한다.</p>
+            <p>2). "을"은 최선을 다하여 "갑"의 업무지시에 응해야 하며, 본 계약에 의하여 부과된 업무를 성실히 수행하여야 한다.</p>
+            <p>3). 본 계약 내용을 위반하거나 이행하지 않아 발생한 손해에 대해서 "을"은 "갑"에게 그 손해를 배상하여야 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 16 조 (해약 및 재계약)</h4>
+            <p>1). "을"이 본 계약내용 또는 연봉제규정에서 정한 사항을 위반하거나 고용관계 유지가 어렵다고 인정될 사유가 발생된 경우 근로계약을 해지한다.</p>
+            <p>2). "을"은 "갑"과의 근로계약 만료 30일 전까지 연봉재계약 신청을 하여야 하며, "갑"은 "을"의 근무성적 및 직무수행 능력 등을 종합적으로 평가하여 재계약 여부를 결정할 수 있다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 17 조 (수습기간)</h4>
+            <p>최초계약자에 한해 업무숙련도, 경력연관성, 조직적응력 등을 평가하기 위해 3개월 간 수습기간을 두는 것이 원칙이고, 경력직의 경우 2개월로 할 수 있다. 이 기간 중 근무 부적격으로 인정된 자에게는 본 계약을 무효로 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 18 조 (연봉비밀준수)</h4>
+            <p>동 계약서상의 내용이나 연봉에 대하여는 타인에게 누설하여서는 아니되며, 타인의 계약 내용에 대하여 알려고 하여서도 아니된다. 만일 이를 어길 시에는 이에 상응하는 징계조치 등 불이익을 받을 수 있다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 19 조 (분쟁의해결)</h4>
+            <p>"갑"과 "을" 사이에서 법적 분쟁이 발생한 경우 소송은 "갑"의 소재지 관할법원으로 한다.</p>
+          </div>
+
+          <div class="contract-article">
+            <h4>제 20 조 (준용)</h4>
+            <p>"갑"과 "을"의 권리, 의무에 관하여 본 계약에 명시되지 아니한 사항은 근로기준법 및 관련법규, 또는 연봉제규정에서 정한 내용에 따른다.</p>
+          </div>
+
+          <p style="margin: 1.5rem 0;"><strong>*특이사항 :</strong> <input type="text" class="contract-input wide" name="contractSpecial" placeholder="" style="min-width:300px"></p>
+
+          <p class="contract-closing">이상 "갑"과 "을"은 상기계약의 내용을 성실히 이행할 것을 약정하고, 본 사실을 증명하기 위하여 계약서 2통을 작성 및 서명․날인하여 각각 1통씩 보관한다.</p>
+
+          <p class="contract-date" style="text-align: right; margin: 1.5rem 0;"><input type="number" class="contract-input tiny" name="contractDateYear" value="2026" style="width:44px"> 년 <input type="number" class="contract-input tiny" name="contractDateMonth" placeholder="월" style="width:36px"> 월 <input type="number" class="contract-input tiny" name="contractDateDay" placeholder="일" style="width:36px"> 일</p>
+
+          <div class="contract-signatures">
+            <div class="contract-sig-block">
+              <strong>"갑"</strong> 회 사 명 : ㈜ 휴텍씨<br>
+              대 표 이 사 : 박미진 (인)
+            </div>
+            <div class="contract-sig-block">
+              <strong>"을"</strong> 성 명 : <input type="text" class="contract-input" name="contractName" placeholder=""> (인)<br>
+              주민등록번호 : <input type="text" class="contract-input" name="contractSSN" placeholder=""><br>
+              주 소 : <input type="text" class="contract-input" name="contractAddress" placeholder="">
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(4)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 5 -->
+      <section id="step6" class="step-section" data-step="6" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 6</span>
+          <h1 class="step-title">출근 후 교육 내용</h1>
+        </div>
+
+        <p style="color: var(--color-text-muted); margin-bottom: 2rem;">출근 후 필요한 교육 내용과 회사 생활 안내입니다.</p>
+
+        <div class="content-card">
+          <table class="edu-table">
+            <thead>
+              <tr><th>제목</th><th>내용</th><th>비고</th><th>피드백</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>소개</td>
+                <td>휴텍씨, 국제통역번역협회, 타임스미디어 / 본사는 서초동, 여기는 연구소 개념</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb1" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>출퇴근</td>
+                <td>출근/퇴근 업무일지 기록, 업무 우선순위 및 내용 변경 시 추가 업무·이메일 확인 후 처리, 고정 업무·변경 업무·잔무·기획 업무·공용 업무 구분</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb2" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무일지</td>
+                <td>30분 단위 작성, 다음날·다음 주·다음 달 일정 기록, 피드백 하루 2회(모아서 보고), 초기 양 위주 → 이후 질/내용 위주, 1차(잔무·급함·전달·보고) 2차(고정) 3차(새일·연결) 구분</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb3" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 프로세싱</td>
+                <td>맥락·흐름·뉘앙스 이해, 틀·폼·형태 먼저 확인 후 진행, 효율성·가독성·30분 단위 중요</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb4" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무</td>
+                <td>진행 내용 캡처 이미지로 보고 후 다운로드 가능, 우선순위 헷갈릴 때 반드시 질문</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb5" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 인지</td>
+                <td>What/Why/How 함께 설명, A/B 경우 함께 제시, 중간 보고 필수, 마감일 정하고 지시자에게 알리기, 문서 한 달에 한 번씩 정리</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb6" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>정리정돈</td>
+                <td>본인 컴퓨터 위·화면·문서·출력물 정리 요청</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb7" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>보고법</td>
+                <td>보고 대상: 지시한 사람, 중요하거나 긴 업무는 중간 보고 필수, 완료 후 보고 필수, 잔무는 한 마디로 요약 보고</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb8" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>업무 체크리스트</td>
+                <td>각종 업무 체크리스트 활용</td>
+                <td>와이파이</td>
+                <td class="feedback-cell"><input type="text" name="eduFb9" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>이메일</td>
+                <td>-</td>
+                <td>구글 메일</td>
+                <td class="feedback-cell"><input type="text" name="eduFb10" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>AI 활용</td>
+                <td>-</td>
+                <td>GPT, 커서(Cursor)</td>
+                <td class="feedback-cell"><input type="text" name="eduFb11" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>급여</td>
+                <td>매월 15일~말일 입금, 업무일지 기록 시 출퇴근 시간 5분 전 출근하여 기록</td>
+                <td>캔바</td>
+                <td class="feedback-cell"><input type="text" name="eduFb12" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>로그인 정보</td>
+                <td>자료로 제공</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb13" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>엑셀</td>
+                <td>모든 문서 엑셀 1개(시트 20개까지), 줄 긋고 한 장에 50% 이상 프린트 가능하게, 셀 병합 금지, 글자 색·색칠로 보기 쉽게, 시트 20개 넘으면 카테고리별 분류</td>
+                <td>홈페이지</td>
+                <td class="feedback-cell"><input type="text" name="eduFb14" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>PPT</td>
+                <td>한 장에 2장 캡처/출력 가로 4장, 이미지 캡처 위주, 40장까지 하나의 파일로 관리</td>
+                <td>개발 홈피</td>
+                <td class="feedback-cell"><input type="text" name="eduFb15" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>피드백·아이디어</td>
+                <td>종이 출력 내용 위주/캡처하여 내용 삽입</td>
+                <td>카카오톡</td>
+                <td class="feedback-cell"><input type="text" name="eduFb16" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>비품/프린터</td>
+                <td>개인 물품 필요 시 담당자 요청, 프린터 공용 한 장에 4장 출력</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb17" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>보안규정</td>
+                <td>개인 메일·핸드폰·클라우드 사용 금지, 회사 자료 복사·외부 반출·개인 USB 금지</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb18" placeholder="피드백"></td>
+              </tr>
+              <tr>
+                <td>기타</td>
+                <td>모든 문서 삭제 금지, 삭제 파일 보관. 담당: 노재훈 사장님, 서수연 팀장, 정인수 팀장, 이원진 팀장님, 김성태 팀장님</td>
+                <td></td>
+                <td class="feedback-cell"><input type="text" name="eduFb19" placeholder="피드백"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="feedback-form-section">
+            <h3>교육 피드백 작성</h3>
+            <div class="feedback-category-row">
+              <div class="feedback-category-item">
+                <label>대분류</label>
+                <select name="feedbackLarge" id="feedbackLarge">
+                  <option value="">선택</option>
+                  <option value="소개·환경">소개·환경</option>
+                  <option value="출퇴근·업무관리">출퇴근·업무관리</option>
+                  <option value="업무처리">업무처리</option>
+                  <option value="보고·소통">보고·소통</option>
+                  <option value="시스템·도구">시스템·도구</option>
+                  <option value="인사·급여">인사·급여</option>
+                  <option value="보안·기타">보안·기타</option>
+                </select>
+              </div>
+              <div class="feedback-category-item">
+                <label>중분류</label>
+                <select name="feedbackMid" id="feedbackMid">
+                  <option value="">선택</option>
+                  <option value="소개">소개</option>
+                  <option value="출퇴근">출퇴근</option>
+                  <option value="업무일지">업무일지</option>
+                  <option value="업무 프로세싱">업무 프로세싱</option>
+                  <option value="업무">업무</option>
+                  <option value="업무 인지">업무 인지</option>
+                  <option value="정리정돈">정리정돈</option>
+                  <option value="보고법">보고법</option>
+                  <option value="업무 체크리스트">업무 체크리스트</option>
+                  <option value="이메일">이메일</option>
+                  <option value="AI 활용">AI 활용</option>
+                  <option value="급여">급여</option>
+                  <option value="로그인 정보">로그인 정보</option>
+                  <option value="엑셀">엑셀</option>
+                  <option value="PPT">PPT</option>
+                  <option value="피드백·아이디어">피드백·아이디어</option>
+                  <option value="비품/프린터">비품/프린터</option>
+                  <option value="보안규정">보안규정</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+              <div class="feedback-category-item">
+                <label>소분류</label>
+                <select name="feedbackSmall" id="feedbackSmall">
+                  <option value="">선택</option>
+                  <option value="내용 이해도">내용 이해도</option>
+                  <option value="교육 시간">교육 시간</option>
+                  <option value="자료 적절성">자료 적절성</option>
+                  <option value="추가 필요 사항">추가 필요 사항</option>
+                  <option value="개선 제안">개선 제안</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <textarea class="form-textarea" name="feedbackContent" placeholder="피드백을 입력해 주세요."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(6)">← 이전</button>
+          <button class="btn btn-primary" onclick="goToStep(7)">다음 단계로 →</button>
+        </div>
+      </section>
+
+      <!-- STEP 6 계약서 -->
+
+
+      <!-- STEP 7 서류첨부 -->
+      <section id="step7" class="step-section" data-step="7" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 7</span>
+          <h1 class="step-title">서류첨부</h1>
+        </div>
+        <div class="content-card">
+          <p class="card-desc" style="color: var(--color-text-muted); margin-bottom: 1.5rem;">필요한 서류를 첨부해 주세요. (PDF, 이미지, 한글/엑셀 등)</p>
+          <div class="form-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">이력서</label>
+              <input type="file" class="form-input file-input" name="docResume" accept=".pdf,.hwp,.doc,.docx,.jpg,.jpeg,.png" multiple>
+            </div>
+            <div class="form-group">
+              <label class="form-label">포트폴리오 / 자격증 등</label>
+              <input type="file" class="form-input file-input" name="docPortfolio" accept=".pdf,.hwp,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple>
+            </div>
+            <div class="form-group">
+              <label class="form-label">기타 서류</label>
+              <input type="file" class="form-input file-input" name="docEtc" accept=".pdf,.hwp,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" multiple>
+            </div>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(5)">← 이전</button>
+          <button type="button" class="btn btn-submit" onclick="submitForm()">제출</button>
+        </div>
+      </section>
+
+
+      <section id="step9" class="step-section" data-step="9" data-phase="work1">
+        <div class="step-header">
+          <span class="step-badge">Step 8</span>
+          <h1 class="step-title">업무 1차</h1>
+        </div>
+        <div class="content-card">
+          <h3>체크한 항목 확인</h3>
+          <p class="card-desc">왼쪽 사이드의 체크박스를 선택하면, 여기에서 선택한 항목들이 한눈에 보입니다.</p>
+          <div class="selected-box" style="min-height: 120px; padding: 0.75rem 1rem; border: 1px solid var(--color-border-subtle); border-radius: 8px; background-color: #fafafa;">
+            <ul id="work1SelectedList" style="margin: 0; padding-left: 1.25rem;"></ul>
+          </div>
+        </div>
+
+        <!-- 업무1차: 선택 항목 상세 내용(토글 표시) -->
+        <div id="work1TopicContainer">
+          <div class="content-card" data-work1-topic="회사배경" style="display:none;">
+            <h3>🏢 회사 배경</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">면접 전에 회사와 대표님 스타일을 간단히 알아두시면 도움이 됩니다.</p>
+            <div class="table-scroll-wrap">
+              <table class="edu-table info-table">
+                <thead>
+                  <tr>
+                    <th>항목</th>
+                    <th>내용 (쉬운 말)</th>
+                    <th>신입이 알아두면 좋은 포인트</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>한 줄 요약</td><td>자수성가형 사업가, 성과로 증명해 온 리더</td><td>“결과물로 말하는 문화”가 강함</td></tr>
+                  <tr><td>성과 경험</td><td>매출 1000억 규모를 만든 경험이 있음</td><td>속도/성과/납기를 중요하게 봄</td></tr>
+                  <tr><td>성공 경험</td><td>큰 성공을 2번 해 본 타입</td><td>‘될 때까지 해보자’ 추진력이 강함</td></tr>
+                  <tr><td>리딩 경험</td><td>과거에 200명 규모 조직을 리딩한 경험</td><td>기본(보고/시간/정리)에 기준이 높음</td></tr>
+                  <tr><td>현재 환경</td><td>테크기업 운영, 비교적 젊은 팀과 협업 중</td><td>문서/템플릿으로 맞추면 일하기 쉬움</td></tr>
+                  <tr><td>의사결정 습관</td><td>빨리 보고 받고 빨리 결정하는 편</td><td>길게 설명보다 “결론 1줄”이 잘 먹힘</td></tr>
+                  <tr><td>일하는 기대치</td><td>“지시하면 시작한다”에 가깝다</td><td>시작 신호(“지금 시작”)가 신뢰를 만든다</td></tr>
+                  <tr><td>신뢰 포인트</td><td>늦게 말하는 것보다, 먼저 말하는 걸 더 신뢰함</td><td>막히면 숨기지 말고 빨리 공유해야 함</td></tr>
+                  <tr><td>피드백 특징</td><td>결과 중심으로 수정 포인트를 빠르게 준다</td><td>피드백은 ‘수정 리스트’로 정리하면 편함</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="content-card" data-work1-topic="업무방식" style="display:none;">
+            <h3>📌 한눈에 보는 가이드</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">아래 이미지로 요약을 먼저 훑어보시고, 세부 내용은 아래 표에서 확인하실 수 있습니다.</p>
+            <figure class="guide-image-wrap">
+              <img src="면접_업무방식.png" alt="휴텍씨 대표님과 일 잘하는 방법: 자수성가형 리더 실전 대응 매뉴얼" class="guide-image" />
+            </figure>
+          </div>
+          <div class="content-card" data-work1-topic="업무방식" style="display:none;">
+            <h3>📐 업무 방식 (대표님 스타일)</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">일할 때 이렇게 맞추면 소통이 수월합니다.</p>
+            <div class="table-scroll-wrap">
+              <table class="edu-table info-table wide-cols">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>대표님은 이런 사람</th>
+                    <th>일할 때 보이는 모습</th>
+                    <th>강점(좋은 점)</th>
+                    <th>약점/리스크</th>
+                    <th>신입 지침 (딱 이렇게)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>속도</td><td>빠른 걸 좋아함</td><td>“지금 시작했어?”를 빨리 묻는다</td><td>일 빨리 굴림</td><td>느리면 불안해하고 톤이 세질 수 있음</td><td>받자마자 '시작했습니다' 한 줄 보내기</td></tr>
+                  <tr><td>추진력</td><td>밀어붙이는 힘이 큼</td><td>“일단 해봐”, “바로 가자”</td><td>실행이 빠름</td><td>방향 확인 없이 밀면 다시 해야 함</td><td>초안 먼저 보여주고 맞추기</td></tr>
+                  <tr><td>말투</td><td>직설적임</td><td>“이건 아니야”가 바로 나올 수 있음</td><td>피드백이 빠름</td><td>신입이 상처받고 위축될 수 있음</td><td>관리자는 수정 포인트를 3개로 정리해서 전달</td></tr>
+                  <tr><td>설명 스타일</td><td>긴 설명 싫어함</td><td>길게 말하면 끊을 수 있음</td><td>회의가 짧아짐</td><td>배경이 빠져 오해가 생길 수 있음</td><td>배경은 1줄만, 자세한 건 링크/표로</td></tr>
+                  <tr><td>결론 선호</td><td>결론부터 듣고 싶어함</td><td>“그래서 결론이 뭐야?”</td><td>결정이 빠름</td><td>과정 설명 길면 답답해함</td><td>보고는 결론 1줄 먼저</td></tr>
+                  <tr><td>기준 제시</td><td>기준을 말로 다 안 줄 때가 있음</td><td>“깔끔하게”, “센스 있게” 같은 말</td><td>감각적 판단 빠름</td><td>기준이 없어서 헤매기 쉬움</td><td>“직설적으로 기준 주세요: 형식/분량/예시”</td></tr>
+                  <tr><td>행동 중심</td><td>말보다 행동을 보여 주는 걸 좋아함</td><td>계획만 있으면 답답해함</td><td>일 진행이 보임</td><td>신입이 “생각 중”으로 멈추면 불리</td><td>일단 시작 → 초안 → 수정 순서</td></tr>
+                  <tr><td>질문 방식</td><td>질문을 자주 끊어 먹는 걸 싫어함</td><td>질문이 계속 오면 흐름 끊긴다고 느낌</td><td>속도 유지</td><td>질문 못 하고 혼자 끌면 터짐</td><td>질문은 모아서 한 번에(3개)</td></tr>
+                  <tr><td>피드백 방식</td><td>수정 포인트를 바로 찍음</td><td>“이거 바꿔”가 빠름</td><td>개선 속도 빠름</td><td>'왜' 설명이 짧아 납득이 어려울 수 있음</td><td>“수정은 3개만 확정하고 시작”</td></tr>
+                  <tr><td>감정/텐션</td><td>텐션이 높고 즉흥적일 수 있음</td><td>분위기 좋을 땐 아이디어가 쏟아짐</td><td>팀 에너지 올림</td><td>텐션 따라 말이 바뀌는 느낌 날 수 있음</td><td>말로 끝내지 말고 한 줄 기록 남기기</td></tr>
+                  <tr><td>동시 지시</td><td>한 번에 여러 일을 던질 수 있음</td><td>“이것도 해봐”가 붙는다</td><td>기회/아이디어 많음</td><td>우선순위가 흔들림</td><td>A/B/C로 정리해서 1순위 확인</td></tr>
+                  <tr><td>중간 확인</td><td>완성본보다 '방향'을 먼저 보고 싶어함</td><td>중간에 한 번 보면 마음이 놓임</td><td>갈아엎기 줄어듦</td><td>중간 확인이 없으면 막판에 뒤집힘</td><td>중간에 한 번 보여주기(방향 확인)</td></tr>
+                  <tr><td>리스크 반응</td><td>문제 생기면 바로 해결하려 함</td><td>이슈 나오면 즉시 대응 모드</td><td>위기 대응 빠름</td><td>늦게 알리면 신뢰가 확 떨어짐</td><td>문제 생기면 바로 말하기(숨기지 않기)</td></tr>
+                  <tr><td>신뢰 기준</td><td>늦게 말하는 걸 제일 싫어함</td><td>“왜 지금 말해?”가 나올 수 있음</td><td>책임감 문화</td><td>보고 회피하면 큰 문제</td><td>늦어질 것 같으면 먼저 말하기</td></tr>
+                  <tr><td>결과 기준</td><td>결과물/납기 중심</td><td>“결과물 링크 줘”</td><td>판단 빠름</td><td>과정 설명 늘어지면 싫어함</td><td>제출은 링크 + 한 줄 요약</td></tr>
+                  <tr><td>일관성 확보</td><td>구두로 결정나는 경우가 있음</td><td>“내가 말했잖아” 상황 가능</td><td>빠름</td><td>기록 없으면 싸움</td><td>결정은 결정/담당/기한 3줄로 남기기</td></tr>
+                  <tr><td>세대/방식 차이</td><td>옛 방식+빠른 방식 섞임</td><td>문서/틀 표준화가 아직 흔들릴 수 있음</td><td>변화 적응 가능</td><td>팀마다 방식이 달라 혼란</td><td>관리자가 템플릿/규칙을 고정해서 통일</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-card" data-work1-topic="2차(수습)" style="display:none;">
+            <h3>📌 한눈에 보는 가이드</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">아래 이미지로 요약을 먼저 훑어보시고, 세부 내용은 아래 표에서 확인하실 수 있습니다.</p>
+            <figure class="guide-image-wrap">
+              <img src="수습.png" alt="휴텍씨 대표님과 일 잘하는 방법: 자수성가형 리더 실전 대응 매뉴얼" class="guide-image" />
+            </figure>
+          </div>
+
+          <div class="content-card" data-work1-topic="2차(수습)" style="display:none;">
+            <p class="card-desc" style="margin-bottom: 1rem;">
+              수습 기간 합격자가 업무를 진행할 때 꼭 지키면 좋은 기본 규칙입니다.
+            </p>
+            <div class="table-scroll-wrap">
+              <table class="edu-table info-table wide-cols">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>합격자가 해야 하는 핵심(한 줄)</th>
+                    <th>쉽게 풀어서(1~2줄)</th>
+                    <th>예시 문장(2개)</th>
+                    <th>태그(5개)</th>
+                    <th>비고</th>
+                    <th>피드백</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1. 시작 세팅</td>
+                    <td>계정/폴더부터 맞춘다</td>
+                    <td>회사 자료는 회사 폴더에만 둔다. 권한이 없으면 요청한다</td>
+                    <td>① “폴더/권한 세팅부터 맞추겠습니다. 어떤 폴더 구조로 두면 될까요?” ② “권한이 안 열려서 요청드립니다. 읽기/편집 중 어디까지 주시면 될까요?”</td>
+                    <td>폴더세팅, 권한요청, 회사폴더, 접근관리, 초기정리</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note1" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb1" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>2. 업무 받는 방식</td>
+                    <td>업무는 ‘말’이 아니라 ‘글’로 남긴다</td>
+                    <td>구두 지시도 짧게 써서 남기고 시작한다</td>
+                    <td>① “방금 지시 정리해서 남겼습니다: 목적/기한/산출물/기준 확인 부탁드립니다.” ② “구두로 받은 내용도 한 줄로 기록하고 시작하겠습니다. 맞으면 ‘OK’만 주세요.”</td>
+                    <td>글로남기기, 지시정리, 확인요청, 기준합의, 기록습관</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note2" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb2" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>3. 일을 바로 시작</td>
+                    <td>지시 받으면 바로 움직인다</td>
+                    <td>오래 생각하지 말고 초안을 먼저 만든다</td>
+                    <td>① “지금 바로 착수했고, 오늘 ○시까지 1차 초안 공유드리겠습니다.” ② “먼저 거친 초안 만들고 방향 맞춘 뒤 디테일 보완하겠습니다.”</td>
+                    <td>즉시착수, 초안우선, 속도, 추진, 일정약속</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note3" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb3" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>4. 질문하는 타이밍</td>
+                    <td>질문은 모아서 한 번에 한다</td>
+                    <td>하면서 생긴 질문은 메모해뒀다가 한 번에 묻는다</td>
+                    <td>① “진행하면서 생긴 질문을 3개로 묶어 한 번에 드리겠습니다.” ② “질문은 A/B로 정리했습니다. 저는 A가 더 안전하다고 봅니다.”</td>
+                    <td>질문정리, 한번에질문, A/B, 효율, 판단제시</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note4" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb4" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>5. 하루 루틴(아침)</td>
+                    <td>오늘 할 일을 한 줄로 쓴다</td>
+                    <td>아침에 “오늘 뭐 할지” 한 줄로 남긴다</td>
+                    <td>① “오늘 할 일 한 줄 남깁니다: ○○ 정리 / ○○ 업데이트 / 초안 1개.” ② “오늘 목표는 3개입니다: 1)○○ 2)○○ 3)○○.”</td>
+                    <td>오늘할일, 아침로그, 우선순위, 목표3개, 계획</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note5" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb5" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>6. 하루 루틴(퇴근 전)</td>
+                    <td>오늘 한 일+링크를 남긴다</td>
+                    <td>퇴근 전에 결과물 링크를 붙이고 짧게 정리한다</td>
+                    <td>① “오늘 결과 공유드립니다: 링크( ) / 완료( ) / 남은 것( ) / 내일( ).” ② “퇴근 전 정리 올립니다. 변경사항 요약과 결과물 링크 첨부했습니다.”</td>
+                    <td>퇴근정리, 결과링크, 진행상태, 내일계획, 변경요약</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note6" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb6" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>7. 막힘 처리</td>
+                    <td>막히면 바로 말한다</td>
+                    <td>혼자 끌지 말고 30분 안에 공유한다</td>
+                    <td>① “막혔습니다. <strong>원인: ○○ / 시도: ○○ / 필요한 결정: ○○</strong>입니다.” ② “30분 안에 공유드립니다. 지금 필요한 건 A 승인입니다.”</td>
+                    <td>30분공유, 막힘보고, 원인정리, 도움요청, 의사결정</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note7" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb7" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>8. 중간 확인</td>
+                    <td>완성 전에 한 번 보여준다</td>
+                    <td>중간에 보여주면 나중에 갈아엎는 일이 줄어든다</td>
+                    <td>① “완성 전 중간본 공유드립니다. 방향 OK/수정 부탁드립니다.” ② “지금 단계에서 한 번만 맞추면, 뒤에 갈아엎는 리스크 줄일 수 있습니다.”</td>
+                    <td>중간본, 방향확인, 리스크감소, 피드백, 합의</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note8" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb8" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>9. 제출 방식</td>
+                    <td>파일 붙이기보다 링크로 낸다</td>
+                    <td>찾기 쉽게 링크/경로로 제출한다</td>
+                    <td>① “파일 대신 링크로 제출드립니다: (링크). 확인 후 OK/수정 부탁드립니다.” ② “찾기 쉬우시게 경로+링크 같이 남깁니다.”</td>
+                    <td>링크제출, 경로표기, 찾기쉽게, 공유, 버전관리</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note9" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb9" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>10. 파일 이름</td>
+                    <td>파일명은 규칙대로 쓴다</td>
+                    <td>날짜_업무_v1처럼 한 방식으로 통일한다</td>
+                    <td>① “파일명 규칙대로 올렸습니다: 20260302_업무명_v1.” ② “같은 규칙로 통일하겠습니다: 날짜_주제_v#.”</td>
+                    <td>파일명규칙, 통일, 날짜포맷, v표기, 검색성</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note10" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb10" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>11. 버전 관리</td>
+                    <td>‘최종’ 금지, v1/v2로 간다</td>
+                    <td>최종/최종2 같은 혼란을 막는다</td>
+                    <td>① “‘최종’ 표기 없이 v2로 올렸고, v1은 보관했습니다.” ② “수정 이력은 v3에서 반영했고, 변경점은 메모에 남겼습니다.”</td>
+                    <td>버전관리, 최종금지, v1v2, 변경이력, 혼선방지</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note11" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb11" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>12. 엑셀 기본</td>
+                    <td>표준 템플릿을 쓴다</td>
+                    <td>엑셀은 회사 방식대로(예: 셀 합치기 금지)</td>
+                    <td>① “회사 템플릿 기준으로 정리하겠습니다(예: 셀 병합 금지).” ② “표는 필터/정렬 가능한 형태로 맞춰 올리겠습니다.”</td>
+                    <td>템플릿준수, 셀병합금지, 표준화, 필터가능, 엑셀정리</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note12" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb12" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>13. PPT 기본</td>
+                    <td>PPT는 설명용이다</td>
+                    <td>예쁘게보다 결론 1줄 + 캡쳐가 우선</td>
+                    <td>① “이 페이지 결론 1줄 먼저 말씀드리면 ○○입니다.” ② “예쁘게보다 결론+근거 캡처 위주로 구성하겠습니다.”</td>
+                    <td>결론한줄, 근거캡처, 설명용, 메시지, 가독성</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note13" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb13" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>14. 출력물 메모</td>
+                    <td>출력물엔 3가지를 적는다</td>
+                    <td>날짜/버전/요청사항만 적어도 안 헷갈린다</td>
+                    <td>① “출력물 상단에 날짜/버전/요청사항 적어두겠습니다.” ② “라벨 이렇게 붙이겠습니다: 2026-03-02 / v1 / 수정포인트: ○○.”</td>
+                    <td>날짜표기, 버전표기, 요청사항, 라벨링, 혼선방지</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note14" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb14" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>15. 보안 실수 방지</td>
+                    <td>개인 메일/폰/클라우드로 옮기지 않는다</td>
+                    <td>회사 밖으로 자료가 나가면 바로 사고다</td>
+                    <td>① “회사 자료는 개인 메일/개인 폰/개인 클라우드로 절대 이동하지 않겠습니다.” ② “공유/저장은 회사 폴더·회사 채널에서만 진행하겠습니다.”</td>
+                    <td>보안, 개인채널금지, 회사폴더, 유출방지, 규정준수</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note15" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb15" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>16. 외부 공유 필요 시</td>
+                    <td>승인 받고 한다</td>
+                    <td>꼭 필요하면 먼저 승인을 받는다</td>
+                    <td>① “외부 공유 필요합니다. 대상/자료/기간은 ○○이며 승인 요청드립니다.” ② “승인 전까지는 외부 전송하지 않고, 대체 방식으로 진행하겠습니다.”</td>
+                    <td>승인요청, 외부공유, 대상명시, 기간명시, 리스크관리</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note16" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb16" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>17. 삭제 규칙</td>
+                    <td>함부로 지우지 않는다</td>
+                    <td>삭제는 금지. 필요하면 삭제폴더/기록으로 처리</td>
+                    <td>① “삭제는 하지 않고 삭제폴더로 이동했습니다(기록 남김).” ② “정리 필요하면 보관/아카이브로 처리하겠습니다.”</td>
+                    <td>삭제금지, 아카이브, 이력보존, 이동처리, 실수방지</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note17" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb17" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>18. 프린터/비품</td>
+                    <td>모르면 바로 물어본다</td>
+                    <td>프린터 오류/비품은 담당자에게 바로 요청</td>
+                    <td>① “프린터 오류입니다(사진 첨부). 담당자/요청 경로 알려주시면 바로 진행하겠습니다.” ② “비품이 부족합니다. 어디에 요청하면 될까요?”</td>
+                    <td>즉시요청, 사진첨부, 담당자확인, 비품, 30분룰</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note18" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb18" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>19. 수습 체크</td>
+                    <td>주간으로 점검한다</td>
+                    <td>매주 “잘한 것/막힌 것/다음주”를 짧게 정리</td>
+                    <td>① “이번 주 점검 올립니다: 잘한 것 1 / 막힌 것 1 / 다음주 1.” ② “수습 체크 공유드립니다. 다음 주는 ○○를 개선 포인트로 잡겠습니다.”</td>
+                    <td>주간점검, 회고, 개선포인트, 다음주계획, 피드백</td>
+                    <td class="feedback-cell"><input type="text" name="phase2Note19" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase2Fb19" placeholder="피드백"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+
+          <div class="content-card" data-work1-topic="1차(면접 시)" style="display:none;">
+            <h3>📌 1차(면접 시) 알아야 할 핵심</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">면접·입사 시 꼭 알아두면 좋은 팀 문화와 업무 방식입니다.</p>
+            <div class="table-scroll-wrap">
+              <table class="edu-table info-table wide-cols">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>면접자가 알아야 하는 핵심(한 줄)</th>
+                    <th>쉽게 풀어서(1~2줄)</th>
+                    <th>예시 문장(2개)</th>
+                    <th>태그(5개)</th>
+                    <th>비고</th>
+                    <th>피드백</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1. 우리 팀 한 줄</td>
+                    <td>우리는 결과물로 일한다</td>
+                    <td>말로 끝내지 않고 문서/표/캡쳐 정리를 남긴다</td>
+                    <td>① "저희는 말로 끝내지 않고, <strong>결과물(문서/표/정리자료)</strong>로 남깁니다." ② "회의 끝나면 정리본/표/캡처까지 만들어서 결과로 공유합니다."</td>
+                    <td>결과물, 문서화, 정리, 캡처, 실행</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note1" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb1" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>2. 회사 성격</td>
+                    <td>연구소 성격 팀이다</td>
+                    <td>본사(서초동) 소속이고, 실무는 결과물 중심이다</td>
+                    <td>① "휴텍씨 안에서 연구소 성격으로, 실무도 결과물 중심으로 움직입니다." ② "본사(서초) 소속이고, 리서치 기반으로 실무를 문서로 정리하는 팀입니다."</td>
+                    <td>연구소, 리서치, 본사, 실무, 결과중심</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note2" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb2" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>3. 일하는 기본</td>
+                    <td>짧게 공유·중간에 보여주기·기록</td>
+                    <td>일이 커지기 전에 중간에 한 번 보여주고 맞춘다</td>
+                    <td>① "큰 방향은 빨리 잡고, 중간 공유로 계속 맞추면서 갑니다." ② "일 커지기 전에 초안/중간본을 먼저 보여드리고 조정합니다."</td>
+                    <td>중간공유, 초안, 기록, 정렬, 싱크</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note3" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb3" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>4. 말하는 방식</td>
+                    <td>보고는 결론부터</td>
+                    <td>긴 설명보다 한 줄 요약이 먼저다</td>
+                    <td>① "저는 먼저 결론 한 줄 말씀드리고, 근거를 붙이겠습니다." ② "요약부터 드리면, 지금 필요한 결정은 A입니다."</td>
+                    <td>결론, 요약, 핵심, 의사결정, 보고</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note4" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb4" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>5. 질문하는 방식</td>
+                    <td>질문은 A/B로</td>
+                    <td>"어떻게 할까요?" 말고 선택지를 들고 간다</td>
+                    <td>① "지금은 A안/B안 중에 고르면 될 것 같고, 저는 A가 더 맞다고 봅니다." ② "선택지는 두 개입니다. A로 가면 속도, B로 가면 완성도가 강점입니다."</td>
+                    <td>선택지, A/B, 비교, 근거, 제안</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note5" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb5" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>6. 막히면</td>
+                    <td>30분 안에 말하기</td>
+                    <td>혼자 끌면 더 커진다. 빨리 공유가 이득이다</td>
+                    <td>① "지금 막힌 지 20분 됐고, 10분 더 보고 바로 공유드리겠습니다." ② "혼자 끌기보다 빨리 맞추는 게 낫다고 판단해서 지금 공유드립니다."</td>
+                    <td>30분룰, 즉시공유, 리스크, 빠른보고, 정리</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note6" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb6" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>7. 속도 문화</td>
+                    <td>늦게 말하면 손해</td>
+                    <td>늦어질 것 같으면 먼저 말하는 게 정답이다</td>
+                    <td>① "지연 가능성이 보여서 먼저 말씀드립니다. 오늘 오후까지는 업데이트 드릴게요." ② "늦어질 것 같으면 먼저 공유하는 게 맞아서 사전에 알립니다."</td>
+                    <td>선공유, 속도, 지연관리, 일정, 선제</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note7" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb7" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>8. 보안(핵심)</td>
+                    <td>개인 메일/폰/클라우드 금지</td>
+                    <td>회사 자료는 개인 채널로 옮기면 안 됨</td>
+                    <td>① "회사 자료는 개인 메일/개인 폰/개인 클라우드로 절대 옮기지 않습니다." ② "업무 자료는 회사 채널 안에서만 저장·공유하고 개인 채널은 쓰지 않습니다."</td>
+                    <td>보안, 개인채널금지, 회사채널, 정보보호, 규정준수</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note8" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb8" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>9. 보안(추가)</td>
+                    <td>USB/반출 금지</td>
+                    <td>파일 복사/반출도 금지</td>
+                    <td>① "업무 파일은 USB 복사/외부 반출 없이 회사 환경에서만 처리합니다." ② "외부로 나가는 형태(USB/메신저/개인 드라이브)는 전부 금지로 이해하고 있습니다."</td>
+                    <td>반출금지, USB금지, 외부유출방지, 접근통제, 컴플라이언스</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note9" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb9" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>10. 어떤 사람이 맞나</td>
+                    <td>센스보다 기록/공유</td>
+                    <td>센스 싸움이 아니라 기록과 공유가 기준이다</td>
+                    <td>① "저희 팀은 센스보다 기록/공유/중간확인을 꾸준히 하는 사람이 잘 맞습니다." ② "아이디어보다 정리해서 남기는 습관이 있는 사람이 성과를 냅니다."</td>
+                    <td>기록, 공유, 중간확인, 습관, 성과</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note10" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb10" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>11. 다음 단계</td>
+                    <td>합격하면 2차, 수습 통과하면 3차</td>
+                    <td>필요한 정보는 단계별로 준다</td>
+                    <td>① "단계별로 필요한 정보가 열리는 구조라 2차에서 프로세스/템플릿, 이후에 더 상세 안내를 받는 흐름으로 이해했습니다." ② "합격 후에는 단계별로 안내를 받으면서 맞춰가면 되는 구조로 알고 있고, 저는 그 방식이 명확해서 좋습니다."</td>
+                    <td>단계별안내, 프로세스, 템플릿, 온보딩, 유연함</td>
+                    <td class="feedback-cell"><input type="text" name="phase1Note11" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase1Fb11" placeholder="피드백"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-card" data-work1-topic="3차(수습통과)" style="display:none;">
+            <h3>📌 한눈에 보는 가이드</h3>
+            <p class="card-desc" style="margin-bottom: 1rem;">아래 이미지로 요약을 먼저 훑어보시고, 세부 내용은 아래 표에서 확인하실 수 있습니다.</p>
+            <figure class="guide-image-wrap">
+              <img src="신입사원_생존_전략.png" alt="휴텍씨 대표님과 일 잘하는 방법: 자수성가형 리더 실전 대응 매뉴얼" class="guide-image" />
+            </figure>
+          </div>
+          
+          <div class="content-card" data-work1-topic="3차(수습통과)" style="display:none;">
+            <p class="card-desc" style="margin-bottom: 1rem;">정식 멤버가 된 이후, 팀을 함께 운영할 때 필요한 핵심 포인트입니다.</p>
+            <div class="table-scroll-wrap">
+              <table class="edu-table info-table wide-cols">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>정식 멤버가 알아야 할 핵심(한 줄)</th>
+                    <th>쉽게 풀어서(1~2줄)</th>
+                    <th>예시 문장(2개)</th>
+                    <th>태그(5개)</th>
+                    <th>비고</th>
+                    <th>피드백</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1. 이제부터 역할</td>
+                    <td>“시키는 사람”이 아니라 “운영하는 사람”</td>
+                    <td>업무를 받기만 하지 말고, 정리해서 굴리는 역할도 한다</td>
+                    <td>① “이 업무는 제가 운영 흐름으로 정리해서 굴려보겠습니다. 이렇게 바꿔도 될까요?” ② “받은 일을 처리만 하지 않고, 체크포인트/템플릿까지 만들어서 속도 올리겠습니다.”</td>
+                    <td>운영, 구조화, 프로세스, 템플릿, 개선</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note1" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb1" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>2. 판단 범위</td>
+                    <td>내가 결정해도 되는 것 / 승인 받아야 하는 것</td>
+                    <td>헷갈리면 바로 물어본다. 혼자 크게 결정하면 사고다</td>
+                    <td>① “이건 제가 결정해도 되는 범위일까요, 승인이 필요할까요?” ② “리스크가 있어 보여서 먼저 확인드립니다. 결정권자가 누구일까요?”</td>
+                    <td>승인, 결정권, 리스크, 권한, 확인</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note2" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb2" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>3. 우선순위 권한</td>
+                    <td>‘지금 뭐부터’는 내가 정리해서 올린다</td>
+                    <td>정식 멤버는 A/B/C를 먼저 잡아주는 사람이다</td>
+                    <td>① “지금은 A가 최우선이라 A부터 처리하고, B는 내일로 미루겠습니다.” ② “긴급/중요 기준으로 정리하면 1)A 2)B 3)C 순서가 맞습니다.”</td>
+                    <td>우선순위, A/B/C, 긴급도, 중요도, 정렬</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note3" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb3" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>4. 결과 기준(KPI)</td>
+                    <td>잘한 기준은 5개로 본다</td>
+                    <td>속도/정확/소통/납기/기록 이 5개가 기본 점수다</td>
+                    <td>① “이번 주는 납기 준수/정확도/기록 3가지를 특히 맞췄습니다.” ② “KPI 기준으로 보면 속도는 개선, 소통/기록은 유지했습니다.”</td>
+                    <td>KPI, 납기, 정확도, 소통, 기록</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note4" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb4" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>5. 늦어질 때 규칙</td>
+                    <td>늦어지면 먼저 말하는 사람이 이긴다</td>
+                    <td>늦게 말하면 신뢰가 확 깎인다</td>
+                    <td>① “지연 가능성 있어 선공유드립니다. 오늘은 ○○까지, 내일은 ○○까지 가능합니다.” ② “일정이 밀릴 수 있어 먼저 말씀드립니다. <strong>대안은 A(속도)/B(품질)</strong>입니다.”</td>
+                    <td>선공유, 지연관리, 신뢰, 일정, 대안</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note5" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb5" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>6. 반복 실수 처리</td>
+                    <td>실수는 ‘반성’이 아니라 ‘막기’</td>
+                    <td>같은 실수 나오면 체크리스트/템플릿을 고쳐서 막는다</td>
+                    <td>① “같은 실수 재발 방지로 체크리스트 1줄 추가하겠습니다.” ② “원인을 시스템으로 막겠습니다. 템플릿에 검수 항목 넣겠습니다.”</td>
+                    <td>재발방지, 체크리스트, 템플릿수정, 시스템화, 검수</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note6" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb6" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>7. 결정 기록</td>
+                    <td>말로 끝내지 말고 한 줄 남긴다</td>
+                    <td>결정은 나중에 싸움 나기 쉬움. 짧게 기록이 답</td>
+                    <td>① “결정 남깁니다: ○○ / 담당 ○○ / 기한 ○○ / 근거 1줄.” ② “이슈 재발 방지 위해 결정 로그로 남겨두겠습니다.”</td>
+                    <td>결정로그, 담당, 기한, 근거, 기록</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note7" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb7" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>8. 회의 운영</td>
+                    <td>회의는 짧게, 끝나면 바로 정리</td>
+                    <td>회의 길게 하면 아무도 안 읽는다</td>
+                    <td>① “회의 끝나고 요약 5줄 + 액션아이템 정리해서 올리겠습니다.” ② “회의는 20분 안에 끝내고, 결정/담당/기한만 남기겠습니다.”</td>
+                    <td>회의요약, 액션아이템, 타임박스, 결정정리, 공유</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note8" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb8" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>9. 지식 저장소</td>
+                    <td>자료는 한 곳에 모은다</td>
+                    <td>찾기 쉬워야 팀이 빨라진다. 개인 폴더에 숨기면 안 됨</td>
+                    <td>① “관련 자료는 한 폴더/한 링크로 모아두겠습니다(찾기 쉽게).” ② “개인 폴더에 두지 않고 공용 저장소로 이동하겠습니다.”</td>
+                    <td>지식저장소, 공용폴더, 링크정리, 접근성, 검색</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note9" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb9" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>10. 템플릿 관리</td>
+                    <td>템플릿은 ‘회사 방식’이다</td>
+                    <td>개인 스타일로 바꾸지 말고, 바꿀 땐 제안→합의→업데이트</td>
+                    <td>① “템플릿 변경 제안드립니다. 효과/리스크 정리했고, 합의되면 업데이트하겠습니다.” ② “개인 스타일로 바꾸지 않고, 제안→확인→반영 순서로 진행하겠습니다.”</td>
+                    <td>템플릿, 표준, 변경제안, 합의, 업데이트</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note10" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb10" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>11. 후배/신입 케어</td>
+                    <td>신입은 ‘번역’이 필요하다</td>
+                    <td>대표 말은 빠를 수 있다. 쉬운 말로 바꿔서 전달한다</td>
+                    <td>① “대표님 말씀은 정리하면 이 3가지만 하면 됩니다: 1)○○ 2)○○ 3)○○.” ② “지금은 여기까지가 범위예요. 나머지는 제가 이어서 맞출게요.”</td>
+                    <td>번역, 온보딩, 범위정리, 단계화, 케어</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note11" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb11" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>12. 대표 커뮤니케이션(고급)</td>
+                    <td>질문은 모아서, 피드백은 묶어서</td>
+                    <td>자잘한 왕복을 줄이면 대표 만족도가 올라간다</td>
+                    <td>① “질문 3개로 묶었습니다. 추천은 A이고, 이유는 1줄로 ○○입니다.” ② “피드백 반영안 2안 준비했습니다. 선택만 부탁드립니다.”</td>
+                    <td>묶음질문, 선택지, 추천, 왕복감소, 효율</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note12" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb12" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>13. 보안 등급</td>
+                    <td>자료는 밖으로 나가면 끝</td>
+                    <td>정식 멤버는 보안을 관리하는 사람이다</td>
+                    <td>① “이 자료는 외부 공유 불가로 처리하겠습니다. 필요 시 승인 먼저 받겠습니다.” ② “보안 이슈라 회사 채널 밖 전송 금지로 진행하겠습니다.”</td>
+                    <td>외부공유금지, 보안등급, 승인필수, 유출방지, 규정</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note13" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb13" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>14. 외부 공유 운영</td>
+                    <td>예외는 ‘기록하고 승인’</td>
+                    <td>예외는 무조건 남겨야 나중에 안 터진다</td>
+                    <td>① “외부 공유 예외 건 기록 남겼습니다: 대상/자료/기간/승인자.” ② “공유 전 승인 받았고, 기록 링크도 함께 남깁니다.”</td>
+                    <td>예외관리, 승인기록, 대상, 기간, 추적</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note14" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb14" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>15. 파일/버전(심화)</td>
+                    <td>버전은 한 줄로 정리해서 관리</td>
+                    <td>‘최종’ 금지 유지. 바뀐 내용은 한 줄로 남긴다</td>
+                    <td>① “v3 업데이트했습니다. 변경점 1줄: 표 2개 추가, 문구 3줄 수정.” ② “버전은 v로만 관리하고, v2→v3 차이를 로그로 남깁니다.”</td>
+                    <td>버전로그, 변경점, v관리, 비교, 히스토리</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note15" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb15" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>16. 문제 생겼을 때</td>
+                    <td>문제는 숨기지 말고 바로 꺼낸다</td>
+                    <td>정식 멤버는 문제를 빨리 꺼내서 팀을 살린다</td>
+                    <td>① “문제 공유드립니다: 이슈 ○○ / 원인 ○○ / 필요한 결정 ○○ / 지금 조치 ○○.” ② “숨기지 않고 바로 올립니다. 지금 막아야 하는 리스크는 ○○입니다.”</td>
+                    <td>30분룰, 이슈공유, 원인, 조치, 리스크</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note16" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb16" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>17. 개선 제안 방식</td>
+                    <td>불평 말고 “대안”으로 말한다</td>
+                    <td>“이거 별로” 말고 “이렇게 바꾸자”가 정답</td>
+                    <td>① “현재 방식은 시간이 걸립니다. 이렇게 바꾸면 30분 줄어듭니다(근거: ○○).” ② “불평 대신 대안 드립니다. A안(빠름)/B안(안전) 중 추천은 A입니다.”</td>
+                    <td>대안제시, 개선, 근거, 효과, A/B</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note17" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb17" placeholder="피드백"></td>
+                  </tr>
+                  <tr>
+                    <td>18. 성장 루틴</td>
+                    <td>30/60/90일 목표를 잡는다</td>
+                    <td>정식 멤버는 성장도 스스로 챙긴다</td>
+                    <td>① “30/60/90 목표 잡겠습니다. 30일은 ○○를 단독 완주가 목표입니다.” ② “이번 달은 혼자 끝낸 결과물 1개 만드는 걸 KPI로 두겠습니다.”</td>
+                    <td>30-60-90, 성장목표, 단독완주, 역량강화, KPI</td>
+                    <td class="feedback-cell"><input type="text" name="phase3Note18" placeholder="비고"></td>
+                    <td class="feedback-cell"><input type="text" name="phase3Fb18" placeholder="피드백"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="goToStep(7)">← 이전</button>
+        </div>
+      </section>
+
+      <!-- STEP 8 취업 규칙 (업무3차) -->
+      <section id="step8" class="step-section" data-step="8" data-phase="work3">
+        <div class="step-header">
+          <span class="step-badge">Step 1</span>
+          <h1 class="step-title">취업 규칙</h1>
+        </div>
+        <div class="content-card" style="padding:1rem;">
+          <p class="card-desc" style="color:var(--color-text-muted); margin-bottom:1rem;">아래에서 취업규칙 PDF를 확인하실 수 있습니다.</p>
+          <iframe
+            src="취업규칙%20제정_주식회사%20휴텍씨.pdf"
+            style="width:100%; height:70vh; min-height:500px; border:1px solid var(--color-border); border-radius:var(--radius-sm);"
+            title="취업규칙 제정 주식회사 휴텍씨"
+          ></iframe>
+          <p style="margin-top:1rem; font-size:0.85rem; color:var(--color-text-muted);">PDF가 보이지 않을 경우 <a href="취업규칙%20제정_주식회사%20휴텍씨.pdf" target="_blank" rel="noopener">여기를 클릭</a>하여 새 탭에서 열어보세요.</p>
+        </div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="switchPhase('work1')">업무1차로</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll('.step-section');
+    const navLinks = document.querySelectorAll('.step-nav-link');
+    const progressFill = document.getElementById('progressFill');
+    let currentPhase = 'interview';
+
+    const PHASE_STEPS = { interview: [1,2,3,4], work1: [5,6,7], work2: [], work3: [8] };
+
+    function switchPhase(phase, stepNum) {
+      if (!PHASE_STEPS[phase] || PHASE_STEPS[phase].length === 0) return;
+      currentPhase = phase;
+      const stepList = PHASE_STEPS[phase];
+      const targetStep = (stepNum && stepList.includes(stepNum)) ? stepNum : stepList[0];
+      document.querySelectorAll('.step-nav-item').forEach(li => {
+        li.classList.toggle('phase-hidden', li.dataset.phase !== phase);
+      });
+      document.querySelectorAll('.step-section').forEach(sec => {
+        sec.classList.toggle('phase-hidden', sec.dataset.phase !== phase);
+      });
+      document.querySelectorAll('.phase-btn:not([disabled])').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.phase === phase);
+      });
+      goToStep(targetStep, true);
+    }
+
+    // 면접 일시 기본값: 오늘 날짜
+    (function() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const el = document.querySelector('input[name="interviewDate"]');
+      if (el) el.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    })();
+
+    function goToStep(stepNum, skipPhaseCheck) {
+      const targetPhase = Object.keys(PHASE_STEPS).find(p => PHASE_STEPS[p].includes(stepNum));
+      if (!skipPhaseCheck && targetPhase && targetPhase !== currentPhase) {
+        switchPhase(targetPhase, stepNum);
+        return;
+      }
+      const stepList = PHASE_STEPS[currentPhase] || [];
+      steps.forEach(s => {
+        if (s.dataset.phase !== currentPhase) return;
+        s.classList.toggle('active', parseInt(s.dataset.step) === stepNum);
+      });
+      navLinks.forEach(link => {
+        const li = link.closest('.step-nav-item');
+        if (!li || li.dataset.phase !== currentPhase) return;
+        const num = parseInt(link.dataset.step);
+        link.classList.remove('active', 'completed');
+        if (num === stepNum) link.classList.add('active');
+        else if (num < stepNum) link.classList.add('completed');
+      });
+      const totalInPhase = stepList.length || 1;
+      const idx = stepList.indexOf(stepNum);
+      const pct = totalInPhase ? ((idx >= 0 ? idx + 1 : 1) / totalInPhase * 100) : 100;
+      progressFill.style.width = pct + '%';
+      const target = document.getElementById('step' + stepNum);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      if (stepNum === 6) syncContractFromForm();
+    }
+
+    switchPhase('interview');
+
+
+    (function() {
+      const checkboxes = document.querySelectorAll('.work1-side-check');
+      const listEl = document.getElementById('work1SelectedList');
+      const topicCards = document.querySelectorAll('#work1TopicContainer [data-work1-topic]');
+      if (!checkboxes.length || !listEl) return;
+
+      const syncSelected = () => {
+        listEl.innerHTML = '';
+        const selected = new Set();
+        checkboxes.forEach(cb => {
+          if (cb.checked) {
+            selected.add(cb.value);
+            const li = document.createElement('li');
+            li.textContent = cb.value;
+            listEl.appendChild(li);
+          }
+        });
+
+        if (topicCards && topicCards.length) {
+          topicCards.forEach(card => {
+            const key = card.getAttribute('data-work1-topic');
+            card.style.display = selected.has(key) ? '' : 'none';
+          });
+        }
+      };
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', syncSelected);
+      });
+
+      // 초기 상태도 한 번 반영
+      syncSelected();
+    })();
+
+
+    function syncContractFromForm() {
+      const name = getVal('name');
+      const birth = getVal('birthDate');
+      ['contractWorkerName', 'contractName'].forEach(n => {
+        const el = document.querySelector(`[name="${n}"]`);
+        if (el && name && !el.value) el.value = name;
+      });
+      const birthEl = document.querySelector('[name="contractBirth"]');
+      if (birthEl && birth && !birthEl.value) birthEl.value = birth;
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const stepNum = parseInt(link.dataset.step);
+        const phase = link.closest('.step-nav-item')?.dataset.phase;
+        if (phase && phase !== currentPhase) switchPhase(phase);
+        else goToStep(stepNum);
+      });
+    });
+
+    // Personality option styling
+    document.querySelectorAll('.personality-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const parent = this.closest('.personality-question');
+        parent.querySelectorAll('.personality-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+
+    document.getElementById('personalityCompleteBtn').addEventListener('click', updatePersonalityResult);
+
+    function updatePersonalityResult() {
+      const dims = { EI: [0, 0], SN: [0, 0], TF: [0, 0], JP: [0, 0] };
+      document.querySelectorAll('.personality-question').forEach((q) => {
+        const sel = q.querySelector('input[type="radio"]:checked');
+        if (!sel) return;
+        const dim = q.dataset.dim;
+        if (sel.value === 'a') dims[dim][0]++;
+        else dims[dim][1]++;
+      });
+      const total = Object.values(dims).reduce((s, [a,b]) => s + a + b, 0);
+      if (total < 40) {
+        alert('모든 문항(40개)에 답해 주세요.');
+        return;
+      }
+      const mbti = 
+        (dims.EI[0] >= dims.EI[1] ? 'E' : 'I') +
+        (dims.SN[0] >= dims.SN[1] ? 'S' : 'N') +
+        (dims.TF[0] >= dims.TF[1] ? 'T' : 'F') +
+        (dims.JP[0] >= dims.JP[1] ? 'J' : 'P');
+      document.getElementById('mbtiResult').textContent = mbti;
+      document.getElementById('personalityScores').innerHTML = `
+        <div class="score-row">a(E): <strong>${dims.EI[0]}</strong> / b(I): <strong>${dims.EI[1]}</strong></div>
+        <div class="score-row">a(S): <strong>${dims.SN[0]}</strong> / b(N): <strong>${dims.SN[1]}</strong></div>
+        <div class="score-row">a(T): <strong>${dims.TF[0]}</strong> / b(F): <strong>${dims.TF[1]}</strong></div>
+        <div class="score-row">a(J): <strong>${dims.JP[0]}</strong> / b(P): <strong>${dims.JP[1]}</strong></div>
+      `;
+      const barsHtml = [
+        ['외향 E', '내향 I', dims.EI[0], dims.EI[1]],
+        ['감각 S', '직관 N', dims.SN[0], dims.SN[1]],
+        ['사고 T', '감정 F', dims.TF[0], dims.TF[1]],
+        ['판단 J', '인식 P', dims.JP[0], dims.JP[1]]
+      ].map(([a, b, va, vb]) => {
+        const tot = va + vb;
+        const pct = tot ? (va / tot * 100) : 50;
+        return `<div class="scale-bar">
+          <label>${a}</label>
+          <div class="scale-track">
+            <div class="scale-fill" style="width: ${pct}%"></div>
+          </div>
+          <label>${b}</label>
+        </div>`;
+      }).join('');
+      document.getElementById('scaleBars').innerHTML = barsHtml;
+      document.getElementById('personalityResult').classList.add('show');
+      document.getElementById('personalityResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getVal(name) {
+      const el = document.querySelector(`[name="${name}"]`);
+      if (!el) return '';
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.type === 'radio') {
+          const checked = document.querySelector(`[name="${name}"]:checked`);
+          return checked ? checked.value : '';
+        }
+        const checked = document.querySelectorAll(`[name="${name}"]:checked`);
+        return Array.from(checked).map(c => c.value).join(', ');
+      }
+      return el.value || '';
+    }
+
+    function getMBTI() {
+      const dims = getMBTIDims();
+      if (!dims) return '-';
+      return (dims.EI[0] >= dims.EI[1] ? 'E' : 'I') +
+        (dims.SN[0] >= dims.SN[1] ? 'S' : 'N') +
+        (dims.TF[0] >= dims.TF[1] ? 'T' : 'F') +
+        (dims.JP[0] >= dims.JP[1] ? 'J' : 'P');
+    }
+    function getMBTIDims() {
+      const dims = { EI: [0, 0], SN: [0, 0], TF: [0, 0], JP: [0, 0] };
+      document.querySelectorAll('.personality-question').forEach((q) => {
+        const sel = q.querySelector('input[type="radio"]:checked');
+        if (!sel) return;
+        const dim = q.dataset.dim;
+        if (sel.value === 'a') dims[dim][0]++;
+        else dims[dim][1]++;
+      });
+      const total = Object.values(dims).reduce((s, [a,b]) => s + a + b, 0);
+      return total >= 40 ? dims : null;
+    }
+
+    function getDocFiles(name) {
+      const el = document.querySelector(`input[name="${name}"]`);
+      if (!el || !el.files || el.files.length === 0) return '-';
+      return Array.from(el.files).map(f => f.name).join(', ');
+    }
+
+    function getEduFeedbackHtml() {
+      const titles = ['소개','출퇴근','업무일지','업무 프로세싱','업무','업무 인지','정리정돈','보고법','업무 체크리스트','이메일','AI 활용','급여','로그인 정보','엑셀','PPT','피드백·아이디어','비품/프린터','보안규정','기타'];
+      let rows = '';
+      for (let i = 1; i <= 19; i++) {
+        const v = getVal('eduFb' + i);
+        if (v) rows += `<tr><th>${escapeHtml(titles[i-1])}</th><td>${escapeHtml(v)}</td></tr>`;
+      }
+      const large = getVal('feedbackLarge'), mid = getVal('feedbackMid'), small = getVal('feedbackSmall'), content = getVal('feedbackContent');
+      let catPart = '';
+      if (large || mid || small || content) {
+        catPart = `<h4 style="margin-top:1rem; font-size:0.95rem;">분류별 피드백</h4>
+  <table><tr><th>대분류</th><td>${escapeHtml(large) || '-'}</td></tr><tr><th>중분류</th><td>${escapeHtml(mid) || '-'}</td></tr><tr><th>소분류</th><td>${escapeHtml(small) || '-'}</td></tr><tr><th>내용</th><td>${escapeHtml(content) || '-'}</td></tr></table>`;
+      }
+      if (!rows && !catPart) return '';
+      return `<h4 style="margin-bottom:0.5rem; font-size:0.95rem;">행별 피드백</h4>
+  ${rows ? '<table><tr><th>항목</th><th>피드백</th></tr>' + rows + '</table>' : ''}
+  ${catPart}`;
+    }
+
+    function getContractHtml() {
+      const doc = document.querySelector('.contract-doc');
+      if (!doc) return '';
+      const clone = doc.cloneNode(true);
+      clone.querySelectorAll('input').forEach(inp => {
+        const val = inp.value || (inp.placeholder ? `[${inp.placeholder}]` : '');
+        const span = document.createElement('span');
+        span.className = 'contract-value';
+        span.textContent = val;
+        span.style.cssText = 'display:inline; border-bottom:1px solid #94a3b8; padding:0 2px; min-width:1.5em;';
+        inp.parentNode.replaceChild(span, inp);
+      });
+      return clone.innerHTML;
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, '<br>');
+    }
+
+    function row(label, value) {
+      if (!value && value !== 0) value = '-';
+      return `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`;
+    }
+
+    function getMBTIBarHtml() {
+      const dims = getMBTIDims();
+      if (!dims) return '';
+      const pairs = [['E', 'I', dims.EI], ['S', 'N', dims.SN], ['T', 'F', dims.TF], ['J', 'P', dims.JP]];
+      return pairs.map(([a, b, [va, vb]]) => {
+        const tot = va + vb;
+        const pctA = tot ? Math.round(va / tot * 100) : 50;
+        const pctB = tot ? 100 - pctA : 50;
+        return `<div class="mbti-bar-item">
+          <div class="mbti-bar-dim">${escapeHtml(a)} / ${escapeHtml(b)}</div>
+          <div class="mbti-bar-labels">
+            <span class="mbti-bar-label">${escapeHtml(a)} ${pctA}%</span>
+            <span class="mbti-bar-label">${escapeHtml(b)} ${pctB}%</span>
+          </div>
+          <div class="mbti-bar-track">
+            <div class="mbti-bar-fill mbti-bar-a" style="width: ${pctA}%"></div>
+            <div class="mbti-bar-fill mbti-bar-b" style="width: ${pctB}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    function submitForm() {
+      const name = getVal('name');
+      const mbti = getMBTI();
+      const mbtiBarHtml = getMBTIBarHtml();
+      const now = new Date();
+      const dateStr = now.getFullYear() + '' + String(now.getMonth()+1).padStart(2,'0') + '' + String(now.getDate()).padStart(2,'0') + '_' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+      const safeName = (name || '익명').replace(/[\\/:*?"<>|]/g, '_');
+      const fileName = '직원_면접제출_' + safeName + '_' + dateStr + '.html';
+
+      const skills = { excel: '엑셀', ppt: '파워포인트', word: '워드', photoshop: '포토샵', illustrator: '일러스트', video: '동영상편집', blog: '블로그', premiere: '프리미어' };
+      let skillsStr = '';
+      document.querySelectorAll('input[name="skill"]:checked').forEach(c => {
+        skillsStr += (skills[c.value] || c.value) + ', ';
+      });
+      skillsStr = skillsStr.replace(/,\s*$/, '');
+
+      const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>직원 면접 제출서 - ${escapeHtml(name || '익명')}</title>
+  <style>
+    body { font-family: 'Malgun Gothic', sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; line-height: 1.7; color: #333; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; color: #1e40af; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { width: 140px; font-weight: 600; color: #475569; background: #f8fafc; }
+    .summary-box { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; white-space: pre-wrap; }
+    .mbti { font-size: 1.25rem; font-weight: 700; color: #3b82f6; }
+    .mbti-chart { margin: 1.25rem 0; }
+    .mbti-bar-item { margin-bottom: 1.25rem; }
+    .mbti-bar-dim { font-size: 0.8rem; color: #64748b; margin-bottom: 0.25rem; font-weight: 500; }
+    .mbti-bar-labels { display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.9rem; font-weight: 600; color: #475569; }
+    .mbti-bar-track { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #e2e8f0; }
+    .mbti-bar-fill { height: 100%; transition: width 0.3s ease; }
+    .mbti-bar-a { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .mbti-bar-b { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+    .meta { font-size: 0.85rem; color: #64748b; margin-bottom: 2rem; }
+    .contract-export .contract-title { font-size: 1.15rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+    .contract-export .contract-article { margin-bottom: 1.25rem; }
+    .contract-export .contract-article h4 { font-size: 0.95rem; margin-bottom: 0.5rem; color: #1e40af; }
+    .contract-export .contract-article p, .contract-export .contract-article ol { margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .contract-export .contract-article ol { padding-left: 1.5rem; }
+    .contract-export .contract-value { border-bottom: 1px solid #94a3b8; padding: 0 2px; }
+    .contract-export .contract-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+    .contract-export .contract-sig-block { padding: 1rem; background: #fff; border-radius: 6px; font-size: 0.9rem; }
+    .contract-export .contract-closing { margin: 1rem 0; font-size: 0.9rem; }
+    .contract-export .contract-date { margin-bottom: 1rem; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>직원 면접 제출서</h1>
+  <p class="meta">제출일시: ${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</p>
+
+  <h2>1. 인적사항</h2>
+  <table>
+    ${row('이름', name)}
+    ${row('면접 일시', getVal('interviewDate'))}
+    ${row('입사 희망일', getVal('startDate'))}
+    ${row('희망 근무 기간', getVal('availableMonths'))}
+    ${row('회사 홈페이지 확인', getVal('websiteViewed'))}
+    ${row('지원 부서/희망 직무', getVal('supportField'))}
+    ${row('근무 형태', getVal('workType'))}
+    ${row('통근 수단', getVal('commuteMethod'))}
+    ${row('통근 소요 시간', getVal('commuteTime'))}
+    ${row('생년월일', getVal('birthDate'))}
+    ${row('나이', getVal('age'))}
+    ${row('경력', getVal('experience'))}
+    ${row('운전 가능', getVal('driving'))}
+    ${row('차량 소유', getVal('carOwned'))}
+    ${row('종교', getVal('religion'))}
+    ${row('PT 가능', getVal('pt'))}
+    ${row('가족 관계', getVal('family'))}
+    ${row('결혼 여부', getVal('marriage'))}
+    ${row('자녀', getVal('children'))}
+    ${row('컴퓨터 능력', skillsStr)}
+    ${row('영어 능력', getVal('english'))}
+    ${row('월요일', getVal('mon'))}
+    ${row('화요일', getVal('tue'))}
+    ${row('수요일', getVal('wed'))}
+    ${row('목요일', getVal('thu'))}
+    ${row('금요일', getVal('fri'))}
+  </table>
+
+  <h2>2. 성격 검사 결과</h2>
+  <p><span class="mbti">${escapeHtml(mbti)}</span></p>
+  ${mbtiBarHtml ? '<div class="mbti-chart">' + mbtiBarHtml + '</div>' : ''}
+
+  <h2>3. 영상 시청 요약</h2>
+  <h3>영상 1</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary1')) || '(미작성)'}</div>
+  <h3>영상 2</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary2')) || '(미작성)'}</div>
+  <h3>영상 3</h3>
+  <div class="summary-box">${escapeHtml(getVal('summary3')) || '(미작성)'}</div>
+
+  <h2>4. 서류첨부</h2>
+  <table>
+    ${row('이력서', getDocFiles('docResume'))}
+    ${row('포트폴리오/자격증', getDocFiles('docPortfolio'))}
+    ${row('기타 서류', getDocFiles('docEtc'))}
+  </table>
+
+  <h2>5. 출근 후 교육 피드백</h2>
+  ${getEduFeedbackHtml() ? '<div class="summary-box">' + getEduFeedbackHtml() + '</div>' : '<p>(없음)</p>'}
+
+  <h2>6. 연봉제 근로계약서</h2>
+  <div class="contract-export" style="margin-top:1rem; padding:1.5rem; background:#f8fafc; border-radius:8px; font-size:0.95rem; line-height:1.8; border:1px solid #e2e8f0;">
+    ${getContractHtml()}
+  </div>
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('제출서가 다운로드되었습니다.\n파일명: ' + fileName);
+    }
+  </script>
+</body>
+</html>
