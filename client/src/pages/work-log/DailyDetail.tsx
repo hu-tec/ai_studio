@@ -46,8 +46,30 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   }, [dateStr, log]);
 
   const handleIntervalChange = useCallback((newInterval: '30min' | '1hour' | 'half-day') => {
+    setTimeSlots(prev => {
+      const filledSlots = prev.filter(s => s.title || s.content || s.planned || s.aiDetail);
+      if (filledSlots.length === 0) {
+        return createEmptyTimeSlots(newInterval);
+      }
+      const newSlots = createEmptyTimeSlots(newInterval);
+      // 기존 작성 데이터를 시간대 기준으로 매핑
+      for (const filled of filledSlots) {
+        const oldStart = filled.timeSlot.split('~')[0]?.trim().split(':').map(Number);
+        if (!oldStart || oldStart.length < 2) continue;
+        const oldMinutes = oldStart[0] * 60 + oldStart[1];
+        // 가장 가까운 새 슬롯 찾기
+        let bestIdx = 0, bestDist = Infinity;
+        for (let i = 0; i < newSlots.length; i++) {
+          const ns = newSlots[i].timeSlot.split('~')[0]?.trim().split(':').map(Number);
+          if (!ns || ns.length < 2) continue;
+          const dist = Math.abs((ns[0] * 60 + ns[1]) - oldMinutes);
+          if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+        }
+        newSlots[bestIdx] = { ...newSlots[bestIdx], title: filled.title, content: filled.content, planned: filled.planned, aiDetail: filled.aiDetail };
+      }
+      return newSlots;
+    });
     setTimeInterval(newInterval);
-    setTimeSlots(createEmptyTimeSlots(newInterval));
   }, []);
 
   const updateSlot = (index: number, field: keyof TimeSlotEntry, value: string) => {
