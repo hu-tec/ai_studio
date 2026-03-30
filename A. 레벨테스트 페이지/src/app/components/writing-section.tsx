@@ -59,7 +59,7 @@ export function WritingSection() {
       });
     } catch {
       // 네트워크 오류 시에도 결과 페이지로 이동 (오프라인 대응)
-      console.error('답안 제출 실패');
+      alert('답안 제출에 실패했습니다. 인터넷 연결을 확인해주세요. 결과 페이지로 이동합니다.');
     } finally {
       setSubmitting(false);
       navigate("/result");
