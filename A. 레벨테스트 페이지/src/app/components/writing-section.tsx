@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useExam } from "./exam-context";
 import { getExamByType } from "./exam-data";
@@ -5,9 +6,12 @@ import { ChevronLeft, CheckCircle2, Circle } from "lucide-react";
 import { motion } from "motion/react";
 import logo from "figma:asset/64fabebe4c3543be23256b5d663a331523d0c13c.png";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export function WritingSection() {
   const { state, setSelectedTopic, setEssay } = useExam();
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
 
   const exam = getExamByType(state.examType);
   const topics = exam.essayTopics;
@@ -17,8 +21,49 @@ export function WritingSection() {
     .split(/\s+/)
     .filter((w) => w.length > 0).length;
 
-  const handleSubmit = () => {
-    navigate("/result");
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      // MCQ 자동 채점
+      const correctAnswers = exam.correctAnswers;
+      const mcqResults: Record<number, { selected: string; correct: string; isCorrect: boolean }> = {};
+      let mcqScore = 0;
+      for (const [qId, correct] of Object.entries(correctAnswers)) {
+        const selected = state.answers[Number(qId)] || '';
+        const isCorrect = selected === correct;
+        if (isCorrect) mcqScore++;
+        mcqResults[Number(qId)] = { selected, correct, isCorrect };
+      }
+
+      const submission = {
+        name: state.name,
+        program: state.program,
+        date: state.date,
+        examType: state.examType,
+        answers: state.answers,
+        mcqResults,
+        mcqScore,
+        mcqTotal: Object.keys(correctAnswers).length,
+        selectedTopic: state.selectedTopic,
+        essayTopicTitle: topics.find(t => t.id === state.selectedTopic)?.title || '',
+        essay: state.essay,
+        wordCount,
+        startTime: state.startTime,
+        submittedAt: new Date().toISOString(),
+      };
+
+      await fetch(`${API_URL}/api/level_test_submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submission),
+      });
+    } catch {
+      // 네트워크 오류 시에도 결과 페이지로 이동 (오프라인 대응)
+      console.error('답안 제출 실패');
+    } finally {
+      setSubmitting(false);
+      navigate("/result");
+    }
   };
 
   return (
@@ -216,11 +261,11 @@ export function WritingSection() {
 
           <button
             onClick={handleSubmit}
-            disabled={!state.selectedTopic || !state.essay.trim()}
+            disabled={!state.selectedTopic || !state.essay.trim() || submitting}
             className="px-8 py-3 bg-[#8B1A2B] hover:bg-[#6d1422] text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer text-[15px]"
             style={{ fontWeight: 700 }}
           >
-            시험 제출하기
+            {submitting ? '제출 중...' : '시험 제출하기'}
           </button>
         </div>
       </div>
