@@ -98,6 +98,55 @@ export function createEmptyFranklinTasks(): FranklinTask[] {
   return [];
 }
 
+/** Franklin → TimeSlots 정방향 동기화: 연결된 과업의 텍스트/노트를 타임슬롯에 반영 */
+export function syncFranklinToSlots(
+  tasks: FranklinTask[],
+  slots: TimeSlotEntry[],
+  prevTasks?: FranklinTask[],
+): TimeSlotEntry[] {
+  const taskBySlotId = new Map<string, FranklinTask>();
+  tasks.forEach(t => { if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t); });
+
+  // 이전에 연결되었다가 해제된 슬롯 파악
+  const unlinkedSlotIds = new Set<string>();
+  if (prevTasks) {
+    prevTasks.forEach(t => {
+      if (t.timeSlotId && !taskBySlotId.has(t.timeSlotId)) {
+        unlinkedSlotIds.add(t.timeSlotId);
+      }
+    });
+  }
+
+  return slots.map(slot => {
+    const task = taskBySlotId.get(slot.id);
+    if (task) {
+      return { ...slot, title: task.task, content: task.note || '' };
+    }
+    if (unlinkedSlotIds.has(slot.id)) {
+      return { ...slot, title: '', content: '' };
+    }
+    return slot;
+  });
+}
+
+/** TimeSlots → Franklin 역방향 동기화: 타임슬롯 편집 시 연결된 과업 업데이트 */
+export function syncSlotToFranklin(
+  tasks: FranklinTask[],
+  slotId: string,
+  field: string,
+  value: string,
+): FranklinTask[] {
+  const linkedTask = tasks.find(t => t.timeSlotId === slotId);
+  if (!linkedTask) return tasks;
+  if (field === 'title') {
+    return tasks.map(t => t.id === linkedTask.id ? { ...t, task: value } : t);
+  }
+  if (field === 'content') {
+    return tasks.map(t => t.id === linkedTask.id ? { ...t, note: value } : t);
+  }
+  return tasks;
+}
+
 export function getNextNumber(tasks: FranklinTask[], priority: FranklinPriority): number {
   const nums = tasks.filter(t => t.priority === priority).map(t => t.number);
   return nums.length > 0 ? Math.max(...nums) + 1 : 1;

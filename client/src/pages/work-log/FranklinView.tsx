@@ -43,13 +43,17 @@ export function FranklinView({ tasks, timeSlots, onTasksChange, onSlotTitleChang
   };
 
   const linkToSlot = (taskId: string, slotId: string | undefined) => {
+    const task = tasks.find(t => t.id === taskId);
+    // 기존 연결 해제 시 슬롯 클리어
+    if (task?.timeSlotId) {
+      const prevIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
+      if (prevIdx >= 0) onSlotTitleChange(prevIdx, '');
+    }
     updateTask(taskId, { timeSlotId: slotId });
-    if (slotId) {
-      const task = tasks.find(t => t.id === taskId);
+    // 새 슬롯에 과업 내용 동기화 (항상 덮어쓰기)
+    if (slotId && task) {
       const slotIdx = timeSlots.findIndex(s => s.id === slotId);
-      if (task && slotIdx >= 0 && !timeSlots[slotIdx].title) {
-        onSlotTitleChange(slotIdx, task.task);
-      }
+      if (slotIdx >= 0) onSlotTitleChange(slotIdx, task.task);
     }
   };
 
@@ -185,17 +189,28 @@ export function FranklinView({ tasks, timeSlots, onTasksChange, onSlotTitleChang
                           </span>
                         )}
 
-                        {/* Time link */}
-                        <select
-                          value={task.timeSlotId || ''}
-                          onChange={e => linkToSlot(task.id, e.target.value || undefined)}
-                          className="text-[10px] border border-border rounded px-1 py-0.5 bg-background w-24 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <option value="">시간 연결</option>
-                          {timeSlots.map(s => (
-                            <option key={s.id} value={s.id}>{s.timeSlot}</option>
-                          ))}
-                        </select>
+                        {/* Time link — 연결된 시간 표시 / 클릭으로 변경 */}
+                        {task.timeSlotId ? (
+                          <button
+                            onClick={() => linkToSlot(task.id, undefined)}
+                            className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors"
+                            title="클릭하여 연결 해제"
+                          >
+                            {timeSlots.find(s => s.id === task.timeSlotId)?.timeSlot || '연결됨'}
+                          </button>
+                        ) : (
+                          <div className="flex gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity overflow-x-auto max-w-[180px]">
+                            {timeSlots.filter(s => !slotTaskMap.has(s.id)).map(s => (
+                              <button
+                                key={s.id}
+                                onClick={() => linkToSlot(task.id, s.id)}
+                                className="text-[9px] px-1 py-0.5 rounded bg-muted/40 hover:bg-blue-100 hover:text-blue-700 whitespace-nowrap transition-colors"
+                              >
+                                {s.timeSlot.split('~')[0]?.trim()}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
                         {/* Delete */}
                         <button

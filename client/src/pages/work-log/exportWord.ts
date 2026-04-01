@@ -21,7 +21,7 @@ import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import type { DailyLog } from './data';
-import { employees } from './data';
+import { employees, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 
 // ── 폰트 / 사이즈 상수 ──
 const FONT = '맑은 고딕';
@@ -326,6 +326,59 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
   });
 
   // ═══════════════════════════════════════════
+  // 3-B. 프랭클린 과업 (viewMode가 franklin일 때)
+  // ═══════════════════════════════════════════
+  const franklinChildren: (Paragraph | Table)[] = [];
+  if (log.viewMode === 'franklin' && log.franklinTasks && log.franklinTasks.length > 0) {
+    franklinChildren.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: '프랭클린 과업 목록', font: FONT, size: SZ_SUBTITLE, bold: true, color: CLR_TITLE }),
+        ],
+        spacing: { before: 200, after: 80 },
+      })
+    );
+
+    const ftHeaderRow = new TableRow({
+      children: [
+        hCell('우선순위', { width: 10 }),
+        hCell('번호', { width: 8 }),
+        hCell('상태', { width: 10 }),
+        hCell('과업', { width: 47 }),
+        hCell('시간', { width: 15 }),
+        hCell('비고', { width: 10 }),
+      ],
+      tableHeader: true,
+    });
+
+    const ftRows = log.franklinTasks.map((task, idx) => {
+      const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
+      const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
+      const linkedSlot = task.timeSlotId ? log.timeSlots.find(s => s.id === task.timeSlotId) : null;
+      const altBg = idx % 2 === 1 ? CLR_LIGHT_BG : undefined;
+
+      return new TableRow({
+        children: [
+          dCell(`${pCfg.label} (${pCfg.desc})`, { width: 10, alignment: AlignmentType.CENTER, bg: altBg }),
+          dCell(`${task.priority}${task.number}`, { width: 8, alignment: AlignmentType.CENTER, bg: altBg }),
+          dCell(`${stCfg.icon} ${stCfg.label}`, { width: 10, alignment: AlignmentType.CENTER, bg: altBg }),
+          eCell(task.task, { width: 47, lines: 1 }),
+          dCell(linkedSlot?.timeSlot || '—', { width: 15, alignment: AlignmentType.CENTER, bg: altBg }),
+          dCell(task.note || '', { width: 10, bg: altBg }),
+        ],
+      });
+    });
+
+    franklinChildren.push(
+      new Table({
+        rows: [ftHeaderRow, ...ftRows],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED,
+      })
+    );
+  }
+
+  // ═══════════════════════════════════════════
   // 4. 세부 내용
   // ═══════════════════════════════════════════
   const detailTable = new Table({
@@ -469,7 +522,10 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
           intervalLine,
           timeSlotTable,
 
-          sectionTitle('4', '세부 내용'),
+          // 프랭클린 과업 (franklin 모드일 때만)
+          ...franklinChildren,
+
+          sectionTitle(franklinChildren.length > 0 ? '5' : '4', '세부 내용'),
           detailTable,
 
           // AI 상세는 새 페이지

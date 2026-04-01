@@ -5,7 +5,7 @@ import { Save, FileDown, List, Target } from 'lucide-react';
 import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { exportDailyLogToWord } from './exportWord';
 import { toast } from 'sonner';
 
@@ -79,8 +79,22 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     setTimeInterval(newInterval);
   }, []);
 
+  // Franklin → TimeSlots 정방향 동기화 핸들러
+  const handleFranklinTasksChange = useCallback((newTasks: FranklinTask[]) => {
+    setFranklinTasks(prev => {
+      // 동기화: 연결된 과업 변경 → 타임슬롯 자동 반영
+      setTimeSlots(slots => syncFranklinToSlots(newTasks, slots, prev));
+      return newTasks;
+    });
+  }, []);
+
   const updateSlot = (index: number, field: keyof TimeSlotEntry, value: string) => {
     setTimeSlots(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
+    // Classic → Franklin 역방향 동기화: 연결된 과업 자동 업데이트
+    const slotId = timeSlots[index]?.id;
+    if (slotId) {
+      setFranklinTasks(prev => syncSlotToFranklin(prev, slotId, field, value));
+    }
   };
 
   const openModal = (index: number) => {
@@ -297,7 +311,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
           <FranklinView
             tasks={franklinTasks}
             timeSlots={timeSlots}
-            onTasksChange={setFranklinTasks}
+            onTasksChange={handleFranklinTasksChange}
             onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
           />
         ) : (
@@ -313,15 +327,28 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
             </div>
 
             {/* Rows */}
-            {timeSlots.map((slot, index) => (
+            {timeSlots.map((slot, index) => {
+              const linkedTask = franklinTasks.find(t => t.timeSlotId === slot.id);
+              const pCfg = linkedTask ? FRANKLIN_PRIORITY_CONFIG[linkedTask.priority] : null;
+              const stCfg = linkedTask ? FRANKLIN_STATUS_CONFIG[linkedTask.status] : null;
+              return (
               <div
                 key={slot.id}
                 className="border-b border-border last:border-b-0"
               >
                 {/* Main row */}
                 <div className="md:grid md:grid-cols-[100px_1fr_1fr_90px_4px_1fr] flex flex-col">
-                  <div className="px-2 py-1.5 md:border-r border-border bg-accent/20 flex items-center">
+                  <div className="px-2 py-1.5 md:border-r border-border bg-accent/20 flex items-center gap-1">
                     <span className="text-muted-foreground">{slot.timeSlot}</span>
+                    {linkedTask && pCfg && stCfg && (
+                      <span
+                        className="text-[9px] font-bold px-1 rounded shrink-0"
+                        style={{ background: pCfg.bg, color: pCfg.color }}
+                        title={`${linkedTask.priority}${linkedTask.number} ${stCfg.label}`}
+                      >
+                        {linkedTask.priority}{linkedTask.number}{stCfg.icon}
+                      </span>
+                    )}
                   </div>
                   <div className="px-1 py-0.5 md:border-r border-border">
                     <input
@@ -365,7 +392,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
