@@ -34,7 +34,13 @@ router.post('/:key', (req, res) => {
   try {
     const db = getDB();
     const key = req.params.key;
-    const data = JSON.stringify(req.body.data);
+    const logData = req.body.data;
+
+    if (!logData || !logData.employeeId || !logData.date) {
+      return res.status(400).json({ success: false, error: 'employeeId and date are required' });
+    }
+
+    const data = JSON.stringify(logData);
 
     db.prepare(`
       INSERT INTO work_logs (log_key, data, updated_at)

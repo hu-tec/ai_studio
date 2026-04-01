@@ -85,7 +85,7 @@ export function AdminPage() {
       if (dateTo && row.date > dateTo) return false;
       if (filterDepts.length > 0 && !filterDepts.some(d => row.log.departmentCategories.includes(d) || row.department === d)) return false;
       if (filterHp.length > 0 && !filterHp.some(h => row.log.homepageCategories.includes(h))) return false;
-      if (filterWorkTypes.length > 0 && row.slotEntry.aiDetail && !filterWorkTypes.some(w => row.slotEntry.aiDetail!.workTypes.includes(w))) return false;
+      if (filterWorkTypes.length > 0 && (!row.slotEntry.aiDetail || !filterWorkTypes.some(w => row.slotEntry.aiDetail!.workTypes.includes(w)))) return false;
       if (filterAI.length > 0 && !filterAI.some(a => row.aiTools.includes(a))) return false;
       if (searchText && !row.title.includes(searchText) && !row.employeeName.includes(searchText) && !row.content.includes(searchText)) return false;
       return true;

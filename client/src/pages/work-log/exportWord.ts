@@ -400,6 +400,9 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
       });
     };
 
+    const promptGrid1Text = ai?.promptGrid1?.map((r, i) => `${i + 1}. ${r.content}${r.note ? ` (${r.note})` : ''}`).join('\n') || '';
+    const promptGrid2Text = ai?.promptGrid2?.map((r, i) => `${i + 1}. ${r.content}${r.note ? ` (${r.note})` : ''}`).join('\n') || '';
+
     const aiTable = new Table({
       rows: [
         addRow('업무 유형', ai?.workTypes.join(', ') || ''),
@@ -407,13 +410,14 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
         addRow('지시사항', ai?.instructions || '', 3),
         addRow('지시사항 메모', ai?.instructionNote || '', 3),
         addRow('중요 참고사항', ai?.importantNotes || '', 3),
-        addRow('1차 프롬프트', ai?.prompt1 || '', 5),
-        addRow('2차 프롬프트', ai?.prompt2 || '', 5),
+        addRow('1차 프롬프트', promptGrid1Text, 5),
+        addRow('2차 프롬프트', promptGrid2Text, 5),
         addRow('보안 프롬프트 1', ai?.securityPrompt1 || '', 3),
         addRow('보안 프롬프트 2', ai?.securityPrompt2 || '', 3),
-        addRow('문제점', ai?.problems || '', 3),
-        addRow('장점', ai?.advantages || '', 3),
-        addRow('보안 메모', ai?.securityNote || '', 3),
+        addRow('규정', ai?.regulations || '', 3),
+        addRow('준규정', ai?.semiRegulations || '', 3),
+        addRow('선택규정', ai?.optionalRegulations || '', 3),
+        addRow('분야규정', ai?.fieldRegulations || '', 3),
       ],
       width: { size: 100, type: WidthType.PERCENTAGE },
       layout: TableLayoutType.FIXED,

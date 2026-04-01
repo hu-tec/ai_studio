@@ -9,6 +9,7 @@ import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 import { toPng } from 'html-to-image';
+import { toast } from 'sonner';
 
 function PromptTemplateManager() {
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -138,7 +139,7 @@ export function EmployeePage() {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const currentLog = myLogs.find(l => l.date === dateStr);
 
-  const handleSaveLog = useCallback((log: DailyLog) => {
+  const handleSaveLog = useCallback(async (log: DailyLog) => {
     setLogs(prev => {
       const existing = prev.findIndex(
         l => l.date === log.date && l.employeeId === log.employeeId
@@ -153,8 +154,10 @@ export function EmployeePage() {
       saveLogs(updated);
       return updated;
     });
-    // Also persist to API (fire-and-forget)
-    saveLogToAPI(log);
+    const ok = await saveLogToAPI(log);
+    if (!ok) {
+      toast.error('서버 저장 실패 — 로컬에만 저장되었습니다.');
+    }
   }, []);
 
   const downloadExcel = () => {
@@ -254,12 +257,19 @@ export function EmployeePage() {
           <div className="hidden xl:flex items-center gap-3 border-l border-border pl-6">
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-muted-foreground uppercase">이번 달 작성률</span>
-              <div className="flex items-center gap-2">
-                <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, (myLogs.length / 22) * 100)}%` }} />
-                </div>
-                <span className="text-xs font-black">{Math.round((myLogs.length / 22) * 100)}%</span>
-              </div>
+              {(() => {
+                const currentMonth = format(selectedDate, 'yyyy-MM');
+                const monthLogs = myLogs.filter(l => l.date.startsWith(currentMonth));
+                const rate = Math.min(100, Math.round((monthLogs.length / 22) * 100));
+                return (
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary rounded-full" style={{ width: `${rate}%` }} />
+                    </div>
+                    <span className="text-xs font-black">{rate}%</span>
+                  </div>
+                );
+              })()}
             </div>
             <div className="flex flex-col border-l border-border pl-4">
               <span className="text-[10px] font-bold text-muted-foreground uppercase">누적 업무 수</span>

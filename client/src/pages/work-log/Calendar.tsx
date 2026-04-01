@@ -3,7 +3,7 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSa
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import type { DailyLog, TimeSlotEntry } from './data';
-import { createEmptyTimeSlots, currentEmployee } from './data';
+import { createEmptyTimeSlots, currentEmployee, employees } from './data';
 
 interface CalendarProps {
   selectedDate: Date;
@@ -12,6 +12,15 @@ interface CalendarProps {
   onUpdateLog: (log: DailyLog) => void;
   compact?: boolean;
   mode?: 'monthly' | 'daily';
+}
+
+function recalcSummary(log: DailyLog): DailyLog {
+  const emp = employees.find(e => e.id === log.employeeId);
+  const filledTitles = log.timeSlots.filter(s => s.title).map(s => s.title);
+  const summary = filledTitles.length > 0
+    ? `${emp?.name || ''} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
+    : '';
+  return { ...log, summary };
 }
 
 export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compact = false, mode = 'monthly' }: CalendarProps) {
@@ -50,6 +59,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
     return {
       date: format(date, 'yyyy-MM-dd'),
       summary: '',
+      detail: '',
       position: '신입',
       homepageCategories: [],
       departmentCategories: [],
@@ -64,7 +74,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
     const updatedSlots = log.timeSlots.map(s =>
       s.id === slotId ? { ...s, title: value } : s
     );
-    onUpdateLog({ ...log, timeSlots: updatedSlots });
+    onUpdateLog(recalcSummary({ ...log, timeSlots: updatedSlots }));
   }, [logs, onUpdateLog]);
 
   const handleSlotBlur = useCallback((date: Date, slotId: string, finalValue: string) => {
@@ -92,7 +102,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
     const updatedSlots = log.timeSlots.map(s =>
       s.id === slotId ? { ...s, title: '', content: '', planned: '', aiDetail: undefined } : s
     );
-    onUpdateLog({ ...log, timeSlots: updatedSlots });
+    onUpdateLog(recalcSummary({ ...log, timeSlots: updatedSlots }));
     if (slotId === editingSlotId) setEditingSlotId(null);
   };
 

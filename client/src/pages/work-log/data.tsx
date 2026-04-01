@@ -263,7 +263,9 @@ export async function fetchLogsFromAPI(): Promise<DailyLog[] | null> {
     const res = await fetch('/api/worklogs');
     if (!res.ok) return null;
     const data = await res.json(); // { key: logData, key: logData, ... }
-    const logs: DailyLog[] = Object.values(data);
+    const logs: DailyLog[] = (Object.values(data) as DailyLog[]).filter(
+      log => log.employeeId && log.date
+    );
     if (logs.length === 0) return null;
     return logs;
   } catch {
