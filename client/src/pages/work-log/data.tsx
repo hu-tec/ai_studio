@@ -67,7 +67,7 @@ export const positions: Position[] = ['알바', '신입', '강사', '팀장', '�
 
 export type ViewMode = 'classic' | 'franklin' | 'eisenhower';
 
-export type FranklinPriority = 'A' | 'B' | 'C';
+export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
 
 export interface FranklinTask {
@@ -99,11 +99,22 @@ export function getQuadrant(task: FranklinTask): EisenhowerQuadrant {
 }
 
 export function setQuadrant(task: FranklinTask, q: EisenhowerQuadrant): Partial<FranklinTask> {
+  const priorityMap: Record<EisenhowerQuadrant, FranklinPriority> = { q1: 'A', q2: 'B', q3: 'C', q4: 'D' };
   switch (q) {
-    case 'q1': return { important: true, urgent: true };
-    case 'q2': return { important: true, urgent: false };
-    case 'q3': return { important: false, urgent: true };
-    case 'q4': return { important: false, urgent: false };
+    case 'q1': return { important: true, urgent: true, priority: priorityMap[q] };
+    case 'q2': return { important: true, urgent: false, priority: priorityMap[q] };
+    case 'q3': return { important: false, urgent: true, priority: priorityMap[q] };
+    case 'q4': return { important: false, urgent: false, priority: priorityMap[q] };
+  }
+}
+
+/** Franklin priority → Eisenhower flags 동기화 */
+export function syncPriorityToEisenhower(priority: FranklinPriority): { urgent: boolean; important: boolean } {
+  switch (priority) {
+    case 'A': return { important: true, urgent: true };
+    case 'B': return { important: true, urgent: false };
+    case 'C': return { important: false, urgent: true };
+    case 'D': return { important: false, urgent: false };
   }
 }
 
@@ -115,10 +126,11 @@ export const FRANKLIN_STATUS_CONFIG: Record<FranklinStatus, { icon: string; labe
   cancelled: { icon: '✕', label: '취소',   color: '#ef4444', bg: '#fef2f2' },
 };
 
-export const FRANKLIN_PRIORITY_CONFIG: Record<FranklinPriority, { label: string; desc: string; color: string; bg: string }> = {
-  A: { label: 'A', desc: '필수 (Must)',       color: '#dc2626', bg: '#fef2f2' },
-  B: { label: 'B', desc: '중요 (Should)',     color: '#f59e0b', bg: '#fffbeb' },
-  C: { label: 'C', desc: '하면좋은 (Nice)',    color: '#6b7280', bg: '#f9fafb' },
+export const FRANKLIN_PRIORITY_CONFIG: Record<FranklinPriority, { label: string; desc: string; color: string; bg: string; quadrant: EisenhowerQuadrant }> = {
+  A: { label: 'A', desc: '즉시 실행',   color: '#dc2626', bg: '#fef2f2', quadrant: 'q1' },
+  B: { label: 'B', desc: '계획/예약',   color: '#2563eb', bg: '#eff6ff', quadrant: 'q2' },
+  C: { label: 'C', desc: '위임',       color: '#f59e0b', bg: '#fffbeb', quadrant: 'q3' },
+  D: { label: 'D', desc: '보류/제거',   color: '#6b7280', bg: '#f9fafb', quadrant: 'q4' },
 };
 
 export function createEmptyFranklinTasks(): FranklinTask[] {

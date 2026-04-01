@@ -169,7 +169,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       viewMode,
       franklinTasks,
     };
-    const filledTitles = viewMode === 'franklin'
+    const filledTitles = (viewMode === 'franklin' || viewMode === 'eisenhower')
       ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
       : timeSlots.filter(s => s.title).map(s => s.title);
     newLog.summary = filledTitles.length > 0

@@ -21,7 +21,7 @@ import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import type { DailyLog } from './data';
-import { employees, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { employees, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, EISENHOWER_CONFIG, getQuadrant } from './data';
 
 // ── 폰트 / 사이즈 상수 ──
 const FONT = '맑은 고딕';
@@ -329,11 +329,16 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
   // 3-B. 프랭클린 과업 (viewMode가 franklin일 때)
   // ═══════════════════════════════════════════
   const franklinChildren: (Paragraph | Table)[] = [];
-  if (log.viewMode === 'franklin' && log.franklinTasks && log.franklinTasks.length > 0) {
+  if ((log.viewMode === 'franklin' || log.viewMode === 'eisenhower') && log.franklinTasks && log.franklinTasks.length > 0) {
+    const isEisenhower = log.viewMode === 'eisenhower';
+
     franklinChildren.push(
       new Paragraph({
         children: [
-          new TextRun({ text: '프랭클린 과업 목록', font: FONT, size: SZ_SUBTITLE, bold: true, color: CLR_TITLE }),
+          new TextRun({
+            text: isEisenhower ? '아이젠하워 매트릭스 과업 목록' : '프랭클린 과업 목록',
+            font: FONT, size: SZ_SUBTITLE, bold: true, color: CLR_TITLE,
+          }),
         ],
         spacing: { before: 200, after: 80 },
       })
@@ -341,28 +346,40 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
 
     const ftHeaderRow = new TableRow({
       children: [
-        hCell('우선순위', { width: 10 }),
+        hCell(isEisenhower ? '사분면' : '우선순위', { width: 12 }),
         hCell('번호', { width: 8 }),
         hCell('상태', { width: 10 }),
-        hCell('과업', { width: 47 }),
+        hCell('과업', { width: 45 }),
         hCell('시간', { width: 15 }),
         hCell('비고', { width: 10 }),
       ],
       tableHeader: true,
     });
 
-    const ftRows = log.franklinTasks.map((task, idx) => {
+    // Eisenhower: Q1→Q2→Q3→Q4 순으로 정렬, Franklin: 기존 순서
+    const sortedTasks = isEisenhower
+      ? [...log.franklinTasks].sort((a, b) => {
+          const qOrder = { q1: 0, q2: 1, q3: 2, q4: 3 };
+          return qOrder[getQuadrant(a)] - qOrder[getQuadrant(b)];
+        })
+      : log.franklinTasks;
+
+    const ftRows = sortedTasks.map((task, idx) => {
       const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
       const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
       const linkedSlot = task.timeSlotId ? log.timeSlots.find(s => s.id === task.timeSlotId) : null;
       const altBg = idx % 2 === 1 ? CLR_LIGHT_BG : undefined;
 
+      const firstCol = isEisenhower
+        ? (() => { const q = getQuadrant(task); const cfg = EISENHOWER_CONFIG[q]; return `${cfg.label} ${cfg.action}`; })()
+        : `${pCfg.label} (${pCfg.desc})`;
+
       return new TableRow({
         children: [
-          dCell(`${pCfg.label} (${pCfg.desc})`, { width: 10, alignment: AlignmentType.CENTER, bg: altBg }),
+          dCell(firstCol, { width: 12, alignment: AlignmentType.CENTER, bg: altBg }),
           dCell(`${task.priority}${task.number}`, { width: 8, alignment: AlignmentType.CENTER, bg: altBg }),
           dCell(`${stCfg.icon} ${stCfg.label}`, { width: 10, alignment: AlignmentType.CENTER, bg: altBg }),
-          eCell(task.task, { width: 47, lines: 1 }),
+          eCell(task.task, { width: 45, lines: 1 }),
           dCell(linkedSlot?.timeSlot || '—', { width: 15, alignment: AlignmentType.CENTER, bg: altBg }),
           dCell(task.note || '', { width: 10, bg: altBg }),
         ],
