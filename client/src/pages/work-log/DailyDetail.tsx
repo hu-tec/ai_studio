@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Save, FileDown, List, Target } from 'lucide-react';
+import { Save, FileDown, List, Target, Grid2x2 } from 'lucide-react';
 import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
+import { EisenhowerView } from './EisenhowerView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask } from './data';
 import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { exportDailyLogToWord } from './exportWord';
@@ -302,12 +303,30 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                 <Target className="w-3 h-3" />
                 Franklin
               </button>
+              <button
+                onClick={() => setViewMode('eisenhower')}
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                  viewMode === 'eisenhower'
+                    ? 'bg-slate-700 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Grid2x2 className="w-3 h-3" />
+                Eisenhower
+              </button>
             </div>
           </div>
         </div>
 
-        {/* ⑥ 업무 일지 — Classic 또는 Franklin */}
-        {viewMode === 'franklin' ? (
+        {/* ⑥ 업무 일지 — Classic / Franklin / Eisenhower */}
+        {viewMode === 'eisenhower' ? (
+          <EisenhowerView
+            tasks={franklinTasks}
+            timeSlots={timeSlots}
+            onTasksChange={handleFranklinTasksChange}
+            onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+          />
+        ) : viewMode === 'franklin' ? (
           <FranklinView
             tasks={franklinTasks}
             timeSlots={timeSlots}

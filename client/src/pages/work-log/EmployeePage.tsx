@@ -305,8 +305,8 @@ export function EmployeePage() {
       <div className="flex gap-0 items-start">
         {/* Calendar - left column */}
         <div
-          className="shrink-0 sticky top-3 transition-all duration-300 ease-in-out flex flex-col gap-3"
-          style={{ width: calendarExpanded ? '55%' : '220px' }}
+          className="shrink-0 sticky top-3 transition-all duration-300 ease-in-out flex flex-col gap-3 overflow-hidden"
+          style={{ width: calendarExpanded ? '55%' : '0px', opacity: calendarExpanded ? 1 : 0 }}
         >
           <div className="pr-2">
             <Calendar
