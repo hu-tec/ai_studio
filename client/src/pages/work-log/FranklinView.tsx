@@ -1,35 +1,48 @@
-import { useState, DragEvent } from 'react';
-import { Plus, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip } from 'lucide-react';
 import type { FranklinTask, FranklinPriority, TimeSlotEntry } from './data';
-import { FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, getNextNumber, cycleStatus, syncPriorityToEisenhower } from './data';
+import {
+  FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
+  getNextNumber, cycleStatus, syncPriorityToEisenhower,
+  getTimelinePosition,
+} from './data';
 
 interface FranklinViewProps {
   tasks: FranklinTask[];
   timeSlots: TimeSlotEntry[];
+  timeInterval: '30min' | '1hour' | 'half-day';
   onTasksChange: (tasks: FranklinTask[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
 }
 
-export function FranklinView({ tasks, timeSlots, onTasksChange, onSlotTitleChange }: FranklinViewProps) {
-  const [newTaskText, setNewTaskText] = useState('');
-  const [newTaskPriority, setNewTaskPriority] = useState<FranklinPriority>('A');
+const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: FranklinViewProps) {
+  const [newText, setNewText] = useState('');
+  const [newPriority, setNewPriority] = useState<FranklinPriority>('A');
+  const [newStart, setNewStart] = useState('');
+  const [newEnd, setNewEnd] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<FranklinPriority | 'slot' | null>(null);
+  const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
 
   const addTask = () => {
-    if (!newTaskText.trim()) return;
-    const eisFlags = syncPriorityToEisenhower(newTaskPriority);
+    if (!newText.trim()) return;
+    const eisFlags = syncPriorityToEisenhower(newPriority);
     const task: FranklinTask = {
       id: `ft-${Date.now()}`,
-      priority: newTaskPriority,
-      number: getNextNumber(tasks, newTaskPriority),
-      task: newTaskText.trim(),
+      priority: newPriority,
+      number: getNextNumber(tasks, newPriority),
+      task: newText.trim(),
       status: 'pending',
+      startTime: newStart || undefined,
+      endTime: newEnd || undefined,
       ...eisFlags,
     };
     onTasksChange([...tasks, task]);
-    setNewTaskText('');
+    setNewText('');
+    setNewStart('');
+    setNewEnd('');
   };
 
   const updateTask = (id: string, updates: Partial<FranklinTask>) => {
@@ -40,196 +53,195 @@ export function FranklinView({ tasks, timeSlots, onTasksChange, onSlotTitleChang
     onTasksChange(tasks.filter(t => t.id !== id));
   };
 
-  // Drag handlers
-  const onDragStart = (e: DragEvent, id: string) => {
-    setDragId(id);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', id);
-  };
+  // Sort: priority → number
+  const sorted = [...tasks].sort((a, b) => {
+    const po = { A: 0, B: 1, C: 2, D: 3 };
+    if (po[a.priority] !== po[b.priority]) return po[a.priority] - po[b.priority];
+    return a.number - b.number;
+  });
 
-  const onDragOver = (e: DragEvent, target: FranklinPriority | 'slot') => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDropTarget(target);
-  };
+  // Tasks with time ranges for timeline
+  const timedTasks = tasks.filter(t => t.startTime);
 
-  const onDragLeave = () => setDropTarget(null);
-
-  const onDropPriority = (e: DragEvent, priority: FranklinPriority) => {
-    e.preventDefault();
-    setDropTarget(null);
-    if (!dragId) return;
-    const eisFlags = syncPriorityToEisenhower(priority);
-    updateTask(dragId, { priority, number: getNextNumber(tasks, priority), ...eisFlags });
-    setDragId(null);
-  };
-
-  const onDropSlot = (e: DragEvent, slotIdx: number) => {
-    e.preventDefault();
-    setDropTarget(null);
-    if (!dragId) return;
-    const task = tasks.find(t => t.id === dragId);
-    if (!task) return;
-    // Clear previous slot
-    if (task.timeSlotId) {
-      const prevIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
-      if (prevIdx >= 0) onSlotTitleChange(prevIdx, '');
-    }
-    const slot = timeSlots[slotIdx];
-    updateTask(dragId, { timeSlotId: slot.id });
-    onSlotTitleChange(slotIdx, task.task);
-    setDragId(null);
-  };
-
-  const unlinkSlot = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task?.timeSlotId) {
-      const idx = timeSlots.findIndex(s => s.id === task.timeSlotId);
-      if (idx >= 0) onSlotTitleChange(idx, '');
-    }
-    updateTask(taskId, { timeSlotId: undefined });
-  };
-
-  // Group
-  const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
-  const grouped: Record<FranklinPriority, FranklinTask[]> = { A: [], B: [], C: [], D: [] };
-  [...tasks].sort((a, b) => a.number - b.number).forEach(t => grouped[t.priority]?.push(t));
-
-  // Slot map
-  const slotTaskMap = new Map<string, FranklinTask>();
-  tasks.forEach(t => { if (t.timeSlotId) slotTaskMap.set(t.timeSlotId, t); });
+  // Ruler ticks
+  const ticks = timeInterval === 'half-day'
+    ? [{ label: '오전', pos: 0 }, { label: '오후', pos: 50 }]
+    : HOURS.map(h => ({ label: `${h}`, pos: getTimelinePosition(`${h}:00`) }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-3">
-      {/* Left: Priority groups */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="bg-accent/40 px-3 py-1.5 border-b border-border flex items-center justify-between">
-          <span className="font-semibold text-sm">우선순위 과업</span>
-          <span className="text-[10px] text-muted-foreground">{tasks.length}개 · 드래그로 이동</span>
+    <div className="space-y-3">
+      {/* Add bar */}
+      <div className="flex items-center gap-1 p-2 border border-border rounded-lg bg-muted/20 flex-wrap">
+        <div className="flex gap-0.5">
+          {priorities.map(p => (
+            <button key={p} onClick={() => setNewPriority(p)}
+              className="w-6 h-6 rounded text-[10px] font-bold"
+              style={{ background: newPriority === p ? FRANKLIN_PRIORITY_CONFIG[p].color : FRANKLIN_PRIORITY_CONFIG[p].bg, color: newPriority === p ? '#fff' : FRANKLIN_PRIORITY_CONFIG[p].color }}
+            >{p}</button>
+          ))}
         </div>
+        <input value={newText} onChange={e => setNewText(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTask()}
+          placeholder="업무명" className="flex-1 min-w-[120px] px-2 py-1 text-sm border border-border rounded bg-background outline-none focus:border-primary" />
+        <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)}
+          className="w-[90px] px-1 py-1 text-[11px] border border-border rounded bg-background outline-none" />
+        <span className="text-muted-foreground text-[10px]">~</span>
+        <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)}
+          className="w-[90px] px-1 py-1 text-[11px] border border-border rounded bg-background outline-none" />
+        <button onClick={addTask} className="p-1 rounded bg-primary text-primary-foreground hover:opacity-90">
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
 
-        {/* Add bar */}
-        <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/20">
-          <div className="flex gap-0.5">
-            {priorities.map(p => (
-              <button
-                key={p}
-                onClick={() => setNewTaskPriority(p)}
-                className="w-6 h-6 rounded text-[10px] font-bold transition-all"
-                style={{
-                  background: newTaskPriority === p ? FRANKLIN_PRIORITY_CONFIG[p].color : FRANKLIN_PRIORITY_CONFIG[p].bg,
-                  color: newTaskPriority === p ? '#fff' : FRANKLIN_PRIORITY_CONFIG[p].color,
-                }}
-              >
-                {p}
-              </button>
-            ))}
+      {/* Timeline gantt */}
+      {timedTasks.length > 0 && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="bg-accent/40 px-3 py-1 border-b border-border text-[11px] font-semibold">타임라인</div>
+          <div className="relative px-3 py-2" style={{ minHeight: timedTasks.length * 24 + 30 }}>
+            {/* Ruler */}
+            <div className="flex items-end h-5 border-b border-border/50 mb-1 relative">
+              {ticks.map((tick, i) => (
+                <div key={i} className="absolute text-[9px] text-muted-foreground font-mono" style={{ left: `${tick.pos}%`, transform: 'translateX(-50%)' }}>
+                  {tick.label}
+                </div>
+              ))}
+            </div>
+            {/* Grid lines */}
+            <div className="absolute inset-0 top-[28px] px-3">
+              {ticks.map((tick, i) => (
+                <div key={i} className="absolute top-0 bottom-0 border-l border-border/20" style={{ left: `${tick.pos}%` }} />
+              ))}
+            </div>
+            {/* Bars */}
+            {timedTasks.map((task, i) => {
+              const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
+              const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
+              const left = getTimelinePosition(task.startTime!);
+              const right = task.endTime ? getTimelinePosition(task.endTime) : left + 5;
+              const width = Math.max(3, right - left);
+              return (
+                <div key={task.id} className="relative h-5 mb-0.5" style={{ marginTop: i === 0 ? 2 : 0 }}>
+                  <div
+                    className="absolute h-4 rounded-sm flex items-center gap-1 px-1 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
+                    style={{ left: `${left}%`, width: `${width}%`, background: pCfg.color + '20', borderLeft: `3px solid ${pCfg.color}` }}
+                    onClick={() => setExpandedId(expandedId === task.id ? null : task.id)}
+                    title={`${task.priority}${task.number} ${task.task} (${task.startTime}~${task.endTime || ''})`}
+                  >
+                    <span className="text-[8px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
+                    <span className="text-[9px] truncate" style={{ color: stCfg.color }}>{stCfg.icon}</span>
+                    <span className="text-[9px] truncate">{task.task}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <input
-            type="text"
-            value={newTaskText}
-            onChange={e => setNewTaskText(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addTask()}
-            placeholder="새 과업 → Enter"
-            className="flex-1 px-2 py-1 text-sm border border-border rounded bg-background outline-none focus:border-primary"
-          />
-          <button onClick={addTask} className="p-1 rounded bg-primary text-primary-foreground hover:opacity-90">
-            <Plus className="w-4 h-4" />
-          </button>
+        </div>
+      )}
+
+      {/* Task list */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-accent/40 px-3 py-1 border-b border-border flex items-center justify-between">
+          <span className="text-[11px] font-semibold">업무 목록</span>
+          <div className="flex gap-2 text-[10px]">
+            {priorities.map(p => {
+              const cnt = tasks.filter(t => t.priority === p).length;
+              return cnt > 0 ? (
+                <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color }} className="font-bold">{p}:{cnt}</span>
+              ) : null;
+            })}
+            <span className="text-muted-foreground">
+              ●{tasks.filter(t => t.status === 'done').length} ◐{tasks.filter(t => t.status === 'progress').length} ○{tasks.filter(t => t.status === 'pending').length}
+            </span>
+          </div>
         </div>
 
-        {/* Priority groups with DnD */}
-        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 350px)' }}>
-          {priorities.map(priority => {
-            const cfg = FRANKLIN_PRIORITY_CONFIG[priority];
-            const group = grouped[priority];
-            const isDrop = dropTarget === priority;
+        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 450px)' }}>
+          {sorted.length === 0 ? (
+            <div className="p-6 text-center text-[11px] text-muted-foreground">업무를 추가하세요</div>
+          ) : sorted.map(task => {
+            const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
+            const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
+            const isExpanded = expandedId === task.id;
+            const timeLabel = task.startTime
+              ? `${task.startTime}${task.endTime ? '~' + task.endTime : '~'}`
+              : '미배정';
 
             return (
-              <div
-                key={priority}
-                onDragOver={e => onDragOver(e, priority)}
-                onDragLeave={onDragLeave}
-                onDrop={e => onDropPriority(e, priority)}
-                style={{ borderLeft: isDrop ? `3px solid ${cfg.color}` : '3px solid transparent' }}
-              >
-                {/* Header */}
-                <div
-                  className="px-3 py-1 text-[11px] font-bold flex items-center gap-2 border-b border-border"
-                  style={{ background: cfg.bg, color: cfg.color }}
-                >
-                  <span className="w-5 h-5 rounded flex items-center justify-center text-white text-[10px]" style={{ background: cfg.color }}>
-                    {cfg.label}
+              <div key={task.id} className="border-b border-border/50">
+                {/* Task row */}
+                <div className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-accent/10 group">
+                  {/* Expand */}
+                  <button onClick={() => setExpandedId(isExpanded ? null : task.id)} className="w-4 h-4 shrink-0 text-muted-foreground">
+                    {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  </button>
+                  {/* Status */}
+                  <button onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
+                    className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold shrink-0 hover:scale-110"
+                    style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
+                  {/* Priority */}
+                  <span className="text-[10px] font-bold w-5 shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
+                  {/* Issue badge */}
+                  {task.isIssue && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                  {/* Title */}
+                  {editingId === task.id ? (
+                    <input value={task.task} onChange={e => updateTask(task.id, { task: e.target.value })}
+                      onBlur={() => setEditingId(null)} onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
+                      autoFocus className="flex-1 text-[12px] px-1 py-0.5 border border-primary rounded outline-none" />
+                  ) : (
+                    <span onClick={() => setEditingId(task.id)}
+                      className={`flex-1 text-[12px] cursor-pointer truncate ${task.status === 'done' ? 'line-through text-muted-foreground' : task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                      {task.task}
+                    </span>
+                  )}
+                  {/* Time */}
+                  <span className={`text-[10px] font-mono shrink-0 ${task.startTime ? 'text-blue-600' : 'text-muted-foreground/40'}`}>
+                    {timeLabel}
                   </span>
-                  {cfg.desc}
-                  <span className="ml-auto text-[10px] opacity-60">{group.length}</span>
+                  {/* Files indicator */}
+                  {task.files && task.files.length > 0 && <Paperclip className="w-3 h-3 text-muted-foreground shrink-0" />}
+                  {/* Delete */}
+                  <button onClick={() => removeTask(task.id)}
+                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[10px] shrink-0">✕</button>
                 </div>
 
-                {/* Tasks */}
-                {group.length === 0 ? (
-                  <div className="px-3 py-2 text-[10px] text-muted-foreground/40 text-center border-b border-border italic">
-                    드래그하여 이동
+                {/* Expanded detail */}
+                {isExpanded && (
+                  <div className="px-8 py-2 bg-accent/5 border-t border-border/30 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {/* Time range edit */}
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <span className="text-muted-foreground w-12">시간</span>
+                      <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
+                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[90px]" />
+                      <span>~</span>
+                      <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
+                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[90px]" />
+                      <label className="flex items-center gap-1 ml-4 cursor-pointer">
+                        <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })}
+                          className="w-3 h-3 accent-amber-500" />
+                        <span className="text-amber-600 text-[10px] font-bold">⚠ 이슈</span>
+                      </label>
+                    </div>
+                    {/* Priority change */}
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <span className="text-muted-foreground w-12">우선순위</span>
+                      {priorities.map(p => (
+                        <button key={p} onClick={() => {
+                          const eis = syncPriorityToEisenhower(p);
+                          updateTask(task.id, { priority: p, number: getNextNumber(tasks, p), ...eis });
+                        }}
+                          className="w-6 h-6 rounded text-[10px] font-bold"
+                          style={{ background: task.priority === p ? FRANKLIN_PRIORITY_CONFIG[p].color : FRANKLIN_PRIORITY_CONFIG[p].bg, color: task.priority === p ? '#fff' : FRANKLIN_PRIORITY_CONFIG[p].color }}
+                        >{p}</button>
+                      ))}
+                    </div>
+                    {/* Notes */}
+                    <div className="flex gap-2 text-[11px]">
+                      <span className="text-muted-foreground w-12 pt-1">메모</span>
+                      <textarea value={task.note || ''} onChange={e => updateTask(task.id, { note: e.target.value })}
+                        placeholder="상세 내용, 피드백, 결과..."
+                        className="flex-1 px-2 py-1 border border-border rounded text-[11px] bg-background outline-none resize-none min-h-[50px]"
+                        style={{ scrollbarWidth: 'none' }} />
+                    </div>
                   </div>
-                ) : (
-                  group.map(task => {
-                    const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
-                    return (
-                      <div
-                        key={task.id}
-                        draggable
-                        onDragStart={e => onDragStart(e, task.id)}
-                        className="flex items-center gap-1.5 px-2 py-1 border-b border-border/50 hover:bg-accent/20 cursor-grab active:cursor-grabbing group"
-                      >
-                        <button
-                          onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
-                          className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold shrink-0 hover:scale-110 transition-all"
-                          style={{ background: stCfg.bg, color: stCfg.color }}
-                          title={stCfg.label}
-                        >
-                          {stCfg.icon}
-                        </button>
-                        <span className="text-[10px] font-bold shrink-0 w-5" style={{ color: cfg.color }}>
-                          {priority}{task.number}
-                        </span>
-                        {editingId === task.id ? (
-                          <input
-                            type="text"
-                            value={task.task}
-                            onChange={e => updateTask(task.id, { task: e.target.value })}
-                            onBlur={() => setEditingId(null)}
-                            onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                            autoFocus
-                            className="flex-1 text-[12px] px-1 py-0.5 border border-primary rounded outline-none"
-                          />
-                        ) : (
-                          <span
-                            className={`flex-1 text-[12px] cursor-pointer truncate ${
-                              task.status === 'done' ? 'line-through text-muted-foreground' :
-                              task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''
-                            }`}
-                            onClick={() => setEditingId(task.id)}
-                          >
-                            {task.task}
-                          </span>
-                        )}
-                        {task.timeSlotId && (
-                          <button
-                            onClick={() => unlinkSlot(task.id)}
-                            className="text-[8px] px-1 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-200 hover:bg-red-50 hover:text-red-500 shrink-0"
-                            title="연결 해제"
-                          >
-                            {timeSlots.find(s => s.id === task.timeSlotId)?.timeSlot.split('~')[0]?.trim() || ''}
-                          </button>
-                        )}
-                        <button
-                          onClick={() => removeTask(task.id)}
-                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[10px] shrink-0"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    );
-                  })
                 )}
               </div>
             );
@@ -239,75 +251,9 @@ export function FranklinView({ tasks, timeSlots, onTasksChange, onSlotTitleChang
         {/* Forwarded */}
         {tasks.some(t => t.status === 'forwarded') && (
           <div className="px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-[10px] text-amber-700">
-            <strong>이월:</strong> {tasks.filter(t => t.status === 'forwarded').map(t => `${t.priority}${t.number}`).join(', ')}
+            <strong>이월:</strong> {tasks.filter(t => t.status === 'forwarded').map(t => `${t.priority}${t.number} ${t.task}`).join(', ')}
           </div>
         )}
-      </div>
-
-      {/* Right: Time Schedule with DnD */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="bg-accent/40 px-3 py-1.5 border-b border-border flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="font-semibold text-sm">일정</span>
-          <span className="text-[10px] text-muted-foreground">과업을 드래그하여 배정</span>
-        </div>
-
-        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 350px)' }}>
-          {timeSlots.map((slot, idx) => {
-            const linked = slotTaskMap.get(slot.id);
-            const stCfg = linked ? FRANKLIN_STATUS_CONFIG[linked.status] : null;
-            const pCfg = linked ? FRANKLIN_PRIORITY_CONFIG[linked.priority] : null;
-            const hasFill = linked || slot.title;
-
-            return (
-              <div
-                key={slot.id}
-                className={`flex items-center gap-2 px-2 py-1.5 border-b border-border/50 transition-colors ${
-                  dropTarget === 'slot' && !linked ? 'bg-blue-50' : hasFill ? 'bg-accent/5' : 'hover:bg-accent/10'
-                }`}
-                onDragOver={e => onDragOver(e, 'slot')}
-                onDragLeave={onDragLeave}
-                onDrop={e => onDropSlot(e, idx)}
-              >
-                <span className={`text-[10px] w-28 shrink-0 font-mono ${hasFill ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
-                  {slot.timeSlot}
-                </span>
-                {linked ? (
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[10px] font-bold px-1 py-0.5 rounded shrink-0" style={{ background: pCfg!.bg, color: pCfg!.color }}>
-                      {linked.priority}{linked.number}
-                    </span>
-                    <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] shrink-0" style={{ background: stCfg!.bg, color: stCfg!.color }}>
-                      {stCfg!.icon}
-                    </span>
-                    <span className={`text-[12px] truncate ${linked.status === 'done' ? 'line-through text-muted-foreground' : 'font-medium'}`}>
-                      {linked.task}
-                    </span>
-                  </div>
-                ) : slot.title ? (
-                  <span className="text-[12px] flex-1 truncate">{slot.title}</span>
-                ) : (
-                  <span className="text-[10px] text-muted-foreground/30 flex-1 italic">비어있음</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="lg:col-span-2 grid grid-cols-4 gap-2">
-        {priorities.map(p => {
-          const cfg = FRANKLIN_PRIORITY_CONFIG[p];
-          const done = grouped[p].filter(t => t.status === 'done').length;
-          const total = grouped[p].length;
-          return (
-            <div key={p} className="text-center p-2 rounded" style={{ background: cfg.bg }}>
-              <div className="text-[10px] font-bold" style={{ color: cfg.color }}>{cfg.label} {cfg.desc}</div>
-              <div className="text-lg font-black" style={{ color: cfg.color }}>{done}/{total}</div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

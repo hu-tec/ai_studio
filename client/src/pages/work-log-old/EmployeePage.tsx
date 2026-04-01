@@ -9,7 +9,6 @@ import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 import { toPng } from 'html-to-image';
-import { toast } from 'sonner';
 
 function PromptTemplateManager() {
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -117,7 +116,7 @@ function PromptTemplateManager() {
 export function EmployeePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [pageMode, setPageMode] = useState<'today' | 'calendar'>('today');
+  const [calendarExpanded, setCalendarExpanded] = useState(true);
   const [calendarMode, setCalendarMode] = useState<'monthly' | 'daily'>('monthly');
   const appRef = useRef<HTMLDivElement>(null);
 
@@ -139,7 +138,7 @@ export function EmployeePage() {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const currentLog = myLogs.find(l => l.date === dateStr);
 
-  const handleSaveLog = useCallback(async (log: DailyLog) => {
+  const handleSaveLog = useCallback((log: DailyLog) => {
     setLogs(prev => {
       const existing = prev.findIndex(
         l => l.date === log.date && l.employeeId === log.employeeId
@@ -154,10 +153,8 @@ export function EmployeePage() {
       saveLogs(updated);
       return updated;
     });
-    const ok = await saveLogToAPI(log);
-    if (!ok) {
-      toast.error('서버 저장 실패 — 로컬에만 저장되었습니다.');
-    }
+    // Also persist to API (fire-and-forget)
+    saveLogToAPI(log);
   }, []);
 
   const downloadExcel = () => {
@@ -230,55 +227,119 @@ export function EmployeePage() {
 
   return (
     <div ref={appRef} className="max-w-[1920px] mx-auto px-1 py-3 bg-background">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between mb-3 px-2">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-black text-primary tracking-tight">업무일지</h1>
-          <div className="flex bg-muted rounded-lg p-0.5">
-            <button
-              onClick={() => { setPageMode('today'); setSelectedDate(new Date()); }}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'today' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
-            >오늘</button>
-            <button
-              onClick={() => setPageMode('calendar')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
-            >캘린더</button>
+      {/* Top Action Bar */}
+      <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <h1 className="text-xl font-black text-primary tracking-tight">AI 업무일지 시스템</h1>
+            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Employee Productivity Dashboard</p>
           </div>
-          {pageMode === 'calendar' && (
-            <div className="flex bg-muted/50 rounded p-0.5">
-              <button onClick={() => setCalendarMode('monthly')}
-                className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'monthly' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>월별</button>
-              <button onClick={() => setCalendarMode('daily')}
-                className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'daily' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>일별</button>
+          <div className="flex bg-muted rounded-lg p-1 shadow-inner">
+            <button
+              onClick={() => setCalendarMode('monthly')}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs transition-all ${calendarMode === 'monthly' ? 'bg-white shadow-sm font-bold text-primary scale-105' : 'text-muted-foreground hover:bg-white/50'}`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              월별 그리드
+            </button>
+            <button
+              onClick={() => setCalendarMode('daily')}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs transition-all ${calendarMode === 'daily' ? 'bg-white shadow-sm font-bold text-primary scale-105' : 'text-muted-foreground hover:bg-white/50'}`}
+            >
+              <ListFilter className="w-3.5 h-3.5" />
+              일별 리스트
+            </button>
+          </div>
+
+          <div className="hidden xl:flex items-center gap-3 border-l border-border pl-6">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">이번 달 작성률</span>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, (myLogs.length / 22) * 100)}%` }} />
+                </div>
+                <span className="text-xs font-black">{Math.round((myLogs.length / 22) * 100)}%</span>
+              </div>
             </div>
-          )}
+            <div className="flex flex-col border-l border-border pl-4">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">누적 업무 수</span>
+              <span className="text-sm font-black text-blue-600">{myLogs.reduce((acc, log) => acc + log.timeSlots.filter(s => s.title.trim()).length, 0)}건</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={downloadExcel} className="px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-[10px] font-semibold hover:bg-green-100">엑셀</button>
-          <button onClick={downloadWord} className="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[10px] font-semibold hover:bg-blue-100">워드</button>
-          <button onClick={downloadImage} className="px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[10px] font-semibold hover:bg-orange-100">이미지</button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={downloadExcel}
+            className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-semibold hover:bg-green-100 transition-colors"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            엑셀 다운받기
+          </button>
+          <button
+            onClick={downloadWord}
+            className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-xs font-semibold hover:bg-blue-100 transition-colors"
+          >
+            <FileCode className="w-4 h-4" />
+            워드 다운받기
+          </button>
+          <button
+            onClick={downloadImage}
+            className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-xs font-semibold hover:bg-orange-100 transition-colors"
+          >
+            <ImageIcon className="w-4 h-4" />
+            이미지로 저장
+          </button>
         </div>
       </div>
 
-      {pageMode === 'today' ? (
-        /* Today mode — full width DailyDetail */
-        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} />
-      ) : (
-        /* Calendar mode — left calendar + right detail */
-        <div className="flex gap-0 items-start">
-          <div className="shrink-0 sticky top-3 flex flex-col gap-3" style={{ width: '50%' }}>
-            <div className="pr-2">
-              <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} />
-            </div>
-            <div className="pr-2">
+      <div className="flex gap-0 items-start">
+        {/* Calendar - left column */}
+        <div
+          className="shrink-0 sticky top-3 transition-all duration-300 ease-in-out flex flex-col gap-3"
+          style={{ width: calendarExpanded ? '55%' : '220px' }}
+        >
+          <div className="pr-2">
+            <Calendar
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              logs={myLogs}
+              onUpdateLog={handleSaveLog}
+              compact={!calendarExpanded}
+              mode={calendarMode}
+            />
+          </div>
+
+          {calendarExpanded && (
+            <div className="pr-2 animate-in fade-in slide-in-from-left-2 duration-300">
               <PromptTemplateManager />
             </div>
-          </div>
-          <div className="flex-1 min-w-0 pl-1">
-            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} />
-          </div>
+          )}
         </div>
-      )}
+
+        {/* Toggle button & Side tools */}
+        <div className="shrink-0 sticky top-3 z-10 flex flex-col items-center gap-2 pt-0.5">
+          <button
+            onClick={() => setCalendarExpanded(prev => !prev)}
+            className="flex items-center justify-center w-6 h-14 bg-accent/80 hover:bg-accent border border-border rounded-md text-muted-foreground hover:text-foreground transition-colors shadow-sm"
+            title={calendarExpanded ? '캘린더 축소' : '캘린더 펼치기'}
+          >
+            {calendarExpanded ? (
+              <PanelLeftClose className="w-3.5 h-3.5" />
+            ) : (
+              <PanelLeftOpen className="w-3.5 h-3.5" />
+            )}
+          </button>
+        </div>
+
+        {/* Daily Detail - right column */}
+        <div className="flex-1 min-w-0 pl-1">
+          <DailyDetail
+            date={selectedDate}
+            log={currentLog}
+            onSave={handleSaveLog}
+          />
+        </div>
+      </div>
     </div>
   );
 }

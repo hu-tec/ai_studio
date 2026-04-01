@@ -65,162 +65,6 @@ export type Position = '알바' | '신입' | '강사' | '팀장' | '개발' | '�
 
 export const positions: Position[] = ['알바', '신입', '강사', '팀장', '개발', '외부', '임원', '대표'];
 
-export type ViewMode = 'classic' | 'franklin' | 'eisenhower';
-
-export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
-export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
-
-export interface FranklinTask {
-  id: string;
-  priority: FranklinPriority;
-  number: number;           // A1, A2, B1...
-  task: string;
-  status: FranklinStatus;
-  timeSlotId?: string;      // Classic 모드: 슬롯 연결
-  startTime?: string;       // Franklin/Eisenhower: "09:00" 자유 시간
-  endTime?: string;         // Franklin/Eisenhower: "14:37"
-  note?: string;
-  files?: string[];         // 첨부 파일 URLs
-  isIssue?: boolean;        // ⚠ 이슈 표시
-  urgent?: boolean;         // 아이젠하워: 긴급
-  important?: boolean;      // 아이젠하워: 중요
-}
-
-export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';
-
-export const EISENHOWER_CONFIG: Record<EisenhowerQuadrant, { label: string; desc: string; action: string; color: string; bg: string; border: string }> = {
-  q1: { label: 'A', desc: '중요 + 긴급',      action: '즉시 실행',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
-  q2: { label: 'B', desc: '중요 + 긴급하지않음', action: '계획/예약',  color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
-  q3: { label: 'C', desc: '긴급 + 중요하지않음', action: '위임',      color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
-  q4: { label: 'D', desc: '긴급하지도 중요하지도', action: '제거/보류', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
-};
-
-export function getQuadrant(task: FranklinTask): EisenhowerQuadrant {
-  if (task.important && task.urgent) return 'q1';
-  if (task.important && !task.urgent) return 'q2';
-  if (!task.important && task.urgent) return 'q3';
-  return 'q4';
-}
-
-export function setQuadrant(task: FranklinTask, q: EisenhowerQuadrant): Partial<FranklinTask> {
-  const priorityMap: Record<EisenhowerQuadrant, FranklinPriority> = { q1: 'A', q2: 'B', q3: 'C', q4: 'D' };
-  switch (q) {
-    case 'q1': return { important: true, urgent: true, priority: priorityMap[q] };
-    case 'q2': return { important: true, urgent: false, priority: priorityMap[q] };
-    case 'q3': return { important: false, urgent: true, priority: priorityMap[q] };
-    case 'q4': return { important: false, urgent: false, priority: priorityMap[q] };
-  }
-}
-
-/** Franklin priority → Eisenhower flags 동기화 */
-export function syncPriorityToEisenhower(priority: FranklinPriority): { urgent: boolean; important: boolean } {
-  switch (priority) {
-    case 'A': return { important: true, urgent: true };
-    case 'B': return { important: true, urgent: false };
-    case 'C': return { important: false, urgent: true };
-    case 'D': return { important: false, urgent: false };
-  }
-}
-
-export const FRANKLIN_STATUS_CONFIG: Record<FranklinStatus, { icon: string; label: string; color: string; bg: string }> = {
-  pending:   { icon: '○', label: '대기',   color: '#9ca3af', bg: '#f3f4f6' },
-  progress:  { icon: '◐', label: '진행중', color: '#3b82f6', bg: '#eff6ff' },
-  done:      { icon: '●', label: '완료',   color: '#16a34a', bg: '#f0fdf4' },
-  forwarded: { icon: '→', label: '이월',   color: '#f59e0b', bg: '#fffbeb' },
-  cancelled: { icon: '✕', label: '취소',   color: '#ef4444', bg: '#fef2f2' },
-};
-
-export const FRANKLIN_PRIORITY_CONFIG: Record<FranklinPriority, { label: string; desc: string; color: string; bg: string; quadrant: EisenhowerQuadrant }> = {
-  A: { label: 'A', desc: '즉시 실행',   color: '#dc2626', bg: '#fef2f2', quadrant: 'q1' },
-  B: { label: 'B', desc: '계획/예약',   color: '#2563eb', bg: '#eff6ff', quadrant: 'q2' },
-  C: { label: 'C', desc: '위임',       color: '#f59e0b', bg: '#fffbeb', quadrant: 'q3' },
-  D: { label: 'D', desc: '보류/제거',   color: '#6b7280', bg: '#f9fafb', quadrant: 'q4' },
-};
-
-export function createEmptyFranklinTasks(): FranklinTask[] {
-  return [];
-}
-
-/** Franklin → TimeSlots 정방향 동기화: 연결된 과업의 텍스트/노트를 타임슬롯에 반영 */
-export function syncFranklinToSlots(
-  tasks: FranklinTask[],
-  slots: TimeSlotEntry[],
-  prevTasks?: FranklinTask[],
-): TimeSlotEntry[] {
-  const taskBySlotId = new Map<string, FranklinTask>();
-  tasks.forEach(t => { if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t); });
-
-  // 이전에 연결되었다가 해제된 슬롯 파악
-  const unlinkedSlotIds = new Set<string>();
-  if (prevTasks) {
-    prevTasks.forEach(t => {
-      if (t.timeSlotId && !taskBySlotId.has(t.timeSlotId)) {
-        unlinkedSlotIds.add(t.timeSlotId);
-      }
-    });
-  }
-
-  return slots.map(slot => {
-    const task = taskBySlotId.get(slot.id);
-    if (task) {
-      return { ...slot, title: task.task, content: task.note || '' };
-    }
-    if (unlinkedSlotIds.has(slot.id)) {
-      return { ...slot, title: '', content: '' };
-    }
-    return slot;
-  });
-}
-
-/** TimeSlots → Franklin 역방향 동기화: 타임슬롯 편집 시 연결된 과업 업데이트 */
-export function syncSlotToFranklin(
-  tasks: FranklinTask[],
-  slotId: string,
-  field: string,
-  value: string,
-): FranklinTask[] {
-  const linkedTask = tasks.find(t => t.timeSlotId === slotId);
-  if (!linkedTask) return tasks;
-  if (field === 'title') {
-    return tasks.map(t => t.id === linkedTask.id ? { ...t, task: value } : t);
-  }
-  if (field === 'content') {
-    return tasks.map(t => t.id === linkedTask.id ? { ...t, note: value } : t);
-  }
-  return tasks;
-}
-
-export function getNextNumber(tasks: FranklinTask[], priority: FranklinPriority): number {
-  const nums = tasks.filter(t => t.priority === priority).map(t => t.number);
-  return nums.length > 0 ? Math.max(...nums) + 1 : 1;
-}
-
-/** 시간 문자열 → 분 변환 ("14:37" → 877) */
-export function timeToMinutes(t: string): number {
-  const [h, m] = t.split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
-
-/** 분 → 시간 문자열 (877 → "14:37") */
-export function minutesToTime(m: number): string {
-  const h = Math.floor(m / 60);
-  const min = m % 60;
-  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-}
-
-/** 타임라인 바 위치 계산 (0~100%) */
-export function getTimelinePosition(time: string, dayStart = 9, dayEnd = 18): number {
-  const mins = timeToMinutes(time);
-  const startMins = dayStart * 60;
-  const endMins = dayEnd * 60;
-  return Math.max(0, Math.min(100, ((mins - startMins) / (endMins - startMins)) * 100));
-}
-
-export function cycleStatus(current: FranklinStatus): FranklinStatus {
-  const order: FranklinStatus[] = ['pending', 'progress', 'done', 'forwarded', 'cancelled'];
-  return order[(order.indexOf(current) + 1) % order.length];
-}
-
 export interface DailyLog {
   date: string; // YYYY-MM-DD
   summary: string;
@@ -231,8 +75,6 @@ export interface DailyLog {
   timeInterval: '30min' | '1hour' | 'half-day';
   timeSlots: TimeSlotEntry[];
   employeeId: string;
-  viewMode?: ViewMode;
-  franklinTasks?: FranklinTask[];
 }
 
 export interface Employee {
@@ -421,9 +263,7 @@ export async function fetchLogsFromAPI(): Promise<DailyLog[] | null> {
     const res = await fetch('/api/worklogs');
     if (!res.ok) return null;
     const data = await res.json(); // { key: logData, key: logData, ... }
-    const logs: DailyLog[] = (Object.values(data) as DailyLog[]).filter(
-      log => log.employeeId && log.date
-    );
+    const logs: DailyLog[] = Object.values(data);
     if (logs.length === 0) return null;
     return logs;
   } catch {

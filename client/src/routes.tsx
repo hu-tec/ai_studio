@@ -33,6 +33,7 @@ export const router = createBrowserRouter(
         { path: 'level-test', element: lazyPage(() => import('./pages/level-test/LevelTestPage')) },
         // 직원 도구
         { path: 'work-log', element: lazyPage(() => import('./pages/work-log/EmployeePage')) },
+        { path: 'work-log-old', element: lazyPage(() => import('./pages/work-log-old/EmployeePage')) },
         { path: 'work-log/admin', element: lazyPage(() => import('./pages/work-log/AdminPage')) },
         { path: 'pledge', element: lazyPage(() => import('./pages/pledge/PledgePage')) },
         { path: 'guidelines', element: lazyPage(() => import('./pages/guidelines/GuidelinesPage')) },

@@ -301,10 +301,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
             ))}
           </div>
 
-          {/* ⑤ 간격 — 모드 옆 */}
-          {viewMode === 'classic' && (
-            <>
-              <div className="w-px h-5 bg-border" />
+          {/* ⑤ 간격 — 항상 표시 */}
+          <div className="w-px h-5 bg-border" />
               <span className="text-[10px] font-bold text-muted-foreground">간격</span>
               <div className="flex gap-0.5">
                 {([
@@ -323,8 +321,6 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                   </button>
                 ))}
               </div>
-            </>
-          )}
         </div>
 
         {/* ⑥ 업무 일지 — Classic / Franklin / Eisenhower */}
@@ -339,6 +335,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
           <FranklinView
             tasks={franklinTasks}
             timeSlots={timeSlots}
+            timeInterval={timeInterval}
             onTasksChange={handleFranklinTasksChange}
             onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
           />
