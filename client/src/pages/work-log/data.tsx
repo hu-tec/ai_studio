@@ -85,10 +85,10 @@ export interface FranklinTask {
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';
 
 export const EISENHOWER_CONFIG: Record<EisenhowerQuadrant, { label: string; desc: string; action: string; color: string; bg: string; border: string }> = {
-  q1: { label: 'Q1', desc: '중요 + 긴급',      action: '즉시 실행',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
-  q2: { label: 'Q2', desc: '중요 + 긴급하지않음', action: '계획/예약',  color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
-  q3: { label: 'Q3', desc: '긴급 + 중요하지않음', action: '위임',      color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
-  q4: { label: 'Q4', desc: '긴급하지도 중요하지도', action: '제거/보류', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
+  q1: { label: 'A', desc: '중요 + 긴급',      action: '즉시 실행',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  q2: { label: 'B', desc: '중요 + 긴급하지않음', action: '계획/예약',  color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+  q3: { label: 'C', desc: '긴급 + 중요하지않음', action: '위임',      color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
+  q4: { label: 'D', desc: '긴급하지도 중요하지도', action: '제거/보류', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
 };
 
 export function getQuadrant(task: FranklinTask): EisenhowerQuadrant {

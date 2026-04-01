@@ -27,7 +27,8 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   const addTask = () => {
     if (!newText.trim()) return;
     const flags = setQuadrant({} as FranklinTask, newQuad);
-    const priority: FranklinPriority = newQuad === 'q1' ? 'A' : newQuad === 'q2' ? 'A' : newQuad === 'q3' ? 'B' : 'C';
+    const priorityMap: Record<EisenhowerQuadrant, FranklinPriority> = { q1: 'A', q2: 'B', q3: 'C', q4: 'D' };
+    const priority = priorityMap[newQuad];
     const task: FranklinTask = {
       id: `ft-${Date.now()}`,
       priority,
@@ -69,9 +70,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
     setDropTarget(null);
     if (!dragId) return;
     const flags = setQuadrant({} as FranklinTask, q);
-    // Auto-adjust priority based on quadrant
-    const priority: FranklinPriority = q === 'q1' ? 'A' : q === 'q2' ? 'A' : q === 'q3' ? 'B' : 'C';
-    updateTask(dragId, { ...flags, priority, number: getNextNumber(tasks, priority) });
+    updateTask(dragId, { ...flags, number: getNextNumber(tasks, flags.priority!) });
     setDragId(null);
   };
 
