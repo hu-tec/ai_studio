@@ -53,18 +53,20 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     }, 2000);
   }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, emp.name, onSave]);
 
-  // Trigger auto-save on data changes (skip initial load)
-  const isInitial = useRef(true);
+  // Trigger auto-save on data changes (skip prop-driven changes)
+  const userEdited = useRef(false);
+  const suppressAutoSave = useRef(false);
   useEffect(() => {
-    if (isInitial.current) { isInitial.current = false; return; }
+    if (suppressAutoSave.current) return;
+    if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
   }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks]);
 
-  // Reset initial flag on date change
-  useEffect(() => { isInitial.current = true; }, [dateStr]);
-
   useEffect(() => {
+    // When date or log changes from props, suppress next auto-save cycle
+    suppressAutoSave.current = true;
+    userEdited.current = false;
     if (log) {
       setPosition(log.position || emp.position);
       setHpCategories(log.homepageCategories);
@@ -84,6 +86,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setViewMode('classic');
       setFranklinTasks([]);
     }
+    // Allow auto-save after prop-driven setState batch completes
+    requestAnimationFrame(() => { suppressAutoSave.current = false; });
   }, [dateStr, log]);
 
   const handleIntervalChange = useCallback((newInterval: '30min' | '1hour' | 'half-day') => {
