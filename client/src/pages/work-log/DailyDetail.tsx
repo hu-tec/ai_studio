@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Save, FileDown } from 'lucide-react';
+import { Save, FileDown, List, Target } from 'lucide-react';
 import { AIDetailModal } from './AIDetailModal';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots } from './data';
+import { FranklinView } from './FranklinView';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks } from './data';
 import { exportDailyLogToWord } from './exportWord';
 import { toast } from 'sonner';
 
@@ -26,6 +27,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   const [detail, setDetail] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('classic');
+  const [franklinTasks, setFranklinTasks] = useState<FranklinTask[]>([]);
 
   useEffect(() => {
     if (log) {
@@ -35,6 +38,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setTimeInterval(log.timeInterval);
       setTimeSlots(log.timeSlots);
       setDetail(log.detail || '');
+      setViewMode(log.viewMode || 'classic');
+      setFranklinTasks(log.franklinTasks || []);
     } else {
       setPosition(emp.position);
       setHpCategories([]);
@@ -42,6 +47,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setTimeInterval('1hour');
       setTimeSlots(createEmptyTimeSlots('1hour'));
       setDetail('');
+      setViewMode('classic');
+      setFranklinTasks([]);
     }
   }, [dateStr, log]);
 
@@ -100,7 +107,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     }
   };
 
-  const handleSave = () => {
+  const buildLog = (): DailyLog => {
     const newLog: DailyLog = {
       date: dateStr,
       summary: '',
@@ -111,32 +118,25 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       timeSlots,
       employeeId: currentEmployee.id,
       detail,
+      viewMode,
+      franklinTasks,
     };
-    const filledTitles = timeSlots.filter(s => s.title).map(s => s.title);
+    const filledTitles = viewMode === 'franklin'
+      ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
+      : timeSlots.filter(s => s.title).map(s => s.title);
     newLog.summary = filledTitles.length > 0
       ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
       : '';
-    onSave(newLog);
+    return newLog;
+  };
+
+  const handleSave = () => {
+    onSave(buildLog());
     toast.success('저장되었습니다.');
   };
 
   const handleExport = () => {
-    const newLog: DailyLog = {
-      date: dateStr,
-      summary: '',
-      position,
-      homepageCategories: hpCategories,
-      departmentCategories: deptCategories,
-      timeInterval,
-      timeSlots,
-      employeeId: currentEmployee.id,
-      detail,
-    };
-    const filledTitles = timeSlots.filter(s => s.title).map(s => s.title);
-    newLog.summary = filledTitles.length > 0
-      ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
-      : '';
-    exportDailyLogToWord(newLog, date);
+    exportDailyLogToWord(buildLog(), date);
     toast.success('워드 파일로 내보내졌습니다.');
   };
 
@@ -163,200 +163,211 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
         </div>
       </div>
 
-      <div className="p-3 space-y-3">
+      <div className="p-3 space-y-2">
 
-        {/* ① 직급 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">① 직급</label>
-          <div className="flex flex-wrap gap-1">
-            {positions.map(pos => (
-              <button
-                key={pos}
-                onClick={() => setPosition(pos)}
-                className={`px-2.5 py-1 rounded border transition-colors ${
-                  position === pos
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'border-border hover:bg-accent'
-                }`}
-              >
-                {pos}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Compact toolbar: ①직급 + ②정보 + ③홈피 + ④부서 + ⑤간격 + 모드 */}
+        <div className="space-y-1.5 bg-accent/10 rounded-lg p-2">
 
-        {/* ② 작성 정보 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">② 작성 정보</label>
-          <div className="border border-border rounded overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-4">
-              <div className="border-r border-b md:border-b-0 border-border">
-                <div className="bg-accent/40 px-2 py-1 text-muted-foreground border-b border-border">작성일자</div>
-                <div className="px-2 py-1">{format(date, 'yyyy-MM-dd (EEE)', { locale: ko })}</div>
-              </div>
-              <div className="border-b md:border-b-0 md:border-r border-border">
-                <div className="bg-accent/40 px-2 py-1 text-muted-foreground border-b border-border">작성자</div>
-                <div className="px-2 py-1">{emp.name}</div>
-              </div>
-              <div className="border-r border-border">
-                <div className="bg-accent/40 px-2 py-1 text-muted-foreground border-b border-border">부서</div>
-                <div className="px-2 py-1">{emp.department}</div>
-              </div>
-              <div>
-                <div className="bg-accent/40 px-2 py-1 text-muted-foreground border-b border-border">직무직급</div>
-                <div className="px-2 py-1">{position}</div>
-              </div>
+          {/* Row 1: 작성정보 + 직급 */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-bold text-muted-foreground w-10 shrink-0">② 정보</span>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="px-2 py-0.5 bg-background border border-border rounded">{format(date, 'MM/dd (EEE)', { locale: ko })}</span>
+              <span className="px-2 py-0.5 bg-background border border-border rounded">{emp.name}</span>
+              <span className="px-2 py-0.5 bg-background border border-border rounded">{emp.department}</span>
+            </div>
+            <div className="w-px h-5 bg-border" />
+            <span className="text-[10px] font-bold text-muted-foreground shrink-0">① 직급</span>
+            <div className="flex gap-0.5">
+              {positions.map(pos => (
+                <button
+                  key={pos}
+                  onClick={() => setPosition(pos)}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
+                    position === pos
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                  }`}
+                >
+                  {pos}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* ③ 홈페이지 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">③ 홈페이지</label>
-          <div className="border border-border rounded overflow-hidden">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7">
+          {/* Row 2: 홈페이지 */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-bold text-muted-foreground w-10 shrink-0">③ 홈피</span>
+            <div className="flex gap-0.5 flex-wrap">
               {homepageCategories.map(cat => {
                 const checked = hpCategories.includes(cat);
                 return (
-                  <label
+                  <button
                     key={cat}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 border-r border-b border-border cursor-pointer transition-colors hover:bg-accent/30 text-xs ${
-                      checked ? 'bg-primary/5' : ''
+                    onClick={() => toggleCheckbox(hpCategories, setHpCategories, cat)}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
+                      checked
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleCheckbox(hpCategories, setHpCategories, cat)}
-                      className="w-3 h-3 rounded border-border accent-[var(--color-primary)]"
-                    />
-                    <span className={checked ? 'text-primary' : ''}>{cat}</span>
-                  </label>
+                    {cat}
+                  </button>
                 );
               })}
             </div>
           </div>
-        </div>
 
-        {/* ④ 부서 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">④ 부서</label>
-          <div className="border border-border rounded overflow-hidden">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7">
+          {/* Row 3: 부서 */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-bold text-muted-foreground w-10 shrink-0">④ 부서</span>
+            <div className="flex gap-0.5 flex-wrap">
               {departmentCategories.map(cat => {
                 const checked = deptCategories.includes(cat);
                 return (
-                  <label
+                  <button
                     key={cat}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 border-r border-b border-border cursor-pointer transition-colors hover:bg-accent/30 text-xs ${
-                      checked ? 'bg-primary/5' : ''
+                    onClick={() => toggleCheckbox(deptCategories, setDeptCategories, cat)}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
+                      checked
+                        ? 'bg-violet-600 text-white shadow-sm'
+                        : 'bg-violet-50 text-violet-600 hover:bg-violet-100'
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleCheckbox(deptCategories, setDeptCategories, cat)}
-                      className="w-3 h-3 rounded border-border accent-[var(--color-primary)]"
-                    />
-                    <span className={checked ? 'text-primary' : ''}>{cat}</span>
-                  </label>
+                    {cat}
+                  </button>
                 );
               })}
             </div>
           </div>
-        </div>
 
-        {/* ⑤ 시간 간격 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">⑤ 입력 간격</label>
-          <div className="flex gap-1">
-            {([
-              { value: '30min', label: '30분' },
-              { value: '1hour', label: '1시간' },
-              { value: 'half-day', label: '오전/오후' },
-            ] as const).map(opt => (
+          {/* Row 4: 간격 + 모드 */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-bold text-muted-foreground w-10 shrink-0">⑤ 간격</span>
+            <div className="flex gap-0.5">
+              {([
+                { value: '30min' as const, label: '30분' },
+                { value: '1hour' as const, label: '1시간' },
+                { value: 'half-day' as const, label: '오전·오후' },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleIntervalChange(opt.value)}
+                  className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                    timeInterval === opt.value
+                      ? 'bg-orange-500 text-white shadow-sm'
+                      : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="w-px h-5 bg-border" />
+            <span className="text-[10px] font-bold text-muted-foreground shrink-0">모드</span>
+            <div className="flex gap-0.5">
               <button
-                key={opt.value}
-                onClick={() => handleIntervalChange(opt.value)}
-                className={`px-2.5 py-1 rounded border transition-colors ${
-                  timeInterval === opt.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'border-border hover:bg-accent'
+                onClick={() => setViewMode('classic')}
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                  viewMode === 'classic'
+                    ? 'bg-slate-700 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {opt.label}
+                <List className="w-3 h-3" />
+                Classic
               </button>
-            ))}
+              <button
+                onClick={() => setViewMode('franklin')}
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                  viewMode === 'franklin'
+                    ? 'bg-slate-700 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Target className="w-3 h-3" />
+                Franklin
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ⑥ 시간대별 업무 일지 */}
-        <div className="border border-border rounded overflow-hidden">
-          {/* Table Header */}
-          <div className="hidden md:grid grid-cols-[100px_1fr_1fr_90px_4px_1fr] bg-accent/40 border-b border-border text-muted-foreground">
-            <div className="px-2 py-1.5 border-r border-border">시간대</div>
-            <div className="px-2 py-1.5 border-r border-border">제목</div>
-            <div className="px-2 py-1.5 border-r border-border">업무 내용</div>
-            <div className="px-2 py-1.5 border-r border-border text-center">AI 활용</div>
-            <div className="bg-border" />
-            <div className="px-2 py-1.5 bg-amber-50/60">예정 사항</div>
-          </div>
+        {/* ⑥ 업무 일지 — Classic 또는 Franklin */}
+        {viewMode === 'franklin' ? (
+          <FranklinView
+            tasks={franklinTasks}
+            timeSlots={timeSlots}
+            onTasksChange={setFranklinTasks}
+            onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+          />
+        ) : (
+          <div className="border border-border rounded overflow-hidden">
+            {/* Table Header */}
+            <div className="hidden md:grid grid-cols-[100px_1fr_1fr_90px_4px_1fr] bg-accent/40 border-b border-border text-muted-foreground">
+              <div className="px-2 py-1.5 border-r border-border">시간대</div>
+              <div className="px-2 py-1.5 border-r border-border">제목</div>
+              <div className="px-2 py-1.5 border-r border-border">업무 내용</div>
+              <div className="px-2 py-1.5 border-r border-border text-center">AI 활용</div>
+              <div className="bg-border" />
+              <div className="px-2 py-1.5 bg-amber-50/60">예정 사항</div>
+            </div>
 
-          {/* Rows */}
-          {timeSlots.map((slot, index) => (
-            <div
-              key={slot.id}
-              className="border-b border-border last:border-b-0"
-            >
-              {/* Main row */}
-              <div className="md:grid md:grid-cols-[100px_1fr_1fr_90px_4px_1fr] flex flex-col">
-                <div className="px-2 py-1.5 md:border-r border-border bg-accent/20 flex items-center">
-                  <span className="text-muted-foreground">{slot.timeSlot}</span>
-                </div>
-                <div className="px-1 py-0.5 md:border-r border-border">
-                  <input
-                    type="text"
-                    value={slot.title}
-                    onChange={e => updateSlot(index, 'title', e.target.value)}
-                    className="w-full bg-transparent border-none outline-none px-1 py-0.5"
-                    placeholder="제목"
-                  />
-                </div>
-                <div className="px-1 py-0.5 md:border-r border-border">
-                  <input
-                    type="text"
-                    value={slot.content}
-                    onChange={e => updateSlot(index, 'content', e.target.value)}
-                    className="w-full bg-transparent border-none outline-none px-1 py-0.5"
-                    placeholder="내용"
-                  />
-                </div>
-                <div className="px-1 py-1 md:border-r border-border flex items-center justify-center">
-                  <button
-                    onClick={() => openModal(index)}
-                    className={`px-1.5 py-0.5 rounded border w-full text-center transition-colors ${
-                      slot.aiDetail
-                        ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
-                        : 'border-border hover:bg-accent text-muted-foreground'
-                    }`}
-                  >
-                    {slot.aiDetail ? 'AI 작성됨' : 'AI 작성'}
-                  </button>
-                </div>
-                <div className="bg-border hidden md:block" />
-                <div className="px-1 py-0.5">
-                  <input
-                    type="text"
-                    value={slot.planned}
-                    onChange={e => updateSlot(index, 'planned', e.target.value)}
-                    className="w-full bg-transparent border-none outline-none px-1 py-0.5"
-                    placeholder="예정"
-                  />
+            {/* Rows */}
+            {timeSlots.map((slot, index) => (
+              <div
+                key={slot.id}
+                className="border-b border-border last:border-b-0"
+              >
+                {/* Main row */}
+                <div className="md:grid md:grid-cols-[100px_1fr_1fr_90px_4px_1fr] flex flex-col">
+                  <div className="px-2 py-1.5 md:border-r border-border bg-accent/20 flex items-center">
+                    <span className="text-muted-foreground">{slot.timeSlot}</span>
+                  </div>
+                  <div className="px-1 py-0.5 md:border-r border-border">
+                    <input
+                      type="text"
+                      value={slot.title}
+                      onChange={e => updateSlot(index, 'title', e.target.value)}
+                      className="w-full bg-transparent border-none outline-none px-1 py-0.5"
+                      placeholder="제목"
+                    />
+                  </div>
+                  <div className="px-1 py-0.5 md:border-r border-border">
+                    <input
+                      type="text"
+                      value={slot.content}
+                      onChange={e => updateSlot(index, 'content', e.target.value)}
+                      className="w-full bg-transparent border-none outline-none px-1 py-0.5"
+                      placeholder="내용"
+                    />
+                  </div>
+                  <div className="px-1 py-1 md:border-r border-border flex items-center justify-center">
+                    <button
+                      onClick={() => openModal(index)}
+                      className={`px-1.5 py-0.5 rounded border w-full text-center transition-colors ${
+                        slot.aiDetail
+                          ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
+                          : 'border-border hover:bg-accent text-muted-foreground'
+                      }`}
+                    >
+                      {slot.aiDetail ? 'AI 작성됨' : 'AI 작성'}
+                    </button>
+                  </div>
+                  <div className="bg-border hidden md:block" />
+                  <div className="px-1 py-0.5">
+                    <input
+                      type="text"
+                      value={slot.planned}
+                      onChange={e => updateSlot(index, 'planned', e.target.value)}
+                      className="w-full bg-transparent border-none outline-none px-1 py-0.5"
+                      placeholder="예정"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* ⑦ 세부 내용 */}
         <div>
