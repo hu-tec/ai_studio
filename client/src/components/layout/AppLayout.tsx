@@ -28,7 +28,8 @@ const NAV_SECTIONS = [
   {
     title: '직원 도구',
     items: [
-      { to: '/work-log', icon: ClipboardList, label: '업무일지(직원)' },
+      { to: '/work-log', icon: ClipboardList, label: '업무일지(직원-new)' },
+      { to: '/work-log-old', icon: ClipboardList, label: '업무일지(직원-old)' },
       { to: '/work-log/admin', icon: ClipboardList, label: '업무일지(관리)' },
       { to: '/pledge', icon: ShieldCheck, label: '서약서' },
       { to: '/guidelines', icon: FileText, label: '사내업무지침' },
