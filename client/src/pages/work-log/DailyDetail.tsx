@@ -303,10 +303,13 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
 
         </div>
 
-        {/* ⑥ 좌: 타임테이블 (항상 표시) + 우: 모드별 컨텐츠 */}
+        {/* ⑥ 타임테이블 (Classic=확장, Franklin/Eisenhower=축소+우측패널) */}
         <div className="flex gap-3 items-start">
-          {/* Left: Timetable — Google Calendar day view style */}
-          <div className="w-[220px] shrink-0 border border-border rounded-lg overflow-hidden">
+          {/* Timetable — Classic: 전체너비 확장, 나머지: 300px 축소 */}
+          <div
+            className="shrink-0 border border-border rounded-lg overflow-hidden transition-all duration-300 ease-in-out"
+            style={{ width: viewMode === 'classic' ? '100%' : '300px' }}
+          >
             <div className="bg-accent/40 px-2 py-1 border-b border-border flex items-center justify-between">
               <span className="text-[11px] font-semibold">타임테이블</span>
               <div className="flex gap-0.5">
@@ -315,19 +318,26 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                   { value: '1hour' as const, label: '1시간' },
                   { value: 'half-day' as const, label: '오전·오후' },
                 ] as const).map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleIntervalChange(opt.value)}
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
-                      timeInterval === opt.value ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-                    }`}
+                  <button key={opt.value} onClick={() => handleIntervalChange(opt.value)}
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${timeInterval === opt.value ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}
                   >{opt.label}</button>
                 ))}
               </div>
             </div>
-            <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 280px)' }}>
+
+            {/* Classic: 헤더 */}
+            {viewMode === 'classic' && (
+              <div className="hidden md:grid grid-cols-[80px_1fr_1fr_80px_1fr] bg-accent/20 border-b border-border text-[10px] text-muted-foreground">
+                <div className="px-2 py-1 border-r border-border">시간대</div>
+                <div className="px-2 py-1 border-r border-border">제목</div>
+                <div className="px-2 py-1 border-r border-border">업무 내용</div>
+                <div className="px-2 py-1 border-r border-border text-center">AI</div>
+                <div className="px-2 py-1 bg-amber-50/30">예정</div>
+              </div>
+            )}
+
+            <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 300px)' }}>
               {timeSlots.map((slot, index) => {
-                // Find all tasks linked to this slot (Classic) or overlapping this time (Franklin/Eisenhower)
                 const linkedTask = franklinTasks.find(t => t.timeSlotId === slot.id);
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
                 const overlapping = franklinTasks.filter(t => {
@@ -340,83 +350,18 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                 const tasks_ = linkedTask ? [linkedTask] : (viewMode !== 'classic' ? overlapping : []);
                 const hasFill = tasks_.length > 0 || slot.title;
 
-                return (
-                  <div key={slot.id}
-                    className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
-                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('!bg-blue-100'); }}
-                    onDragLeave={e => { e.currentTarget.classList.remove('!bg-blue-100'); }}
-                    onDrop={e => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('!bg-blue-100');
-                      const taskId = e.dataTransfer.getData('text/plain');
-                      if (!taskId) return;
-                      const task = franklinTasks.find(t => t.id === taskId);
-                      if (!task) return;
-                      // Set startTime based on slot
-                      const startT = slotStart;
-                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                      setFranklinTasks(prev => prev.map(t => t.id === taskId ? { ...t, startTime: startT, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                      updateSlot(index, 'title', task.task);
-                    }}
-                  >
-                    <div className="flex items-center gap-1 px-1.5 py-1">
-                      <span className={`text-[9px] font-mono w-10 shrink-0 ${hasFill ? 'text-foreground font-semibold' : 'text-muted-foreground/60'}`}>
-                        {slotStart}
-                      </span>
-                      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                        {tasks_.length > 0 ? tasks_.map(t => {
-                          const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
-                          const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
-                          return (
-                            <div key={t.id} className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
-                              <span className="text-[8px] font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
-                              <span className="text-[8px]" style={{ color: stCfg.color }}>{stCfg.icon}</span>
-                              <span className="text-[9px] truncate">{t.task}</span>
-                            </div>
-                          );
-                        }) : slot.title ? (
-                          <span className="text-[9px] truncate text-foreground/70">{slot.title}</span>
-                        ) : (
-                          <span className="text-[9px] text-muted-foreground/20">—</span>
+                return viewMode === 'classic' ? (
+                  /* Classic: 확장 — 시간 + 제목 + 내용 + AI + 예정 인라인 편집 */
+                  <div key={slot.id} className="border-b border-border/50 last:border-b-0">
+                    <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
+                      <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1">
+                        <span className="text-[10px] font-mono text-muted-foreground">{slot.timeSlot}</span>
+                        {linkedTask && (
+                          <span className="text-[8px] font-bold px-1 rounded" style={{ background: FRANKLIN_PRIORITY_CONFIG[linkedTask.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[linkedTask.priority].color }}>
+                            {linkedTask.priority}{linkedTask.number}{FRANKLIN_STATUS_CONFIG[linkedTask.status].icon}
+                          </span>
                         )}
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right: Mode-specific content */}
-          <div className="flex-1 min-w-0">
-            {viewMode === 'eisenhower' ? (
-              <EisenhowerView
-                tasks={franklinTasks}
-                timeSlots={timeSlots}
-                onTasksChange={handleFranklinTasksChange}
-                onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
-              />
-            ) : viewMode === 'franklin' ? (
-              <FranklinView
-                tasks={franklinTasks}
-                timeSlots={timeSlots}
-                timeInterval={timeInterval}
-                onTasksChange={handleFranklinTasksChange}
-                onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
-              />
-            ) : (
-              /* Classic — editable time slot table */
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="bg-accent/40 px-3 py-1 border-b border-border text-[11px] font-semibold">Classic 일정</div>
-                <div className="hidden md:grid grid-cols-[1fr_1fr_90px_1fr] bg-accent/20 border-b border-border text-[10px] text-muted-foreground">
-                  <div className="px-2 py-1 border-r border-border">제목</div>
-                  <div className="px-2 py-1 border-r border-border">업무 내용</div>
-                  <div className="px-2 py-1 border-r border-border text-center">AI 활용</div>
-                  <div className="px-2 py-1 bg-amber-50/30">예정 사항</div>
-                </div>
-                {timeSlots.map((slot, index) => (
-                  <div key={slot.id} className="border-b border-border/50 last:border-b-0">
-                    <div className="md:grid md:grid-cols-[1fr_1fr_90px_1fr] flex flex-col">
                       <div className="px-1 py-0.5 md:border-r border-border">
                         <input type="text" value={slot.title} onChange={e => updateSlot(index, 'title', e.target.value)}
                           className="w-full bg-transparent border-none outline-none px-1 py-0.5 text-[12px]" placeholder="제목" />
@@ -427,8 +372,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                       </div>
                       <div className="px-1 py-0.5 md:border-r border-border flex items-center justify-center">
                         <button onClick={() => openModal(index)}
-                          className={`px-1.5 py-0.5 rounded border w-full text-center text-[10px] transition-colors ${slot.aiDetail ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-border text-muted-foreground'}`}>
-                          {slot.aiDetail ? 'AI 작성됨' : 'AI 작성'}
+                          className={`px-1 py-0.5 rounded border w-full text-center text-[9px] transition-colors ${slot.aiDetail ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-border text-muted-foreground'}`}>
+                          {slot.aiDetail ? 'AI✓' : 'AI'}
                         </button>
                       </div>
                       <div className="px-1 py-0.5">
@@ -437,10 +382,73 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                ) : (
+                  /* Franklin/Eisenhower: 축소 — 시간 + 블록 (DnD drop zone) */
+                  <div key={slot.id}
+                    className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragLeave={e => { e.currentTarget.style.background = ''; }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.currentTarget.style.background = '';
+                      const taskId = e.dataTransfer.getData('text/plain');
+                      if (!taskId) return;
+                      const task = franklinTasks.find(t => t.id === taskId);
+                      if (!task) return;
+                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                      setFranklinTasks(prev => prev.map(t => t.id === taskId ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                      updateSlot(index, 'title', task.task);
+                    }}
+                  >
+                    <div className="flex items-center gap-1 px-1.5 py-1">
+                      <span className={`text-[10px] font-mono w-12 shrink-0 ${hasFill ? 'text-foreground font-semibold' : 'text-muted-foreground/60'}`}>
+                        {slotStart}
+                      </span>
+                      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                        {tasks_.length > 0 ? tasks_.map(t => {
+                          const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
+                          const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
+                          return (
+                            <div key={t.id} className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
+                              <span className="text-[9px] font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
+                              <span className="text-[9px]" style={{ color: stCfg.color }}>{stCfg.icon}</span>
+                              <span className="text-[10px] truncate">{t.task}</span>
+                            </div>
+                          );
+                        }) : slot.title ? (
+                          <span className="text-[10px] truncate text-foreground/70">{slot.title}</span>
+                        ) : (
+                          <span className="text-[9px] text-muted-foreground/20 italic">드래그하여 배정</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Right: Franklin/Eisenhower 패널 (Classic에서는 숨김) */}
+          {viewMode !== 'classic' && (
+            <div className="flex-1 min-w-0 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-right-2">
+              {viewMode === 'eisenhower' ? (
+                <EisenhowerView
+                  tasks={franklinTasks}
+                  timeSlots={timeSlots}
+                  onTasksChange={handleFranklinTasksChange}
+                  onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                />
+              ) : (
+                <FranklinView
+                  tasks={franklinTasks}
+                  timeSlots={timeSlots}
+                  timeInterval={timeInterval}
+                  onTasksChange={handleFranklinTasksChange}
+                  onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* ⑦ 세부 내용 */}
