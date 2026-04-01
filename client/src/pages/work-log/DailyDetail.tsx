@@ -301,33 +301,30 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
             ))}
           </div>
 
-          {/* ⑤ 간격 — 항상 표시 */}
-          <div className="w-px h-5 bg-border" />
-              <span className="text-[10px] font-bold text-muted-foreground">간격</span>
-              <div className="flex gap-0.5">
-                {([
-                  { value: '30min' as const, label: '30분' },
-                  { value: '1hour' as const, label: '1시간' },
-                  { value: 'half-day' as const, label: '오전·오후' },
-                ]).map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleIntervalChange(opt.value)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium transition-all ${
-                      timeInterval === opt.value ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
         </div>
 
         {/* ⑥ 좌: 타임테이블 (항상 표시) + 우: 모드별 컨텐츠 */}
         <div className="flex gap-3 items-start">
           {/* Left: Timetable — Google Calendar day view style */}
           <div className="w-[220px] shrink-0 border border-border rounded-lg overflow-hidden">
-            <div className="bg-accent/40 px-2 py-1 border-b border-border text-[11px] font-semibold">타임테이블</div>
+            <div className="bg-accent/40 px-2 py-1 border-b border-border flex items-center justify-between">
+              <span className="text-[11px] font-semibold">타임테이블</span>
+              <div className="flex gap-0.5">
+                {([
+                  { value: '30min' as const, label: '30분' },
+                  { value: '1hour' as const, label: '1시간' },
+                  { value: 'half-day' as const, label: '오전·오후' },
+                ] as const).map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleIntervalChange(opt.value)}
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
+                      timeInterval === opt.value ? 'bg-orange-500 text-white shadow-sm' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                    }`}
+                  >{opt.label}</button>
+                ))}
+              </div>
+            </div>
             <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 280px)' }}>
               {timeSlots.map((slot, index) => {
                 // Find all tasks linked to this slot (Classic) or overlapping this time (Franklin/Eisenhower)
@@ -344,7 +341,24 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                 const hasFill = tasks_.length > 0 || slot.title;
 
                 return (
-                  <div key={slot.id} className={`border-b border-border/50 ${hasFill ? 'bg-accent/5' : ''}`}>
+                  <div key={slot.id}
+                    className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('!bg-blue-100'); }}
+                    onDragLeave={e => { e.currentTarget.classList.remove('!bg-blue-100'); }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('!bg-blue-100');
+                      const taskId = e.dataTransfer.getData('text/plain');
+                      if (!taskId) return;
+                      const task = franklinTasks.find(t => t.id === taskId);
+                      if (!task) return;
+                      // Set startTime based on slot
+                      const startT = slotStart;
+                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                      setFranklinTasks(prev => prev.map(t => t.id === taskId ? { ...t, startTime: startT, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                      updateSlot(index, 'title', task.task);
+                    }}
+                  >
                     <div className="flex items-center gap-1 px-1.5 py-1">
                       <span className={`text-[9px] font-mono w-10 shrink-0 ${hasFill ? 'text-foreground font-semibold' : 'text-muted-foreground/60'}`}>
                         {slotStart}

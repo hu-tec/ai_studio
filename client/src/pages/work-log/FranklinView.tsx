@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, DragEvent } from 'react';
 import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip } from 'lucide-react';
 import type { FranklinTask, FranklinPriority, TimeSlotEntry } from './data';
 import {
@@ -24,7 +24,30 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
   const [newEnd, setNewEnd] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<FranklinPriority | null>(null);
   const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
+
+  // DnD handlers
+  const onDragStart = (e: DragEvent, id: string) => {
+    setDragId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  };
+  const onDragOver = (e: DragEvent, target: FranklinPriority) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropTarget(target);
+  };
+  const onDragLeave = () => setDropTarget(null);
+  const onDropPriority = (e: DragEvent, priority: FranklinPriority) => {
+    e.preventDefault();
+    setDropTarget(null);
+    if (!dragId) return;
+    const eisFlags = syncPriorityToEisenhower(priority);
+    updateTask(dragId, { priority, number: getNextNumber(tasks, priority), ...eisFlags });
+    setDragId(null);
+  };
 
   const addTask = () => {
     if (!newText.trim()) return;
@@ -92,52 +115,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
         </button>
       </div>
 
-      {/* Timeline gantt */}
-      {timedTasks.length > 0 && (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <div className="bg-accent/40 px-3 py-1 border-b border-border text-[11px] font-semibold">타임라인</div>
-          <div className="relative px-3 py-2" style={{ minHeight: timedTasks.length * 24 + 30 }}>
-            {/* Ruler */}
-            <div className="flex items-end h-5 border-b border-border/50 mb-1 relative">
-              {ticks.map((tick, i) => (
-                <div key={i} className="absolute text-[9px] text-muted-foreground font-mono" style={{ left: `${tick.pos}%`, transform: 'translateX(-50%)' }}>
-                  {tick.label}
-                </div>
-              ))}
-            </div>
-            {/* Grid lines */}
-            <div className="absolute inset-0 top-[28px] px-3">
-              {ticks.map((tick, i) => (
-                <div key={i} className="absolute top-0 bottom-0 border-l border-border/20" style={{ left: `${tick.pos}%` }} />
-              ))}
-            </div>
-            {/* Bars */}
-            {timedTasks.map((task, i) => {
-              const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
-              const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
-              const left = getTimelinePosition(task.startTime!);
-              const right = task.endTime ? getTimelinePosition(task.endTime) : left + 5;
-              const width = Math.max(3, right - left);
-              return (
-                <div key={task.id} className="relative h-5 mb-0.5" style={{ marginTop: i === 0 ? 2 : 0 }}>
-                  <div
-                    className="absolute h-4 rounded-sm flex items-center gap-1 px-1 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
-                    style={{ left: `${left}%`, width: `${width}%`, background: pCfg.color + '20', borderLeft: `3px solid ${pCfg.color}` }}
-                    onClick={() => setExpandedId(expandedId === task.id ? null : task.id)}
-                    title={`${task.priority}${task.number} ${task.task} (${task.startTime}~${task.endTime || ''})`}
-                  >
-                    <span className="text-[8px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
-                    <span className="text-[9px] truncate" style={{ color: stCfg.color }}>{stCfg.icon}</span>
-                    <span className="text-[9px] truncate">{task.task}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Task list */}
+      {/* Task list (타임라인은 왼쪽 타임테이블에 표시됨) */}
       <div className="border border-border rounded-lg overflow-hidden">
         <div className="bg-accent/40 px-3 py-1 border-b border-border flex items-center justify-between">
           <span className="text-[11px] font-semibold">업무 목록</span>
@@ -167,8 +145,12 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
 
             return (
               <div key={task.id} className="border-b border-border/50">
-                {/* Task row */}
-                <div className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-accent/10 group">
+                {/* Task row — draggable */}
+                <div
+                  draggable
+                  onDragStart={e => onDragStart(e, task.id)}
+                  className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-accent/10 group cursor-grab active:cursor-grabbing"
+                >
                   {/* Expand */}
                   <button onClick={() => setExpandedId(isExpanded ? null : task.id)} className="w-4 h-4 shrink-0 text-muted-foreground">
                     {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}

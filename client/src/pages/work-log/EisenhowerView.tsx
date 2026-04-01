@@ -222,53 +222,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
         })}
       </div>
 
-      {/* Time slots — drop zone */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="bg-accent/40 px-3 py-1.5 border-b border-border text-sm font-semibold flex items-center gap-2">
-          일정 <span className="text-[10px] text-muted-foreground font-normal">과업을 시간대에 드래그하여 배정</span>
-        </div>
-        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-          {timeSlots.map((slot, idx) => {
-            const linked = slotTaskMap.get(slot.id);
-            const qCfg = linked ? EISENHOWER_CONFIG[getQuadrant(linked)] : null;
-            const stCfg = linked ? FRANKLIN_STATUS_CONFIG[linked.status] : null;
-            const hasFill = linked || slot.title;
-            return (
-              <div
-                key={slot.id}
-                className={`flex items-center gap-2 px-2 py-1.5 border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-accent/10'}`}
-                onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTarget('slot'); }}
-                onDragLeave={onDragLeave}
-                onDrop={e => onDropSlot(e, idx)}
-              >
-                <span className={`text-[10px] w-28 shrink-0 font-mono ${hasFill ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
-                  {slot.timeSlot}
-                </span>
-                {linked ? (
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded text-white shrink-0" style={{ background: qCfg!.color }}>
-                      {qCfg!.label}
-                    </span>
-                    <span
-                      className="w-4 h-4 rounded flex items-center justify-center text-[10px] shrink-0"
-                      style={{ background: stCfg!.bg, color: stCfg!.color }}
-                    >
-                      {stCfg!.icon}
-                    </span>
-                    <span className={`text-[12px] truncate ${linked.status === 'done' ? 'line-through text-muted-foreground' : 'font-medium'}`}>
-                      {linked.task}
-                    </span>
-                  </div>
-                ) : slot.title ? (
-                  <span className="text-[12px] text-foreground flex-1 truncate">{slot.title}</span>
-                ) : (
-                  <span className="text-[11px] text-muted-foreground/30 flex-1 italic">비어있음</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* 일정 섹션 제거 — 왼쪽 타임테이블에서 표시/DnD 처리 */}
 
       {/* Summary */}
       <div className="grid grid-cols-4 gap-2">
