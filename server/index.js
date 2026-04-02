@@ -20,11 +20,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/interviews', require('./routes/interviews'));
 app.use('/api/worklogs', require('./routes/worklogs'));
 app.use('/api/upload', require('./routes/uploads'));
-app.use('/api/tesol', require('./routes/tesol'));
+// tesol, level-test → work_studio로 이관 완료
 
 // 범용 CRUD API (JSON blob 테이블)
 const { createGenericRouter } = require('./routes/generic');
-app.use('/api/level-tests', createGenericRouter('level_tests', 'test_id'));
 app.use('/api/pledges', createGenericRouter('pledges', 'pledge_id'));
 app.use('/api/lesson-plans', createGenericRouter('lesson_plans', 'plan_id'));
 app.use('/api/attendance', createGenericRouter('attendance_records', 'record_key'));

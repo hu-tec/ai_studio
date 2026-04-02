@@ -34,24 +34,30 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
+  const doSave = useCallback(() => {
+    const filledTitles = viewMode === 'franklin' || viewMode === 'eisenhower'
+      ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
+      : timeSlots.filter(s => s.title).map(s => s.title);
+    const summary = filledTitles.length > 0
+      ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
+      : '';
+    onSave({
+      date: dateStr, summary, position,
+      homepageCategories: hpCategories, departmentCategories: deptCategories,
+      timeInterval, timeSlots, employeeId: currentEmployee.id,
+      detail, viewMode, franklinTasks,
+    });
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, emp.name, onSave]);
+
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(() => {
-      // buildLog는 아래에서 정의됨 — 직접 onSave 호출
-      const filledTitles = viewMode === 'franklin' || viewMode === 'eisenhower'
-        ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
-        : timeSlots.filter(s => s.title).map(s => s.title);
-      const summary = filledTitles.length > 0
-        ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
-        : '';
-      onSave({
-        date: dateStr, summary, position,
-        homepageCategories: hpCategories, departmentCategories: deptCategories,
-        timeInterval, timeSlots, employeeId: currentEmployee.id,
-        detail, viewMode, franklinTasks,
-      });
-    }, 2000);
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, emp.name, onSave]);
+    autoSaveTimer.current = setTimeout(doSave, 2000);
+  }, [doSave]);
+
+  const flushSave = useCallback(() => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    doSave();
+  }, [doSave]);
 
   // Trigger auto-save on data changes (skip prop-driven changes)
   const userEdited = useRef(false);
@@ -364,10 +370,12 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                       </div>
                       <div className="px-1 py-0.5 md:border-r border-border">
                         <input type="text" value={slot.title} onChange={e => updateSlot(index, 'title', e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur(); flushSave(); } }}
                           className="w-full bg-transparent border-none outline-none px-1 py-0.5 text-[12px]" placeholder="제목" />
                       </div>
                       <div className="px-1 py-0.5 md:border-r border-border">
                         <input type="text" value={slot.content} onChange={e => updateSlot(index, 'content', e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur(); flushSave(); } }}
                           className="w-full bg-transparent border-none outline-none px-1 py-0.5 text-[12px]" placeholder="내용" />
                       </div>
                       <div className="px-1 py-0.5 md:border-r border-border flex items-center justify-center">
@@ -378,6 +386,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                       </div>
                       <div className="px-1 py-0.5">
                         <input type="text" value={slot.planned} onChange={e => updateSlot(index, 'planned', e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.currentTarget.blur(); flushSave(); } }}
                           className="w-full bg-transparent border-none outline-none px-1 py-0.5 text-[12px]" placeholder="예정" />
                       </div>
                     </div>
