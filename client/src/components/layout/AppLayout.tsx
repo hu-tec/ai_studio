@@ -5,7 +5,7 @@ import {
   ClipboardCheck, ShieldCheck, Clock, ClipboardList,
   Calendar, FileText, Image, Phone, ChevronLeft, ChevronRight, Home,
   BarChart3, LayoutDashboard, BookOpen,
-  CalendarClock, Settings, Scale, FileEdit, ListChecks, Construction
+  CalendarClock, Settings, Scale, FileEdit, FileInput, ListChecks, Construction
 } from 'lucide-react';
 import { StoreProvider } from '../../pages/interview/interviewStore';
 
