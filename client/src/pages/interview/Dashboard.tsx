@@ -161,7 +161,7 @@ function DetailContent({ a }: { a: Applicant }) {
 
 export function Dashboard() {
   const { applicants } = useStore();
-  const [viewMode, setViewMode] = useState<"summary" | "list">("list");
+  const [viewMode, setViewMode] = useState<"summary" | "list">("summary");
   const [filterType, setFilterType] = useState<string>("전체");
   const [filterGrade, setFilterGrade] = useState<string>("전체");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -387,12 +387,12 @@ export function Dashboard() {
 
               {/* 오른쪽: 고득점 테이블 */}
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">고득점 지원자</h3>
-                  <button onClick={() => setViewMode("list")} className="text-[10px] text-indigo-600 hover:underline">전체보기 →</button>
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">전체 지원자 ({applicants.length}명)</h3>
                 </div>
+                <div className="overflow-y-auto max-h-[300px]">
                 <table className="w-full text-xs">
-                  <thead className="bg-gray-50/80">
+                  <thead className="bg-gray-50/80 sticky top-0">
                     <tr>
                       <th className="px-3 py-1.5 text-left font-medium text-gray-400">이름</th>
                       <th className="px-3 py-1.5 text-left font-medium text-gray-400">분류</th>
@@ -402,7 +402,7 @@ export function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).slice(0, 7).map((a) => (
+                    {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).map((a) => (
                       <tr key={a.id} className="hover:bg-gray-50/50">
                         <td className="px-3 py-1.5 font-medium text-gray-900">{a.name}</td>
                         <td className="px-3 py-1.5">
@@ -423,6 +423,7 @@ export function Dashboard() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           </motion.div>
