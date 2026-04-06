@@ -57,8 +57,12 @@ export default function WorkMaterialsPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch('/api/work-materials');
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) { setRows(data); }
+      const raw = await res.json();
+      const data = Array.isArray(raw) ? raw.map((r: any) => {
+        const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+        return { ...r, data: { ...d, attachments: d.attachments || [], content: d.content || '', author: d.author || '', created_at: d.created_at || r.updated_at || '' } };
+      }) : [];
+      if (data.length > 0) { setRows(data); }
       else {
         for (const d of DUMMY) {
           const id = `mat-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
@@ -115,13 +119,13 @@ export default function WorkMaterialsPage() {
           <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
         ) : filtered.map(row=>(
           <div key={row.material_id}>
-            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'14px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:expandedIds.has(row.material_id)?'#F8FAFC':'#fff',transition:'background 0.15s'}} onMouseEnter={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fafbfd')}} onMouseLeave={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fff')}}>
+            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'14px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:expandedIds.has(row.material_id)?'#F8FAFC':'#fff',transition:'background 0.15s'}} onMouseEnter={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fafbfd')}} onMouseLeave={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fff')}}>
               <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:12,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
               <div style={{fontSize:13,color:'#64748b'}}>{row.data.position}</div>
               <div style={{fontSize:14,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:8}}>
                 {row.data.title}
-                {row.data.attachments.length>0&&<span style={{fontSize:11,color:'#94a3b8'}}>📎{row.data.attachments.length}</span>}
-                {!expandedIds.has(row.material_id)&&<ChevronDown size={14} color="#94a3b8"/>}
+                {(row.data.attachments||[]).length>0&&<span style={{fontSize:11,color:'#94a3b8'}}>📎{row.data.attachments.length}</span>}
+                {expandedIds.has(row.material_id)?<ChevronUp size={14} color="#94a3b8"/>:<ChevronDown size={14} color="#94a3b8"/>}
               </div>
               <div style={{fontSize:13,color:'#64748b'}}>{row.data.author}</div>
               <div style={{fontSize:12,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
@@ -133,7 +137,7 @@ export default function WorkMaterialsPage() {
             {expandedIds.has(row.material_id)&&(
               <div style={{padding:'16px 24px 20px',background:'#fafbfd',borderBottom:'1px solid #e2e8f0'}}>
                 <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:16}}>{row.data.content}</div>
-                {row.data.attachments.length>0&&(
+                {(row.data.attachments||[]).length>0&&(
                   <div style={{display:'flex',flexDirection:'column',gap:8}}>
                     <div style={{fontSize:13,fontWeight:600,color:'#64748b'}}>첨부 ({row.data.attachments.length})</div>
                     {row.data.attachments.map((att,i)=><AttItem key={i} a={att}/>)}
