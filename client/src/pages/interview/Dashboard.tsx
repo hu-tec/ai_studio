@@ -161,7 +161,7 @@ function DetailContent({ a }: { a: Applicant }) {
 
 export function Dashboard() {
   const { applicants } = useStore();
-  const [viewMode, setViewMode] = useState<"summary" | "list">("summary");
+  const [viewMode, setViewMode] = useState<"summary" | "list">("list");
   const [filterType, setFilterType] = useState<string>("전체");
   const [filterGrade, setFilterGrade] = useState<string>("전체");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
