@@ -30,7 +30,7 @@ interface MaterialRow {
   updated_at: string;
 }
 
-const DEPARTMENTS = ['전체', '경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무'];
+const DEPARTMENTS = ['전체', '경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
 const POSITIONS = ['전체', '대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
 
 const DUMMY: MaterialData[] = [
