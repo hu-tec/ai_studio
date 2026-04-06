@@ -97,7 +97,17 @@ export default function WorkMaterialsPage() {
     <div style={{padding:'24px 32px',maxWidth:1200,margin:'0 auto'}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
         <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
-        <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}><Plus size={16}/>새 자료</button>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={()=>{
+            const allIds = filtered.map(r=>r.material_id);
+            const allExpanded = allIds.every(id=>expandedIds.has(id));
+            if(allExpanded) setExpandedIds(new Set());
+            else setExpandedIds(new Set(allIds));
+          }} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,cursor:'pointer',color:'#475569'}}>
+            {filtered.length>0 && filtered.every(r=>expandedIds.has(r.material_id)) ? '전체 접기' : '전체 펼치기'}
+          </button>
+          <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}><Plus size={16}/>새 자료</button>
+        </div>
       </div>
 
       {/* 필터 */}
@@ -112,41 +122,55 @@ export default function WorkMaterialsPage() {
 
       {/* 테이블 */}
       <div style={{background:'#fff',borderRadius:12,border:'1px solid #e2e8f0',overflow:'hidden'}}>
-        <div style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:13,fontWeight:600,color:'#64748b'}}>
-          <div>부서</div><div>직급</div><div>제목</div><div>작성자</div><div>날짜</div><div></div>
+        <div style={{display:'grid',gridTemplateColumns:'80px 64px 160px 1fr 180px 72px 72px 48px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:13,fontWeight:600,color:'#64748b',gap:8}}>
+          <div>부서</div><div>직급</div><div>제목</div><div>내용</div><div>첨부</div><div>작성자</div><div>날짜</div><div></div>
         </div>
         {filtered.length===0 ? (
           <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
-        ) : filtered.map(row=>(
+        ) : filtered.map(row=>{
+          const atts = row.data.attachments||[];
+          const isOpen = expandedIds.has(row.material_id);
+          return (
           <div key={row.material_id}>
-            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'14px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:expandedIds.has(row.material_id)?'#F8FAFC':'#fff',transition:'background 0.15s'}} onMouseEnter={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fafbfd')}} onMouseLeave={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fff')}}>
-              <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:12,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
-              <div style={{fontSize:13,color:'#64748b'}}>{row.data.position}</div>
-              <div style={{fontSize:14,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:8}}>
+            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'80px 64px 160px 1fr 180px 72px 72px 48px',padding:'12px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:8}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
+              <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:11,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
+              <div style={{fontSize:12,color:'#64748b'}}>{row.data.position}</div>
+              <div style={{fontSize:13,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:4}}>
                 {row.data.title}
-                {(row.data.attachments||[]).length>0&&<span style={{fontSize:11,color:'#94a3b8'}}>📎{row.data.attachments.length}</span>}
-                {expandedIds.has(row.material_id)?<ChevronUp size={14} color="#94a3b8"/>:<ChevronDown size={14} color="#94a3b8"/>}
+                {isOpen?<ChevronUp size={13} color="#94a3b8"/>:<ChevronDown size={13} color="#94a3b8"/>}
               </div>
-              <div style={{fontSize:13,color:'#64748b'}}>{row.data.author}</div>
-              <div style={{fontSize:12,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
-              <div style={{display:'flex',gap:4}} onClick={e=>e.stopPropagation()}>
-                <button onClick={()=>{setEditingId(row.material_id);setShowForm(true);}} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><Pencil size={14} color="#94a3b8"/></button>
-                <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><Trash2 size={14} color="#ef4444"/></button>
+              <div style={{fontSize:12,color:'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]}</div>
+              <div style={{fontSize:11,color:'#94a3b8',display:'flex',gap:4,flexWrap:'wrap',overflow:'hidden',maxHeight:20}}>
+                {atts.length===0?<span>—</span>:atts.map((a,i)=>(
+                  <span key={i} style={{display:'inline-flex',alignItems:'center',gap:2}}>
+                    {a.type==='link'&&<ExternalLink size={10} color="#10B981"/>}
+                    {a.type==='file'&&<File size={10} color="#F59E0B"/>}
+                    {a.type==='image'&&<ImageIcon size={10} color="#3B82F6"/>}
+                    <span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span>
+                  </span>
+                ))}
+              </div>
+              <div style={{fontSize:12,color:'#64748b'}}>{row.data.author}</div>
+              <div style={{fontSize:11,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
+              <div style={{display:'flex',gap:2}} onClick={e=>e.stopPropagation()}>
+                <button onClick={()=>{setEditingId(row.material_id);setShowForm(true);}} style={{background:'none',border:'none',cursor:'pointer',padding:3}}><Pencil size={13} color="#94a3b8"/></button>
+                <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:3}}><Trash2 size={13} color="#ef4444"/></button>
               </div>
             </div>
-            {expandedIds.has(row.material_id)&&(
+            {isOpen&&(
               <div style={{padding:'16px 24px 20px',background:'#fafbfd',borderBottom:'1px solid #e2e8f0'}}>
-                <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:16}}>{row.data.content}</div>
-                {(row.data.attachments||[]).length>0&&(
+                <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:atts.length>0?16:0}}>{row.data.content}</div>
+                {atts.length>0&&(
                   <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                    <div style={{fontSize:13,fontWeight:600,color:'#64748b'}}>첨부 ({row.data.attachments.length})</div>
-                    {row.data.attachments.map((att,i)=><AttItem key={i} a={att}/>)}
+                    <div style={{fontSize:13,fontWeight:600,color:'#64748b'}}>첨부 ({atts.length})</div>
+                    {atts.map((att,i)=><AttItem key={i} a={att}/>)}
                   </div>
                 )}
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
       <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{(filterDept!=='전체'||filterPos!=='전체'||searchText)?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
 
