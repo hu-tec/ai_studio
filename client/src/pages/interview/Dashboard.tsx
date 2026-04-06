@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { Download, ChevronDown, ChevronRight, LayoutDashboard, List, Eye, Search, X, TrendingUp, Users, Award, Star } from "lucide-react";
+import { Download, ChevronDown, ChevronRight, LayoutDashboard, List, Eye, Search, X, Users } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { useStore, type Applicant } from "./interviewStore";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -269,14 +269,14 @@ export function Dashboard() {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-4 pb-6">
       {/* Header with View Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
             📊 면접 평가 대시보드
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">실시간 면접 데이터 요약 및 상세 관리</p>
+          <p className="text-xs text-gray-500 mt-0.5">실시간 면접 데이터 요약 및 상세 관리</p>
         </div>
         <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg self-start md:self-center">
           <button
@@ -307,72 +307,47 @@ export function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Top Stats KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-gray-200 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-indigo-100 group-hover:text-indigo-200 transition-colors">
-                  <Users className="w-12 h-12" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">총 지원자</div>
-                  <div className="text-3xl font-bold text-gray-900 mt-1">{stats.total}<span className="text-sm font-normal text-gray-400 ml-1">명</span></div>
-                  <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-400">
-                    <TrendingUp className="w-3 h-3 text-emerald-500" />
-                    최근 7일 대비 +2명
-                  </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
+                <div className="text-gray-500 text-[11px] font-medium">총 지원자</div>
+                <div className="text-xl font-bold text-gray-900 mt-0.5">{stats.total}<span className="text-xs font-normal text-gray-400 ml-1">명</span></div>
+              </div>
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
+                <div className="text-gray-500 text-[11px] font-medium">우수 인재 (A등급)</div>
+                <div className="text-xl font-bold text-emerald-600 mt-0.5">{stats.byGrade.A}<span className="text-xs font-normal text-gray-400 ml-1">명</span>
+                  <span className="text-[10px] font-normal text-gray-400 ml-2">{stats.total > 0 ? ((stats.byGrade.A / stats.total) * 100).toFixed(0) : 0}%</span>
                 </div>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-emerald-100 group-hover:text-emerald-200 transition-colors">
-                  <Star className="w-12 h-12" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">우수 인재 (A등급)</div>
-                  <div className="text-3xl font-bold text-emerald-600 mt-1">{stats.byGrade.A}<span className="text-sm font-normal text-gray-400 ml-1">명</span></div>
-                  <div className="mt-2 text-[10px] text-gray-400">전체 대비 {stats.total > 0 ? ((stats.byGrade.A / stats.total) * 100).toFixed(1) : 0}% 비율</div>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
+                <div className="text-gray-500 text-[11px] font-medium">평균 평가 점수</div>
+                <div className="text-xl font-bold text-blue-600 mt-0.5">{stats.avgScore}<span className="text-xs font-normal text-gray-400 ml-1">점</span></div>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-blue-100 group-hover:text-blue-200 transition-colors">
-                  <Award className="w-12 h-12" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">평균 평가 점수</div>
-                  <div className="text-3xl font-bold text-blue-600 mt-1">{stats.avgScore}<span className="text-sm font-normal text-gray-400 ml-1">점</span></div>
-                  <div className="mt-2 text-[10px] text-gray-400">전체 항목 기준 산출</div>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-amber-100 group-hover:text-amber-200 transition-colors">
-                  <LayoutDashboard className="w-12 h-12" />
-                </div>
-                <div className="relative z-10">
-                  <div className="text-gray-500 text-xs font-medium uppercase tracking-wider">합격 결정 완료</div>
-                  <div className="text-3xl font-bold text-amber-600 mt-1">{stats.passStatus.합격 + stats.passStatus.불합격}<span className="text-sm font-normal text-gray-400 ml-1">건</span></div>
-                  <div className="mt-2 text-[10px] text-gray-400">미정 {stats.passStatus.미정}건 진행 중</div>
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
+                <div className="text-gray-500 text-[11px] font-medium">합격 결정</div>
+                <div className="text-xl font-bold text-amber-600 mt-0.5">{stats.passStatus.합격 + stats.passStatus.불합격}<span className="text-xs font-normal text-gray-400 ml-1">건</span>
+                  <span className="text-[10px] font-normal text-gray-400 ml-2">미정 {stats.passStatus.미정}건</span>
                 </div>
               </div>
             </div>
 
             {/* Visual Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    🎖️ 등급별 분포 현황
-                  </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-gray-800">🎖️ 등급별 분포</h3>
                   <div className="flex gap-2">
                     {Object.keys(GRADE_COLORS).map(g => (
                       <div key={g} className="flex items-center gap-1 text-[10px] text-gray-500">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: GRADE_COLORS[g] }} />
-                        {g}등급
+                        {g}
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="h-[250px] w-full">
+                <div className="h-[180px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={gradeChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -408,13 +383,11 @@ export function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    📊 분류 및 합격 여부
-                  </h3>
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-gray-800">📊 분류 및 합격 여부</h3>
                 </div>
-                <div className="grid grid-cols-2 h-[250px]">
+                <div className="grid grid-cols-2 h-[180px]">
                   <div className="relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -422,8 +395,8 @@ export function Dashboard() {
                           data={typeChartData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={50}
-                          outerRadius={75}
+                          innerRadius={40}
+                          outerRadius={65}
                           paddingAngle={5}
                           dataKey="value"
                         >
@@ -446,8 +419,8 @@ export function Dashboard() {
                           data={passStatusData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={50}
-                          outerRadius={75}
+                          innerRadius={40}
+                          outerRadius={65}
                           paddingAngle={5}
                           dataKey="value"
                         >
@@ -468,8 +441,8 @@ export function Dashboard() {
             </div>
 
             {/* Top Rank Table Preview */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-gray-800">최근 고득점 지원자</h3>
                 <button onClick={() => setViewMode("list")} className="text-xs text-indigo-600 hover:underline">전체보기</button>
               </div>
@@ -477,27 +450,27 @@ export function Dashboard() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">분류</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">등급</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">총점</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">액션</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">이름</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">분류</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">등급</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">총점</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">액션</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).slice(0, 5).map((a) => (
                       <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-3 font-medium text-gray-900">{a.name}</td>
-                        <td className="px-6 py-3">
+                        <td className="px-4 py-2 font-medium text-gray-900">{a.name}</td>
+                        <td className="px-4 py-2">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${a.type === "강사" ? "bg-indigo-50 text-indigo-600" : "bg-purple-50 text-purple-600"}`}>
                             {TYPE_EMOJI[a.type]} {a.type}
                           </span>
                         </td>
-                        <td className="px-6 py-3">
+                        <td className="px-4 py-2">
                           <span className="font-bold" style={{ color: GRADE_COLORS[a.grade] }}>{a.grade}등급</span>
                         </td>
-                        <td className="px-6 py-3 font-bold text-indigo-600">{a.totalScore}</td>
-                        <td className="px-6 py-3 text-right">
+                        <td className="px-4 py-2 font-bold text-indigo-600">{a.totalScore}</td>
+                        <td className="px-4 py-2 text-right">
                           <button onClick={() => setPreviewApplicant(a)} className="text-gray-400 hover:text-indigo-600">
                             <Eye className="w-4 h-4" />
                           </button>
