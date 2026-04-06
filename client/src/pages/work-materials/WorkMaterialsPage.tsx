@@ -47,7 +47,7 @@ function fmtSize(b: number) { if(b<1024) return `${b}B`; if(b<1048576) return `$
 export default function WorkMaterialsPage() {
   const [rows, setRows] = useState<MaterialRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string|null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [filterDept, setFilterDept] = useState('전체');
   const [filterPos, setFilterPos] = useState('전체');
   const [searchText, setSearchText] = useState('');
@@ -84,7 +84,7 @@ export default function WorkMaterialsPage() {
 
   const handleDelete = async (mid: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    try { await fetch(`/api/work-materials/${mid}`, { method:'DELETE' }); setRows(p=>p.filter(r=>r.material_id!==mid)); if(expandedId===mid) setExpandedId(null); toast.success('삭제되었습니다'); } catch { toast.error('삭제 실패'); }
+    try { await fetch(`/api/work-materials/${mid}`, { method:'DELETE' }); setRows(p=>p.filter(r=>r.material_id!==mid)); setExpandedIds(prev=>{const next=new Set(prev);next.delete(mid);return next;}); toast.success('삭제되었습니다'); } catch { toast.error('삭제 실패'); }
   };
 
   if (loading) return <div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>;
@@ -115,13 +115,13 @@ export default function WorkMaterialsPage() {
           <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
         ) : filtered.map(row=>(
           <div key={row.material_id}>
-            <div onClick={()=>setExpandedId(expandedId===row.material_id?null:row.material_id)} style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'14px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:expandedId===row.material_id?'#F8FAFC':'#fff',transition:'background 0.15s'}} onMouseEnter={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fafbfd')}} onMouseLeave={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fff')}}>
+            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'100px 80px 1fr 100px 80px 60px',padding:'14px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:expandedIds.has(row.material_id)?'#F8FAFC':'#fff',transition:'background 0.15s'}} onMouseEnter={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fafbfd')}} onMouseLeave={e=>{if(expandedId!==row.material_id)(e.currentTarget.style.background='#fff')}}>
               <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:12,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
               <div style={{fontSize:13,color:'#64748b'}}>{row.data.position}</div>
               <div style={{fontSize:14,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:8}}>
                 {row.data.title}
                 {row.data.attachments.length>0&&<span style={{fontSize:11,color:'#94a3b8'}}>📎{row.data.attachments.length}</span>}
-                {expandedId===row.material_id?<ChevronUp size={14} color="#94a3b8"/>:<ChevronDown size={14} color="#94a3b8"/>}
+                {!expandedIds.has(row.material_id)&&<ChevronDown size={14} color="#94a3b8"/>}
               </div>
               <div style={{fontSize:13,color:'#64748b'}}>{row.data.author}</div>
               <div style={{fontSize:12,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
@@ -130,7 +130,7 @@ export default function WorkMaterialsPage() {
                 <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><Trash2 size={14} color="#ef4444"/></button>
               </div>
             </div>
-            {expandedId===row.material_id&&(
+            {expandedIds.has(row.material_id)&&(
               <div style={{padding:'16px 24px 20px',background:'#fafbfd',borderBottom:'1px solid #e2e8f0'}}>
                 <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:16}}>{row.data.content}</div>
                 {row.data.attachments.length>0&&(
