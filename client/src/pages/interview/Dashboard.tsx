@@ -309,71 +309,42 @@ export function Dashboard() {
             exit={{ opacity: 0, y: -10 }}
             className="space-y-4"
           >
-            {/* Top Stats KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
-                <div className="text-gray-500 text-[11px] font-medium">총 지원자</div>
-                <div className="text-xl font-bold text-gray-900 mt-0.5">{stats.total}<span className="text-xs font-normal text-gray-400 ml-1">명</span></div>
+            {/* KPI 인라인 바 */}
+            <div className="bg-white rounded-lg border border-gray-200 px-4 py-2 flex items-center divide-x divide-gray-200">
+              <div className="pr-5">
+                <span className="text-[10px] text-gray-400">지원자</span>
+                <div className="text-lg font-bold text-gray-900 leading-tight">{stats.total}<span className="text-[10px] font-normal text-gray-400 ml-0.5">명</span></div>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
-                <div className="text-gray-500 text-[11px] font-medium">우수 인재 (A등급)</div>
-                <div className="text-xl font-bold text-emerald-600 mt-0.5">{stats.byGrade.A}<span className="text-xs font-normal text-gray-400 ml-1">명</span>
-                  <span className="text-[10px] font-normal text-gray-400 ml-2">{stats.total > 0 ? ((stats.byGrade.A / stats.total) * 100).toFixed(0) : 0}%</span>
-                </div>
+              <div className="px-5">
+                <span className="text-[10px] text-gray-400">A등급</span>
+                <div className="text-lg font-bold text-emerald-600 leading-tight">{stats.byGrade.A}<span className="text-[10px] font-normal text-gray-400 ml-0.5">명 ({stats.total > 0 ? ((stats.byGrade.A / stats.total) * 100).toFixed(0) : 0}%)</span></div>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
-                <div className="text-gray-500 text-[11px] font-medium">평균 평가 점수</div>
-                <div className="text-xl font-bold text-blue-600 mt-0.5">{stats.avgScore}<span className="text-xs font-normal text-gray-400 ml-1">점</span></div>
+              <div className="px-5">
+                <span className="text-[10px] text-gray-400">평균점수</span>
+                <div className="text-lg font-bold text-blue-600 leading-tight">{stats.avgScore}<span className="text-[10px] font-normal text-gray-400 ml-0.5">점</span></div>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2.5">
-                <div className="text-gray-500 text-[11px] font-medium">합격 결정</div>
-                <div className="text-xl font-bold text-amber-600 mt-0.5">{stats.passStatus.합격 + stats.passStatus.불합격}<span className="text-xs font-normal text-gray-400 ml-1">건</span>
-                  <span className="text-[10px] font-normal text-gray-400 ml-2">미정 {stats.passStatus.미정}건</span>
-                </div>
+              <div className="px-5">
+                <span className="text-[10px] text-gray-400">합격</span>
+                <div className="text-lg font-bold text-amber-600 leading-tight">{stats.passStatus.합격 + stats.passStatus.불합격}<span className="text-[10px] font-normal text-gray-400 ml-0.5">건</span></div>
+              </div>
+              <div className="pl-5">
+                <span className="text-[10px] text-gray-400">미정</span>
+                <div className="text-lg font-bold text-gray-400 leading-tight">{stats.passStatus.미정}<span className="text-[10px] font-normal text-gray-400 ml-0.5">건</span></div>
               </div>
             </div>
 
-            {/* Visual Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-gray-800">🎖️ 등급별 분포</h3>
-                  <div className="flex gap-2">
-                    {Object.keys(GRADE_COLORS).map(g => (
-                      <div key={g} className="flex items-center gap-1 text-[10px] text-gray-500">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: GRADE_COLORS[g] }} />
-                        {g}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-[180px] w-full">
+            {/* 차트 + 테이블 2단 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-3">
+              {/* 왼쪽: 차트 2개 세로 */}
+              <div className="bg-white rounded-lg border border-gray-200 p-3 space-y-2">
+                <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">등급 분포</h3>
+                <div className="h-[120px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={gradeChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis
-                        dataKey="grade"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fontWeight: 500, fill: "#64748b" }}
-                        dy={10}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: "#94a3b8" }}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        cursor={{ fill: '#f8fafc' }}
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                      />
-                      <Bar
-                        dataKey="count"
-                        radius={[4, 4, 0, 0]}
-                        barSize={40}
-                        animationDuration={1500}
-                      >
+                    <BarChart data={gradeChartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                      <XAxis dataKey="grade" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#94a3b8" }} allowDecimals={false} />
+                      <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '6px', border: 'none', boxShadow: '0 2px 4px rgb(0 0 0 / 0.1)', fontSize: '11px' }} />
+                      <Bar dataKey="count" radius={[3, 3, 0, 0]} barSize={28}>
                         {gradeChartData.map((entry) => (
                           <Cell key={entry.grade} fill={entry.fill} />
                         ))}
@@ -381,98 +352,71 @@ export function Dashboard() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-              </div>
-
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-gray-800">📊 분류 및 합격 여부</h3>
-                </div>
-                <div className="grid grid-cols-2 h-[180px]">
-                  <div className="relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={typeChartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={65}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {typeChartData.map((entry) => (
-                            <Cell key={entry.name} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-[10px] text-gray-400">분류별</span>
-                      <span className="text-sm font-bold text-gray-700">인원</span>
+                <div className="border-t border-gray-100 pt-2">
+                  <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">분류 / 합격</h3>
+                  <div className="grid grid-cols-2 h-[110px]">
+                    <div className="relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={typeChartData} cx="50%" cy="50%" innerRadius={28} outerRadius={42} paddingAngle={5} dataKey="value">
+                            {typeChartData.map((entry) => (<Cell key={entry.name} fill={entry.fill} />))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span className="text-[9px] text-gray-400">분류</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={passStatusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={65}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {passStatusData.map((entry) => (
-                            <Cell key={entry.name} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-[10px] text-gray-400">합격여부</span>
-                      <span className="text-sm font-bold text-gray-700">현황</span>
+                    <div className="relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={passStatusData} cx="50%" cy="50%" innerRadius={28} outerRadius={42} paddingAngle={5} dataKey="value">
+                            {passStatusData.map((entry) => (<Cell key={entry.name} fill={entry.fill} />))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span className="text-[9px] text-gray-400">합격</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Top Rank Table Preview */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-800">최근 고득점 지원자</h3>
-                <button onClick={() => setViewMode("list")} className="text-xs text-indigo-600 hover:underline">전체보기</button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
+              {/* 오른쪽: 고득점 테이블 */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">고득점 지원자</h3>
+                  <button onClick={() => setViewMode("list")} className="text-[10px] text-indigo-600 hover:underline">전체보기 →</button>
+                </div>
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50/80">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">이름</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">분류</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">등급</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">총점</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">액션</th>
+                      <th className="px-3 py-1.5 text-left font-medium text-gray-400">이름</th>
+                      <th className="px-3 py-1.5 text-left font-medium text-gray-400">분류</th>
+                      <th className="px-3 py-1.5 text-left font-medium text-gray-400">등급</th>
+                      <th className="px-3 py-1.5 text-right font-medium text-gray-400">총점</th>
+                      <th className="px-3 py-1.5 text-right font-medium text-gray-400"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).slice(0, 5).map((a) => (
-                      <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-4 py-2 font-medium text-gray-900">{a.name}</td>
-                        <td className="px-4 py-2">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${a.type === "강사" ? "bg-indigo-50 text-indigo-600" : "bg-purple-50 text-purple-600"}`}>
-                            {TYPE_EMOJI[a.type]} {a.type}
+                  <tbody className="divide-y divide-gray-50">
+                    {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).slice(0, 7).map((a) => (
+                      <tr key={a.id} className="hover:bg-gray-50/50">
+                        <td className="px-3 py-1.5 font-medium text-gray-900">{a.name}</td>
+                        <td className="px-3 py-1.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${a.type === "강사" ? "bg-indigo-50 text-indigo-600" : "bg-purple-50 text-purple-600"}`}>
+                            {a.type}
                           </span>
                         </td>
-                        <td className="px-4 py-2">
-                          <span className="font-bold" style={{ color: GRADE_COLORS[a.grade] }}>{a.grade}등급</span>
+                        <td className="px-3 py-1.5">
+                          <span className="font-bold" style={{ color: GRADE_COLORS[a.grade] }}>{a.grade}</span>
                         </td>
-                        <td className="px-4 py-2 font-bold text-indigo-600">{a.totalScore}</td>
-                        <td className="px-4 py-2 text-right">
-                          <button onClick={() => setPreviewApplicant(a)} className="text-gray-400 hover:text-indigo-600">
-                            <Eye className="w-4 h-4" />
+                        <td className="px-3 py-1.5 text-right font-bold text-indigo-600">{a.totalScore}</td>
+                        <td className="px-3 py-1.5 text-right">
+                          <button onClick={() => setPreviewApplicant(a)} className="text-gray-300 hover:text-indigo-600">
+                            <Eye className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
