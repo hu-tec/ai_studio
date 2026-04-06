@@ -4,7 +4,7 @@ import { Toaster } from 'sonner';
 import {
   ClipboardCheck, ShieldCheck, Clock, ClipboardList,
   Calendar, FileText, Image, Phone, ChevronLeft, ChevronRight, Home,
-  BarChart3, LayoutDashboard, BookOpen,
+  BarChart3, LayoutDashboard, BookOpen, FolderOpen,
   CalendarClock, Settings, Scale, FileEdit, FileInput, ListChecks, Construction
 } from 'lucide-react';
 import { StoreProvider } from '../../pages/interview/interviewStore';
@@ -16,6 +16,7 @@ const NAV_SECTIONS = [
   {
     title: '직원 도구',
     items: [
+      { to: '/work-materials', icon: FolderOpen, label: '업무 자료' },
       { to: '/work-log', icon: ClipboardList, label: '업무일지(직원-new)' },
       { to: '/work-log-old', icon: ClipboardList, label: '업무일지(직원-old)' },
       { to: '/work-log/admin', icon: ClipboardList, label: '업무일지(관리)' },

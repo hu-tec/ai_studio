@@ -33,6 +33,7 @@ app.use('/api/photos', createGenericRouter('photos', 'photo_id'));
 app.use('/api/schedules', createGenericRouter('schedules', 'schedule_id'));
 app.use('/api/rules', createGenericRouter('rules', 'rule_id'));
 app.use('/api/eval-criteria', createGenericRouter('eval_criteria', 'criteria_id'));
+app.use('/api/work-materials', createGenericRouter('work_materials', 'material_id'));
 
 // React SPA fallback (/app/*)
 app.get('/app/*', (req, res) => {

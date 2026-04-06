@@ -161,3 +161,11 @@ CREATE TABLE IF NOT EXISTS work_log_files (
   s3_url TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- 업무 자료 공유
+CREATE TABLE IF NOT EXISTS work_materials (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  material_id TEXT NOT NULL UNIQUE,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
