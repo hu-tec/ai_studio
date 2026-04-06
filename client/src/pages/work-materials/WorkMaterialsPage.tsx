@@ -31,7 +31,7 @@ interface MaterialRow {
 }
 
 const DEPARTMENTS = ['전체', '경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무'];
-const POSITIONS = ['전체', '대표', '임원', '팀장', '개발', '강사', '신입', '알바', '외부'];
+const POSITIONS = ['전체', '대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
 
 const DUMMY: MaterialData[] = [
   { department: '개발', position: '개발', title: 'Work Studio API 가이드', content: 'Work Studio의 범용 CRUD API 사용법입니다.\n\nGET /api/:table — 전체 조회\nPOST /api/:table — 생성\nPUT /api/:table/:id — 수정\nDELETE /api/:table/:id — 삭제', attachments: [{ type: 'link', url: 'http://54.116.15.136', name: 'Work Studio 관리자' }], author: '박개발', created_at: '2026-04-05T09:00:00' },
