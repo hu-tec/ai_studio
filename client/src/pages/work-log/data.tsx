@@ -100,6 +100,7 @@ export interface FranklinTask {
   achievement?: number;     // 달성률 0-5 (1-3=양, 4-5=질)
   children?: FranklinTask[]; // 서브태스크
   parentId?: string;        // 부모 태스크 ID
+  period?: MandalartPeriod; // 일간/주간/월간
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';

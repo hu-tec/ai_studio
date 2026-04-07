@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { ArrowLeft, GripVertical } from 'lucide-react';
+import { ArrowLeft, GripVertical, FileText } from 'lucide-react';
+import { MarkdownField } from './MarkdownField';
 import type { MandalartCell, FranklinTask, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
 import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
 
@@ -50,6 +51,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -161,6 +163,13 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
           {drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
         </span>
+        <button onClick={() => {
+          const filledCells = currentGrid.filter((c,i) => i !== 4 && c.text.trim());
+          const allOpen = filledCells.every(c => c.id === detailId);
+          setDetailId(allOpen || !detailId ? (filledCells.length > 0 ? '__all__' : null) : null);
+        }} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer', background: detailId ? '#eff6ff' : '#fff', color: detailId ? '#3B82F6' : '#94a3b8' }}>
+          {detailId ? '상세접기' : '상세펼치기'}
+        </button>
 
       </div>
 
@@ -320,6 +329,32 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           );
         })}
       </div>
+
+      {/* 상세 내용 패널 */}
+      {detailId && (
+        <div style={{ display:'flex', flexDirection:'column', gap:4, padding:'6px 0' }}>
+          {currentGrid.filter((c, i) => i !== 4 && c.text.trim()).filter(c => detailId === '__all__' || detailId === c.id).map(cell => {
+            const linked = linkedTask(cell);
+            return (
+              <div key={cell.id} style={{ padding:'6px 8px', background:'#fff', borderRadius:6, border:'1px solid #e2e8f0', fontSize:11 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+                  {linked && <span style={{ fontSize:9, fontWeight:700, color: FRANKLIN_PRIORITY_CONFIG[linked.priority].color }}>{linked.priority}{linked.number}</span>}
+                  <span style={{ fontWeight:600, color:'#1e293b' }}>{cell.text}</span>
+                  {linked?.startTime && <span style={{ fontSize:9, color:'#3B82F6', fontFamily:'monospace' }}>{linked.startTime}{linked.endTime ? '~'+linked.endTime : ''}</span>}
+                </div>
+                <div style={{ borderTop:'1px solid #f1f5f9', paddingTop:4 }}>
+                  <MarkdownField
+                    value={linked?.note || ''}
+                    onChange={v => { if (linked) onTasksChange(tasks.map(t => t.id === linked.id ? { ...t, note: v } : t)); }}
+                    placeholder="상세 내용 입력 (마크다운 지원)"
+                    minHeight={30}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       </div>
 

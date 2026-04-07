@@ -1,6 +1,7 @@
 import { useState, DragEvent } from 'react';
 import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip } from 'lucide-react';
-import type { FranklinTask, FranklinPriority, TimeSlotEntry } from './data';
+import { MarkdownField } from './MarkdownField';
+import type { FranklinTask, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
 import {
   FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getNextNumber, cycleStatus, syncPriorityToEisenhower,
@@ -14,11 +15,12 @@ interface FranklinViewProps {
   timeInterval: '30min' | '1hour' | 'half-day';
   onTasksChange: (tasks: FranklinTask[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
+  period?: MandalartPeriod;
 }
 
 const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
-export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: FranklinViewProps) {
+export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, period = 'daily' }: FranklinViewProps) {
   const [newText, setNewText] = useState('');
   const [newPriority, setNewPriority] = useState<FranklinPriority>('A');
   const [newStart, setNewStart] = useState('');
@@ -63,6 +65,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
       status: 'pending',
       startTime: newStart || undefined,
       endTime: newEnd || undefined,
+      period,
       ...eisFlags,
     };
     onTasksChange([...tasks, task]);
@@ -239,13 +242,12 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
                         >{p}</button>
                       ))}
                     </div>
-                    {/* Notes */}
+                    {/* Notes (마크다운) */}
                     <div className="flex gap-2 text-[11px]">
                       <span className="text-muted-foreground w-12 pt-1">메모</span>
-                      <textarea value={task.note || ''} onChange={e => updateTask(task.id, { note: e.target.value })}
-                        placeholder="상세 내용, 피드백, 결과..."
-                        className="flex-1 px-2 py-1 border border-border rounded text-[11px] bg-background outline-none resize-none min-h-[50px]"
-                        style={{ scrollbarWidth: 'none' }} />
+                      <div className="flex-1 border border-border rounded bg-background overflow-hidden">
+                        <MarkdownField value={task.note || ''} onChange={v => updateTask(task.id, { note: v })} placeholder="상세 내용 (마크다운 지원)" minHeight={40} />
+                      </div>
                     </div>
                     {/* Sub-tasks */}
                     <div className="text-[11px]">

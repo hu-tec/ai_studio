@@ -1,6 +1,7 @@
 import { useState, DragEvent } from 'react';
 import { Plus, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
-import type { FranklinTask, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry } from './data';
+import { MarkdownField } from './MarkdownField';
+import type { FranklinTask, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry, MandalartPeriod } from './data';
 import {
   EISENHOWER_CONFIG, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getQuadrant, setQuadrant, getNextNumber, cycleStatus, syncPriorityToEisenhower,
@@ -13,9 +14,10 @@ interface EisenhowerViewProps {
   timeSlots: TimeSlotEntry[];
   onTasksChange: (tasks: FranklinTask[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
+  period?: MandalartPeriod;
 }
 
-export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleChange }: EisenhowerViewProps) {
+export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleChange, period = 'daily' }: EisenhowerViewProps) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<EisenhowerQuadrant | 'slot' | null>(null);
   const [newText, setNewText] = useState('');
@@ -41,6 +43,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
       number: getNextNumber(tasks, priority),
       task: newText.trim(),
       status: 'pending',
+      period,
       ...flags,
     };
     onTasksChange([...tasks, task]);
@@ -248,9 +251,9 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                             </div>
                             <div className="flex gap-2">
                               <span className="text-muted-foreground w-10 pt-0.5">메모</span>
-                              <textarea value={task.note || ''} onChange={e => updateTask(task.id, { note: e.target.value })}
-                                placeholder="상세 내용..."
-                                className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none resize-none min-h-[36px]" style={{ scrollbarWidth: 'none' }} />
+                              <div className="flex-1 border border-border rounded bg-background overflow-hidden">
+                                <MarkdownField value={task.note || ''} onChange={v => updateTask(task.id, { note: v })} placeholder="상세 내용 (마크다운 지원)" minHeight={30} />
+                              </div>
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-0.5">

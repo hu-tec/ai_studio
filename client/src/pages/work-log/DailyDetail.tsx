@@ -10,6 +10,7 @@ import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTas
 import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
+import { MarkdownField } from './MarkdownField';
 import { toast } from 'sonner';
 
 interface DailyDetailProps {
@@ -68,7 +69,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
             updated.push({
               id: newId, priority: 'B', number: updated.filter(t => t.priority === 'B').length + 1,
               task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
-              important: true, urgent: false,
+              important: true, urgent: false, period,
             });
             cell.taskId = newId;
             changed = true;
@@ -141,7 +142,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTodayTasks(log.todayTasks || '');
       setTomorrowTasks(log.tomorrowTasks || '');
       setViewMode(log.viewMode || 'classic');
-      setFranklinTasks(log.franklinTasks || []);
+      // 기존 태스크에 period 없으면 'daily' 기본값 설정 (마이그레이션)
+      setFranklinTasks((log.franklinTasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
       // 기간별 만다라트: 기존 데이터 호환
       if (log.mandalartByPeriod) {
         setMandalartByPeriod(log.mandalartByPeriod);
@@ -381,41 +383,21 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           )}
         </div>
 
-        {/* 오늘의 업무 / 다음 날 업무 */}
+        {/* 오늘의 업무 / 다음 날 업무 (마크다운 지원) */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
-            <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200">
+            <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-blue-700">오늘의 업무</span>
+              {todayTasks && <span className="text-[9px] text-blue-500">{todayTasks.split('\n').filter(Boolean).length}줄</span>}
             </div>
-            <textarea
-              value={todayTasks}
-              onChange={e => setTodayTasks(e.target.value)}
-              className="w-full px-2 py-1.5 bg-transparent outline-none resize-none text-[12px] min-h-[60px]"
-              rows={2}
-              placeholder="오늘 해야 할 주요 업무를 입력하세요."
-              onInput={e => {
-                const t = e.target as HTMLTextAreaElement;
-                t.style.height = 'auto';
-                t.style.height = Math.max(60, t.scrollHeight) + 'px';
-              }}
-            />
+            <MarkdownField value={todayTasks} onChange={setTodayTasks} placeholder="오늘 해야 할 주요 업무 (마크다운 지원)" minHeight={50} />
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50/30 overflow-hidden">
-            <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200">
+            <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-amber-700">다음 날 업무</span>
+              {tomorrowTasks && <span className="text-[9px] text-amber-500">{tomorrowTasks.split('\n').filter(Boolean).length}줄</span>}
             </div>
-            <textarea
-              value={tomorrowTasks}
-              onChange={e => setTomorrowTasks(e.target.value)}
-              className="w-full px-2 py-1.5 bg-transparent outline-none resize-none text-[12px] min-h-[60px]"
-              rows={2}
-              placeholder="내일 해야 할 주요 업무를 입력하세요."
-              onInput={e => {
-                const t = e.target as HTMLTextAreaElement;
-                t.style.height = 'auto';
-                t.style.height = Math.max(60, t.scrollHeight) + 'px';
-              }}
-            />
+            <MarkdownField value={tomorrowTasks} onChange={setTomorrowTasks} placeholder="내일 해야 할 주요 업무 (마크다운 지원)" minHeight={50} />
           </div>
         </div>
 
@@ -689,18 +671,27 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 />
               ) : viewMode === 'eisenhower' ? (
                 <EisenhowerView
-                  tasks={franklinTasks}
+                  tasks={franklinTasks.filter(t => !t.period || t.period === period)}
                   timeSlots={timeSlots}
-                  onTasksChange={handleFranklinTasksChange}
+                  onTasksChange={newTasks => {
+                    // period 필터링된 태스크만 받으므로 다른 period 태스크는 유지
+                    const otherPeriod = franklinTasks.filter(t => t.period && t.period !== period);
+                    handleFranklinTasksChange([...otherPeriod, ...newTasks]);
+                  }}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                  period={period}
                 />
               ) : (
                 <FranklinView
-                  tasks={franklinTasks}
+                  tasks={franklinTasks.filter(t => !t.period || t.period === period)}
                   timeSlots={timeSlots}
                   timeInterval={timeInterval}
-                  onTasksChange={handleFranklinTasksChange}
+                  onTasksChange={newTasks => {
+                    const otherPeriod = franklinTasks.filter(t => t.period && t.period !== period);
+                    handleFranklinTasksChange([...otherPeriod, ...newTasks]);
+                  }}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                  period={period}
                 />
               )}
             </div>
