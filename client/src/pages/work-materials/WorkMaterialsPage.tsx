@@ -50,13 +50,8 @@ function saveCustom(c: Record<string, string[]>) { localStorage.setItem(LS_KEY, 
 function fmtDate(iso: string) { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; }
 function fmtSize(b: number) { if(b<1024) return `${b}B`; if(b<1048576) return `${(b/1024).toFixed(0)}KB`; return `${(b/1048576).toFixed(1)}MB`; }
 
-const DUMMY: MaterialData[] = [
-  { department:'개발', category2:'기술', category3:'서버', position:'개발', title:'Work Studio API 가이드', content:'Work Studio의 범용 CRUD API 사용법입니다.\n\nGET /api/:table — 전체 조회\nPOST /api/:table — 생성\nPUT /api/:table/:id — 수정\nDELETE /api/:table/:id — 삭제', attachments:[{type:'link',url:'http://54.116.15.136',name:'Work Studio 관리자'}], author:'박개발', note:'', created_at:'2026-04-05T09:00:00' },
-  { department:'마케팅', category2:'홍보', category3:'브로슈어', position:'신입', title:'TESOL 홍보 브로슈어 초안', content:'2026년 상반기 TESOL 과정 홍보용 브로슈어 초안입니다.', attachments:[{type:'file',url:'#',name:'TESOL_브로슈어_v1.pdf',size:2400000},{type:'image',url:'https://placehold.co/600x400/3B82F6/white?text=TESOL',name:'브로슈어_표지.png'}], author:'최신입', note:'디자인 검토 필요', created_at:'2026-04-04T14:00:00' },
-  { department:'강사팀', category2:'교육', category3:'교안', position:'강사', title:'AI번역 교육 3급 교안 자료', content:'AI번역 교육 3급 강의에 사용할 교안 자료 모음입니다.\n\n1장: 기계번역 개론\n2장: MTPE 기초\n3장: 용어집 관리', attachments:[{type:'file',url:'#',name:'AI번역_3급_교안.pptx',size:5200000},{type:'link',url:'https://deepl.com',name:'DeepL 공식 사이트'}], author:'이강사', note:'', created_at:'2026-04-03T10:30:00' },
-  { department:'경영', category2:'운영', category3:'기타', position:'대표', title:'2026년 2분기 사업 방향', content:'2분기 핵심 추진 방향:\n\n1. AI프롬프트 자격시험 런칭\n2. 번역 홈페이지 109개 언어 확장\n3. 전문가 매칭 플랫폼 베타\n4. CBT 시험 시스템 고도화', attachments:[], author:'대표님', note:'전사 공유', created_at:'2026-04-01T09:00:00' },
-  { department:'관리', category2:'규정', category3:'급여', position:'팀장', title:'2026 급여 규정 개정안', content:'2026년도 급여 규정 개정 사항을 안내합니다.\n\n1. 기본급 조정 기준\n2. 성과급 산정 방식 변경\n3. 수당 체계 정비', attachments:[{type:'file',url:'#',name:'급여규정_v2026.pdf',size:1800000}], author:'김팀장', note:'4월 시행', created_at:'2026-04-02T11:00:00' },
-];
+// 더미 데이터 제목 목록 (기존 DB에 남아있는 더미 자동 삭제용)
+const DUMMY_TITLES = ['Work Studio API 가이드','TESOL 홍보 브로슈어 초안','AI번역 교육 3급 교안 자료','2026년 2분기 사업 방향','2026 급여 규정 개정안','EC2 서버 접속 정보'];
 
 /* ══════════════════════════════════════════════════════════════
    Main Page
@@ -93,21 +88,28 @@ export default function WorkMaterialsPage() {
     try {
       const res = await fetch('/api/work-materials');
       const raw = await res.json();
-      const data = Array.isArray(raw) ? raw.map((r: any) => {
+      const data: MaterialRow[] = Array.isArray(raw) ? raw.map((r: any) => {
         const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
         return { ...r, data: { ...d, attachments: d.attachments||[], content: d.content||'', author: d.author||'', created_at: d.created_at||r.updated_at||'', category2: d.category2||'', category3: d.category3||'', note: d.note||'' } };
       }) : [];
-      if (data.length > 0) { setRows(data); }
-      else {
-        for (const d of DUMMY) {
-          const id = `mat-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
-          try { await fetch('/api/work-materials', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ material_id: id, data: d }) }); } catch {}
+
+      // 기존 더미 데이터 자동 삭제 (한 번만 실행)
+      const cleaned = localStorage.getItem('wm-dummy-cleaned');
+      if (!cleaned && data.length > 0) {
+        const dummies = data.filter(r => DUMMY_TITLES.includes(r.data.title));
+        for (const d of dummies) {
+          try { await fetch(`/api/work-materials/${d.material_id}`, { method: 'DELETE' }); } catch {}
         }
-        const r2 = await fetch('/api/work-materials');
-        const d2 = await r2.json();
-        setRows(Array.isArray(d2) && d2.length > 0 ? d2 : DUMMY.map((d,i)=>({ id:i+1, material_id:`local-${i}`, data:d, updated_at:d.created_at })));
+        localStorage.setItem('wm-dummy-cleaned', '1');
+        if (dummies.length > 0) {
+          setRows(data.filter(r => !DUMMY_TITLES.includes(r.data.title)));
+          setLoading(false);
+          return;
+        }
       }
-    } catch { setRows(DUMMY.map((d,i)=>({ id:i+1, material_id:`local-${i}`, data:d, updated_at:d.created_at }))); }
+
+      setRows(data);
+    } catch { setRows([]); }
     finally { setLoading(false); }
   }, []);
 
