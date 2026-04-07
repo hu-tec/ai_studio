@@ -362,6 +362,12 @@ export function addEmployee(emp: Employee) {
   try { localStorage.setItem('custom-employees', JSON.stringify(employees.filter(e => e.id.startsWith('emp-custom')))); } catch {}
 }
 
+export function removeEmployee(id: string) {
+  const idx = employees.findIndex(e => e.id === id);
+  if (idx >= 0) employees.splice(idx, 1);
+  try { localStorage.setItem('custom-employees', JSON.stringify(employees.filter(e => e.id.startsWith('emp-custom')))); } catch {}
+}
+
 // 커스텀 직원 로드
 try {
   const custom = localStorage.getItem('custom-employees');

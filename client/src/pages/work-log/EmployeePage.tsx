@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
-import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
+import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
 import { PanelLeftClose, PanelLeftOpen, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
@@ -123,6 +123,18 @@ export function EmployeePage() {
   const [activeEmpId, setActiveEmpId] = useState(getCurrentEmployee().id);
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [newEmpName, setNewEmpName] = useState('');
+  const [editMode, setEditMode] = useState(false);
+
+  const handleRemoveEmployee = (id: string) => {
+    if (employees.length <= 1) return;
+    removeEmployee(id);
+    if (activeEmpId === id) {
+      const next = employees[0]?.id || '';
+      setActiveEmpId(next);
+      setCurrentEmployee(next);
+    }
+    setEditMode(false);
+  };
 
   const activeEmployee = employees.find(e => e.id === activeEmpId) || employees[0];
   const flushRef = useRef<(() => void) | null>(null);
@@ -259,14 +271,22 @@ export function EmployeePage() {
           {/* 작성자 선택 */}
           <div className="flex items-center gap-1">
             {employees.map(emp => (
-              <button key={emp.id} onClick={() => handleSwitchEmployee(emp.id)}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
-                  activeEmpId === emp.id
-                    ? 'bg-blue-50 text-blue-600 border-blue-300 font-bold'
-                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
-                }`}>
-                {emp.name}
-              </button>
+              <div key={emp.id} className="relative flex items-center">
+                <button onClick={() => handleSwitchEmployee(emp.id)}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                    activeEmpId === emp.id
+                      ? 'bg-blue-50 text-blue-600 border-blue-300 font-bold'
+                      : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                  }`}>
+                  {emp.name}
+                </button>
+                {editMode && employees.length > 1 && (
+                  <button onClick={() => handleRemoveEmployee(emp.id)}
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center hover:bg-red-600 shadow">
+                    ✕
+                  </button>
+                )}
+              </div>
             ))}
             {showAddEmployee ? (
               <div className="flex items-center gap-1">
@@ -283,6 +303,10 @@ export function EmployeePage() {
                 +추가
               </button>
             )}
+            <button onClick={() => setEditMode(!editMode)}
+              className={`px-2 py-1 rounded-full text-[10px] border transition-all ${editMode ? 'bg-red-50 text-red-500 border-red-300 font-bold' : 'text-gray-400 border-gray-200 hover:bg-gray-50'}`}>
+              {editMode ? '완료' : '편집'}
+            </button>
           </div>
           <div className="flex bg-muted rounded-lg p-0.5">
             <button
