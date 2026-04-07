@@ -948,31 +948,130 @@ export default function CompanyGuidelinesPage() {
     const migrated: GuidelineItem[] = [];
     let counter = 0;
     const ruleTypeMap: Record<string, RuleType> = { '규정': '규정', '준규정': '준규정', '선택사항': '선택규정' };
-    const makeGuideline = (text: string, ruleType: RuleType, tab: GuidelineTab, dept: string, pos: string, author: string, noteText: string) => {
+    const makeGuideline = (text: string, ruleType: RuleType, tab: GuidelineTab, opts: {
+      dept?: string; pos?: string; author?: string; note?: string;
+      wc1?: string; wc2?: string; wc3?: string; wc4?: string; wdb?: string;
+    } = {}) => {
       counter++;
       const priority: FranklinPriority = ruleType === '규정' ? 'A' : ruleType === '준규정' ? 'B' : 'C';
       migrated.push({
-        id: `init-${counter}`, tab, workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
-        compWork: '', compDept: dept, compPos: pos, compContract: '',
-        author, title: text.length > 60 ? text.slice(0, 60) + '...' : text, content: text,
+        id: `init-${counter}`, tab,
+        workCat1: opts.wc1 || '', workCat2: opts.wc2 || '', workCat3: opts.wc3 || '', workCat4: opts.wc4 || '', workDb: opts.wdb || '',
+        compWork: '', compDept: opts.dept || '', compPos: opts.pos || '', compContract: '',
+        author: opts.author || '', title: text.length > 60 ? text.slice(0, 60) + '...' : text, content: text,
         ruleType, priority, number: counter, status: 'pending',
         urgent: ruleType === '규정', important: ruleType !== '선택규정',
-        note: noteText, created_at: new Date().toISOString(),
+        note: opts.note || '', created_at: new Date().toISOString(),
       });
     };
-    const addSet = (rules: Record<string, string[]>, tab: GuidelineTab, dept: string, pos: string, author: string, note: string) => {
+    const addSet = (rules: Record<string, string[]>, tab: GuidelineTab, opts: { dept?: string; pos?: string; author?: string; note?: string; wc1?: string; wc2?: string; wc3?: string; wdb?: string } = {}) => {
       for (const [oldType, texts] of Object.entries(rules)) {
         const rt = ruleTypeMap[oldType] || '규정';
-        for (const text of texts) makeGuideline(text, rt, tab, dept, pos, author, note);
+        for (const text of texts) makeGuideline(text, rt, tab, opts);
       }
     };
 
+    // ═══════════════════════════════════
+    // 프롬프트 탭 초기 데이터
+    // ═══════════════════════════════════
+    addSet({
+      '규정': [
+        '프롬프트 작성 시 회사 고정 규정(간격/색상/형식/이모지/톤)을 반드시 포함해야 한다',
+        '민감 정보(개인정보, 기밀자료)를 프롬프트에 입력하지 않는다',
+        'AI 생성 결과물은 반드시 사람이 검수 후 사용한다',
+        'AI 도구 사용 시 보안 프롬프트(1차/2차)를 적용해야 한다',
+        '프롬프트에 저작권 침해 소지가 있는 콘텐츠를 포함하지 않는다',
+      ],
+      '준규정': [
+        '1차 프롬프트는 구조 설계 중심, 2차 프롬프트는 UX 개선 중심으로 작성한다',
+        '프롬프트 결과물 내 개인정보 포함 여부를 검토한다',
+        '프롬프트 템플릿은 사내 표준 양식을 참고하여 작성한다',
+        '업무 지시사항과 중요사항을 프롬프트에 명시한다',
+      ],
+      '선택사항': [
+        '프롬프트 작성 후 동료 검토를 권장한다',
+        'AI 도구별 최적화된 프롬프트 패턴을 공유한다',
+        '프롬프트 결과물의 before/after 비교를 기록한다',
+      ],
+    }, '프롬프트', { author: '회사', note: '프롬프트 사용 규정' });
+
+    // ═══════════════════════════════════
+    // 업무지침 탭 초기 데이터 (규정편집 기반)
+    // ═══════════════════════════════════
+    // 영상 분류
+    addSet({
+      '규정': [
+        '영상 번역의 정확성과 자연스러움을 확보해야 한다',
+        '비속어, 차별적 표현, 저작권 침해 콘텐츠 사용을 금지한다',
+        '문화적 민감성을 고려하고 원작 의도를 존중한다',
+        '오역률 1% 미만, 자연스러운 표현, 맥락 일관성을 유지한다',
+        '자막 형식(SRT/VTT/ASS)과 인코딩(UTF-8) 기준을 준수한다',
+      ],
+      '준규정': [
+        '클라이언트 가이드라인을 우선 적용하고 용어집을 준수한다',
+        '자막 최대 2줄, 줄당 42자 이내로 작성한다',
+        '최소 표시 시간 0.8초, 최대 표시 시간 7초를 준수한다',
+        '프레임레이트와 해상도 기준에 맞게 작업한다',
+      ],
+      '선택사항': [
+        '타임코드 자동조정 기능을 활용할 수 있다',
+        '화자 구분 레이블을 사용할 수 있다',
+        '효과음 자막을 포함할 수 있다',
+      ],
+    }, '업무지침', { author: '업무', note: '영상 업무 지침', wc1: '영상' });
+
+    // 텍스트 분류
+    addSet({
+      '규정': [
+        '텍스트 번역/교정 작업의 정확성과 전문성을 확보해야 한다',
+        '비공식 약어 사용 금지, 출처 미기재 인용을 금지한다',
+        '저작권을 준수하고 기밀 정보를 보호하며 표절을 금지한다',
+        '오류율 0.5% 미만, 일관된 용어 사용, 가독성을 확보한다',
+        '문서 형식(PDF/DOCX/HWP) 및 페이지 레이아웃 기준을 준수한다',
+      ],
+      '준규정': [
+        '산업별 전문 용어집을 참조하고 클라이언트 스타일 가이드를 준수한다',
+        '번역 일치율 95% 이상을 유지한다',
+        '이미지 내 텍스트 번역 기준을 따른다',
+        '각주/미주 처리 시 원문 유지 + 번역 추가를 기본으로 한다',
+      ],
+      '선택사항': [
+        '용어 하이라이트 기능을 활용할 수 있다',
+        '변경 추적 기능을 활성화할 수 있다',
+        '주석 달기를 활용할 수 있다',
+      ],
+    }, '업무지침', { author: '업무', note: '텍스트 업무 지침', wc1: '문서' });
+
+    // 음성 분류
+    addSet({
+      '규정': [
+        '음성 번역/처리의 품질 및 정확성을 확보해야 한다',
+        '품질 저해 행위 일체를 금지한다',
+        '전문가 윤리 기준을 준수한다',
+        '업계 표준 품질 기준을 충족해야 한다',
+        '음성 파일 형식(WAV/MP3/FLAC)과 샘플레이트 기준을 준수한다',
+      ],
+      '준규정': [
+        '샘플레이트 44100Hz 이상, 비트뎁스 16bit 이상을 기본으로 한다',
+        '노이즈 게이트, 컴프레서, EQ 설정 기준을 따른다',
+        '화자 분리 정확도 95% 이상을 유지한다',
+      ],
+      '선택사항': [
+        '실시간 자막 생성을 활용할 수 있다',
+        '감정 분석 태깅을 적용할 수 있다',
+        '배경음 분리 기능을 사용할 수 있다',
+      ],
+    }, '업무지침', { author: '업무', note: '음성 업무 지침', wc1: '음성' });
+
+    // ═══════════════════════════════════
+    // 사내규정 탭 초기 데이터
+    // ═══════════════════════════════════
     // 회사 전체 지침
     addSet({
       '규정': ['모든 임직원은 출퇴근 시 근태관리 시스템에 기록해야 한다', '업무 관련 자료의 외부 반출 시 사전 승인을 받아야 한다', '고객 개인정보는 개인정보보호법에 따라 처리한다', '사내 보안 서약서를 연 1회 이상 갱신해야 한다', '업무용 PC에 허가되지 않은 소프트웨어 설치를 금지한다', '월간 업무보고서는 매월 마지막 영업일까지 제출한다'],
       '준규정': ['재택근무 시 업무 시작/종료 시 메신저로 보고한다', '부서 간 협업 시 공유 문서를 사용하여 진행 상황을 기록한다', '외부 미팅 시 회의록을 작성하여 48시간 내 공유한다', '사내 메신저는 업무 시간 중 항시 접속 상태를 유지한다', '분기별 자기 역량 평가서를 작성하여 팀장에게 제출한다'],
       '선택사항': ['업무 효율화를 위한 자동화 도구 사용을 권장한다', '사내 동호회 활동 참여를 장려한다', '개인 업무 일지 작성을 권장한다', '사내 지식 공유 세미나에 자발적으로 참여할 수 있다'],
-    }, '사내규정', '', '', '회사', '회사 전체 지침');
+    }, '사내규정', { author: '회사', note: '회사 전체 지침' });
 
     // 부서별 지침
     const depts: Record<string, Record<string, string[]>> = {
@@ -988,7 +1087,7 @@ export default function CompanyGuidelinesPage() {
       '강사팀': { '규정': ['강사 채용 및 계약은 표준 계약서를 사용해야 한다', '강사 평가는 학기별 1회 이상 실시해야 한다'], '준규정': ['수업 편성 가이드라인을 참고하여 시간표를 구성한다'], '선택사항': ['학생 피드백 설문을 자율적으로 실시할 수 있다'] },
     };
     for (const [dept, rules] of Object.entries(depts)) {
-      addSet(rules, '사내규정', dept, '', dept, `${dept} 부서 지침`);
+      addSet(rules, '사내규정', { dept, author: dept, note: `${dept} 부서 지침` });
     }
 
     // 직급별 지침
@@ -999,7 +1098,7 @@ export default function CompanyGuidelinesPage() {
       '대표': { '규정': ['회사 경영 총괄 및 최종 의사결정을 수행해야 한다'], '준규정': ['대외 협력 및 네트워킹 활동에 참여한다'], '선택사항': [] },
     };
     for (const [rank, rules] of Object.entries(ranks)) {
-      addSet(rules, '사내규정', '', rank, rank, `${rank} 직급 지침`);
+      addSet(rules, '사내규정', { pos: rank, author: rank, note: `${rank} 직급 지침` });
     }
 
     return migrated;
