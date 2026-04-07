@@ -383,21 +383,48 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           )}
         </div>
 
-        {/* 오늘의 업무 / 다음 날 업무 (마크다운 지원) */}
+        {/* 오늘의 업무 / 다음 날 업무 (마크다운 + 자동 채움) */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-blue-700">오늘의 업무</span>
-              {todayTasks && <span className="text-[9px] text-blue-500">{todayTasks.split('\n').filter(Boolean).length}줄</span>}
+              <span className="text-[9px] text-blue-400">{franklinTasks.filter(t => t.startTime).length}건 배정</span>
             </div>
-            <MarkdownField value={todayTasks} onChange={setTodayTasks} placeholder="오늘 해야 할 주요 업무 (마크다운 지원)" minHeight={50} />
+            {/* 자동: 타임테이블 배정 업무 목록 */}
+            {franklinTasks.filter(t => t.startTime).length > 0 && (
+              <div className="px-2 py-1 border-b border-blue-100 bg-blue-50/50 text-[10px] space-y-0.5">
+                {franklinTasks.filter(t => t.startTime).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||'')).map(t => (
+                  <div key={t.id} className="flex items-center gap-1">
+                    <span className="font-mono text-blue-500 shrink-0">{t.startTime}{t.endTime ? '~'+t.endTime : ''}</span>
+                    <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
+                      {FRANKLIN_STATUS_CONFIG[t.status].icon}
+                    </span>
+                    <span className={t.status === 'done' ? 'line-through text-gray-400' : ''}>{t.task}</span>
+                    {(t.achievement || 0) > 0 && <span className={`text-[8px] font-bold ${(t.achievement||0)>=4?'text-emerald-600':'text-amber-500'}`}>{t.achievement>=4?'질':'양'}{t.achievement}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <MarkdownField value={todayTasks} onChange={setTodayTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-amber-700">다음 날 업무</span>
-              {tomorrowTasks && <span className="text-[9px] text-amber-500">{tomorrowTasks.split('\n').filter(Boolean).length}줄</span>}
+              <span className="text-[9px] text-amber-400">{franklinTasks.filter(t => t.status === 'forwarded').length}건 이월</span>
             </div>
-            <MarkdownField value={tomorrowTasks} onChange={setTomorrowTasks} placeholder="내일 해야 할 주요 업무 (마크다운 지원)" minHeight={50} />
+            {/* 자동: 이월(forwarded) 업무 목록 */}
+            {franklinTasks.filter(t => t.status === 'forwarded').length > 0 && (
+              <div className="px-2 py-1 border-b border-amber-100 bg-amber-50/50 text-[10px] space-y-0.5">
+                {franklinTasks.filter(t => t.status === 'forwarded').map(t => (
+                  <div key={t.id} className="flex items-center gap-1">
+                    <span className="text-amber-500 font-bold">→</span>
+                    <span className="font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>{t.priority}{t.number}</span>
+                    <span>{t.task}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <MarkdownField value={tomorrowTasks} onChange={setTomorrowTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
           </div>
         </div>
 
