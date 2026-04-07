@@ -24,7 +24,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [dragCellId, setDragCellId] = useState<string | null>(null);
 
   // 루트 셀 보장 (9칸)
-  const root: MandalartCell[] = cells.length >= 9 ? cells : Array.from({length:9}, (_,i) => cells[i] || emptyCell(i===4 ? '주간 목표' : ''));
+  const root: MandalartCell[] = cells.length >= 9 ? cells : Array.from({length:9}, (_,i) => cells[i] || emptyCell(i===4 ? '오늘 목표' : ''));
 
   // 현재 보고 있는 3x3
   const drillCell = drillId ? root.find(c => c.id === drillId) : null;

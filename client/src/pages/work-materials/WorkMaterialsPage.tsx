@@ -136,7 +136,7 @@ export default function WorkMaterialsPage() {
       {/* 테이블 */}
       <div style={{background:'#fff',borderRadius:12,border:'1px solid #e2e8f0',overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'80px 64px 160px 1fr 180px 72px 72px 48px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:13,fontWeight:600,color:'#64748b',gap:8}}>
-          <div>부서</div><div>직급</div><div>제목</div><div>내용</div><div>첨부</div><div>작성자</div><div>날짜</div><div></div>
+          <div>부서</div><div>직급</div><div>제목</div><div>내용</div><div>첨부/다운</div><div>작성자</div><div>날짜</div><div></div>
         </div>
         {filtered.length===0 ? (
           <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
@@ -152,14 +152,19 @@ export default function WorkMaterialsPage() {
                 {row.data.title}
                 {isOpen?<ChevronUp size={13} color="#94a3b8"/>:<ChevronDown size={13} color="#94a3b8"/>}
               </div>
-              <div style={{fontSize:12,color:'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]}</div>
-              <div style={{fontSize:11,color:'#94a3b8',display:'flex',gap:4,flexWrap:'wrap',overflow:'hidden',maxHeight:20}}>
+              <div onClick={e=>{e.stopPropagation();setEditingContentId(row.material_id);setEditingContentValue(row.data.content);}} style={{fontSize:12,color:editingContentId===row.material_id?'#1e293b':'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',minHeight:20,borderRadius:4,padding:'2px 4px',background:editingContentId===row.material_id?'#fff':'transparent',border:editingContentId===row.material_id?'1px solid #3B82F6':'1px solid transparent',transition:'all 0.15s'}}>
+                {editingContentId===row.material_id?(
+                  <textarea value={editingContentValue} onChange={e=>setEditingContentValue(e.target.value)} onBlur={()=>handleInlineContentSave(row)} onKeyDown={e=>{if(e.key==='Escape'){setEditingContentId(null);}if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleInlineContentSave(row);}}} autoFocus rows={3} style={{width:'100%',fontSize:12,border:'none',outline:'none',resize:'vertical',lineHeight:1.5,fontFamily:'inherit',padding:0,background:'transparent'}}/>
+                ):(
+                  <span title="클릭하여 수정" style={{display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]||<span style={{color:'#cbd5e1',fontStyle:'italic'}}>내용 없음</span>}</span>
+                )}
+              </div>
+              <div style={{fontSize:11,color:'#94a3b8',display:'flex',gap:4,flexWrap:'wrap',overflow:'hidden',maxHeight:20,alignItems:'center'}} onClick={e=>e.stopPropagation()}>
                 {atts.length===0?<span>—</span>:atts.map((a,i)=>(
                   <span key={i} style={{display:'inline-flex',alignItems:'center',gap:2}}>
-                    {a.type==='link'&&<ExternalLink size={10} color="#10B981"/>}
-                    {a.type==='file'&&<File size={10} color="#F59E0B"/>}
-                    {a.type==='image'&&<ImageIcon size={10} color="#3B82F6"/>}
-                    <span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span>
+                    {a.type==='link'&&<a href={a.url} target="_blank" rel="noopener noreferrer" title={a.name} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#10B981',textDecoration:'none'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><ExternalLink size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
+                    {a.type==='file'&&<a href={a.url} download={a.name} title={`${a.name} 다운로드`} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#F59E0B',textDecoration:'none',cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><Download size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
+                    {a.type==='image'&&<a href={a.url} download={a.name} title={`${a.name} 다운로드`} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#3B82F6',textDecoration:'none',cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><Download size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
                   </span>
                 ))}
               </div>
