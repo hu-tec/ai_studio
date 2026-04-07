@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { ArrowLeft, Plus, X, GripVertical } from 'lucide-react';
-import type { MandalartCell, FranklinTask, FranklinPriority } from './data';
+import { ArrowLeft, GripVertical, BarChart3 } from 'lucide-react';
+import type { MandalartCell, FranklinTask, FranklinPriority, MandalartPeriod } from './data';
 import { getNextNumber } from './data';
 
 interface MandalartViewProps {
@@ -13,60 +13,82 @@ interface MandalartViewProps {
 
 let cellCounter = 0;
 function emptyCell(text = ''): MandalartCell {
-  return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [] };
+  return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [], achievement: 0 };
 }
 
 function createInitialRoot(): MandalartCell[] {
   return Array.from({length:9}, (_,i) => emptyCell(i===4 ? '오늘 목표' : ''));
 }
 
+// 달성률 색상
+const ACH_COLORS = ['#e2e8f0','#f59e0b','#f59e0b','#f59e0b','#10B981','#10B981']; // 0=미설정, 1~3=양(주황), 4~5=질(초록)
+const ACH_LABELS = ['','1(양)','2(양)','3(양)','4(질)','5(질)'];
+
+// 셀 달성률 계산 (하위 셀 평균)
+function calcCellAchievement(cell: MandalartCell): number {
+  if (!cell.children || cell.children.length === 0) return cell.achievement || 0;
+  const filled = cell.children.filter(c => c.text.trim());
+  if (filled.length === 0) return cell.achievement || 0;
+  const sum = filled.reduce((s, c) => s + (c.achievement || 0), 0);
+  return Math.round(sum / filled.length * 10) / 10;
+}
+
+// 전체 달성률
+function calcTotalAchievement(root: MandalartCell[]): { avg: number; filled: number; total: number; done: number } {
+  const surrounding = root.filter((_, i) => i !== 4);
+  const filled = surrounding.filter(c => c.text.trim());
+  let allSubs: MandalartCell[] = [];
+  filled.forEach(c => {
+    if (c.children && c.children.length > 0) {
+      allSubs.push(...c.children.filter(s => s.text.trim()));
+    } else {
+      allSubs.push(c);
+    }
+  });
+  const total = allSubs.length || filled.length;
+  const done = allSubs.filter(c => (c.achievement || 0) >= 4).length;
+  const sum = allSubs.reduce((s, c) => s + (c.achievement || 0), 0);
+  const avg = total > 0 ? Math.round(sum / total * 10) / 10 : 0;
+  return { avg, filled: filled.length, total, done };
+}
+
 export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange }: MandalartViewProps) {
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<MandalartPeriod>('daily');
+  const [showStats, setShowStats] = useState(false);
   const initialized = useRef(false);
 
-  // 초기 셀 생성 (한 번만)
   useEffect(() => {
     if (!initialized.current && (!cells || cells.length < 9)) {
       initialized.current = true;
-      const initial = createInitialRoot();
-      onCellsChange(initial);
+      onCellsChange(createInitialRoot());
     }
   }, []);
 
-  // cells가 아직 초기화 안 됐으면 빈 배열 → useEffect에서 초기화됨
   if (!cells || cells.length < 9) {
     return <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:13}}>만다라트 초기화 중...</div>;
   }
   const root = cells;
 
-  // 현재 보고 있는 3x3
   const drillCell = drillId ? root.find(c => c.id === drillId) : null;
   const currentGrid = drillCell
-    ? [
-        ...(drillCell.children || []).slice(0,4),
-        { ...drillCell }, // center = 부모 셀 자신
-        ...(drillCell.children || []).slice(4,8),
-      ]
+    ? [...(drillCell.children || []).slice(0,4), { ...drillCell }, ...(drillCell.children || []).slice(4,8)]
     : root;
-
-  // 그리드가 9칸 미만이면 빈 셀로 채우기
   while (currentGrid.length < 9) currentGrid.push(emptyCell());
 
   const updateCell = (id: string, text: string) => {
     if (drillCell) {
-      // 하위 그리드 수정
       const newRoot = root.map(c => {
         if (c.id !== drillId) return c;
-        if (id === c.id) return { ...c, text }; // center 수정 = 부모 텍스트 수정
+        if (id === c.id) return { ...c, text };
         const children = [...(c.children || [])];
         const surroundIdx = currentGrid.findIndex(g => g.id === id);
         const childIdx = surroundIdx < 4 ? surroundIdx : surroundIdx - 1;
         if (childIdx >= 0 && childIdx < children.length) {
           children[childIdx] = { ...children[childIdx], text };
         } else {
-          // 새 칸 추가
           while (children.length <= childIdx) children.push(emptyCell());
           children[childIdx] = { ...children[childIdx], text };
         }
@@ -74,49 +96,46 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       });
       onCellsChange(newRoot);
     } else {
-      // 루트 그리드 수정
-      const newRoot = root.map(c => c.id === id ? { ...c, text } : c);
-      onCellsChange(newRoot);
+      onCellsChange(root.map(c => c.id === id ? { ...c, text } : c));
     }
   };
 
+  // 달성률 설정
+  const setAchievement = (id: string, value: number) => {
+    const updateAch = (c: MandalartCell): MandalartCell => {
+      if (c.id === id) return { ...c, achievement: c.achievement === value ? 0 : value };
+      if (c.children) return { ...c, children: c.children.map(updateAch) };
+      return c;
+    };
+    onCellsChange(root.map(updateAch));
+  };
+
   const handleDrillDown = (cell: MandalartCell, idx: number) => {
-    if (drillId) return; // 이미 하위면 더 안 들어감
-    if (idx === 4) return; // center는 드릴다운 안 함
+    if (drillId) return;
+    if (idx === 4) return;
     if (!cell.text.trim()) return;
-    // children이 없으면 빈 8칸 생성
     if (!cell.children || cell.children.length === 0) {
-      const newRoot = root.map(c => c.id === cell.id ? { ...c, children: Array.from({length:8}, () => emptyCell()) } : c);
-      onCellsChange(newRoot);
+      onCellsChange(root.map(c => c.id === cell.id ? { ...c, children: Array.from({length:8}, () => emptyCell()) } : c));
     }
     setDrillId(cell.id);
   };
 
-  // 타임테이블로 드래그 시작
   const onDragStart = (e: DragEvent, cell: MandalartCell) => {
     if (!cell.text.trim()) return;
     setDragCellId(cell.id);
     e.dataTransfer.effectAllowed = 'copy';
     e.dataTransfer.setData('text/plain', cell.text);
-    e.dataTransfer.setData('application/mandalart-cell', JSON.stringify(cell));
   };
 
-  // 셀을 태스크로 변환
   const cellToTask = (cell: MandalartCell) => {
     if (!cell.text.trim()) return;
-    if (cell.taskId && tasks.find(t => t.id === cell.taskId)) return; // 이미 연결됨
+    if (cell.taskId && tasks.find(t => t.id === cell.taskId)) return;
     const priority: FranklinPriority = 'B';
     const task: FranklinTask = {
-      id: `ft-${Date.now()}`,
-      priority,
-      number: getNextNumber(tasks, priority),
-      task: cell.text,
-      status: 'pending',
-      important: true,
-      urgent: false,
+      id: `ft-${Date.now()}`, priority, number: getNextNumber(tasks, priority),
+      task: cell.text, status: 'pending', important: true, urgent: false,
     };
     onTasksChange([...tasks, task]);
-    // 셀에 taskId 연결
     const linkCell = (c: MandalartCell): MandalartCell => {
       if (c.id === cell.id) return { ...c, taskId: task.id };
       if (c.children) return { ...c, children: c.children.map(linkCell) };
@@ -127,11 +146,13 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
 
   const isCenter = (idx: number) => idx === 4;
   const linkedTask = (cell: MandalartCell) => cell.taskId ? tasks.find(t => t.id === cell.taskId) : null;
+  const stats = calcTotalAchievement(root);
+  const pctBar = stats.total > 0 ? Math.round((stats.avg / 5) * 100) : 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {drillId && (
           <button onClick={() => setDrillId(null)} style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', background:'#f1f5f9', border:'1px solid #e2e8f0', borderRadius:6, fontSize:12, cursor:'pointer', color:'#475569' }}>
             <ArrowLeft size={14} /> 상위로
@@ -140,13 +161,69 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
           {drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
         </span>
-        {!drillId && <span style={{ fontSize: 11, color: '#94a3b8' }}>셀 더블클릭 → 하위 분해 / 드래그 → 타임테이블 배정</span>}
+
+        {/* 기간 탭 */}
+        <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+          {([['daily','일간'],['weekly','주간'],['monthly','월간']] as const).map(([key, label]) => (
+            <button key={key} onClick={() => setPeriod(key)}
+              style={{ padding:'3px 10px', borderRadius:12, border:'1px solid', fontSize:11, cursor:'pointer',
+                borderColor: period===key?'#3B82F6':'#e2e8f0', background: period===key?'#EFF6FF':'#fff', color: period===key?'#3B82F6':'#94a3b8', fontWeight: period===key?600:400 }}>
+              {label}
+            </button>
+          ))}
+          <button onClick={() => setShowStats(!showStats)}
+            style={{ padding:'3px 8px', borderRadius:12, border:'1px solid', fontSize:11, cursor:'pointer',
+              borderColor: showStats?'#10B981':'#e2e8f0', background: showStats?'#ecfdf5':'#fff', color: showStats?'#10B981':'#94a3b8' }}>
+            <BarChart3 size={12} />
+          </button>
+        </div>
       </div>
 
-      {/* 메인 레이아웃: 드릴다운 시 미니맵(좌) + 서브그리드(우) */}
+      {/* 달성률 요약 바 */}
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', background:'#f8fafc', borderRadius:8, border:'1px solid #e2e8f0' }}>
+        <span style={{ fontSize:11, color:'#64748b', fontWeight:600, minWidth:48 }}>달성률</span>
+        <div style={{ flex:1, height:8, background:'#e2e8f0', borderRadius:4, overflow:'hidden' }}>
+          <div style={{ width:`${pctBar}%`, height:'100%', background: pctBar>=80?'#10B981':pctBar>=40?'#f59e0b':'#ef4444', borderRadius:4, transition:'width 0.3s' }} />
+        </div>
+        <span style={{ fontSize:12, fontWeight:600, color: pctBar>=80?'#10B981':pctBar>=40?'#f59e0b':'#ef4444', minWidth:36, textAlign:'right' }}>{stats.avg}/5</span>
+        <span style={{ fontSize:10, color:'#94a3b8' }}>{stats.done}/{stats.total} 완료</span>
+      </div>
+
+      {/* 통계 패널 */}
+      {showStats && (
+        <div style={{ padding:'12px 14px', background:'#fff', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12 }}>
+          <div style={{ fontWeight:600, color:'#1e293b', marginBottom:8 }}>
+            {period==='daily'?'오늘':period==='weekly'?'이번 주':'이번 달'} 통계
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
+            <StatCard label="목표 항목" value={`${stats.filled}`} sub="/8" color="#3B82F6" />
+            <StatCard label="세부 항목" value={`${stats.total}`} sub="개" color="#8B5CF6" />
+            <StatCard label="질 달성(4+)" value={`${stats.done}`} sub="개" color="#10B981" />
+            <StatCard label="평균 달성" value={`${stats.avg}`} sub="/5" color={stats.avg>=4?'#10B981':'#f59e0b'} />
+          </div>
+          {/* 항목별 달성률 */}
+          <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:4 }}>
+            {root.filter((_,i)=>i!==4).filter(c=>c.text.trim()).map(c => {
+              const ach = calcCellAchievement(c);
+              const pct = Math.round((ach/5)*100);
+              return (
+                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:11, color:'#475569', minWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.text}</span>
+                  <div style={{ flex:1, height:6, background:'#f1f5f9', borderRadius:3, overflow:'hidden' }}>
+                    <div style={{ width:`${pct}%`, height:'100%', background: ach>=4?'#10B981':ach>=1?'#f59e0b':'#e2e8f0', borderRadius:3 }} />
+                  </div>
+                  <span style={{ fontSize:10, color:'#94a3b8', minWidth:24 }}>{ach}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 메인 레이아웃 */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
 
-      {/* 미니맵: 드릴다운 시에만 표시 */}
+      {/* 미니맵 */}
       {drillId && (
         <div style={{ flexShrink: 0, width: 130 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>메인</div>
@@ -154,44 +231,44 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
             display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3,
             background: '#f1f5f9', padding: 4, borderRadius: 8, border: '1px solid #e2e8f0',
           }}>
-            {root.map((c, i) => (
-              <div
-                key={c.id}
+            {root.map((c, i) => {
+              const ach = calcCellAchievement(c);
+              return (
+              <div key={c.id}
                 onClick={() => {
                   if (i === 4) { setDrillId(null); return; }
                   if (c.text.trim()) {
                     if (!c.children || c.children.length === 0) {
-                      const newRoot = root.map(r => r.id === c.id ? { ...r, children: Array.from({length:8}, () => emptyCell()) } : r);
-                      onCellsChange(newRoot);
+                      onCellsChange(root.map(r => r.id === c.id ? { ...r, children: Array.from({length:8}, () => emptyCell()) } : r));
                     }
-                    setDrillId(c.id);
-                    setEditingId(null);
+                    setDrillId(c.id); setEditingId(null);
                   }
                 }}
                 style={{
-                  minHeight: 32, padding: '2px 3px',
+                  minHeight: 32, padding: '2px 3px', position: 'relative',
                   background: i === 4 ? '#1e293b' : c.id === drillId ? '#3B82F6' : '#fff',
                   borderRadius: 4, fontSize: 9, lineHeight: 1.2,
                   color: i === 4 ? '#fff' : c.id === drillId ? '#fff' : c.text ? '#475569' : '#cbd5e1',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
                   textAlign: 'center', wordBreak: 'break-word',
                   cursor: i === 4 ? 'pointer' : c.text.trim() ? 'pointer' : 'default',
                   border: c.id === drillId ? '2px solid #3B82F6' : '1px solid #e2e8f0',
                   fontWeight: c.id === drillId ? 700 : 400,
-                  transition: 'all 0.15s',
-                }}
-              >
-                {c.text || (i === 4 ? '목표' : '')}
+                }}>
+                <span>{c.text || (i === 4 ? '목표' : '')}</span>
+                {i !== 4 && c.text.trim() && ach > 0 && (
+                  <span style={{ fontSize:7, color: ach>=4?'#10B981':'#f59e0b', fontWeight:700 }}>{ach}</span>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* 3×3 Grid */}
       <div style={{
-        flex: 1,
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
+        flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
         background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
       }}>
         {currentGrid.map((cell, idx) => {
@@ -200,6 +277,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           const statusColor = linked
             ? linked.status === 'done' ? '#10B981' : linked.status === 'progress' ? '#3B82F6' : '#94a3b8'
             : undefined;
+          const ach = cell.achievement || 0;
 
           return (
             <div
@@ -210,78 +288,73 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               onDoubleClick={() => !drillId && cell.text.trim() && handleDrillDown(cell, idx)}
               onClick={() => setEditingId(cell.id)}
               style={{
-                position: 'relative',
-                minHeight: 80,
+                position: 'relative', minHeight: 90,
                 background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : '#fff',
                 borderRadius: 8,
                 border: `2px solid ${center ? '#1e293b' : linked ? statusColor : '#e2e8f0'}`,
                 display: 'flex', flexDirection: 'column',
-                cursor: center ? 'default' : cell.text.trim() ? (drillId ? 'grab' : 'pointer') : 'text',
-                transition: 'all 0.15s',
-                overflow: 'hidden',
+                cursor: center ? 'text' : cell.text.trim() ? (drillId ? 'grab' : 'pointer') : 'text',
+                transition: 'all 0.15s', overflow: 'hidden',
               }}
             >
-              {/* 상태 인디케이터 */}
-              {linked && (
-                <div style={{ height: 3, background: statusColor, width: '100%' }} />
-              )}
-
-              {/* 드래그 핸들 */}
+              {linked && <div style={{ height: 3, background: statusColor, width: '100%' }} />}
               {!center && cell.text.trim() && (
-                <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3 }}>
-                  <GripVertical size={12} />
-                </div>
+                <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3 }}><GripVertical size={12} /></div>
               )}
 
-              {/* 텍스트 영역 */}
+              {/* 텍스트 */}
               {editingId === cell.id ? (
-                <textarea
-                  autoFocus
-                  value={cell.text}
+                <textarea autoFocus value={cell.text}
                   onChange={e => updateCell(cell.id, e.target.value)}
                   onBlur={() => setEditingId(null)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
-                  style={{
-                    flex: 1, width: '100%', padding: '8px 10px', border: 'none', outline: 'none',
-                    fontSize: center ? 14 : 12, fontWeight: center ? 700 : 400,
+                  style={{ flex: 1, width: '100%', padding: '6px 8px', border: 'none', outline: 'none',
+                    fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400,
                     color: center ? '#fff' : '#1e293b', background: 'transparent',
-                    resize: 'none', fontFamily: 'inherit', lineHeight: 1.4,
-                  }}
+                    resize: 'none', fontFamily: 'inherit', lineHeight: 1.4 }}
                 />
               ) : (
-                <div
-                  style={{
-                    flex: 1, padding: '8px 10px',
-                    fontSize: center ? 14 : 12, fontWeight: center ? 700 : 400,
-                    color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
-                    lineHeight: 1.4, wordBreak: 'break-word',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    textAlign: 'center',
-                  }}
-                >
+                <div style={{ flex: 1, padding: '6px 8px',
+                  fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400,
+                  color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
+                  lineHeight: 1.4, wordBreak: 'break-word',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                   {cell.text || (center ? '목표 입력' : '+')}
                 </div>
               )}
 
-              {/* 하위 있음 표시 + 태스크 연결 버튼 */}
+              {/* 달성률 1~5 버튼 (center 제외, 텍스트 있을 때) */}
               {!center && cell.text.trim() && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 6px 4px', fontSize: 10 }}>
-                  {!drillId && (cell.children?.length || 0) > 0 && (
-                    <span style={{ color: '#3B82F6' }}>▦ {cell.children?.filter(c=>c.text).length || 0}</span>
-                  )}
-                  {!linked ? (
-                    <button
-                      onClick={e => { e.stopPropagation(); cellToTask(cell); }}
-                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 10 }}
-                      title="태스크로 등록"
-                    >
-                      + 태스크
-                    </button>
-                  ) : (
-                    <span style={{ color: statusColor, fontWeight: 500 }}>
-                      {linked.priority}{linked.number}
-                    </span>
-                  )}
+                <div style={{ padding: '0 4px 3px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* 달성률 점 */}
+                  <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+                    {[1,2,3,4,5].map(v => (
+                      <button key={v} onClick={() => setAchievement(cell.id, v)}
+                        title={ACH_LABELS[v]}
+                        style={{
+                          width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0,
+                          background: ach >= v ? ACH_COLORS[v] : '#e2e8f0',
+                          opacity: ach >= v ? 1 : 0.4,
+                          transition: 'all 0.15s',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {/* 하위 + 태스크 */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, paddingTop: 1 }}>
+                    {!drillId && (cell.children?.length || 0) > 0 && (
+                      <span style={{ color: '#3B82F6' }}>▦ {cell.children?.filter(c=>c.text).length || 0}</span>
+                    )}
+                    <span style={{ flex: 1 }} />
+                    {!linked ? (
+                      <button onClick={e => { e.stopPropagation(); cellToTask(cell); }}
+                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 9 }}>
+                        +태스크
+                      </button>
+                    ) : (
+                      <span style={{ color: statusColor, fontWeight: 500 }}>{linked.priority}{linked.number}</span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -289,14 +362,23 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         })}
       </div>
 
-      </div>{/* 메인 레이아웃 flex 닫기 */}
+      </div>
 
-      {/* 하위 그리드 안내 */}
+      {/* 안내 */}
       {!drillId && (
-        <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'center' }}>
-          주변 셀 더블클릭 → 하위 분해 | 셀 드래그 → 타임테이블 배정 | "+ 태스크" → 프랭클린/아이젠하워 연동
+        <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
+          셀 클릭→편집 | 더블클릭→하위 분해 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
         </div>
       )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
+  return (
+    <div style={{ padding: '8px 10px', background: '#f8fafc', borderRadius: 6, textAlign: 'center' }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color }}>{value}<span style={{ fontSize: 11, color: '#94a3b8' }}>{sub}</span></div>
+      <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>{label}</div>
     </div>
   );
 }

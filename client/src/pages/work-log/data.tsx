@@ -73,7 +73,11 @@ export interface MandalartCell {
   text: string;
   children?: MandalartCell[]; // 하위 3×3 (최대 8개, center 제외)
   taskId?: string;           // 연결된 FranklinTask ID
+  achievement?: number;      // 달성률 1~5 (1·2·3=양, 4·5=질)
 }
+
+// 만다라트 기간 모드
+export type MandalartPeriod = 'daily' | 'weekly' | 'monthly';
 
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
