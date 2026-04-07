@@ -41,6 +41,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
   const [showStats, setShowStats] = useState(false);
+  const [todayListOpen, setTodayListOpen] = useState(true);
+  const [todayMemoOpen, setTodayMemoOpen] = useState(true);
+  const [tomorrowListOpen, setTomorrowListOpen] = useState(true);
+  const [tomorrowMemoOpen, setTomorrowMemoOpen] = useState(true);
 
   const mandalartCells = mandalartByPeriod[period] || [];
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
@@ -383,48 +387,74 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           )}
         </div>
 
-        {/* 오늘의 업무 / 다음 날 업무 (마크다운 + 자동 채움) */}
+        {/* 오늘의 업무 / 다음 날 업무 (펼치기/접기 + 마크다운 + 자동 채움) */}
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-blue-700">오늘의 업무</span>
               <span className="text-[9px] text-blue-400">{franklinTasks.filter(t => t.startTime).length}건 배정</span>
             </div>
-            {/* 자동: 타임테이블 배정 업무 목록 */}
+            {/* 업무 내역 (펼치기/접기) */}
             {franklinTasks.filter(t => t.startTime).length > 0 && (
-              <div className="px-2 py-1 border-b border-blue-100 bg-blue-50/50 text-[10px] space-y-0.5">
-                {franklinTasks.filter(t => t.startTime).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||'')).map(t => (
-                  <div key={t.id} className="flex items-center gap-1">
-                    <span className="font-mono text-blue-500 shrink-0">{t.startTime}{t.endTime ? '~'+t.endTime : ''}</span>
-                    <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
-                      {FRANKLIN_STATUS_CONFIG[t.status].icon}
-                    </span>
-                    <span className={t.status === 'cancelled' ? 'line-through text-gray-400' : ''}>{t.task}</span>
-                    {(t.achievement || 0) > 0 && <span className={`text-[8px] font-bold ${(t.achievement||0)>=4?'text-emerald-600':'text-amber-500'}`}>{t.achievement>=4?'질':'양'}{t.achievement}</span>}
+              <>
+                <button onClick={() => setTodayListOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-blue-500 font-bold bg-blue-50/80 border-b border-blue-100 text-left hover:bg-blue-100/50">
+                  {todayListOpen ? '▼' : '▶'} 업무 내역 ({franklinTasks.filter(t => t.startTime).length})
+                </button>
+                {todayListOpen && (
+                  <div className="px-2 py-1 border-b border-blue-100 bg-blue-50/50 text-[10px] space-y-0.5">
+                    {franklinTasks.filter(t => t.startTime).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||'')).map(t => (
+                      <div key={t.id} className="flex items-center gap-1">
+                        <span className="font-mono text-blue-500 shrink-0">{t.startTime}{t.endTime ? '~'+t.endTime : ''}</span>
+                        <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
+                          {FRANKLIN_STATUS_CONFIG[t.status].icon}
+                        </span>
+                        <span className={t.status === 'cancelled' ? 'line-through text-gray-400' : ''}>{t.task}</span>
+                        {(t.achievement || 0) > 0 && <span className={`text-[8px] font-bold ${(t.achievement||0)>=4?'text-emerald-600':'text-amber-500'}`}>{'●'.repeat(Math.min(t.achievement||0,3))}{'◆'.repeat(Math.max((t.achievement||0)-3,0))}{'○'.repeat(5-(t.achievement||0))}</span>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
-            <MarkdownField value={todayTasks} onChange={setTodayTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
+            {/* 내용 (펼치기/접기) */}
+            <button onClick={() => setTodayMemoOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-blue-500 font-bold bg-blue-50/30 border-b border-blue-100 text-left hover:bg-blue-100/50">
+              {todayMemoOpen ? '▼' : '▶'} 내용 {todayTasks ? `(${todayTasks.split('\n').filter(Boolean).length}줄)` : ''}
+            </button>
+            {todayMemoOpen && (
+              <MarkdownField value={todayTasks} onChange={setTodayTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
+            )}
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-amber-700">다음 날 업무</span>
               <span className="text-[9px] text-amber-400">{franklinTasks.filter(t => t.status === 'forwarded').length}건 이월</span>
             </div>
-            {/* 자동: 이월(forwarded) 업무 목록 */}
+            {/* 이월 업무 내역 (펼치기/접기) */}
             {franklinTasks.filter(t => t.status === 'forwarded').length > 0 && (
-              <div className="px-2 py-1 border-b border-amber-100 bg-amber-50/50 text-[10px] space-y-0.5">
-                {franklinTasks.filter(t => t.status === 'forwarded').map(t => (
-                  <div key={t.id} className="flex items-center gap-1">
-                    <span className="text-amber-500 font-bold">→</span>
-                    <span className="font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>{t.priority}{t.number}</span>
-                    <span>{t.task}</span>
+              <>
+                <button onClick={() => setTomorrowListOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-amber-500 font-bold bg-amber-50/80 border-b border-amber-100 text-left hover:bg-amber-100/50">
+                  {tomorrowListOpen ? '▼' : '▶'} 이월 업무 ({franklinTasks.filter(t => t.status === 'forwarded').length})
+                </button>
+                {tomorrowListOpen && (
+                  <div className="px-2 py-1 border-b border-amber-100 bg-amber-50/50 text-[10px] space-y-0.5">
+                    {franklinTasks.filter(t => t.status === 'forwarded').map(t => (
+                      <div key={t.id} className="flex items-center gap-1">
+                        <span className="text-amber-500 font-bold">→</span>
+                        <span className="font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>{t.priority}{t.number}</span>
+                        <span>{t.task}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
-            <MarkdownField value={tomorrowTasks} onChange={setTomorrowTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
+            {/* 내용 (펼치기/접기) */}
+            <button onClick={() => setTomorrowMemoOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-amber-500 font-bold bg-amber-50/30 border-b border-amber-100 text-left hover:bg-amber-100/50">
+              {tomorrowMemoOpen ? '▼' : '▶'} 내용 {tomorrowTasks ? `(${tomorrowTasks.split('\n').filter(Boolean).length}줄)` : ''}
+            </button>
+            {tomorrowMemoOpen && (
+              <MarkdownField value={tomorrowTasks} onChange={setTomorrowTasks} placeholder="추가 메모 (마크다운 지원)" minHeight={30} />
+            )}
           </div>
         </div>
 
