@@ -181,12 +181,11 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
 
       {/* 달성률 요약 바 */}
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', background:'#f8fafc', borderRadius:8, border:'1px solid #e2e8f0' }}>
-        <span style={{ fontSize:11, color:'#64748b', fontWeight:600, minWidth:48 }}>달성률</span>
+        <span style={{ fontSize:11, color:'#64748b', fontWeight:600, minWidth:36 }}>달성</span>
         <div style={{ flex:1, height:8, background:'#e2e8f0', borderRadius:4, overflow:'hidden' }}>
-          <div style={{ width:`${pctBar}%`, height:'100%', background: pctBar>=80?'#10B981':pctBar>=40?'#f59e0b':'#ef4444', borderRadius:4, transition:'width 0.3s' }} />
+          <div style={{ width:`${stats.total>0?Math.round(stats.done/stats.total*100):0}%`, height:'100%', background: stats.done>=stats.total&&stats.total>0?'#10B981':stats.done>0?'#f59e0b':'#e2e8f0', borderRadius:4, transition:'width 0.3s' }} />
         </div>
-        <span style={{ fontSize:12, fontWeight:600, color: pctBar>=80?'#10B981':pctBar>=40?'#f59e0b':'#ef4444', minWidth:36, textAlign:'right' }}>{stats.avg}/5</span>
-        <span style={{ fontSize:10, color:'#94a3b8' }}>{stats.done}/{stats.total} 완료</span>
+        <span style={{ fontSize:13, fontWeight:700, color: stats.done>=stats.total&&stats.total>0?'#10B981':stats.done>0?'#f59e0b':'#94a3b8' }}>{stats.done}/{stats.total} 완료</span>
       </div>
 
       {/* 통계 패널 */}
@@ -198,8 +197,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
             <StatCard label="목표 항목" value={`${stats.filled}`} sub="/8" color="#3B82F6" />
             <StatCard label="세부 항목" value={`${stats.total}`} sub="개" color="#8B5CF6" />
-            <StatCard label="질 달성(4+)" value={`${stats.done}`} sub="개" color="#10B981" />
-            <StatCard label="평균 달성" value={`${stats.avg}`} sub="/5" color={stats.avg>=4?'#10B981':'#f59e0b'} />
+            <StatCard label="완료(4+)" value={`${stats.done}`} sub={`/${stats.total}`} color="#10B981" />
+            <StatCard label="달성률" value={`${stats.total>0?Math.round(stats.done/stats.total*100):0}`} sub="%" color={stats.done>=stats.total&&stats.total>0?'#10B981':'#f59e0b'} />
           </div>
           {/* 항목별 달성률 */}
           <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:4 }}>

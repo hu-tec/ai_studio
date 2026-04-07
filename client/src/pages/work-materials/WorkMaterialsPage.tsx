@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
-  FileText, Image as ImageIcon, ChevronDown, ChevronUp,
-  Search, File, ExternalLink, Download
+  Image as ImageIcon, ChevronDown, ChevronUp,
+  Search, File, ExternalLink, Download, Eye, Paperclip
 } from 'lucide-react';
 
+/* ── types ── */
 interface Attachment {
   type: 'image' | 'link' | 'file';
   url: string;
@@ -14,12 +15,15 @@ interface Attachment {
 }
 
 interface MaterialData {
-  department: string;
-  position: string;
+  department: string;   // 대분류
+  category2: string;    // 중분류
+  category3: string;    // 소분류
+  position: string;     // 직급
   title: string;
   content: string;
   attachments: Attachment[];
   author: string;
+  note: string;         // 비고
   created_at: string;
 }
 
@@ -30,29 +34,54 @@ interface MaterialRow {
   updated_at: string;
 }
 
-const DEPARTMENTS = ['전체', '경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
-const POSITIONS = ['전체', '대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
+/* ── defaults ── */
+const DEF_DEPTS = ['경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
+const DEF_POS = ['대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
+const DEF_CAT2 = ['규정', '교육', '홍보', '기술', '운영'];
+const DEF_CAT3 = ['급여', '복무', '교안', '브로슈어', '서버', '시스템', '기타'];
 
-const DUMMY: MaterialData[] = [
-  { department: '개발', position: '개발', title: 'Work Studio API 가이드', content: 'Work Studio의 범용 CRUD API 사용법입니다.\n\nGET /api/:table — 전체 조회\nPOST /api/:table — 생성\nPUT /api/:table/:id — 수정\nDELETE /api/:table/:id — 삭제', attachments: [{ type: 'link', url: 'http://54.116.15.136', name: 'Work Studio 관리자' }], author: '박개발', created_at: '2026-04-05T09:00:00' },
-  { department: '마케팅', position: '신입', title: 'TESOL 홍보 브로슈어 초안', content: '2026년 상반기 TESOL 과정 홍보용 브로슈어 초안입니다.', attachments: [{ type: 'file', url: '#', name: 'TESOL_브로슈어_v1.pdf', size: 2400000 }, { type: 'image', url: 'https://placehold.co/600x400/3B82F6/white?text=TESOL', name: '브로슈어_표지.png' }], author: '최신입', created_at: '2026-04-04T14:00:00' },
-  { department: '강사팀', position: '강사', title: 'AI번역 교육 3급 교안 자료', content: 'AI번역 교육 3급 강의에 사용할 교안 자료 모음입니다.\n\n1장: 기계번역 개론\n2장: MTPE 기초\n3장: 용어집 관리', attachments: [{ type: 'file', url: '#', name: 'AI번역_3급_교안.pptx', size: 5200000 }, { type: 'link', url: 'https://deepl.com', name: 'DeepL 공식 사이트' }], author: '이강사', created_at: '2026-04-03T10:30:00' },
-  { department: '경영', position: '대표', title: '2026년 2분기 사업 방향', content: '2분기 핵심 추진 방향:\n\n1. AI프롬프트 자격시험 런칭\n2. 번역 홈페이지 109개 언어 확장\n3. 전문가 매칭 플랫폼 베타\n4. CBT 시험 시스템 고도화', attachments: [], author: '대표님', created_at: '2026-04-01T09:00:00' },
-  { department: '개발', position: '팀장', title: 'EC2 서버 접속 정보', content: 'EC2 서버 접속 정보 공유합니다.\n\nIP: 54.116.15.136\n포트 80: Work Studio\n포트 81: AI Studio\n포트 82: CBT', attachments: [{ type: 'link', url: 'http://54.116.15.136:81/app/', name: 'AI Studio' }, { type: 'link', url: 'http://54.116.15.136', name: 'Work Studio' }], author: '김팀장', created_at: '2026-04-02T11:00:00' },
-];
+const LS_KEY = 'wm-custom-filters';
+
+function loadCustom(): Record<string, string[]> {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
+}
+function saveCustom(c: Record<string, string[]>) { localStorage.setItem(LS_KEY, JSON.stringify(c)); }
 
 function fmtDate(iso: string) { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; }
 function fmtSize(b: number) { if(b<1024) return `${b}B`; if(b<1048576) return `${(b/1024).toFixed(0)}KB`; return `${(b/1048576).toFixed(1)}MB`; }
 
+const DUMMY: MaterialData[] = [
+  { department:'개발', category2:'기술', category3:'서버', position:'개발', title:'Work Studio API 가이드', content:'Work Studio의 범용 CRUD API 사용법입니다.\n\nGET /api/:table — 전체 조회\nPOST /api/:table — 생성\nPUT /api/:table/:id — 수정\nDELETE /api/:table/:id — 삭제', attachments:[{type:'link',url:'http://54.116.15.136',name:'Work Studio 관리자'}], author:'박개발', note:'', created_at:'2026-04-05T09:00:00' },
+  { department:'마케팅', category2:'홍보', category3:'브로슈어', position:'신입', title:'TESOL 홍보 브로슈어 초안', content:'2026년 상반기 TESOL 과정 홍보용 브로슈어 초안입니다.', attachments:[{type:'file',url:'#',name:'TESOL_브로슈어_v1.pdf',size:2400000},{type:'image',url:'https://placehold.co/600x400/3B82F6/white?text=TESOL',name:'브로슈어_표지.png'}], author:'최신입', note:'디자인 검토 필요', created_at:'2026-04-04T14:00:00' },
+  { department:'강사팀', category2:'교육', category3:'교안', position:'강사', title:'AI번역 교육 3급 교안 자료', content:'AI번역 교육 3급 강의에 사용할 교안 자료 모음입니다.\n\n1장: 기계번역 개론\n2장: MTPE 기초\n3장: 용어집 관리', attachments:[{type:'file',url:'#',name:'AI번역_3급_교안.pptx',size:5200000},{type:'link',url:'https://deepl.com',name:'DeepL 공식 사이트'}], author:'이강사', note:'', created_at:'2026-04-03T10:30:00' },
+  { department:'경영', category2:'운영', category3:'기타', position:'대표', title:'2026년 2분기 사업 방향', content:'2분기 핵심 추진 방향:\n\n1. AI프롬프트 자격시험 런칭\n2. 번역 홈페이지 109개 언어 확장\n3. 전문가 매칭 플랫폼 베타\n4. CBT 시험 시스템 고도화', attachments:[], author:'대표님', note:'전사 공유', created_at:'2026-04-01T09:00:00' },
+  { department:'관리', category2:'규정', category3:'급여', position:'팀장', title:'2026 급여 규정 개정안', content:'2026년도 급여 규정 개정 사항을 안내합니다.\n\n1. 기본급 조정 기준\n2. 성과급 산정 방식 변경\n3. 수당 체계 정비', attachments:[{type:'file',url:'#',name:'급여규정_v2026.pdf',size:1800000}], author:'김팀장', note:'4월 시행', created_at:'2026-04-02T11:00:00' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   Main Page
+   ══════════════════════════════════════════════════════════════ */
 export default function WorkMaterialsPage() {
   const [rows, setRows] = useState<MaterialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [filterDept, setFilterDept] = useState('전체');
-  const [filterPos, setFilterPos] = useState('전체');
-  const [searchText, setSearchText] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string|null>(null);
+  const [previewRow, setPreviewRow] = useState<MaterialRow|null>(null);
+
+  // filters
+  const [filterDept, setFilterDept] = useState('전체');
+  const [filterCat2, setFilterCat2] = useState('전체');
+  const [filterCat3, setFilterCat3] = useState('전체');
+  const [filterPos, setFilterPos] = useState('전체');
+  const [filterAuthor, setFilterAuthor] = useState('전체');
+  const [searchText, setSearchText] = useState('');
+
+  // custom filter options
+  const [custom, setCustom] = useState<Record<string,string[]>>(loadCustom);
+  const updateCustom = (key: string, items: string[]) => { const next = {...custom, [key]: items}; setCustom(next); saveCustom(next); };
+
+  // inline content editing
   const [editingContentId, setEditingContentId] = useState<string|null>(null);
   const [editingContentValue, setEditingContentValue] = useState('');
 
@@ -62,7 +91,7 @@ export default function WorkMaterialsPage() {
       const raw = await res.json();
       const data = Array.isArray(raw) ? raw.map((r: any) => {
         const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
-        return { ...r, data: { ...d, attachments: d.attachments || [], content: d.content || '', author: d.author || '', created_at: d.created_at || r.updated_at || '' } };
+        return { ...r, data: { ...d, attachments: d.attachments||[], content: d.content||'', author: d.author||'', created_at: d.created_at||r.updated_at||'', category2: d.category2||'', category3: d.category3||'', note: d.note||'' } };
       }) : [];
       if (data.length > 0) { setRows(data); }
       else {
@@ -80,37 +109,52 @@ export default function WorkMaterialsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // gather unique authors from data
+  const allAuthors = [...new Set(rows.map(r=>r.data.author).filter(Boolean))];
+
   const filtered = rows.filter(r => {
     const d = r.data;
     if (filterDept !== '전체' && d.department !== filterDept) return false;
+    if (filterCat2 !== '전체' && d.category2 !== filterCat2) return false;
+    if (filterCat3 !== '전체' && d.category3 !== filterCat3) return false;
     if (filterPos !== '전체' && d.position !== filterPos) return false;
-    if (searchText) { const s = searchText.toLowerCase(); if (!d.title.toLowerCase().includes(s) && !d.content.toLowerCase().includes(s) && !d.author.toLowerCase().includes(s)) return false; }
+    if (filterAuthor !== '전체' && d.author !== filterAuthor) return false;
+    if (searchText) { const s = searchText.toLowerCase(); if (!d.title.toLowerCase().includes(s) && !d.content.toLowerCase().includes(s) && !d.author.toLowerCase().includes(s) && !(d.note||'').toLowerCase().includes(s)) return false; }
     return true;
   });
 
   const handleDelete = async (mid: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    try { await fetch(`/api/work-materials/${mid}`, { method:'DELETE' }); setRows(p=>p.filter(r=>r.material_id!==mid)); setExpandedIds(prev=>{const next=new Set(prev);next.delete(mid);return next;}); toast.success('삭제되었습니다'); } catch { toast.error('삭제 실패'); }
+    try { await fetch(`/api/work-materials/${mid}`, { method:'DELETE' }); setRows(p=>p.filter(r=>r.material_id!==mid)); toast.success('삭제되었습니다'); } catch { toast.error('삭제 실패'); }
   };
 
   const handleInlineContentSave = async (row: MaterialRow) => {
     if (editingContentValue === row.data.content) { setEditingContentId(null); return; }
     const payload = { ...row.data, content: editingContentValue };
     try {
-      await fetch(`/api/work-materials/${row.material_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      await fetch(`/api/work-materials/${row.material_id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       setRows(prev => prev.map(r => r.material_id === row.material_id ? { ...r, data: { ...r.data, content: editingContentValue } } : r));
       toast.success('내용이 수정되었습니다');
     } catch { toast.error('수정 실패'); }
     setEditingContentId(null);
   };
 
+  const anyFilterActive = filterDept!=='전체'||filterCat2!=='전체'||filterCat3!=='전체'||filterPos!=='전체'||filterAuthor!=='전체'||!!searchText;
+
   if (loading) return <div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>;
 
+  const mergedDepts = [...DEF_DEPTS, ...(custom['dept']||[])];
+  const mergedCat2 = [...DEF_CAT2, ...(custom['cat2']||[])];
+  const mergedCat3 = [...DEF_CAT3, ...(custom['cat3']||[])];
+  const mergedPos = [...DEF_POS, ...(custom['pos']||[])];
+
   return (
-    <div style={{padding:'24px 32px',maxWidth:1200,margin:'0 auto'}}>
+    <div style={{padding:'24px 32px',maxWidth:1400,margin:'0 auto'}}>
+      {/* header */}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
         <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
         <div style={{display:'flex',gap:8}}>
+          {anyFilterActive && <button onClick={()=>{setFilterDept('전체');setFilterCat2('전체');setFilterCat3('전체');setFilterPos('전체');setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:8,fontSize:13,cursor:'pointer',color:'#EF4444'}}><X size={14}/>필터 초기화</button>}
           <button onClick={()=>{
             const allIds = filtered.map(r=>r.material_id);
             const allExpanded = allIds.every(id=>expandedIds.has(id));
@@ -124,19 +168,28 @@ export default function WorkMaterialsPage() {
       </div>
 
       {/* 필터 */}
-      <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:20}}>
+      <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:20}}>
         <div style={{position:'relative',maxWidth:360}}>
           <Search size={16} style={{position:'absolute',left:10,top:10,color:'#94a3b8'}}/>
-          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="제목, 내용, 작성자 검색..." style={{width:'100%',padding:'8px 12px 8px 32px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',background:'#fff'}}/>
+          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{width:'100%',padding:'8px 12px 8px 32px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',background:'#fff'}}/>
         </div>
-        <FilterChips label="부서" items={DEPARTMENTS} value={filterDept} onChange={setFilterDept}/>
-        <FilterChips label="직급" items={POSITIONS} value={filterPos} onChange={setFilterPos}/>
+        <DynFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom}/>
+        <DynFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom}/>
+        <DynFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom}/>
+        <DynFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom}/>
+        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+          <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>작성자</span>
+          <button onClick={()=>setFilterAuthor('전체')} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:filterAuthor==='전체'?'#3B82F6':'#e2e8f0',background:filterAuthor==='전체'?'#EFF6FF':'#fff',color:filterAuthor==='전체'?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:filterAuthor==='전체'?600:400}}>전체</button>
+          {allAuthors.map(a=>(
+            <button key={a} onClick={()=>setFilterAuthor(a)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:filterAuthor===a?'#3B82F6':'#e2e8f0',background:filterAuthor===a?'#EFF6FF':'#fff',color:filterAuthor===a?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:filterAuthor===a?600:400}}>{a}</button>
+          ))}
+        </div>
       </div>
 
       {/* 테이블 */}
       <div style={{background:'#fff',borderRadius:12,border:'1px solid #e2e8f0',overflow:'hidden'}}>
-        <div style={{display:'grid',gridTemplateColumns:'80px 64px 160px 1fr 180px 72px 72px 48px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:13,fontWeight:600,color:'#64748b',gap:8}}>
-          <div>부서</div><div>직급</div><div>제목</div><div>내용</div><div>첨부/다운</div><div>작성자</div><div>날짜</div><div></div>
+        <div style={{display:'grid',gridTemplateColumns:'72px 72px 72px 150px 1fr 80px 110px 60px 72px 64px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:12,fontWeight:600,color:'#64748b',gap:6}}>
+          <div>대분류</div><div>중분류</div><div>소분류</div><div>제목</div><div>내용</div><div>첨부</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
         </div>
         {filtered.length===0 ? (
           <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
@@ -145,32 +198,44 @@ export default function WorkMaterialsPage() {
           const isOpen = expandedIds.has(row.material_id);
           return (
           <div key={row.material_id}>
-            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'80px 64px 160px 1fr 180px 72px 72px 48px',padding:'12px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:8}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
+            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'72px 72px 72px 150px 1fr 80px 110px 60px 72px 64px',padding:'10px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:6}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
               <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:11,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
-              <div style={{fontSize:12,color:'#64748b'}}>{row.data.position}</div>
-              <div style={{fontSize:13,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:4}}>
-                {row.data.title}
-                {isOpen?<ChevronUp size={13} color="#94a3b8"/>:<ChevronDown size={13} color="#94a3b8"/>}
+              <div style={{fontSize:11,color:'#64748b'}}>{row.data.category2||'—'}</div>
+              <div style={{fontSize:11,color:'#64748b'}}>{row.data.category3||'—'}</div>
+              <div style={{fontSize:13,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:4,overflow:'hidden'}}>
+                <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.title}</span>
+                {isOpen?<ChevronUp size={13} color="#94a3b8" style={{flexShrink:0}}/>:<ChevronDown size={13} color="#94a3b8" style={{flexShrink:0}}/>}
               </div>
-              <div onClick={e=>{e.stopPropagation();if(editingContentId!==row.material_id){setEditingContentId(row.material_id);setEditingContentValue(row.data.content);}}} style={{fontSize:12,color:'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',minHeight:20,borderRadius:4,padding:'2px 4px',transition:'all 0.15s'}} title="클릭하여 수정">
-                <span style={{display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]||<span style={{color:'#cbd5e1',fontStyle:'italic'}}>내용 없음</span>}</span>
+              {/* 내용 — 클릭 시 인라인 수정 */}
+              <div onClick={e=>{e.stopPropagation();if(editingContentId!==row.material_id){setEditingContentId(row.material_id);setEditingContentValue(row.data.content);}}} style={{fontSize:12,color:'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',minHeight:20,borderRadius:4,padding:'2px 4px'}} title="클릭하여 수정">
+                <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',display:'block'}}>{row.data.content.split('\n')[0]||<span style={{color:'#cbd5e1',fontStyle:'italic'}}>내용 없음</span>}</span>
               </div>
-              <div style={{fontSize:11,color:'#94a3b8',display:'flex',gap:4,flexWrap:'wrap',overflow:'hidden',maxHeight:20,alignItems:'center'}} onClick={e=>e.stopPropagation()}>
-                {atts.length===0?<span>—</span>:atts.map((a,i)=>(
-                  <span key={i} style={{display:'inline-flex',alignItems:'center',gap:2}}>
-                    {a.type==='link'&&<a href={a.url} target="_blank" rel="noopener noreferrer" title={a.name} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#10B981',textDecoration:'none'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><ExternalLink size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
-                    {a.type==='file'&&<a href={a.url} download={a.name} title={`${a.name} 다운로드`} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#F59E0B',textDecoration:'none',cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><Download size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
-                    {a.type==='image'&&<a href={a.url} download={a.name} title={`${a.name} 다운로드`} style={{display:'inline-flex',alignItems:'center',gap:2,color:'#3B82F6',textDecoration:'none',cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.textDecoration='underline'} onMouseLeave={e=>e.currentTarget.style.textDecoration='none'}><Download size={10}/><span style={{maxWidth:60,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.name}</span></a>}
-                  </span>
-                ))}
+              {/* 첨부 — 개수 + 다운 */}
+              <div style={{display:'flex',alignItems:'center',gap:4,fontSize:11,color:'#64748b'}} onClick={e=>e.stopPropagation()}>
+                {atts.length===0?<span style={{color:'#cbd5e1'}}>—</span>:(
+                  <>
+                    <Paperclip size={12} color="#94a3b8"/>
+                    <span style={{fontWeight:600}}>{atts.length}</span>
+                    {atts.slice(0,2).map((a,i)=>(
+                      <a key={i} href={a.url} {...(a.type==='link'?{target:'_blank',rel:'noopener noreferrer'}:{download:a.name})} title={a.name} style={{color:a.type==='link'?'#10B981':a.type==='image'?'#3B82F6':'#F59E0B',display:'inline-flex'}}>
+                        {a.type==='link'?<ExternalLink size={11}/>:<Download size={11}/>}
+                      </a>
+                    ))}
+                    {atts.length>2&&<span style={{color:'#94a3b8'}}>+{atts.length-2}</span>}
+                  </>
+                )}
               </div>
+              {/* 비고 */}
+              <div style={{fontSize:11,color:'#64748b',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.note||'—'}</div>
               <div style={{fontSize:12,color:'#64748b'}}>{row.data.author}</div>
               <div style={{fontSize:11,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
               <div style={{display:'flex',gap:2}} onClick={e=>e.stopPropagation()}>
-                <button onClick={()=>{setEditingId(row.material_id);setShowForm(true);}} style={{background:'none',border:'none',cursor:'pointer',padding:3}}><Pencil size={13} color="#94a3b8"/></button>
-                <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:3}}><Trash2 size={13} color="#ef4444"/></button>
+                <button onClick={()=>setPreviewRow(row)} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="미리보기"><Eye size={13} color="#3B82F6"/></button>
+                <button onClick={()=>{setEditingId(row.material_id);setShowForm(true);}} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="수정"><Pencil size={13} color="#94a3b8"/></button>
+                <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="삭제"><Trash2 size={13} color="#ef4444"/></button>
               </div>
             </div>
+            {/* 인라인 내용 수정 영역 */}
             {editingContentId===row.material_id&&(
               <div style={{padding:'12px 24px 16px',background:'#FFFBEB',borderBottom:'1px solid #FDE68A'}} onClick={e=>e.stopPropagation()}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
@@ -180,12 +245,14 @@ export default function WorkMaterialsPage() {
                     <button onClick={()=>handleInlineContentSave(row)} style={{padding:'4px 12px',fontSize:12,background:'#3B82F6',color:'#fff',border:'none',borderRadius:6,cursor:'pointer',fontWeight:600}}>저장 (Ctrl+Enter)</button>
                   </div>
                 </div>
-                <textarea value={editingContentValue} onChange={e=>setEditingContentValue(e.target.value)} onKeyDown={e=>{if(e.key==='Escape'){setEditingContentId(null);}if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();handleInlineContentSave(row);}}} autoFocus rows={Math.max(5, editingContentValue.split('\n').length+1)} style={{width:'100%',fontSize:14,border:'1px solid #FDE68A',outline:'none',resize:'vertical',lineHeight:1.7,fontFamily:'inherit',padding:'10px 12px',background:'#fff',borderRadius:8,boxSizing:'border-box'}}/>
+                <textarea value={editingContentValue} onChange={e=>setEditingContentValue(e.target.value)} onKeyDown={e=>{if(e.key==='Escape')setEditingContentId(null);if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();handleInlineContentSave(row);}}} autoFocus rows={Math.max(5,editingContentValue.split('\n').length+1)} style={{width:'100%',fontSize:14,border:'1px solid #FDE68A',outline:'none',resize:'vertical',lineHeight:1.7,fontFamily:'inherit',padding:'10px 12px',background:'#fff',borderRadius:8,boxSizing:'border-box'}}/>
               </div>
             )}
+            {/* 펼침 상세 */}
             {isOpen&&(
               <div style={{padding:'16px 24px 20px',background:'#fafbfd',borderBottom:'1px solid #e2e8f0'}}>
                 <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:atts.length>0?16:0}}>{row.data.content}</div>
+                {row.data.note&&<div style={{fontSize:13,color:'#64748b',marginBottom:atts.length>0?12:0}}><strong>비고:</strong> {row.data.note}</div>}
                 {atts.length>0&&(
                   <div style={{display:'flex',flexDirection:'column',gap:8}}>
                     <div style={{fontSize:13,fontWeight:600,color:'#64748b'}}>첨부 ({atts.length})</div>
@@ -198,42 +265,189 @@ export default function WorkMaterialsPage() {
           );
         })}
       </div>
-      <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{(filterDept!=='전체'||filterPos!=='전체'||searchText)?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
+      <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{anyFilterActive?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
 
-      {showForm&&<MaterialForm editData={editingId?rows.find(r=>r.material_id===editingId):undefined} onClose={()=>{setShowForm(false);setEditingId(null);}} onSaved={()=>{setShowForm(false);setEditingId(null);fetchData();}}/>}
+      {showForm&&<MaterialForm editData={editingId?rows.find(r=>r.material_id===editingId):undefined} onClose={()=>{setShowForm(false);setEditingId(null);}} onSaved={()=>{setShowForm(false);setEditingId(null);fetchData();}} custom={custom} updateCustom={updateCustom}/>}
+      {previewRow&&<PreviewModal row={previewRow} onClose={()=>setPreviewRow(null)}/>}
     </div>
   );
 }
 
-function FilterChips({label,items,value,onChange}:{label:string;items:string[];value:string;onChange:(v:string)=>void}) {
+/* ══════════════════════════════════════════════════════════════
+   Dynamic Filter Chips with +추가 / 삭제
+   ══════════════════════════════════════════════════════════════ */
+function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateCustom}:{label:string;items:string[];defaults:string[];value:string;onChange:(v:string)=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
+  const [adding, setAdding] = useState(false);
+  const [newVal, setNewVal] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleAdd = () => {
+    const v = newVal.trim();
+    if (!v || items.includes(v)) { setNewVal(''); setAdding(false); return; }
+    updateCustom(customKey, [...(custom[customKey]||[]), v]);
+    setNewVal(''); setAdding(false);
+  };
+
+  const handleRemove = (item: string) => {
+    if (defaults.includes(item)) return; // 기본값 삭제 불가
+    updateCustom(customKey, (custom[customKey]||[]).filter(c=>c!==item));
+    if (value === item) onChange('전체');
+  };
+
+  useEffect(()=>{ if(adding) inputRef.current?.focus(); }, [adding]);
+
   return (
     <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-      <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:36}}>{label}</span>
+      <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>{label}</span>
+      <button onClick={()=>onChange('전체')} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:value==='전체'?'#3B82F6':'#e2e8f0',background:value==='전체'?'#EFF6FF':'#fff',color:value==='전체'?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value==='전체'?600:400}}>전체</button>
       {items.map(d=>(
-        <button key={d} onClick={()=>onChange(d)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:value===d?'#3B82F6':'#e2e8f0',background:value===d?'#EFF6FF':'#fff',color:value===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value===d?600:400}}>{d}</button>
+        <span key={d} style={{display:'inline-flex',alignItems:'center',position:'relative'}}>
+          <button onClick={()=>onChange(d)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:value===d?'#3B82F6':'#e2e8f0',background:value===d?'#EFF6FF':'#fff',color:value===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value===d?600:400,paddingRight:defaults.includes(d)?undefined:24}}>{d}</button>
+          {!defaults.includes(d)&&<button onClick={e=>{e.stopPropagation();handleRemove(d);}} style={{position:'absolute',right:4,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',lineHeight:1}}><X size={11} color="#EF4444"/></button>}
+        </span>
       ))}
+      {adding ? (
+        <span style={{display:'inline-flex',alignItems:'center',gap:4}}>
+          <input ref={inputRef} value={newVal} onChange={e=>setNewVal(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')handleAdd();if(e.key==='Escape'){setAdding(false);setNewVal('');}}} placeholder="입력 후 Enter" style={{padding:'4px 10px',borderRadius:16,border:'1px solid #3B82F6',fontSize:13,outline:'none',width:100}}/>
+          <button onClick={()=>{setAdding(false);setNewVal('');}} style={{background:'none',border:'none',cursor:'pointer',padding:0}}><X size={14} color="#94a3b8"/></button>
+        </span>
+      ) : (
+        <button onClick={()=>setAdding(true)} style={{padding:'4px 10px',borderRadius:16,border:'1px dashed #cbd5e1',background:'#fff',color:'#94a3b8',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',gap:2}}><Plus size={12}/>추가</button>
+      )}
     </div>
   );
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Attachment item
+   ══════════════════════════════════════════════════════════════ */
 function AttItem({a}:{a:Attachment}) {
   const icons = {image:<ImageIcon size={16} color="#3B82F6"/>,link:<ExternalLink size={16} color="#10B981"/>,file:<File size={16} color="#F59E0B"/>};
   return (
-    <a href={a.url} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:13,transition:'border-color 0.15s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='#3B82F6'} onMouseLeave={e=>e.currentTarget.style.borderColor='#e2e8f0'}>
-      {icons[a.type]}<span style={{flex:1}}>{a.name}</span>
+    <a href={a.url} {...(a.type==='link'?{target:'_blank',rel:'noopener noreferrer'}:{download:a.name})} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:13,transition:'border-color 0.15s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='#3B82F6'} onMouseLeave={e=>e.currentTarget.style.borderColor='#e2e8f0'}>
+      {icons[a.type]}
+      <span style={{flex:1}}>{a.name}</span>
       {a.type==='file'&&a.size&&<span style={{fontSize:12,color:'#94a3b8'}}>{fmtSize(a.size)}</span>}
+      {a.type!=='link'&&<Download size={14} color="#94a3b8"/>}
       {a.type==='image'&&<img src={a.url} alt={a.name} style={{width:48,height:32,objectFit:'cover',borderRadius:4}}/>}
     </a>
   );
 }
 
-function MaterialForm({editData,onClose,onSaved}:{editData?:MaterialRow;onClose:()=>void;onSaved:()=>void}) {
+/* ══════════════════════════════════════════════════════════════
+   Preview Modal (Notion-like)
+   ══════════════════════════════════════════════════════════════ */
+function PreviewModal({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
+  const d = row.data;
+  const atts = d.attachments||[];
+  const images = atts.filter(a=>a.type==='image');
+  const files = atts.filter(a=>a.type==='file');
+  const links = atts.filter(a=>a.type==='link');
+  const isPdf = (name: string) => name.toLowerCase().endsWith('.pdf');
+
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:24}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:16,width:800,maxHeight:'90vh',overflow:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
+        {/* header */}
+        <div style={{padding:'24px 32px 0',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div style={{display:'flex',gap:6,marginBottom:8}}>
+              <span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{d.department}</span>
+              {d.category2&&<span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#F0FDF4',color:'#22C55E'}}>{d.category2}</span>}
+              {d.category3&&<span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#FFFBEB',color:'#F59E0B'}}>{d.category3}</span>}
+            </div>
+            <h2 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>{d.title}</h2>
+            <div style={{fontSize:13,color:'#94a3b8',marginTop:6}}>{d.author} · {fmtDate(d.created_at)} · {d.position}</div>
+          </div>
+          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><X size={22} color="#94a3b8"/></button>
+        </div>
+
+        {/* content */}
+        <div style={{padding:'20px 32px 24px'}}>
+          {d.content && (
+            <div style={{fontSize:15,color:'#334155',lineHeight:1.8,whiteSpace:'pre-wrap',padding:'20px 24px',background:'#f8fafc',borderRadius:12,marginBottom:20,border:'1px solid #f1f5f9'}}>{d.content}</div>
+          )}
+
+          {d.note && (
+            <div style={{fontSize:14,color:'#64748b',padding:'12px 16px',background:'#FFFBEB',borderRadius:8,marginBottom:20,border:'1px solid #FDE68A'}}>
+              <strong style={{color:'#92400E'}}>비고</strong> &nbsp;{d.note}
+            </div>
+          )}
+
+          {/* images inline */}
+          {images.length>0&&(
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:10}}>이미지</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:12}}>
+                {images.map((img,i)=>(
+                  <div key={i} style={{borderRadius:10,overflow:'hidden',border:'1px solid #e2e8f0',background:'#f8fafc'}}>
+                    <img src={img.url} alt={img.name} style={{width:'100%',maxHeight:300,objectFit:'contain',display:'block',background:'#fff'}}/>
+                    <div style={{padding:'8px 12px',fontSize:12,color:'#64748b',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <span>{img.name}</span>
+                      <a href={img.url} download={img.name} style={{color:'#3B82F6'}}><Download size={14}/></a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PDF embed */}
+          {files.filter(f=>isPdf(f.name)).map((f,i)=>(
+            <div key={i} style={{marginBottom:20}}>
+              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>PDF 미리보기 — {f.name}</div>
+              {f.url==='#' ? (
+                <div style={{padding:24,background:'#f8fafc',borderRadius:10,border:'1px solid #e2e8f0',textAlign:'center',color:'#94a3b8',fontSize:13}}>데모 파일 — 실제 URL이 필요합니다</div>
+              ) : (
+                <iframe src={f.url} style={{width:'100%',height:500,borderRadius:10,border:'1px solid #e2e8f0'}}/>
+              )}
+            </div>
+          ))}
+
+          {/* other files */}
+          {files.filter(f=>!isPdf(f.name)).length>0&&(
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>파일</div>
+              {files.filter(f=>!isPdf(f.name)).map((f,i)=>(
+                <a key={i} href={f.url} download={f.name} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'#f8fafc',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:14,marginBottom:6}}>
+                  <File size={18} color="#F59E0B"/><span style={{flex:1}}>{f.name}</span>{f.size&&<span style={{fontSize:12,color:'#94a3b8'}}>{fmtSize(f.size)}</span>}<Download size={16} color="#3B82F6"/>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* links */}
+          {links.length>0&&(
+            <div>
+              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>링크</div>
+              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                {links.map((l,i)=>(
+                  <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'#f0fdf4',borderRadius:8,border:'1px solid #BBF7D0',textDecoration:'none',color:'#15803D',fontSize:14}}>
+                    <ExternalLink size={16}/><span style={{flex:1}}>{l.name}</span><span style={{fontSize:12,color:'#94a3b8'}}>{l.url}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Material Form (create / edit)
+   ══════════════════════════════════════════════════════════════ */
+function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:MaterialRow;onClose:()=>void;onSaved:()=>void;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
   const isEdit = !!editData;
   const [dept,setDept] = useState(editData?.data.department||'');
+  const [cat2,setCat2] = useState(editData?.data.category2||'');
+  const [cat3,setCat3] = useState(editData?.data.category3||'');
   const [pos,setPos] = useState(editData?.data.position||'');
   const [title,setTitle] = useState(editData?.data.title||'');
   const [content,setContent] = useState(editData?.data.content||'');
   const [author,setAuthor] = useState(editData?.data.author||'');
+  const [note,setNote] = useState(editData?.data.note||'');
   const [attachments,setAttachments] = useState<Attachment[]>(editData?.data.attachments||[]);
   const [saving,setSaving] = useState(false);
   const [showLink,setShowLink] = useState(false);
@@ -261,9 +475,9 @@ function MaterialForm({editData,onClose,onSaved}:{editData?:MaterialRow;onClose:
   };
 
   const save = async () => {
-    if(!dept||!pos||!title||!author){toast.error('부서, 직급, 제목, 작성자를 입력해주세요');return;}
+    if(!dept||!title||!author){toast.error('대분류, 제목, 작성자를 입력해주세요');return;}
     setSaving(true);
-    const payload:MaterialData = {department:dept,position:pos,title,content,attachments,author,created_at:editData?.data.created_at||new Date().toISOString()};
+    const payload:MaterialData = {department:dept,category2:cat2,category3:cat3,position:pos,title,content,attachments,author,note,created_at:editData?.data.created_at||new Date().toISOString()};
     try {
       if(isEdit&&editData) { await fetch(`/api/work-materials/${editData.material_id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); toast.success('수정되었습니다'); }
       else { await fetch('/api/work-materials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); toast.success('등록되었습니다'); }
@@ -271,22 +485,34 @@ function MaterialForm({editData,onClose,onSaved}:{editData?:MaterialRow;onClose:
     } catch { toast.error('저장 실패'); } finally { setSaving(false); }
   };
 
-  const depts = DEPARTMENTS.filter(d=>d!=='전체');
-  const poss = POSITIONS.filter(p=>p!=='전체');
+  const depts = [...DEF_DEPTS,...(custom['dept']||[])];
+  const cat2s = [...DEF_CAT2,...(custom['cat2']||[])];
+  const cat3s = [...DEF_CAT3,...(custom['cat3']||[])];
+  const poss = [...DEF_POS,...(custom['pos']||[])];
+
+  const chipRow = (label:string, items:string[], val:string, set:(v:string)=>void, customKey:string) => (
+    <div>
+      <label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>{label}</label>
+      <FormChips items={items} defaults={customKey==='dept'?DEF_DEPTS:customKey==='cat2'?DEF_CAT2:customKey==='cat3'?DEF_CAT3:DEF_POS} value={val} onChange={set} customKey={customKey} custom={custom} updateCustom={updateCustom}/>
+    </div>
+  );
 
   return (
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:16,width:600,maxHeight:'90vh',overflow:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.15)'}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:16,width:640,maxHeight:'90vh',overflow:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.15)'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'20px 24px',borderBottom:'1px solid #f1f5f9'}}>
           <h2 style={{fontSize:18,fontWeight:700,margin:0,color:'#1e293b'}}>{isEdit?'자료 수정':'새 자료 등록'}</h2>
           <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer'}}><X size={20} color="#94a3b8"/></button>
         </div>
-        <div style={{padding:'20px 24px',display:'flex',flexDirection:'column',gap:16}}>
-          <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>부서 *</label><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{depts.map(d=><button key={d} onClick={()=>setDept(d)} style={{padding:'6px 14px',borderRadius:16,border:'1px solid',borderColor:dept===d?'#3B82F6':'#e2e8f0',background:dept===d?'#EFF6FF':'#fff',color:dept===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:dept===d?600:400}}>{d}</button>)}</div></div>
-          <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>직급 *</label><div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{poss.map(p=><button key={p} onClick={()=>setPos(p)} style={{padding:'6px 14px',borderRadius:16,border:'1px solid',borderColor:pos===p?'#3B82F6':'#e2e8f0',background:pos===p?'#EFF6FF':'#fff',color:pos===p?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:pos===p?600:400}}>{p}</button>)}</div></div>
+        <div style={{padding:'20px 24px',display:'flex',flexDirection:'column',gap:14}}>
+          {chipRow('대분류 *', depts, dept, setDept, 'dept')}
+          {chipRow('중분류', cat2s, cat2, setCat2, 'cat2')}
+          {chipRow('소분류', cat3s, cat3, setCat3, 'cat3')}
+          {chipRow('직급', poss, pos, setPos, 'pos')}
           <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>작성자 *</label><input value={author} onChange={e=>setAuthor(e.target.value)} placeholder="이름" style={{width:'100%',padding:'8px 12px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none'}}/></div>
           <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>제목 *</label><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="자료 제목" style={{width:'100%',padding:'8px 12px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none'}}/></div>
-          <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>내용</label><textarea value={content} onChange={e=>setContent(e.target.value)} placeholder="텍스트 내용을 입력하세요..." rows={6} style={{width:'100%',padding:'10px 12px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',resize:'vertical',lineHeight:1.6,fontFamily:'inherit'}}/></div>
+          <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>내용</label><textarea value={content} onChange={e=>setContent(e.target.value)} placeholder="텍스트 내용을 입력하세요..." rows={5} style={{width:'100%',padding:'10px 12px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',resize:'vertical',lineHeight:1.6,fontFamily:'inherit'}}/></div>
+          <div><label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>비고</label><input value={note} onChange={e=>setNote(e.target.value)} placeholder="비고 사항" style={{width:'100%',padding:'8px 12px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none'}}/></div>
           <div>
             <label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:8,display:'block'}}>첨부</label>
             {attachments.length>0&&<div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:10}}>{attachments.map((att,i)=>(<div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 12px',background:'#f8fafc',borderRadius:8,fontSize:13}}>{att.type==='image'&&<ImageIcon size={14} color="#3B82F6"/>}{att.type==='link'&&<ExternalLink size={14} color="#10B981"/>}{att.type==='file'&&<File size={14} color="#F59E0B"/>}<span style={{flex:1,color:'#334155'}}>{att.name}</span>{att.size&&<span style={{fontSize:11,color:'#94a3b8'}}>{fmtSize(att.size)}</span>}<button onClick={()=>setAttachments(attachments.filter((_,j)=>j!==i))} style={{background:'none',border:'none',cursor:'pointer'}}><X size={14} color="#ef4444"/></button></div>))}</div>}
@@ -303,6 +529,30 @@ function MaterialForm({editData,onClose,onSaved}:{editData?:MaterialRow;onClose:
           <button onClick={save} disabled={saving} style={{padding:'8px 20px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:saving?'not-allowed':'pointer',opacity:saving?0.6:1}}>{saving?'저장 중...':isEdit?'수정':'등록'}</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Form Chips (with +추가 in modal) ── */
+function FormChips({items,defaults,value,onChange,customKey,custom,updateCustom}:{items:string[];defaults:string[];value:string;onChange:(v:string)=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
+  const [adding, setAdding] = useState(false);
+  const [newVal, setNewVal] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleAdd = () => { const v=newVal.trim(); if(!v||items.includes(v)){setNewVal('');setAdding(false);return;} updateCustom(customKey,[...(custom[customKey]||[]),v]); onChange(v); setNewVal('');setAdding(false); };
+  useEffect(()=>{ if(adding) inputRef.current?.focus(); },[adding]);
+  return (
+    <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+      {items.map(d=>(
+        <button key={d} type="button" onClick={()=>onChange(value===d?'':d)} style={{padding:'6px 14px',borderRadius:16,border:'1px solid',borderColor:value===d?'#3B82F6':'#e2e8f0',background:value===d?'#EFF6FF':'#fff',color:value===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value===d?600:400}}>{d}</button>
+      ))}
+      {adding?(
+        <span style={{display:'inline-flex',alignItems:'center',gap:4}}>
+          <input ref={inputRef} value={newVal} onChange={e=>setNewVal(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();handleAdd();}if(e.key==='Escape'){setAdding(false);setNewVal('');}}} placeholder="입력" style={{padding:'5px 10px',borderRadius:16,border:'1px solid #3B82F6',fontSize:13,outline:'none',width:80}}/>
+          <button type="button" onClick={()=>{setAdding(false);setNewVal('');}} style={{background:'none',border:'none',cursor:'pointer',padding:0}}><X size={14} color="#94a3b8"/></button>
+        </span>
+      ):(
+        <button type="button" onClick={()=>setAdding(true)} style={{padding:'5px 10px',borderRadius:16,border:'1px dashed #cbd5e1',background:'#fff',color:'#94a3b8',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',gap:2}}><Plus size={12}/>추가</button>
+      )}
     </div>
   );
 }
