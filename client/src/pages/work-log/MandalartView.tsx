@@ -38,7 +38,7 @@ function calcGridAchievement(grid: MandalartCell[]): { filled: number; total: nu
   const surrounding = grid.filter((_, i) => i !== 4);
   const filled = surrounding.filter(c => c.text.trim());
   const total = filled.length;
-  const yang = filled.filter(c => { const a = c.achievement || 0; return a >= 1 && a <= 3; }).length;
+  const yang = filled.filter(c => (c.achievement || 0) >= 1).length;
   const jil = filled.filter(c => (c.achievement || 0) >= 4).length;
   const sum = filled.reduce((s, c) => s + (c.achievement || 0), 0);
   const avg = total > 0 ? Math.round(sum / total * 10) / 10 : 0;
