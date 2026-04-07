@@ -169,3 +169,10 @@ CREATE TABLE IF NOT EXISTS work_materials (
   data TEXT NOT NULL,
   updated_at TEXT DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS company_guidelines (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guideline_id TEXT NOT NULL UNIQUE,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);

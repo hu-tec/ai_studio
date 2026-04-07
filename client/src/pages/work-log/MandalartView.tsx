@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { ArrowLeft, GripVertical, BarChart3 } from 'lucide-react';
+import { ArrowLeft, GripVertical } from 'lucide-react';
 import type { MandalartCell, FranklinTask, FranklinPriority, MandalartPeriod } from './data';
 import { getNextNumber } from './data';
 
@@ -34,7 +34,7 @@ function calcCellAchievement(cell: MandalartCell): number {
 }
 
 // 현재 그리드 기준 달성률 (양: 1~3, 질: 4~5)
-function calcGridAchievement(grid: MandalartCell[]): { filled: number; total: number; yang: number; jil: number; avg: number } {
+export function calcGridAchievement(grid: MandalartCell[]): { filled: number; total: number; yang: number; jil: number; avg: number } {
   const surrounding = grid.filter((_, i) => i !== 4);
   const filled = surrounding.filter(c => c.text.trim());
   const total = filled.length;
@@ -49,8 +49,6 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
-  const [period, setPeriod] = useState<MandalartPeriod>('daily');
-  const [showStats, setShowStats] = useState(false);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -139,7 +137,6 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
 
   const isCenter = (idx: number) => idx === 4;
   const linkedTask = (cell: MandalartCell) => cell.taskId ? tasks.find(t => t.id === cell.taskId) : null;
-  const stats = calcGridAchievement(currentGrid);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -154,64 +151,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           {drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
         </span>
 
-        {/* 기간 탭 */}
-        <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
-          {([['daily','일간'],['weekly','주간'],['monthly','월간']] as const).map(([key, label]) => (
-            <button key={key} onClick={() => setPeriod(key)}
-              style={{ padding:'3px 10px', borderRadius:12, border:'1px solid', fontSize:11, cursor:'pointer',
-                borderColor: period===key?'#3B82F6':'#e2e8f0', background: period===key?'#EFF6FF':'#fff', color: period===key?'#3B82F6':'#94a3b8', fontWeight: period===key?600:400 }}>
-              {label}
-            </button>
-          ))}
-          <button onClick={() => setShowStats(!showStats)}
-            style={{ padding:'3px 8px', borderRadius:12, border:'1px solid', fontSize:11, cursor:'pointer',
-              borderColor: showStats?'#10B981':'#e2e8f0', background: showStats?'#ecfdf5':'#fff', color: showStats?'#10B981':'#94a3b8' }}>
-            <BarChart3 size={12} />
-          </button>
-        </div>
       </div>
-
-      {/* 달성률 요약 바 */}
-      <div style={{ display:'flex', alignItems:'center', gap:6, padding:'4px 8px', background:'#f8fafc', borderRadius:6, border:'1px solid #e2e8f0' }}>
-        <span style={{ fontSize:10, color:'#64748b', fontWeight:600 }}>달성</span>
-        <div style={{ flex:1, height:6, background:'#e2e8f0', borderRadius:3, overflow:'hidden', position:'relative' }}>
-          <div style={{ width:`${stats.total>0?Math.round(stats.yang/stats.total*100):0}%`, height:'100%', background:'#f59e0b', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
-          <div style={{ width:`${stats.total>0?Math.round(stats.jil/stats.total*100):0}%`, height:'100%', background:'#10B981', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
-        </div>
-        <span style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>양 {stats.yang}/{stats.total}</span>
-        <span style={{ fontSize:10, color:'#10B981', fontWeight:700 }}>질 {stats.jil}/{stats.total}</span>
-      </div>
-
-      {/* 통계 패널 */}
-      {showStats && (
-        <div style={{ padding:'6px 8px', background:'#fff', borderRadius:6, border:'1px solid #e2e8f0', fontSize:11 }}>
-          <div style={{ fontWeight:600, color:'#1e293b', marginBottom:4, fontSize:11 }}>
-            {period==='daily'?'오늘':period==='weekly'?'이번 주':'이번 달'} 통계 {drillId ? `— ${drillCell?.text}` : '(전체)'}
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:4 }}>
-            <StatCard label="작성" value={`${stats.filled}`} sub="/8" color="#3B82F6" />
-            <StatCard label="양(1~3)" value={`${stats.yang}`} sub={`/${stats.total}`} color="#f59e0b" />
-            <StatCard label="질(4~5)" value={`${stats.jil}`} sub={`/${stats.total}`} color="#10B981" />
-            <StatCard label="달성률" value={`${stats.total>0?Math.round(stats.jil/stats.total*100):0}`} sub="%" color={stats.jil>=stats.total&&stats.total>0?'#10B981':'#f59e0b'} />
-          </div>
-          {/* 항목별 달성률 */}
-          <div style={{ marginTop:6, display:'flex', flexDirection:'column', gap:2 }}>
-            {currentGrid.filter((_,i)=>i!==4).filter(c=>c.text.trim()).map(c => {
-              const ach = c.achievement || 0;
-              const pct = Math.round((ach/5)*100);
-              return (
-                <div key={c.id} style={{ display:'flex', alignItems:'center', gap:6 }}>
-                  <span style={{ fontSize:10, color:'#475569', minWidth:70, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.text}</span>
-                  <div style={{ flex:1, height:5, background:'#f1f5f9', borderRadius:3, overflow:'hidden' }}>
-                    <div style={{ width:`${pct}%`, height:'100%', background: ach>=4?'#10B981':ach>=1?'#f59e0b':'#e2e8f0', borderRadius:3 }} />
-                  </div>
-                  <span style={{ fontSize:9, color: ach>=4?'#10B981':ach>=1?'#f59e0b':'#94a3b8', fontWeight:600, minWidth:20 }}>{ach>0?ACH_LABELS[ach]:'-'}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* 메인 레이아웃 */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -333,12 +273,22 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                       />
                     ))}
                   </div>
-                  {/* 하위 카운트 */}
-                  {!drillId && (cell.children?.filter(c=>c.text).length || 0) > 0 && (
-                    <div style={{ fontSize: 9, paddingTop: 1 }}>
-                      <span style={{ color: '#3B82F6' }}>▦ {cell.children?.filter(c=>c.text).length || 0}</span>
-                    </div>
-                  )}
+                  {/* 하위 진행 현황 */}
+                  {!drillId && cell.children && cell.children.length > 0 && (() => {
+                    const subs = cell.children.filter(c => c.text.trim());
+                    if (subs.length === 0) return null;
+                    const subYang = subs.filter(c => (c.achievement || 0) >= 1).length;
+                    const subJil = subs.filter(c => (c.achievement || 0) >= 4).length;
+                    return (
+                      <div style={{ display:'flex', alignItems:'center', gap:3, paddingTop:1 }}>
+                        <div style={{ flex:1, height:3, background:'#e2e8f0', borderRadius:2, overflow:'hidden', position:'relative' }}>
+                          <div style={{ width:`${Math.round(subYang/subs.length*100)}%`, height:'100%', background:'#f59e0b', borderRadius:2, position:'absolute', left:0 }} />
+                          <div style={{ width:`${Math.round(subJil/subs.length*100)}%`, height:'100%', background:'#10B981', borderRadius:2, position:'absolute', left:0 }} />
+                        </div>
+                        <span style={{ fontSize:8, color:'#94a3b8', whiteSpace:'nowrap' }}>{subJil}/{subs.length}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -354,15 +304,6 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           셀 클릭→편집 | 더블클릭→하위 분해 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
         </div>
       )}
-    </div>
-  );
-}
-
-function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
-  return (
-    <div style={{ padding: '4px 6px', background: '#f8fafc', borderRadius: 4, textAlign: 'center' }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color, lineHeight: 1.2 }}>{value}<span style={{ fontSize: 10, color: '#94a3b8' }}>{sub}</span></div>
-      <div style={{ fontSize: 9, color: '#64748b' }}>{label}</div>
     </div>
   );
 }

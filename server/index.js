@@ -34,6 +34,7 @@ app.use('/api/schedules', createGenericRouter('schedules', 'schedule_id'));
 app.use('/api/rules', createGenericRouter('rules', 'rule_id'));
 app.use('/api/eval-criteria', createGenericRouter('eval_criteria', 'criteria_id'));
 app.use('/api/work-materials', createGenericRouter('work_materials', 'material_id'));
+app.use('/api/company-guidelines', createGenericRouter('company_guidelines', 'guideline_id'));
 
 // 서버 디스크 용량 API
 app.get('/api/disk-usage', (req, res) => {

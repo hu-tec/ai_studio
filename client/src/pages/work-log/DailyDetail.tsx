@@ -5,9 +5,10 @@ import { Save, FileDown, List, Target, Grid2x2, LayoutGrid, ChevronDown, Chevron
 import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
-import { MandalartView } from './MandalartView';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask, MandalartCell } from './data';
+import { MandalartView, calcGridAchievement } from './MandalartView';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask, MandalartCell, MandalartPeriod } from './data';
 import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { toast } from 'sonner';
 
@@ -37,6 +38,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [franklinTasks, setFranklinTasks] = useState<FranklinTask[]>([]);
   const [mandalartCells, setMandalartCells] = useState<MandalartCell[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [period, setPeriod] = useState<MandalartPeriod>('daily');
+  const [showStats, setShowStats] = useState(false);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
@@ -345,29 +348,77 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           </div>
         </div>
 
-        {/* Mode toggle — standalone */}
-        <div className="flex items-center gap-2">
-          <div className="flex gap-0.5">
-            {([
-              { mode: 'classic' as ViewMode, icon: List, label: 'Classic' },
-              { mode: 'franklin' as ViewMode, icon: Target, label: 'Franklin' },
-              { mode: 'eisenhower' as ViewMode, icon: Grid2x2, label: 'Eisenhower' },
-              { mode: 'mandalart' as ViewMode, icon: LayoutGrid, label: 'Mandalart' },
-            ]).map(({ mode, icon: Icon, label }) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                  viewMode === mode ? 'bg-slate-700 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                <Icon className="w-3 h-3" />
-                {label}
-              </button>
-            ))}
-          </div>
-
-        </div>
+        {/* Mode toggle + Period + Stats */}
+        {(() => {
+          // 통계 계산 (모든 뷰 공통)
+          const filledSlots = timeSlots.filter(s => s.title.trim()).length;
+          const totalSlots = timeSlots.length;
+          const doneTasks = franklinTasks.filter(t => t.status === 'done').length;
+          const totalTasks = franklinTasks.length;
+          const mStats = viewMode === 'mandalart' && mandalartCells.length >= 9
+            ? calcGridAchievement(mandalartCells) : null;
+          return (
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex gap-0.5">
+                {([
+                  { mode: 'classic' as ViewMode, icon: List, label: 'Classic' },
+                  { mode: 'franklin' as ViewMode, icon: Target, label: 'Franklin' },
+                  { mode: 'eisenhower' as ViewMode, icon: Grid2x2, label: 'Eisenhower' },
+                  { mode: 'mandalart' as ViewMode, icon: LayoutGrid, label: 'Mandalart' },
+                ]).map(({ mode, icon: Icon, label }) => (
+                  <button key={mode} onClick={() => setViewMode(mode)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                      viewMode === mode ? 'bg-slate-700 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}>
+                    <Icon className="w-3 h-3" />{label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-0.5 ml-auto">
+                {(['daily','weekly','monthly'] as const).map(k => (
+                  <button key={k} onClick={() => setPeriod(k)}
+                    className={`px-2 py-0.5 rounded-full text-[10px] border ${period===k?'bg-blue-50 text-blue-600 border-blue-300 font-bold':'bg-white text-gray-400 border-gray-200'}`}>
+                    {k==='daily'?'일간':k==='weekly'?'주간':'월간'}
+                  </button>
+                ))}
+                <button onClick={() => setShowStats(!showStats)}
+                  className={`px-1.5 py-0.5 rounded-full border ${showStats?'bg-emerald-50 text-emerald-600 border-emerald-300':'bg-white text-gray-400 border-gray-200'}`}>
+                  <BarChart3 className="w-3 h-3" />
+                </button>
+              </div>
+              {/* 인라인 통계 바 */}
+              {showStats && (
+                <div className="w-full flex items-center gap-3 px-2 py-1 bg-slate-50 rounded border border-slate-200 text-[10px]">
+                  <span className="text-slate-500 font-semibold">{period==='daily'?'오늘':period==='weekly'?'이번 주':'이번 달'}</span>
+                  {viewMode === 'mandalart' && mStats ? (<>
+                    <span className="text-blue-600 font-bold">작성 {mStats.filled}/8</span>
+                    <span className="text-amber-500 font-bold">양 {mStats.yang}/{mStats.total}</span>
+                    <span className="text-emerald-600 font-bold">질 {mStats.jil}/{mStats.total}</span>
+                    <div className="flex-1 h-1 bg-slate-200 rounded overflow-hidden relative">
+                      <div className="absolute left-0 top-0 h-full bg-amber-400 rounded" style={{width:`${mStats.total>0?Math.round(mStats.yang/mStats.total*100):0}%`}} />
+                      <div className="absolute left-0 top-0 h-full bg-emerald-500 rounded" style={{width:`${mStats.total>0?Math.round(mStats.jil/mStats.total*100):0}%`}} />
+                    </div>
+                    <span className="text-emerald-600 font-bold">{mStats.total>0?Math.round(mStats.jil/mStats.total*100):0}%</span>
+                  </>) : viewMode === 'classic' ? (<>
+                    <span className="text-blue-600 font-bold">작성 {filledSlots}/{totalSlots}</span>
+                    <div className="flex-1 h-1 bg-slate-200 rounded overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded" style={{width:`${totalSlots>0?Math.round(filledSlots/totalSlots*100):0}%`}} />
+                    </div>
+                    <span className="text-blue-600 font-bold">{totalSlots>0?Math.round(filledSlots/totalSlots*100):0}%</span>
+                  </>) : (<>
+                    <span className="text-blue-600 font-bold">태스크 {totalTasks}</span>
+                    <span className="text-emerald-600 font-bold">완료 {doneTasks}/{totalTasks}</span>
+                    <span className="text-amber-500 font-bold">진행 {franklinTasks.filter(t=>t.status==='progress').length}</span>
+                    <div className="flex-1 h-1 bg-slate-200 rounded overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded" style={{width:`${totalTasks>0?Math.round(doneTasks/totalTasks*100):0}%`}} />
+                    </div>
+                    <span className="text-emerald-600 font-bold">{totalTasks>0?Math.round(doneTasks/totalTasks*100):0}%</span>
+                  </>)}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ⑥ 타임테이블 (Classic=확장, Franklin/Eisenhower=축소+우측패널) */}
         <div className="flex gap-3 items-start">
