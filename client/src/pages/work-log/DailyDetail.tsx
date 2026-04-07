@@ -80,7 +80,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, todayTasks, tomorrowTasks]);
+  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, todayTasks, tomorrowTasks]);
 
   useEffect(() => {
     // When date or log changes from props, suppress next auto-save cycle
