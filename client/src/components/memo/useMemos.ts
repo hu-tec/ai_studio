@@ -51,6 +51,17 @@ export function useMemos() {
     [persist],
   );
 
+  const updateMemo = useCallback(
+    (id: string, updates: Partial<Omit<MemoItemData, 'id' | 'created_at'>>) => {
+      setItems((prev) => {
+        const next = prev.map((m) => (m.id === id ? { ...m, ...updates } : m));
+        persist(next);
+        return next;
+      });
+    },
+    [persist],
+  );
+
   const deleteMemo = useCallback(
     (id: string) => {
       setItems((prev) => {
@@ -62,5 +73,5 @@ export function useMemos() {
     [persist],
   );
 
-  return { items, loading, addMemo, deleteMemo, pageKey };
+  return { items, loading, addMemo, updateMemo, deleteMemo, pageKey };
 }
