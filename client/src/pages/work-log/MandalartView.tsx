@@ -178,9 +178,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           <div style={{ width:`${stats.total>0?Math.round((stats.yang+stats.jil)/stats.total*100):0}%`, height:'100%', background:'#f59e0b', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
           <div style={{ width:`${stats.total>0?Math.round(stats.jil/stats.total*100):0}%`, height:'100%', background:'#10B981', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
         </div>
-        <span style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>양{stats.yang}</span>
-        <span style={{ fontSize:10, color:'#10B981', fontWeight:700 }}>질{stats.jil}</span>
-        <span style={{ fontSize:10, color:'#94a3b8' }}>/{stats.total}</span>
+        <span style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>양 {stats.yang}/{stats.total}</span>
+        <span style={{ fontSize:10, color:'#10B981', fontWeight:700 }}>질 {stats.jil}/{stats.total}</span>
       </div>
 
       {/* 통계 패널 */}
