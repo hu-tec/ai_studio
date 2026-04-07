@@ -29,6 +29,15 @@ export const api = {
     file: (formData: FormData) =>
       fetch(`${API_BASE}/upload`, { method: 'POST', body: formData }).then((r) => r.json()),
   },
+  pageMemos: {
+    get: (pageKey: string) =>
+      request<any>(`/page-memos/${encodeURIComponent(pageKey)}`).catch(() => null),
+    save: (pageKey: string, data: any) =>
+      request('/page-memos', {
+        method: 'POST',
+        body: JSON.stringify({ memo_id: pageKey, data }),
+      }),
+  },
   // 향후 확장: 각 모듈별 API
   meetings: {},
   attendance: {},

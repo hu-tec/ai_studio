@@ -176,3 +176,11 @@ CREATE TABLE IF NOT EXISTS company_guidelines (
   data TEXT NOT NULL,
   updated_at TEXT DEFAULT (datetime('now'))
 );
+
+-- 페이지별 메모
+CREATE TABLE IF NOT EXISTS page_memos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  memo_id TEXT NOT NULL UNIQUE,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);

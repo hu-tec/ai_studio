@@ -558,16 +558,20 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
             <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 300px)' }}>
               {timeSlots.map((slot, index) => {
-                const linkedTask = franklinTasks.find(t => t.timeSlotId === slot.id);
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
-                const overlapping = franklinTasks.filter(t => {
+                const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭
+                const slotTasks = franklinTasks.filter(t => {
+                  if (t.timeSlotId === slot.id) return true;
                   if (!t.startTime) return false;
                   const tStart = t.startTime.replace(':','');
                   const tEnd = (t.endTime || '23:59').replace(':','');
                   const sStart = slotStart.replace(':','');
                   return sStart >= tStart && sStart < tEnd;
                 });
-                const tasks_ = linkedTask ? [linkedTask] : (viewMode !== 'classic' ? overlapping : []);
+                // 중복 제거 (timeSlotId + 시간 겹침 둘 다 매칭될 수 있음)
+                const seen = new Set<string>();
+                const tasks_ = slotTasks.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
                 const hasFill = tasks_.length > 0 || slot.title;
 
                 return viewMode === 'classic' ? (
@@ -583,23 +587,21 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       let task = franklinTasks.find(t => t.id === droppedText);
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                        const existing = slot.title.split(' / ').filter(Boolean);
-                        if (!existing.includes(task.task)) updateSlot(index, 'title', [...existing, task.task].join(' / '));
+                        // 태스크 시간만 설정 — 시간 겹침으로 자동 표시됨
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id } : t));
                       } else {
-                        const existing = slot.title.split(' / ').filter(Boolean);
-                        if (!existing.includes(droppedText)) updateSlot(index, 'title', [...existing, droppedText].join(' / '));
+                        // 프리텍스트 드롭은 슬롯 제목에 추가
+                        updateSlot(index, 'title', slot.title ? slot.title + ' / ' + droppedText : droppedText);
                       }
                     }}>
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
-                      <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1">
-                        <span className="text-[10px] font-mono text-muted-foreground">{slot.timeSlot}</span>
-                        {linkedTask && (
-                          <span className="text-[8px] font-bold px-1 rounded" style={{ background: FRANKLIN_PRIORITY_CONFIG[linkedTask.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[linkedTask.priority].color }}>
-                            {linkedTask.priority}{linkedTask.number}{FRANKLIN_STATUS_CONFIG[linkedTask.status].icon}
+                      <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1 flex-wrap">
+                        <span className="text-[10px] font-mono text-muted-foreground shrink-0">{slot.timeSlot}</span>
+                        {tasks_.map(t => (
+                          <span key={t.id} className="text-[8px] font-bold px-1 rounded" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
+                            {t.priority}{t.number}{FRANKLIN_STATUS_CONFIG[t.status].icon}
                           </span>
-                        )}
+                        ))}
                       </div>
                       <div className="px-1 py-0.5 md:border-r border-border">
                         <input type="text" value={slot.title} onChange={e => updateSlot(index, 'title', e.target.value)}
@@ -638,13 +640,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       let task = franklinTasks.find(t => t.id === droppedText);
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                        const existing = slot.title.split(' / ').filter(Boolean);
-                        if (!existing.includes(task.task)) updateSlot(index, 'title', [...existing, task.task].join(' / '));
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id } : t));
+                        updateSlot(index, 'title', task.task);
                       } else {
-                        const existing = slot.title.split(' / ').filter(Boolean);
-                        if (!existing.includes(droppedText)) updateSlot(index, 'title', [...existing, droppedText].join(' / '));
+                        updateSlot(index, 'title', droppedText);
                       }
                     }}
                   >
