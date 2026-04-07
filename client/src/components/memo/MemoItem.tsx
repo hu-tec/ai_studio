@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Trash2, Crosshair, Paperclip, ExternalLink, Pencil, Check, X, Loader2 } from 'lucide-react';
 import { api } from '@/api/api';
-import type { MemoItemData, MemoAttachment, MemoTarget } from './memoTypes';
+import { MEMO_CATEGORIES, type MemoItemData, type MemoAttachment, type MemoTarget, type MemoCategory } from './memoTypes';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -40,6 +40,7 @@ interface Props {
 export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) {
   const [editing, setEditing] = useState(false);
   const [editAuthor, setEditAuthor] = useState(item.author);
+  const [editCategory, setEditCategory] = useState<MemoCategory>(item.category || 'memo');
   const [editText, setEditText] = useState(item.text);
   const [editAttachments, setEditAttachments] = useState(item.attachments);
   const [editTarget, setEditTarget] = useState(item.target);
@@ -48,6 +49,7 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
 
   const startEdit = () => {
     setEditAuthor(item.author);
+    setEditCategory(item.category || 'memo');
     setEditText(item.text);
     setEditAttachments([...item.attachments]);
     setEditTarget(item.target);
@@ -59,6 +61,7 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
   const saveEdit = () => {
     onUpdate(item.id, {
       author: editAuthor.trim(),
+      category: editCategory,
       text: editText.trim(),
       attachments: editAttachments,
       target: editTarget,
@@ -109,6 +112,23 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
           placeholder="작성자"
           className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-blue-400 focus:outline-none"
         />
+
+        {/* 분류 */}
+        <div className="flex flex-wrap gap-1">
+          {MEMO_CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setEditCategory(cat.key)}
+              className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-all ${
+                editCategory === cat.key
+                  ? `${cat.color} ring-1 ring-current`
+                  : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
         {/* 대상 뱃지 */}
         {editTarget && (
@@ -208,11 +228,21 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
         </div>
       </div>
 
+      {/* 분류 뱃지 */}
+      {(() => {
+        const cat = MEMO_CATEGORIES.find((c) => c.key === (item.category || 'memo'));
+        return cat ? (
+          <span className={`mb-1.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${cat.color}`}>
+            {cat.label}
+          </span>
+        ) : null;
+      })()}
+
       {/* 대상 뱃지 */}
       {item.target && (
         <button
           onClick={() => scrollToTarget(item.target!.selector)}
-          className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-100 transition-colors"
+          className="mb-1.5 ml-1 inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-100 transition-colors"
         >
           <Crosshair size={11} />
           <span className="max-w-[200px] truncate">{item.target.label}</span>

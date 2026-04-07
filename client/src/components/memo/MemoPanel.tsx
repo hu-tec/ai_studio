@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { StickyNote, MessageSquare } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
+import { StickyNote, MessageSquare, ArrowUpDown } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -11,15 +11,41 @@ import { useMemos } from './useMemos';
 import { MemoItem } from './MemoItem';
 import { MemoInput } from './MemoInput';
 import { ElementTargetOverlay } from './ElementTargetOverlay';
-import type { MemoTarget } from './memoTypes';
+import { MEMO_CATEGORIES, type MemoTarget, type MemoCategory } from './memoTypes';
+
+type SortMode = 'newest' | 'oldest' | 'category';
+
+const SORT_OPTIONS: { key: SortMode; label: string }[] = [
+  { key: 'newest', label: '최신순' },
+  { key: 'oldest', label: '오래된순' },
+  { key: 'category', label: '분류별' },
+];
 
 export function MemoPanel() {
   const { items, loading, addMemo, updateMemo, deleteMemo, pageKey } = useMemos();
   const [open, setOpen] = useState(false);
   const [targeting, setTargeting] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<MemoTarget | null>(null);
-  // 편집 중 대상 지정: 어떤 메모를 편집 중인지 ('new' = 새 메모, memo id = 기존 메모 편집)
   const [targetingFor, setTargetingFor] = useState<string>('new');
+  const [filterCategory, setFilterCategory] = useState<MemoCategory | 'all'>('all');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
+
+  // 필터 + 정렬 적용
+  const filteredItems = useMemo(() => {
+    let result = filterCategory === 'all'
+      ? items
+      : items.filter((m) => (m.category || 'memo') === filterCategory);
+
+    if (sortMode === 'oldest') {
+      result = [...result].reverse();
+    } else if (sortMode === 'category') {
+      const order = MEMO_CATEGORIES.map((c) => c.key);
+      result = [...result].sort((a, b) =>
+        order.indexOf(a.category || 'memo') - order.indexOf(b.category || 'memo')
+      );
+    }
+    return result;
+  }, [items, filterCategory, sortMode]);
 
   const handleStartTargeting = useCallback(() => {
     setTargetingFor('new');
@@ -38,7 +64,6 @@ export function MemoPanel() {
     if (targetingFor === 'new') {
       setPendingTarget(target);
     } else {
-      // 편집 중인 메모에 대상 직접 업데이트
       updateMemo(targetingFor, { target });
     }
     setTimeout(() => setOpen(true), 100);
@@ -49,7 +74,14 @@ export function MemoPanel() {
     setTimeout(() => setOpen(true), 100);
   }, []);
 
+  // 정렬 순환
+  const cycleSortMode = () => {
+    const idx = SORT_OPTIONS.findIndex((o) => o.key === sortMode);
+    setSortMode(SORT_OPTIONS[(idx + 1) % SORT_OPTIONS.length].key);
+  };
+
   const pageName = pageKey.replace(/--/g, ' / ');
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.key === sortMode)!.label;
 
   return (
     <>
@@ -82,6 +114,51 @@ export function MemoPanel() {
             </SheetDescription>
           </SheetHeader>
 
+          {/* 필터 + 정렬 바 */}
+          {items.length > 0 && (
+            <div className="border-b border-slate-100 px-3 py-2 space-y-1.5">
+              {/* 분류 필터 */}
+              <div className="flex flex-wrap gap-1">
+                <button
+                  onClick={() => setFilterCategory('all')}
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-all ${
+                    filterCategory === 'all'
+                      ? 'bg-slate-200 text-slate-700 ring-1 ring-slate-300'
+                      : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                  }`}
+                >
+                  전체 ({items.length})
+                </button>
+                {MEMO_CATEGORIES.map((cat) => {
+                  const count = items.filter((m) => (m.category || 'memo') === cat.key).length;
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => setFilterCategory(cat.key)}
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-all ${
+                        filterCategory === cat.key
+                          ? `${cat.color} ring-1 ring-current`
+                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                      }`}
+                    >
+                      {cat.label} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 정렬 */}
+              <button
+                onClick={cycleSortMode}
+                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <ArrowUpDown size={11} />
+                {currentSortLabel}
+              </button>
+            </div>
+          )}
+
           {/* 메모 리스트 */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {loading ? (
@@ -94,8 +171,12 @@ export function MemoPanel() {
                 <p className="text-sm">이 페이지에 메모가 없습니다</p>
                 <p className="text-xs mt-1">아래에서 메모를 작성하세요</p>
               </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="flex items-center justify-center py-8 text-sm text-slate-400">
+                해당 분류의 메모가 없습니다
+              </div>
             ) : (
-              items.map((item) => (
+              filteredItems.map((item) => (
                 <MemoItem
                   key={item.id}
                   item={item}

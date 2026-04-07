@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { StoreProvider } from '../../pages/interview/interviewStore';
 import { MemoPanel } from '../memo/MemoPanel';
+import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
 
 const C = Construction; // 공사중 아이콘 약어
 
@@ -67,6 +68,7 @@ const NAV_SECTIONS = [
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const memoCounts = useAllMemoCounts();
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 58px)', overflow: 'hidden', background: '#f3f6fb' }}>
@@ -100,6 +102,7 @@ export function AppLayout() {
               )}
               {section.items.map((item) => {
                 const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+                const memoCount = memoCounts[toPageKey(item.to)] || 0;
                 return (
                   <NavLink
                     key={item.to}
@@ -122,7 +125,26 @@ export function AppLayout() {
                     title={item.label}
                   >
                     <item.icon size={16} style={{ flexShrink: 0 }} />
-                    {!collapsed && item.label}
+                    {!collapsed && (
+                      <>
+                        <span style={{ flex: 1 }}>{item.label}</span>
+                        {memoCount > 0 && (
+                          <span style={{
+                            background: '#3b82f6',
+                            color: '#fff',
+                            fontSize: 10,
+                            fontWeight: 600,
+                            borderRadius: 9999,
+                            padding: '1px 6px',
+                            minWidth: 18,
+                            textAlign: 'center',
+                            lineHeight: '16px',
+                          }}>
+                            {memoCount}
+                          </span>
+                        )}
+                      </>
+                    )}
                   </NavLink>
                 );
               })}

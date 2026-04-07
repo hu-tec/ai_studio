@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react';
 import { Send, Paperclip, Crosshair, X, Loader2 } from 'lucide-react';
 import { api } from '@/api/api';
-import type { MemoAttachment, MemoTarget } from './memoTypes';
+import { MEMO_CATEGORIES, type MemoAttachment, type MemoTarget, type MemoCategory } from './memoTypes';
 
 interface Props {
-  onSubmit: (data: { author: string; text: string; attachments: MemoAttachment[]; target: MemoTarget | null }) => void;
+  onSubmit: (data: { author: string; category: MemoCategory; text: string; attachments: MemoAttachment[]; target: MemoTarget | null }) => void;
   onStartTargeting: () => void;
   pendingTarget: MemoTarget | null;
   onClearTarget: () => void;
@@ -14,6 +14,7 @@ const AUTHOR_KEY = 'memo_author';
 
 export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTarget }: Props) {
   const [author, setAuthor] = useState(() => localStorage.getItem(AUTHOR_KEY) || '');
+  const [category, setCategory] = useState<MemoCategory>('memo');
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<MemoAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -49,7 +50,7 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
   const handleSubmit = () => {
     if (!text.trim() && attachments.length === 0) return;
     if (author.trim()) localStorage.setItem(AUTHOR_KEY, author.trim());
-    onSubmit({ author: author.trim(), text: text.trim(), attachments, target: pendingTarget });
+    onSubmit({ author: author.trim(), category, text: text.trim(), attachments, target: pendingTarget });
     setText('');
     setAttachments([]);
     onClearTarget();
@@ -71,6 +72,23 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
         placeholder="작성자 이름"
         className="mb-2 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
       />
+
+      {/* 분류 선택 */}
+      <div className="mb-2 flex flex-wrap gap-1">
+        {MEMO_CATEGORIES.map((cat) => (
+          <button
+            key={cat.key}
+            onClick={() => setCategory(cat.key)}
+            className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-all ${
+              category === cat.key
+                ? `${cat.color} ring-1 ring-current`
+                : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
 
       {/* 대상 뱃지 */}
       {pendingTarget && (

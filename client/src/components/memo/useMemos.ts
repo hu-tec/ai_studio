@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 import { api } from '@/api/api';
 import type { MemoItemData, PageMemoData } from './memoTypes';
 
-function toPageKey(pathname: string): string {
+export function toPageKey(pathname: string): string {
   return pathname.replace(/^\//, '').replace(/\//g, '--') || 'home';
 }
 
@@ -74,4 +74,26 @@ export function useMemos() {
   );
 
   return { items, loading, addMemo, updateMemo, deleteMemo, pageKey };
+}
+
+/** 모든 페이지의 메모 개수 맵: { pageKey: count } */
+export function useAllMemoCounts() {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch('/api/page-memos')
+      .then((r) => r.json())
+      .then((rows: any[]) => {
+        const map: Record<string, number> = {};
+        for (const row of rows) {
+          const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+          const len = data?.items?.length || 0;
+          if (len > 0) map[row.memo_id] = len;
+        }
+        setCounts(map);
+      })
+      .catch(() => {});
+  }, []);
+
+  return counts;
 }
