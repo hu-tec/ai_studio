@@ -35,6 +35,38 @@ app.use('/api/rules', createGenericRouter('rules', 'rule_id'));
 app.use('/api/eval-criteria', createGenericRouter('eval_criteria', 'criteria_id'));
 app.use('/api/work-materials', createGenericRouter('work_materials', 'material_id'));
 
+// 서버 디스크 용량 API
+app.get('/api/disk-usage', (req, res) => {
+  const { execSync } = require('child_process');
+  try {
+    // df: 전체 디스크
+    const dfOut = execSync("df -B1 / | tail -1").toString().trim();
+    const dfParts = dfOut.split(/\s+/);
+    const total = parseInt(dfParts[1]) || 0;
+    const used = parseInt(dfParts[2]) || 0;
+    const available = parseInt(dfParts[3]) || 0;
+
+    // uploads 폴더 크기
+    let uploadsSize = 0;
+    try {
+      const duOut = execSync("du -sb public/uploads 2>/dev/null || echo '0'").toString().trim();
+      uploadsSize = parseInt(duOut.split(/\s/)[0]) || 0;
+    } catch {}
+
+    // DB 파일 크기
+    let dbSize = 0;
+    try {
+      const fs = require('fs');
+      const dbPath = require('path').join(__dirname, 'db', 'hutechc.db');
+      if (fs.existsSync(dbPath)) dbSize = fs.statSync(dbPath).size;
+    } catch {}
+
+    res.json({ total, used, available, uploadsSize, dbSize });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // React SPA fallback (/app/*)
 app.get('/app/*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'app', 'index.html'));

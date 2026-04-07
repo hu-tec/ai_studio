@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
   Image as ImageIcon, ChevronDown, ChevronUp,
-  Search, File, ExternalLink, Download, Eye, Paperclip
+  Search, File, ExternalLink, Download, Eye, Paperclip, HardDrive, Database
 } from 'lucide-react';
 
 /* ── types ── */
@@ -68,6 +68,7 @@ export default function WorkMaterialsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string|null>(null);
   const [previewRow, setPreviewRow] = useState<MaterialRow|null>(null);
+  const [diskInfo, setDiskInfo] = useState<{total:number;used:number;available:number;uploadsSize:number;dbSize:number}|null>(null);
 
   // filters
   const [filterDept, setFilterDept] = useState('전체');
@@ -111,6 +112,7 @@ export default function WorkMaterialsPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetch('/api/disk-usage').then(r=>r.json()).then(setDiskInfo).catch(()=>{}); }, []);
 
   // gather unique authors from data
   const allAuthors = [...new Set(rows.map(r=>r.data.author).filter(Boolean))];
@@ -182,6 +184,31 @@ export default function WorkMaterialsPage() {
           <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}><Plus size={16}/>새 자료</button>
         </div>
       </div>
+
+      {/* 디스크 용량 */}
+      {diskInfo&&(()=>{
+        const pct = diskInfo.total>0?Math.round(diskInfo.used/diskInfo.total*100):0;
+        const gb = (b:number)=>(b/1073741824).toFixed(1);
+        const mb = (b:number)=>(b/1048576).toFixed(1);
+        const barColor = pct>90?'#EF4444':pct>70?'#F59E0B':'#3B82F6';
+        return (
+          <div style={{display:'flex',alignItems:'center',gap:16,padding:'10px 16px',background:'#f8fafc',borderRadius:10,border:'1px solid #e2e8f0',marginBottom:16,fontSize:12,color:'#64748b',flexWrap:'wrap'}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,flex:1,minWidth:200}}>
+              <HardDrive size={15} color={barColor}/>
+              <span style={{fontWeight:600,color:'#475569'}}>서버 디스크</span>
+              <div style={{flex:1,height:8,background:'#e2e8f0',borderRadius:4,overflow:'hidden',maxWidth:200}}>
+                <div style={{height:'100%',width:`${pct}%`,background:barColor,borderRadius:4,transition:'width 0.3s'}}/>
+              </div>
+              <span>{gb(diskInfo.used)}GB / {gb(diskInfo.total)}GB ({pct}%)</span>
+            </div>
+            <div style={{display:'flex',gap:12}}>
+              <span style={{display:'flex',alignItems:'center',gap:4}}><Upload size={12} color="#F59E0B"/>업로드: {mb(diskInfo.uploadsSize)}MB</span>
+              <span style={{display:'flex',alignItems:'center',gap:4}}><Database size={12} color="#8B5CF6"/>DB: {mb(diskInfo.dbSize)}MB</span>
+              <span>여유: {gb(diskInfo.available)}GB</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 필터 */}
       <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:20}}>
@@ -347,6 +374,15 @@ function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateC
    ══════════════════════════════════════════════════════════════ */
 function AttItem({a}:{a:Attachment}) {
   const icons = {image:<ImageIcon size={16} color="#3B82F6"/>,link:<ExternalLink size={16} color="#10B981"/>,file:<File size={16} color="#F59E0B"/>};
+  const broken = !a.url || a.url==='#' || a.url==='local_only' || a.url.startsWith('blob:');
+  if (broken) {
+    return (
+      <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#FEF2F2',borderRadius:8,border:'1px solid #FECACA',color:'#991B1B',fontSize:13}}>
+        {icons[a.type]}<span style={{flex:1}}>{a.name}</span>
+        <span style={{fontSize:11,color:'#EF4444'}}>파일 재업로드 필요</span>
+      </div>
+    );
+  }
   return (
     <a href={a.url} {...(a.type==='link'?{target:'_blank',rel:'noopener noreferrer'}:{download:a.name})} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:13,transition:'border-color 0.15s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='#3B82F6'} onMouseLeave={e=>e.currentTarget.style.borderColor='#e2e8f0'}>
       {icons[a.type]}
