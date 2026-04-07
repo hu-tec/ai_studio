@@ -920,7 +920,7 @@ export default function CompanyGuidelinesPage() {
   const [editingItem, setEditingItem] = useState<GuidelineItem | null>(null);
 
   // Tab
-  const [activeTab, setActiveTab] = useState<GuidelineTab>('프롬프트');
+  const [activeTab, setActiveTab] = useState<GuidelineTab>('사내규정');
 
   // Filters
   const [filterRuleType, setFilterRuleType] = useState<RuleType | '전체'>('전체');

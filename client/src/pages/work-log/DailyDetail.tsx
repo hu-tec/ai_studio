@@ -43,10 +43,23 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
   const mandalartCells = mandalartByPeriod[period] || [];
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
-    setMandalartByPeriod(prev => ({
-      ...prev,
-      [period]: typeof cells === 'function' ? cells(prev[period] || []) : cells,
-    }));
+    setMandalartByPeriod(prev => {
+      const newCells = typeof cells === 'function' ? cells(prev[period] || []) : cells;
+      // 역방향 동기화: 만다라트 셀 → 연결된 FranklinTask achievement/status
+      setFranklinTasks(tasks => {
+        let changed = false;
+        const updated = tasks.map(t => {
+          const cell = newCells.find(c => c.taskId === t.id);
+          if (!cell) return t;
+          const updates: Partial<FranklinTask> = {};
+          if (cell.achievement !== undefined && cell.achievement !== t.achievement) { updates.achievement = cell.achievement; changed = true; }
+          if (cell.status && cell.status !== t.status) { updates.status = cell.status; changed = true; }
+          return changed ? { ...t, ...updates } : t;
+        });
+        return changed ? updated : tasks;
+      });
+      return { ...prev, [period]: newCells };
+    });
   }, [period]);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -159,11 +172,25 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     setTimeInterval(newInterval);
   }, []);
 
-  // Franklin → TimeSlots 정방향 동기화 핸들러
+  // Franklin → TimeSlots + MandalartCells 정방향 동기화 핸들러
   const handleFranklinTasksChange = useCallback((newTasks: FranklinTask[]) => {
     setFranklinTasks(prev => {
       // 동기화: 연결된 과업 변경 → 타임슬롯 자동 반영
       setTimeSlots(slots => syncFranklinToSlots(newTasks, slots, prev));
+      // 동기화: 태스크 변경 → 만다라트 셀 achievement/status 반영
+      setMandalartByPeriod(mp => {
+        const updated = { ...mp };
+        for (const p of ['daily', 'weekly', 'monthly'] as const) {
+          if (!updated[p] || updated[p].length === 0) continue;
+          updated[p] = updated[p].map(cell => {
+            if (!cell.taskId) return cell;
+            const task = newTasks.find(t => t.id === cell.taskId);
+            if (!task) return cell;
+            return { ...cell, text: task.task, achievement: task.achievement, status: task.status };
+          });
+        }
+        return updated;
+      });
       return newTasks;
     });
   }, []);

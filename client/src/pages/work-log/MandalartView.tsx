@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, GripVertical } from 'lucide-react';
-import type { MandalartCell, FranklinTask, FranklinPriority, MandalartPeriod } from './data';
-import { getNextNumber } from './data';
+import type { MandalartCell, FranklinTask, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
+import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
 
 interface MandalartViewProps {
   cells: MandalartCell[];
@@ -23,9 +23,7 @@ function createInitialRoot(periodLabel: string): MandalartCell[] {
   return Array.from({length:9}, (_,i) => emptyCell(i===4 ? periodLabel : ''));
 }
 
-// 달성률 색상
-const ACH_COLORS = ['#e2e8f0','#f59e0b','#f59e0b','#f59e0b','#10B981','#10B981']; // 0=미설정, 1~3=양(주황), 4~5=질(초록)
-const ACH_LABELS = ['','1(양)','2(양)','3(양)','4(질)','5(질)'];
+// ACH_COLORS, ACH_LABELS는 data.tsx에서 import
 
 // 셀 달성률 계산 (하위 셀 평균)
 function calcCellAchievement(cell: MandalartCell): number {
@@ -101,6 +99,16 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       return c;
     };
     onCellsChange(root.map(updateAch));
+  };
+
+  // 상태 순환 설정
+  const setCellStatus = (id: string) => {
+    const updateSt = (c: MandalartCell): MandalartCell => {
+      if (c.id === id) return { ...c, status: cycleStatus(c.status || 'pending') };
+      if (c.children) return { ...c, children: c.children.map(updateSt) };
+      return c;
+    };
+    onCellsChange(root.map(updateSt));
   };
 
   const handleDrillDown = (cell: MandalartCell, idx: number) => {
@@ -258,16 +266,30 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                 </div>
               )}
 
-              {/* 달성률 1~5 버튼 (center 제외, 텍스트 있을 때) */}
+              {/* 상태 + 달성률 (center 제외, 텍스트 있을 때) */}
               {!center && cell.text.trim() && (
                 <div style={{ padding: '0 4px 3px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {/* 달성률 점 */}
-                  <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+                  {/* 상태 + 달성률 한 줄 */}
+                  <div style={{ display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+                    {/* 상태 아이콘 */}
+                    {(() => {
+                      const st = FRANKLIN_STATUS_CONFIG[cell.status || 'pending'];
+                      return (
+                        <button onClick={() => setCellStatus(cell.id)}
+                          title={st.label}
+                          style={{ width: 16, height: 16, borderRadius: 4, border: 'none', cursor: 'pointer', padding: 0,
+                            background: st.bg, color: st.color, fontSize: 10, fontWeight: 700, lineHeight: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {st.icon}
+                        </button>
+                      );
+                    })()}
+                    {/* 달성률 점 */}
                     {[1,2,3,4,5].map(v => (
                       <button key={v} onClick={() => setAchievement(cell.id, v)}
                         title={ACH_LABELS[v]}
                         style={{
-                          width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0,
+                          width: 12, height: 12, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0,
                           background: ach >= v ? ACH_COLORS[v] : '#e2e8f0',
                           opacity: ach >= v ? 1 : 0.4,
                           transition: 'all 0.15s',

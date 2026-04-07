@@ -176,10 +176,28 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
                       {task.task}
                     </span>
                   )}
+                  {/* Achievement dots */}
+                  <div className="flex gap-[2px] shrink-0" onClick={e => e.stopPropagation()}>
+                    {[1,2,3,4,5].map(v => {
+                      const ach = calcTaskAchievement(task);
+                      return (
+                        <button key={v} onClick={() => updateTask(task.id, { achievement: task.achievement === v ? 0 : v })}
+                          className="w-3 h-3 rounded-full border-none p-0 cursor-pointer"
+                          title={ACH_LABELS[v]}
+                          style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />
+                      );
+                    })}
+                  </div>
                   {/* Time */}
                   <span className={`text-[10px] font-mono shrink-0 ${task.startTime ? 'text-blue-600' : 'text-muted-foreground/40'}`}>
                     {timeLabel}
                   </span>
+                  {/* Sub-task count */}
+                  {task.children && task.children.length > 0 && (
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
+                      {task.children.filter(c => c.status === 'done').length}/{task.children.length}
+                    </span>
+                  )}
                   {/* Files indicator */}
                   {task.files && task.files.length > 0 && <Paperclip className="w-3 h-3 text-muted-foreground shrink-0" />}
                   {/* Delete */}
@@ -224,6 +242,41 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
                         placeholder="상세 내용, 피드백, 결과..."
                         className="flex-1 px-2 py-1 border border-border rounded text-[11px] bg-background outline-none resize-none min-h-[50px]"
                         style={{ scrollbarWidth: 'none' }} />
+                    </div>
+                    {/* Sub-tasks */}
+                    <div className="text-[11px]">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-muted-foreground w-12">하위</span>
+                        <input value={newSubText} onChange={e => setNewSubText(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && newSubText.trim()) {
+                              onTasksChange(addSubTask(tasks, task.id, newSubText.trim()));
+                              setNewSubText('');
+                            }
+                          }}
+                          placeholder="서브태스크 입력 후 Enter"
+                          className="flex-1 px-2 py-0.5 border border-border rounded text-[11px] bg-background outline-none" />
+                      </div>
+                      {(task.children || []).map(sub => {
+                        const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
+                        return (
+                          <div key={sub.id} className="flex items-center gap-1.5 pl-14 py-0.5 group/sub">
+                            <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
+                              className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0"
+                              style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
+                            <span className={`flex-1 text-[11px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
+                            <div className="flex gap-[1px] shrink-0">
+                              {[1,2,3,4,5].map(v => (
+                                <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
+                                  className="w-2.5 h-2.5 rounded-full border-none p-0 cursor-pointer"
+                                  style={{ background: (sub.achievement||0) >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: (sub.achievement||0) >= v ? 1 : 0.3 }} />
+                              ))}
+                            </div>
+                            <button onClick={() => onTasksChange(removeSubTask(tasks, task.id, sub.id))}
+                              className="text-muted-foreground hover:text-destructive opacity-0 group-hover/sub:opacity-100 text-[9px] shrink-0">✕</button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

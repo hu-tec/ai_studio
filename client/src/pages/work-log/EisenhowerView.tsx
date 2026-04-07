@@ -1,9 +1,11 @@
 import { useState, DragEvent } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
 import type { FranklinTask, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry } from './data';
 import {
   EISENHOWER_CONFIG, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getQuadrant, setQuadrant, getNextNumber, cycleStatus,
+  ACH_COLORS, ACH_LABELS, calcTaskAchievement,
+  addSubTask, updateSubTask, removeSubTask,
 } from './data';
 
 interface EisenhowerViewProps {
@@ -18,6 +20,8 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   const [dropTarget, setDropTarget] = useState<EisenhowerQuadrant | 'slot' | null>(null);
   const [newText, setNewText] = useState('');
   const [newQuad, setNewQuad] = useState<EisenhowerQuadrant>('q1');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [newSubText, setNewSubText] = useState('');
 
   // Group tasks by quadrant
   const grouped: Record<EisenhowerQuadrant, FranklinTask[]> = { q1: [], q2: [], q3: [], q4: [] };
@@ -178,40 +182,82 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                   items.map(task => {
                     const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
                     const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
+                    const isExpanded = expandedId === task.id;
                     return (
-                      <div
-                        key={task.id}
-                        draggable
-                        onDragStart={e => onDragStart(e, task.id)}
-                        className="flex items-center gap-1.5 px-2 py-1.5 border-b border-border/50 hover:bg-accent/20 cursor-grab active:cursor-grabbing group"
-                      >
-                        <button
-                          onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
-                          className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold shrink-0 transition-all hover:scale-110"
-                          style={{ background: stCfg.bg, color: stCfg.color }}
+                      <div key={task.id} className="border-b border-border/50">
+                        <div
+                          draggable
+                          onDragStart={e => onDragStart(e, task.id)}
+                          className="flex items-center gap-1 px-2 py-1.5 hover:bg-accent/20 cursor-grab active:cursor-grabbing group"
                         >
-                          {stCfg.icon}
-                        </button>
-                        <span className="text-[10px] font-bold shrink-0" style={{ color: pCfg.color }}>
-                          {task.priority}{task.number}
-                        </span>
-                        <span className={`flex-1 text-[12px] truncate ${
-                          task.status === 'done' ? 'line-through text-muted-foreground' :
-                          task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''
-                        }`}>
-                          {task.task}
-                        </span>
-                        {task.timeSlotId && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-blue-100 text-blue-600 font-mono shrink-0">
-                            {timeSlots.find(s => s.id === task.timeSlotId)?.timeSlot.split('~')[0]?.trim() || ''}
+                          <button onClick={() => setExpandedId(isExpanded ? null : task.id)} className="w-3 h-3 shrink-0 text-muted-foreground">
+                            {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                          </button>
+                          <button
+                            onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
+                            className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 hover:scale-110"
+                            style={{ background: stCfg.bg, color: stCfg.color }}
+                          >{stCfg.icon}</button>
+                          <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>
+                            {task.priority}{task.number}
                           </span>
+                          <span className={`flex-1 text-[11px] truncate ${
+                            task.status === 'done' ? 'line-through text-muted-foreground' :
+                            task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''
+                          }`}>{task.task}</span>
+                          {/* Achievement dots */}
+                          <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
+                            {[1,2,3,4,5].map(v => {
+                              const ach = calcTaskAchievement(task);
+                              return <button key={v} onClick={() => updateTask(task.id, { achievement: task.achievement === v ? 0 : v })}
+                                className="w-2.5 h-2.5 rounded-full border-none p-0 cursor-pointer"
+                                style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />;
+                            })}
+                          </div>
+                          {task.children && task.children.length > 0 && (
+                            <span className="text-[8px] px-1 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
+                              {task.children.filter(c => c.status === 'done').length}/{task.children.length}
+                            </span>
+                          )}
+                          <button onClick={() => removeTask(task.id)}
+                            className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[9px] shrink-0">✕</button>
+                        </div>
+                        {/* Expanded: sub-tasks */}
+                        {isExpanded && (
+                          <div className="px-3 py-1.5 bg-accent/5 border-t border-border/30 space-y-1">
+                            <div className="flex items-center gap-1">
+                              <input value={newSubText} onChange={e => setNewSubText(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && newSubText.trim()) {
+                                    onTasksChange(addSubTask(tasks, task.id, newSubText.trim()));
+                                    setNewSubText('');
+                                  }
+                                }}
+                                placeholder="서브태스크 추가 (Enter)"
+                                className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none" />
+                            </div>
+                            {(task.children || []).map(sub => {
+                              const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
+                              return (
+                                <div key={sub.id} className="flex items-center gap-1 pl-2 group/sub">
+                                  <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
+                                    className="w-3.5 h-3.5 rounded flex items-center justify-center text-[8px] font-bold shrink-0"
+                                    style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
+                                  <span className={`flex-1 text-[10px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
+                                  <div className="flex gap-[1px] shrink-0">
+                                    {[1,2,3,4,5].map(v => (
+                                      <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
+                                        className="w-2 h-2 rounded-full border-none p-0 cursor-pointer"
+                                        style={{ background: (sub.achievement||0) >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: (sub.achievement||0) >= v ? 1 : 0.3 }} />
+                                    ))}
+                                  </div>
+                                  <button onClick={() => onTasksChange(removeSubTask(tasks, task.id, sub.id))}
+                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover/sub:opacity-100 text-[8px] shrink-0">✕</button>
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
-                        <button
-                          onClick={() => removeTask(task.id)}
-                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[10px] shrink-0"
-                        >
-                          ✕
-                        </button>
                       </div>
                     );
                   })
