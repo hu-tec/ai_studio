@@ -943,6 +943,69 @@ export default function CompanyGuidelinesPage() {
 
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 기존 규정관리 데이터 → 새 GuidelineItem[] 변환
+  const migrateOldRules = async (): Promise<GuidelineItem[]> => {
+    try {
+      const res = await fetch('/api/rules/company-rules');
+      if (!res.ok) return [];
+      const row = await res.json();
+      if (!row?.data) return [];
+      const d = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+      const migrated: GuidelineItem[] = [];
+      let counter = 0;
+      const ruleTypeMap: Record<string, RuleType> = { '규정': '규정', '준규정': '준규정', '선택사항': '선택규정' };
+
+      // 회사 전체 지침 → 사내규정 탭
+      const addRules = (ruleSet: any, section: string, group: string) => {
+        if (!ruleSet) return;
+        for (const [oldType, newType] of Object.entries(ruleTypeMap)) {
+          const arr = ruleSet[oldType];
+          if (!Array.isArray(arr)) continue;
+          for (const rule of arr) {
+            if (!rule.text?.trim()) continue;
+            counter++;
+            migrated.push({
+              id: `migrated-${counter}`,
+              tab: '사내규정',
+              workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
+              compWork: section === 'company' ? '' : '',
+              compDept: section === 'departments' ? group : '',
+              compPos: section === 'ranks' ? group : '',
+              compContract: '',
+              author: section === 'company' ? '회사' : group,
+              title: rule.text.length > 50 ? rule.text.slice(0, 50) + '...' : rule.text,
+              content: rule.text,
+              ruleType: newType as RuleType,
+              priority: newType === '규정' ? 'A' : newType === '준규정' ? 'B' : 'C',
+              number: counter,
+              status: 'pending',
+              urgent: newType === '규정',
+              important: newType !== '선택규정',
+              note: section === 'company' ? '회사 전체 지침' : section === 'departments' ? `${group} 부서 지침` : `${group} 직급 지침`,
+              created_at: new Date().toISOString(),
+            });
+          }
+        }
+      };
+
+      // 회사 전체
+      addRules(d.companyData, 'company', '');
+      // 부서별
+      if (d.deptData) {
+        for (const [dept, ruleSet] of Object.entries(d.deptData)) {
+          addRules(ruleSet, 'departments', dept);
+        }
+      }
+      // 직급별
+      if (d.rankData) {
+        for (const [rank, ruleSet] of Object.entries(d.rankData)) {
+          addRules(ruleSet, 'ranks', rank);
+        }
+      }
+      return migrated;
+    } catch { return []; }
+  };
+
   // Load data
   useEffect(() => {
     (async () => {
@@ -950,17 +1013,27 @@ export default function CompanyGuidelinesPage() {
         const res = await fetch('/api/company-guidelines');
         const raw = await res.json();
         if (Array.isArray(raw) && raw.length > 0) {
-          // Find the single data row
           const row = raw[0];
           const d = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
           setItems(d.items || []);
           setMandalartCells(d.mandalartCells || []);
         } else {
-          // Load from localStorage fallback
-          try {
-            const ls = localStorage.getItem(DATA_KEY);
-            if (ls) { const d = JSON.parse(ls); setItems(d.items || []); setMandalartCells(d.mandalartCells || []); }
-          } catch {}
+          // 새 테이블이 비어있으면 → 기존 규정관리 데이터 마이그레이션
+          const migrated = await migrateOldRules();
+          if (migrated.length > 0) {
+            setItems(migrated);
+            // 자동 저장
+            const payload = { items: migrated, mandalartCells: [] };
+            localStorage.setItem(DATA_KEY, JSON.stringify(payload));
+            await fetch('/api/company-guidelines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guideline_id: 'main', data: payload }) });
+            toast.success(`기존 규정관리 데이터 ${migrated.length}건이 마이그레이션되었습니다`);
+          } else {
+            // localStorage fallback
+            try {
+              const ls = localStorage.getItem(DATA_KEY);
+              if (ls) { const d = JSON.parse(ls); setItems(d.items || []); setMandalartCells(d.mandalartCells || []); }
+            } catch {}
+          }
         }
       } catch {
         try {
