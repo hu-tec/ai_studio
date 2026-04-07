@@ -4,13 +4,16 @@ import { api } from '@/api/api';
 import type { MemoAttachment, MemoTarget } from './memoTypes';
 
 interface Props {
-  onSubmit: (data: { text: string; attachments: MemoAttachment[]; target: MemoTarget | null }) => void;
+  onSubmit: (data: { author: string; text: string; attachments: MemoAttachment[]; target: MemoTarget | null }) => void;
   onStartTargeting: () => void;
   pendingTarget: MemoTarget | null;
   onClearTarget: () => void;
 }
 
+const AUTHOR_KEY = 'memo_author';
+
 export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTarget }: Props) {
+  const [author, setAuthor] = useState(() => localStorage.getItem(AUTHOR_KEY) || '');
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<MemoAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -45,7 +48,8 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
 
   const handleSubmit = () => {
     if (!text.trim() && attachments.length === 0) return;
-    onSubmit({ text: text.trim(), attachments, target: pendingTarget });
+    if (author.trim()) localStorage.setItem(AUTHOR_KEY, author.trim());
+    onSubmit({ author: author.trim(), text: text.trim(), attachments, target: pendingTarget });
     setText('');
     setAttachments([]);
     onClearTarget();
@@ -60,6 +64,14 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
 
   return (
     <div className="border-t border-slate-200 bg-slate-50 p-3">
+      {/* 작성자 */}
+      <input
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+        placeholder="작성자 이름"
+        className="mb-2 w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+      />
+
       {/* 대상 뱃지 */}
       {pendingTarget && (
         <div className="mb-2 flex items-center gap-1">

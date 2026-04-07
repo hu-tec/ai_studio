@@ -12,6 +12,7 @@ export interface MemoTarget {
 
 export interface MemoItemData {
   id: string;
+  author: string;
   text: string;
   attachments: MemoAttachment[];
   target: MemoTarget | null;

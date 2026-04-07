@@ -36,9 +36,14 @@ interface Props {
 export function MemoItem({ item, onDelete }: Props) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
-      {/* 헤더: 시간 + 삭제 */}
+      {/* 헤더: 작성자 + 시간 + 삭제 */}
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs text-slate-400">{timeAgo(item.created_at)}</span>
+        <div className="flex items-center gap-1.5">
+          {item.author && (
+            <span className="text-xs font-medium text-slate-600">{item.author}</span>
+          )}
+          <span className="text-xs text-slate-400">{timeAgo(item.created_at)}</span>
+        </div>
         <button
           onClick={() => onDelete(item.id)}
           className="rounded p-0.5 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-colors"
