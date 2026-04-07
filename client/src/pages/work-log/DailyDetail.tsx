@@ -564,7 +564,24 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
                 return viewMode === 'classic' ? (
                   /* Classic: 확장 — 시간 + 제목 + 내용 + AI + 예정 인라인 편집 */
-                  <div key={slot.id} className="border-b border-border/50 last:border-b-0">
+                  <div key={slot.id} className="border-b border-border/50 last:border-b-0"
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragLeave={e => { e.currentTarget.style.background = ''; }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      e.currentTarget.style.background = '';
+                      const droppedText = e.dataTransfer.getData('text/plain');
+                      if (!droppedText) return;
+                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                      let task = franklinTasks.find(t => t.id === droppedText);
+                      if (!task) task = franklinTasks.find(t => t.task === droppedText);
+                      if (task) {
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        updateSlot(index, 'title', task.task);
+                      } else {
+                        updateSlot(index, 'title', droppedText);
+                      }
+                    }}>
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
                       <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1">
                         <span className="text-[10px] font-mono text-muted-foreground">{slot.timeSlot}</span>
@@ -610,12 +627,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       if (!droppedText) return;
                       const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
                       // 태스크 ID로 매칭 시도
-                      const task = franklinTasks.find(t => t.id === droppedText);
+                      let task = franklinTasks.find(t => t.id === droppedText);
+                      // ID 매칭 실패 시 텍스트로 매칭 (만다라트 셀 드래그)
+                      if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        setFranklinTasks(prev => prev.map(t => t.id === droppedText ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
                         updateSlot(index, 'title', task.task);
                       } else {
-                        // 만다라트 셀 텍스트 직접 배정
                         updateSlot(index, 'title', droppedText);
                       }
                     }}
