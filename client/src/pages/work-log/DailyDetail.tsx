@@ -325,10 +325,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
             className="w-full px-3 py-1.5 flex items-center justify-between bg-accent/10 hover:bg-accent/20 transition-colors"
           >
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-              <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold text-[10px]">{position}</span>
-              <span>{emp.name}</span>
-              <span className="text-muted-foreground/40">·</span>
-              <span>{emp.department}</span>
+              <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold text-[10px]">{emp.name}</span>
+              <span className="text-[10px]">{position} · {emp.department}</span>
               {hpCategories.length > 0 && <>
                 <span className="text-muted-foreground/40">·</span>
                 <span className="text-emerald-600">{hpCategories.join(', ')}</span>

@@ -125,8 +125,13 @@ export function EmployeePage() {
   const [newEmpName, setNewEmpName] = useState('');
   const [editMode, setEditMode] = useState(false);
 
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameText, setRenameText] = useState('');
+
   const handleRemoveEmployee = (id: string) => {
     if (employees.length <= 1) return;
+    const emp = employees.find(e => e.id === id);
+    if (!confirm(`'${emp?.name}' 작성자를 삭제하시겠습니까?`)) return;
     removeEmployee(id);
     if (activeEmpId === id) {
       const next = employees[0]?.id || '';
@@ -134,6 +139,15 @@ export function EmployeePage() {
       setCurrentEmployee(next);
     }
     setEditMode(false);
+  };
+
+  const handleRenameEmployee = (id: string) => {
+    if (!renameText.trim()) return;
+    const emp = employees.find(e => e.id === id);
+    if (emp) emp.name = renameText.trim();
+    try { localStorage.setItem('custom-employees', JSON.stringify(employees.filter(e => e.id.startsWith('emp-custom')))); } catch {}
+    setRenamingId(null);
+    setRenameText('');
   };
 
   const activeEmployee = employees.find(e => e.id === activeEmpId) || employees[0];
@@ -272,15 +286,24 @@ export function EmployeePage() {
           <div className="flex items-center gap-1">
             {employees.map(emp => (
               <div key={emp.id} className="relative flex items-center">
-                <button onClick={() => handleSwitchEmployee(emp.id)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
-                    activeEmpId === emp.id
-                      ? 'bg-blue-50 text-blue-600 border-blue-300 font-bold'
-                      : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
-                  }`}>
-                  {emp.name}
-                </button>
-                {editMode && employees.length > 1 && (
+                {editMode && renamingId === emp.id ? (
+                  <div className="flex items-center gap-0.5">
+                    <input value={renameText} onChange={e => setRenameText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleRenameEmployee(emp.id); if (e.key === 'Escape') setRenamingId(null); }}
+                      autoFocus className="w-16 px-2 py-0.5 text-[11px] border border-blue-400 rounded-full outline-none" />
+                    <button onClick={() => handleRenameEmployee(emp.id)} className="text-[9px] text-blue-500 font-bold">확인</button>
+                  </div>
+                ) : (
+                  <button onClick={() => editMode ? (setRenamingId(emp.id), setRenameText(emp.name)) : handleSwitchEmployee(emp.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                      activeEmpId === emp.id
+                        ? 'bg-blue-50 text-blue-600 border-blue-300 font-bold'
+                        : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                    } ${editMode ? 'border-dashed cursor-text' : ''}`}>
+                    {emp.name}
+                  </button>
+                )}
+                {editMode && employees.length > 1 && renamingId !== emp.id && (
                   <button onClick={() => handleRemoveEmployee(emp.id)}
                     className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center hover:bg-red-600 shadow">
                     ✕
