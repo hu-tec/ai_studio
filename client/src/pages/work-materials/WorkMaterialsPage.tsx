@@ -152,12 +152,8 @@ export default function WorkMaterialsPage() {
                 {row.data.title}
                 {isOpen?<ChevronUp size={13} color="#94a3b8"/>:<ChevronDown size={13} color="#94a3b8"/>}
               </div>
-              <div onClick={e=>{e.stopPropagation();setEditingContentId(row.material_id);setEditingContentValue(row.data.content);}} style={{fontSize:12,color:editingContentId===row.material_id?'#1e293b':'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',minHeight:20,borderRadius:4,padding:'2px 4px',background:editingContentId===row.material_id?'#fff':'transparent',border:editingContentId===row.material_id?'1px solid #3B82F6':'1px solid transparent',transition:'all 0.15s'}}>
-                {editingContentId===row.material_id?(
-                  <textarea value={editingContentValue} onChange={e=>setEditingContentValue(e.target.value)} onBlur={()=>handleInlineContentSave(row)} onKeyDown={e=>{if(e.key==='Escape'){setEditingContentId(null);}if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleInlineContentSave(row);}}} autoFocus rows={3} style={{width:'100%',fontSize:12,border:'none',outline:'none',resize:'vertical',lineHeight:1.5,fontFamily:'inherit',padding:0,background:'transparent'}}/>
-                ):(
-                  <span title="클릭하여 수정" style={{display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]||<span style={{color:'#cbd5e1',fontStyle:'italic'}}>내용 없음</span>}</span>
-                )}
+              <div onClick={e=>{e.stopPropagation();if(editingContentId!==row.material_id){setEditingContentId(row.material_id);setEditingContentValue(row.data.content);}}} style={{fontSize:12,color:'#94a3b8',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',minHeight:20,borderRadius:4,padding:'2px 4px',transition:'all 0.15s'}} title="클릭하여 수정">
+                <span style={{display:'block',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.content.split('\n')[0]||<span style={{color:'#cbd5e1',fontStyle:'italic'}}>내용 없음</span>}</span>
               </div>
               <div style={{fontSize:11,color:'#94a3b8',display:'flex',gap:4,flexWrap:'wrap',overflow:'hidden',maxHeight:20,alignItems:'center'}} onClick={e=>e.stopPropagation()}>
                 {atts.length===0?<span>—</span>:atts.map((a,i)=>(
@@ -175,6 +171,18 @@ export default function WorkMaterialsPage() {
                 <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:3}}><Trash2 size={13} color="#ef4444"/></button>
               </div>
             </div>
+            {editingContentId===row.material_id&&(
+              <div style={{padding:'12px 24px 16px',background:'#FFFBEB',borderBottom:'1px solid #FDE68A'}} onClick={e=>e.stopPropagation()}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                  <span style={{fontSize:13,fontWeight:600,color:'#92400E'}}>내용 수정</span>
+                  <div style={{display:'flex',gap:6}}>
+                    <button onClick={()=>setEditingContentId(null)} style={{padding:'4px 12px',fontSize:12,background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:6,cursor:'pointer',color:'#64748b'}}>취소 (Esc)</button>
+                    <button onClick={()=>handleInlineContentSave(row)} style={{padding:'4px 12px',fontSize:12,background:'#3B82F6',color:'#fff',border:'none',borderRadius:6,cursor:'pointer',fontWeight:600}}>저장 (Ctrl+Enter)</button>
+                  </div>
+                </div>
+                <textarea value={editingContentValue} onChange={e=>setEditingContentValue(e.target.value)} onKeyDown={e=>{if(e.key==='Escape'){setEditingContentId(null);}if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();handleInlineContentSave(row);}}} autoFocus rows={Math.max(5, editingContentValue.split('\n').length+1)} style={{width:'100%',fontSize:14,border:'1px solid #FDE68A',outline:'none',resize:'vertical',lineHeight:1.7,fontFamily:'inherit',padding:'10px 12px',background:'#fff',borderRadius:8,boxSizing:'border-box'}}/>
+              </div>
+            )}
             {isOpen&&(
               <div style={{padding:'16px 24px 20px',background:'#fafbfd',borderBottom:'1px solid #e2e8f0'}}>
                 <div style={{fontSize:14,color:'#334155',lineHeight:1.7,whiteSpace:'pre-wrap',marginBottom:atts.length>0?16:0}}>{row.data.content}</div>

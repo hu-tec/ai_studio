@@ -1,4 +1,4 @@
-import { useState, DragEvent } from 'react';
+import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, Plus, X, GripVertical } from 'lucide-react';
 import type { MandalartCell, FranklinTask, FranklinPriority } from './data';
 import { getNextNumber } from './data';
@@ -11,20 +11,35 @@ interface MandalartViewProps {
   onSlotTitleChange: (index: number, title: string) => void;
 }
 
-const POSITIONS = [0,1,2,3,4,5,6,7,8]; // 0-8, center=4
-const SURROUND = [0,1,2,3,5,6,7,8]; // center 제외
-
+let cellCounter = 0;
 function emptyCell(text = ''): MandalartCell {
-  return { id: `mc-${Date.now()}-${Math.random().toString(36).slice(2,6)}`, text, children: [] };
+  return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [] };
+}
+
+function createInitialRoot(): MandalartCell[] {
+  return Array.from({length:9}, (_,i) => emptyCell(i===4 ? '오늘 목표' : ''));
 }
 
 export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange }: MandalartViewProps) {
-  const [drillId, setDrillId] = useState<string | null>(null); // 하위 3x3 보기 중인 셀 ID
+  const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
+  const initialized = useRef(false);
 
-  // 루트 셀 보장 (9칸)
-  const root: MandalartCell[] = cells.length >= 9 ? cells : Array.from({length:9}, (_,i) => cells[i] || emptyCell(i===4 ? '오늘 목표' : ''));
+  // 초기 셀 생성 (한 번만)
+  useEffect(() => {
+    if (!initialized.current && (!cells || cells.length < 9)) {
+      initialized.current = true;
+      const initial = createInitialRoot();
+      onCellsChange(initial);
+    }
+  }, []);
+
+  // cells가 아직 초기화 안 됐으면 빈 배열 → useEffect에서 초기화됨
+  if (!cells || cells.length < 9) {
+    return <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:13}}>만다라트 초기화 중...</div>;
+  }
+  const root = cells;
 
   // 현재 보고 있는 3x3
   const drillCell = drillId ? root.find(c => c.id === drillId) : null;
