@@ -42,7 +42,7 @@ function calcGridAchievement(grid: MandalartCell[]): { filled: number; total: nu
   const jil = filled.filter(c => (c.achievement || 0) >= 4).length;
   const sum = filled.reduce((s, c) => s + (c.achievement || 0), 0);
   const avg = total > 0 ? Math.round(sum / total * 10) / 10 : 0;
-  return { filled, total, yang, jil, avg };
+  return { filled: filled.length, total, yang, jil, avg };
 }
 
 export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange }: MandalartViewProps) {
@@ -175,7 +175,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       <div style={{ display:'flex', alignItems:'center', gap:6, padding:'4px 8px', background:'#f8fafc', borderRadius:6, border:'1px solid #e2e8f0' }}>
         <span style={{ fontSize:10, color:'#64748b', fontWeight:600 }}>달성</span>
         <div style={{ flex:1, height:6, background:'#e2e8f0', borderRadius:3, overflow:'hidden', position:'relative' }}>
-          <div style={{ width:`${stats.total>0?Math.round((stats.yang+stats.jil)/stats.total*100):0}%`, height:'100%', background:'#f59e0b', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
+          <div style={{ width:`${stats.total>0?Math.round(stats.yang/stats.total*100):0}%`, height:'100%', background:'#f59e0b', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
           <div style={{ width:`${stats.total>0?Math.round(stats.jil/stats.total*100):0}%`, height:'100%', background:'#10B981', borderRadius:3, transition:'width 0.3s', position:'absolute', left:0, top:0 }} />
         </div>
         <span style={{ fontSize:10, color:'#f59e0b', fontWeight:700 }}>양 {stats.yang}/{stats.total}</span>
@@ -192,7 +192,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
             <StatCard label="작성" value={`${stats.filled}`} sub="/8" color="#3B82F6" />
             <StatCard label="양(1~3)" value={`${stats.yang}`} sub={`/${stats.total}`} color="#f59e0b" />
             <StatCard label="질(4~5)" value={`${stats.jil}`} sub={`/${stats.total}`} color="#10B981" />
-            <StatCard label="달성률" value={`${stats.total>0?Math.round((stats.yang+stats.jil)/stats.total*100):0}`} sub="%" color={stats.jil>=stats.total&&stats.total>0?'#10B981':'#f59e0b'} />
+            <StatCard label="달성률" value={`${stats.total>0?Math.round(stats.jil/stats.total*100):0}`} sub="%" color={stats.jil>=stats.total&&stats.total>0?'#10B981':'#f59e0b'} />
           </div>
           {/* 항목별 달성률 */}
           <div style={{ marginTop:6, display:'flex', flexDirection:'column', gap:2 }}>
