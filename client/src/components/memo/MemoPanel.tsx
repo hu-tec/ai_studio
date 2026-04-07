@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { StickyNote, MessageSquare } from 'lucide-react';
 import {
   Sheet,
@@ -14,27 +14,40 @@ import { ElementTargetOverlay } from './ElementTargetOverlay';
 import type { MemoTarget } from './memoTypes';
 
 export function MemoPanel() {
-  const { items, loading, addMemo, deleteMemo, pageKey } = useMemos();
+  const { items, loading, addMemo, updateMemo, deleteMemo, pageKey } = useMemos();
   const [open, setOpen] = useState(false);
   const [targeting, setTargeting] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<MemoTarget | null>(null);
+  // 편집 중 대상 지정: 어떤 메모를 편집 중인지 ('new' = 새 메모, memo id = 기존 메모 편집)
+  const [targetingFor, setTargetingFor] = useState<string>('new');
 
-  const handleStartTargeting = () => {
+  const handleStartTargeting = useCallback(() => {
+    setTargetingFor('new');
     setOpen(false);
-    // Sheet 닫힌 후 오버레이 표시
     setTimeout(() => setTargeting(true), 350);
-  };
+  }, []);
 
-  const handleTargetSelect = (target: MemoTarget) => {
-    setTargeting(false);
-    setPendingTarget(target);
-    setTimeout(() => setOpen(true), 100);
-  };
+  const handleEditTargeting = useCallback((editId: string) => {
+    setTargetingFor(editId);
+    setOpen(false);
+    setTimeout(() => setTargeting(true), 350);
+  }, []);
 
-  const handleTargetCancel = () => {
+  const handleTargetSelect = useCallback((target: MemoTarget) => {
+    setTargeting(false);
+    if (targetingFor === 'new') {
+      setPendingTarget(target);
+    } else {
+      // 편집 중인 메모에 대상 직접 업데이트
+      updateMemo(targetingFor, { target });
+    }
+    setTimeout(() => setOpen(true), 100);
+  }, [targetingFor, updateMemo]);
+
+  const handleTargetCancel = useCallback(() => {
     setTargeting(false);
     setTimeout(() => setOpen(true), 100);
-  };
+  }, []);
 
   const pageName = pageKey.replace(/--/g, ' / ');
 
@@ -83,7 +96,13 @@ export function MemoPanel() {
               </div>
             ) : (
               items.map((item) => (
-                <MemoItem key={item.id} item={item} onDelete={deleteMemo} />
+                <MemoItem
+                  key={item.id}
+                  item={item}
+                  onUpdate={updateMemo}
+                  onDelete={deleteMemo}
+                  onStartTargeting={handleEditTargeting}
+                />
               ))
             )}
           </div>
