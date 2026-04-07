@@ -186,7 +186,15 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           const dist = Math.abs((ns[0] * 60 + ns[1]) - oldMinutes);
           if (dist < bestDist) { bestDist = dist; bestIdx = i; }
         }
-        newSlots[bestIdx] = { ...newSlots[bestIdx], title: filled.title, content: filled.content, planned: filled.planned, aiDetail: filled.aiDetail };
+        // 병합: 여러 슬롯이 같은 새 슬롯에 매핑될 때 제목/내용 합침 (중복 제거)
+        const cur = newSlots[bestIdx];
+        const mergeField = (existing: string, adding: string) => {
+          if (!adding) return existing;
+          const parts = existing.split(' / ').filter(Boolean);
+          adding.split(' / ').forEach(p => { if (p && !parts.includes(p)) parts.push(p); });
+          return parts.join(' / ');
+        };
+        newSlots[bestIdx] = { ...cur, title: mergeField(cur.title, filled.title), content: mergeField(cur.content, filled.content), planned: mergeField(cur.planned, filled.planned), aiDetail: cur.aiDetail || filled.aiDetail };
       }
       return newSlots;
     });
