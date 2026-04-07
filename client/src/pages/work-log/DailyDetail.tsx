@@ -565,19 +565,23 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 return viewMode === 'classic' ? (
                   /* Classic: 확장 — 시간 + 제목 + 내용 + AI + 예정 인라인 편집 */
                   <div key={slot.id} className="border-b border-border/50 last:border-b-0"
-                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
-                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
                       let task = franklinTasks.find(t => t.id === droppedText);
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        // 복사 배정: 슬롯에 태스크 이름 복사, 태스크 미배정이면 이 슬롯에 연결
+                        if (!task.timeSlotId) {
+                          const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                          setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        }
                         updateSlot(index, 'title', task.task);
+                        if (task.note) updateSlot(index, 'content', task.note);
                       } else {
                         updateSlot(index, 'title', droppedText);
                       }
@@ -615,23 +619,24 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                     </div>
                   </div>
                 ) : (
-                  /* Franklin/Eisenhower: 축소 — 시간 + 블록 (DnD drop zone) */
+                  /* Franklin/Eisenhower/Mandalart: 축소 — 시간 + 블록 (DnD drop zone) */
                   <div key={slot.id}
                     className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
-                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
-                      const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                      // 태스크 ID로 매칭 시도
                       let task = franklinTasks.find(t => t.id === droppedText);
-                      // ID 매칭 실패 시 텍스트로 매칭 (만다라트 셀 드래그)
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        // 복사 배정: 슬롯에 태스크 복사, 미배정이면 이 슬롯 연결
+                        if (!task.timeSlotId) {
+                          const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                          setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        }
                         updateSlot(index, 'title', task.task);
                       } else {
                         updateSlot(index, 'title', droppedText);
