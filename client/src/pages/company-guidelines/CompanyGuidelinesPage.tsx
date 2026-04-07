@@ -1,10 +1,14 @@
-import { useState, useEffect, useRef, useCallback, DragEvent } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
-  Plus, Trash2, Pencil, X, Search, Eye, ChevronDown, ChevronUp,
-  List, Target, Grid2x2, LayoutGrid, AlertTriangle, ChevronRight,
-  ArrowLeft, GripVertical, BarChart3, Paperclip,
+  Plus, Trash2, Pencil, X, Search, ChevronDown, ChevronUp,
+  List, Target, Grid2x2, LayoutGrid,
 } from 'lucide-react';
+import { FranklinView } from '../work-log/FranklinView';
+import { EisenhowerView } from '../work-log/EisenhowerView';
+import { MandalartView } from '../work-log/MandalartView';
+import type { FranklinTask, TimeSlotEntry, MandalartCell as WLMandalartCell } from '../work-log/data';
+import { createEmptyTimeSlots } from '../work-log/data';
 
 /* ══════════════════════════════════════════════════════════════
    Types  (업무자료 분류 + 업무일지 Franklin/Eisenhower/Mandalart)
@@ -472,441 +476,41 @@ function chipStyle(bg: string, color: string, border: string) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Franklin View (업무일지에서 그대로 가져옴)
+   Adapter: GuidelineItem[] ↔ FranklinTask[] (업무일지 뷰 재사용)
    ══════════════════════════════════════════════════════════════ */
-function FranklinViewPanel({ items, onUpdate, onDelete }: {
-  items: GuidelineItem[];
-  onUpdate: (id: string, updates: Partial<GuidelineItem>) => void;
-  onDelete: (id: string) => void;
-}) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<FranklinPriority | null>(null);
-  const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
+function itemsToTasks(items: GuidelineItem[]): FranklinTask[] {
+  return items.map(i => ({
+    id: i.id, priority: i.priority, number: i.number, task: i.title,
+    status: i.status, note: i.content, urgent: i.urgent, important: i.important,
+    achievement: 0,
+  }));
+}
 
-  const onDragStart = (e: DragEvent, id: string) => { setDragId(id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id); };
-  const onDragOver = (e: DragEvent, target: FranklinPriority) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTarget(target); };
-  const onDragLeave = () => setDropTarget(null);
-  const onDropPriority = (e: DragEvent, priority: FranklinPriority) => {
-    e.preventDefault(); setDropTarget(null);
-    if (!dragId) return;
-    const eis = syncPriorityToEisenhower(priority);
-    onUpdate(dragId, { priority, number: getNextNumber(items, priority), ...eis });
-    setDragId(null);
-  };
-
-  const sorted = [...items].sort((a, b) => {
-    const po = { A: 0, B: 1, C: 2, D: 3 };
-    if (po[a.priority] !== po[b.priority]) return po[a.priority] - po[b.priority];
-    return a.number - b.number;
+function tasksToItemUpdates(tasks: FranklinTask[], items: GuidelineItem[]): GuidelineItem[] {
+  const taskMap = new Map(tasks.map(t => [t.id, t]));
+  const updated = items.map(i => {
+    const t = taskMap.get(i.id);
+    if (!t) return i;
+    return { ...i, priority: t.priority, number: t.number, title: t.task, status: t.status, urgent: t.urgent ?? i.urgent, important: t.important ?? i.important };
   });
-
-  return (
-    <div className="space-y-3">
-      {/* Task list */}
-      <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ background: 'rgba(0,0,0,0.03)', padding: '6px 12px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 11, fontWeight: 600 }}>업무 지침 목록 (Franklin)</span>
-          <div style={{ display: 'flex', gap: 8, fontSize: 10 }}>
-            {priorities.map(p => {
-              const cnt = items.filter(t => t.priority === p).length;
-              return cnt > 0 ? <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color, fontWeight: 700 }}>{p}:{cnt}</span> : null;
-            })}
-            <span style={{ color: '#9ca3af' }}>
-              {FRANKLIN_STATUS_CONFIG.done.icon}{items.filter(t => t.status === 'done').length}{' '}
-              {FRANKLIN_STATUS_CONFIG.progress.icon}{items.filter(t => t.status === 'progress').length}{' '}
-              {FRANKLIN_STATUS_CONFIG.pending.icon}{items.filter(t => t.status === 'pending').length}
-            </span>
-          </div>
-        </div>
-
-        <div style={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', scrollbarWidth: 'none' as any }}>
-          {sorted.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 11, color: '#94a3b8' }}>지침을 추가하세요</div>
-          ) : sorted.map(task => {
-            const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
-            const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
-            const isExpanded = expandedId === task.id;
-            const rc = RULE_COLORS[task.ruleType];
-
-            return (
-              <div key={task.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
-                onDragOver={e => onDragOver(e, task.priority)} onDragLeave={onDragLeave} onDrop={e => onDropPriority(e, task.priority)}>
-                <div draggable onDragStart={e => onDragStart(e, task.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', cursor: 'grab' }}
-                  className="hover:bg-accent/10 group">
-                  <button onClick={() => setExpandedId(isExpanded ? null : task.id)} style={{ width: 16, height: 16, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}>
-                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  </button>
-                  <button onClick={() => onUpdate(task.id, { status: cycleStatus(task.status) })}
-                    style={{ width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0, background: stCfg.bg, color: stCfg.color, border: 'none', cursor: 'pointer' }}>{stCfg.icon}</button>
-                  <span style={{ fontSize: 10, fontWeight: 700, width: 20, flexShrink: 0, color: pCfg.color }}>{task.priority}{task.number}</span>
-                  <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 9, fontWeight: 600, background: rc.bg, color: rc.color, flexShrink: 0 }}>{task.ruleType}</span>
-                  {editingId === task.id ? (
-                    <input value={task.title} onChange={e => onUpdate(task.id, { title: e.target.value })}
-                      onBlur={() => setEditingId(null)} onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                      autoFocus style={{ flex: 1, fontSize: 12, padding: '2px 4px', border: '1px solid #3B82F6', borderRadius: 4, outline: 'none' }} />
-                  ) : (
-                    <span onClick={() => setEditingId(task.id)}
-                      style={{ flex: 1, fontSize: 12, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: task.status === 'done' || task.status === 'cancelled' ? 'line-through' : 'none', color: task.status === 'cancelled' ? '#9ca3af' : '#1e293b' }}>
-                      {task.title}
-                    </span>
-                  )}
-                  <button onClick={() => onDelete(task.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 10, opacity: 0 }} className="group-hover:!opacity-100">✕</button>
-                </div>
-
-                {isExpanded && (
-                  <div style={{ padding: '8px 32px 12px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
-                      <span style={{ color: '#64748b', width: 50 }}>우선순위</span>
-                      {priorities.map(p => (
-                        <button key={p} onClick={() => { const eis = syncPriorityToEisenhower(p); onUpdate(task.id, { priority: p, number: getNextNumber(items, p), ...eis }); }}
-                          style={{ width: 24, height: 24, borderRadius: 4, fontSize: 10, fontWeight: 700, border: 'none', cursor: 'pointer', background: task.priority === p ? FRANKLIN_PRIORITY_CONFIG[p].color : FRANKLIN_PRIORITY_CONFIG[p].bg, color: task.priority === p ? '#fff' : FRANKLIN_PRIORITY_CONFIG[p].color }}>{p}</button>
-                      ))}
-                    </div>
-                    {task.content && <div style={{ fontSize: 12, color: '#475569', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{task.content}</div>}
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
-                      <span style={{ color: '#64748b', width: 50, paddingTop: 4 }}>메모</span>
-                      <textarea value={task.note} onChange={e => onUpdate(task.id, { note: e.target.value })}
-                        placeholder="상세 내용, 피드백, 결과..."
-                        style={{ flex: 1, padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 11, outline: 'none', resize: 'none', minHeight: 40, fontFamily: 'inherit', scrollbarWidth: 'none' as any }} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {items.some(t => t.status === 'forwarded') && (
-          <div style={{ padding: '6px 12px', background: '#FFFBEB', borderTop: '1px solid #FDE68A', fontSize: 10, color: '#D97706' }}>
-            <strong>이월:</strong> {items.filter(t => t.status === 'forwarded').map(t => `${t.priority}${t.number} ${t.title}`).join(', ')}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════
-   Eisenhower View (업무일지에서 그대로 가져옴)
-   ══════════════════════════════════════════════════════════════ */
-function EisenhowerViewPanel({ items, onUpdate, onDelete }: {
-  items: GuidelineItem[];
-  onUpdate: (id: string, updates: Partial<GuidelineItem>) => void;
-  onDelete: (id: string) => void;
-}) {
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<EisenhowerQuadrant | null>(null);
-
-  const grouped: Record<EisenhowerQuadrant, GuidelineItem[]> = { q1: [], q2: [], q3: [], q4: [] };
-  items.forEach(t => grouped[getQuadrant(t)].push(t));
-
-  const onDragStart = (e: DragEvent, id: string) => { setDragId(id); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id); };
-  const onDropQuadrant = (e: DragEvent, q: EisenhowerQuadrant) => {
-    e.preventDefault(); setDropTarget(null);
-    if (!dragId) return;
-    const flags = setQuadrant(q);
-    onUpdate(dragId, { ...flags, number: getNextNumber(items, flags.priority) });
-    setDragId(null);
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {(['q1', 'q2', 'q3', 'q4'] as EisenhowerQuadrant[]).map(q => {
-          const cfg = EISENHOWER_CONFIG[q];
-          const qItems = grouped[q];
-          const isDrop = dropTarget === q;
-          return (
-            <div key={q} style={{ border: `1px solid ${isDrop ? cfg.color : cfg.border}`, borderRadius: 8, overflow: 'hidden', minHeight: 140, maxHeight: 'calc(40vh - 40px)', display: 'flex', flexDirection: 'column', boxShadow: isDrop ? `0 0 0 2px ${cfg.color}30` : 'none' }}
-              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropTarget(q); }} onDragLeave={() => setDropTarget(null)} onDrop={e => onDropQuadrant(e, q)}>
-              <div style={{ padding: '6px 10px', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4, background: cfg.color, color: '#fff' }}>{cfg.label}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color }}>{cfg.desc}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.action}</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: cfg.border }}>{qItems.length}</span>
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto' }}>
-                {qItems.length === 0 ? (
-                  <div style={{ padding: 16, textAlign: 'center', fontSize: 11, color: '#9ca3af' }}>드래그하여 배치</div>
-                ) : qItems.map(task => {
-                  const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
-                  const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
-                  const rc = RULE_COLORS[task.ruleType];
-                  return (
-                    <div key={task.id} draggable onDragStart={e => onDragStart(e, task.id)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderBottom: '1px solid rgba(0,0,0,0.05)', cursor: 'grab' }}
-                      className="hover:bg-accent/20 group">
-                      <button onClick={() => onUpdate(task.id, { status: cycleStatus(task.status) })}
-                        style={{ width: 20, height: 20, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0, background: stCfg.bg, color: stCfg.color, border: 'none', cursor: 'pointer' }}>{stCfg.icon}</button>
-                      <span style={{ fontSize: 10, fontWeight: 700, flexShrink: 0, color: pCfg.color }}>{task.priority}{task.number}</span>
-                      <span style={{ padding: '1px 5px', borderRadius: 8, fontSize: 9, fontWeight: 600, background: rc.bg, color: rc.color, flexShrink: 0 }}>{task.ruleType}</span>
-                      <span style={{ flex: 1, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: task.status === 'done' ? 'line-through' : 'none', color: task.status === 'cancelled' ? '#9ca3af80' : undefined }}>{task.title}</span>
-                      <button onClick={() => onDelete(task.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 10, opacity: 0 }} className="group-hover:!opacity-100">✕</button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-        {(['q1', 'q2', 'q3', 'q4'] as EisenhowerQuadrant[]).map(q => {
-          const cfg = EISENHOWER_CONFIG[q];
-          const done = grouped[q].filter(t => t.status === 'done').length;
-          const total = grouped[q].length;
-          return (
-            <div key={q} style={{ textAlign: 'center', padding: 8, borderRadius: 8, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.action}</div>
-              <div style={{ fontSize: 18, fontWeight: 900, color: cfg.color }}>{done}/{total}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════
-   Mandalart View (업무일지에서 그대로 가져옴)
-   ══════════════════════════════════════════════════════════════ */
-function MandalartViewPanel({ cells, items, onCellsChange, onItemAdd }: {
-  cells: MandalartCell[];
-  items: GuidelineItem[];
-  onCellsChange: (cells: MandalartCell[]) => void;
-  onItemAdd: (title: string) => void;
-}) {
-  const [drillId, setDrillId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [dragCellId, setDragCellId] = useState<string | null>(null);
-  const [period, setPeriod] = useState<MandalartPeriod>('daily');
-  const [showStats, setShowStats] = useState(false);
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    if (!initialized.current && (!cells || cells.length < 9)) {
-      initialized.current = true;
-      onCellsChange(createInitialRoot());
-    }
-  }, []);
-
-  if (!cells || cells.length < 9) return <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>만다라트 초기화 중...</div>;
-
-  const root = cells;
-  const drillCell = drillId ? root.find(c => c.id === drillId) : null;
-  const currentGrid = drillCell
-    ? [...(drillCell.children || []).slice(0, 4), { ...drillCell }, ...(drillCell.children || []).slice(4, 8)]
-    : root;
-  while (currentGrid.length < 9) currentGrid.push(emptyCell());
-
-  const updateCell = (id: string, text: string) => {
-    if (drillCell) {
-      const newRoot = root.map(c => {
-        if (c.id !== drillId) return c;
-        if (id === c.id) return { ...c, text };
-        const children = [...(c.children || [])];
-        const surroundIdx = currentGrid.findIndex(g => g.id === id);
-        const childIdx = surroundIdx < 4 ? surroundIdx : surroundIdx - 1;
-        if (childIdx >= 0 && childIdx < children.length) children[childIdx] = { ...children[childIdx], text };
-        else { while (children.length <= childIdx) children.push(emptyCell()); children[childIdx] = { ...children[childIdx], text }; }
-        return { ...c, children };
+  // 새로 추가된 태스크
+  for (const t of tasks) {
+    if (!items.find(i => i.id === t.id)) {
+      updated.push({
+        id: t.id, tab: '사내규정' as GuidelineTab,
+        workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
+        compWork: '', compDept: '', compPos: '', compContract: '',
+        author: '', title: t.task, content: t.note || '', ruleType: '규정',
+        priority: t.priority, number: t.number, status: t.status,
+        urgent: t.urgent ?? false, important: t.important ?? true,
+        note: '', created_at: new Date().toISOString(),
       });
-      onCellsChange(newRoot);
-    } else {
-      onCellsChange(root.map(c => c.id === id ? { ...c, text } : c));
     }
-  };
-
-  const setAchievement = (id: string, value: number) => {
-    const updateAch = (c: MandalartCell): MandalartCell => {
-      if (c.id === id) return { ...c, achievement: c.achievement === value ? 0 : value };
-      if (c.children) return { ...c, children: c.children.map(updateAch) };
-      return c;
-    };
-    onCellsChange(root.map(updateAch));
-  };
-
-  const handleDrillDown = (cell: MandalartCell, idx: number) => {
-    if (drillId) return;
-    if (idx === 4 || !cell.text.trim()) return;
-    if (!cell.children || cell.children.length === 0) {
-      onCellsChange(root.map(c => c.id === cell.id ? { ...c, children: Array.from({ length: 8 }, () => emptyCell()) } : c));
-    }
-    setDrillId(cell.id);
-  };
-
-  const onDragStart = (e: DragEvent, cell: MandalartCell) => {
-    if (!cell.text.trim()) return;
-    setDragCellId(cell.id);
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/plain', cell.text);
-  };
-
-  const isCenter = (idx: number) => idx === 4;
-  const stats = calcGridAchievement(currentGrid);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {drillId && (
-          <button onClick={() => setDrillId(null)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, cursor: 'pointer', color: '#475569' }}>
-            <ArrowLeft size={14} /> 상위로
-          </button>
-        )}
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
-          {drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
-        </span>
-        <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
-          {([['daily', '일간'], ['weekly', '주간'], ['monthly', '월간']] as const).map(([key, label]) => (
-            <button key={key} onClick={() => setPeriod(key)}
-              style={{ padding: '3px 10px', borderRadius: 12, border: '1px solid', fontSize: 11, cursor: 'pointer', borderColor: period === key ? '#3B82F6' : '#e2e8f0', background: period === key ? '#EFF6FF' : '#fff', color: period === key ? '#3B82F6' : '#94a3b8', fontWeight: period === key ? 600 : 400 }}>
-              {label}
-            </button>
-          ))}
-          <button onClick={() => setShowStats(!showStats)}
-            style={{ padding: '3px 8px', borderRadius: 12, border: '1px solid', fontSize: 11, cursor: 'pointer', borderColor: showStats ? '#10B981' : '#e2e8f0', background: showStats ? '#ecfdf5' : '#fff', color: showStats ? '#10B981' : '#94a3b8' }}>
-            <BarChart3 size={12} />
-          </button>
-        </div>
-      </div>
-
-      {/* Achievement bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-        <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>달성</span>
-        <div style={{ flex: 1, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
-          <div style={{ width: `${stats.total > 0 ? Math.round(stats.yang / stats.total * 100) : 0}%`, height: '100%', background: '#f59e0b', borderRadius: 3, transition: 'width 0.3s', position: 'absolute', left: 0, top: 0 }} />
-          <div style={{ width: `${stats.total > 0 ? Math.round(stats.jil / stats.total * 100) : 0}%`, height: '100%', background: '#10B981', borderRadius: 3, transition: 'width 0.3s', position: 'absolute', left: 0, top: 0 }} />
-        </div>
-        <span style={{ fontSize: 10, color: '#f59e0b', fontWeight: 700 }}>양 {stats.yang}/{stats.total}</span>
-        <span style={{ fontSize: 10, color: '#10B981', fontWeight: 700 }}>질 {stats.jil}/{stats.total}</span>
-      </div>
-
-      {/* Stats */}
-      {showStats && (
-        <div style={{ padding: '6px 8px', background: '#fff', borderRadius: 6, border: '1px solid #e2e8f0', fontSize: 11 }}>
-          <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: 4 }}>
-            {period === 'daily' ? '오늘' : period === 'weekly' ? '이번 주' : '이번 달'} 통계
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 4 }}>
-            <StatCard label="작성" value={`${stats.filled}`} sub="/8" color="#3B82F6" />
-            <StatCard label="양(1~3)" value={`${stats.yang}`} sub={`/${stats.total}`} color="#f59e0b" />
-            <StatCard label="질(4~5)" value={`${stats.jil}`} sub={`/${stats.total}`} color="#10B981" />
-            <StatCard label="달성률" value={`${stats.total > 0 ? Math.round(stats.jil / stats.total * 100) : 0}`} sub="%" color={stats.jil >= stats.total && stats.total > 0 ? '#10B981' : '#f59e0b'} />
-          </div>
-          <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {currentGrid.filter((_, i) => i !== 4).filter(c => c.text.trim()).map(c => {
-              const ach = c.achievement || 0;
-              const pct = Math.round((ach / 5) * 100);
-              return (
-                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 10, color: '#475569', minWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.text}</span>
-                  <div style={{ flex: 1, height: 5, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: `${pct}%`, height: '100%', background: ach >= 4 ? '#10B981' : ach >= 1 ? '#f59e0b' : '#e2e8f0', borderRadius: 3 }} />
-                  </div>
-                  <span style={{ fontSize: 9, color: ach >= 4 ? '#10B981' : ach >= 1 ? '#f59e0b' : '#94a3b8', fontWeight: 600, minWidth: 20 }}>{ach > 0 ? ACH_LABELS[ach] : '-'}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Layout */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        {/* Minimap */}
-        {drillId && (
-          <div style={{ flexShrink: 0, width: 130 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>메인</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, background: '#f1f5f9', padding: 4, borderRadius: 8, border: '1px solid #e2e8f0' }}>
-              {root.map((c, i) => (
-                <div key={c.id}
-                  onClick={() => {
-                    if (i === 4) { setDrillId(null); return; }
-                    if (c.text.trim()) {
-                      if (!c.children || c.children.length === 0) onCellsChange(root.map(r => r.id === c.id ? { ...r, children: Array.from({ length: 8 }, () => emptyCell()) } : r));
-                      setDrillId(c.id); setEditingId(null);
-                    }
-                  }}
-                  style={{ minHeight: 32, padding: '2px 3px', background: i === 4 ? '#1e293b' : c.id === drillId ? '#3B82F6' : '#fff', borderRadius: 4, fontSize: 9, color: i === 4 ? '#fff' : c.id === drillId ? '#fff' : c.text ? '#475569' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', wordBreak: 'break-word', cursor: i === 4 || c.text.trim() ? 'pointer' : 'default', border: c.id === drillId ? '2px solid #3B82F6' : '1px solid #e2e8f0', fontWeight: c.id === drillId ? 700 : 400 }}>
-                  {c.text || (i === 4 ? '목표' : '')}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 3x3 Grid */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0' }}>
-          {currentGrid.map((cell, idx) => {
-            const center = isCenter(idx);
-            const ach = cell.achievement || 0;
-            return (
-              <div key={cell.id}
-                draggable={!center && !!cell.text.trim()}
-                onDragStart={e => onDragStart(e, cell)}
-                onDragEnd={() => setDragCellId(null)}
-                onDoubleClick={() => !drillId && cell.text.trim() && handleDrillDown(cell, idx)}
-                onClick={() => setEditingId(cell.id)}
-                style={{ position: 'relative', minHeight: 90, background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : '#fff', borderRadius: 8, border: `2px solid ${center ? '#1e293b' : '#e2e8f0'}`, display: 'flex', flexDirection: 'column', cursor: center ? 'text' : cell.text.trim() ? (drillId ? 'grab' : 'pointer') : 'text', transition: 'all 0.15s', overflow: 'hidden' }}>
-                {!center && cell.text.trim() && <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3 }}><GripVertical size={12} /></div>}
-                {editingId === cell.id ? (
-                  <textarea autoFocus value={cell.text}
-                    onChange={e => updateCell(cell.id, e.target.value)}
-                    onBlur={() => setEditingId(null)}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
-                    style={{ flex: 1, width: '100%', padding: '6px 8px', border: 'none', outline: 'none', fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400, color: center ? '#fff' : '#1e293b', background: 'transparent', resize: 'none', fontFamily: 'inherit', lineHeight: 1.4 }} />
-                ) : (
-                  <div style={{ flex: 1, padding: '6px 8px', fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400, color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1', lineHeight: 1.4, wordBreak: 'break-word', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                    {cell.text || (center ? '목표 입력' : '+')}
-                  </div>
-                )}
-                {!center && cell.text.trim() && (
-                  <div style={{ padding: '0 4px 3px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <div style={{ display: 'flex', gap: 2, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
-                      {[1, 2, 3, 4, 5].map(v => (
-                        <button key={v} onClick={() => setAchievement(cell.id, v)} title={ACH_LABELS[v]}
-                          style={{ width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0, background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.4, transition: 'all 0.15s' }} />
-                      ))}
-                    </div>
-                    {!drillId && (cell.children?.filter(c => c.text).length || 0) > 0 && (
-                      <div style={{ fontSize: 9, paddingTop: 1 }}>
-                        <span style={{ color: '#3B82F6' }}>▦ {cell.children?.filter(c => c.text).length || 0}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {!drillId && (
-        <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
-          {'셀 클릭→편집 | 더블클릭→하위 분해 | 달성률 설정 | 드래그→재배치'}
-        </div>
-      )}
-    </div>
-  );
+  }
+  return updated;
 }
 
-function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
-  return (
-    <div style={{ padding: '4px 6px', background: '#f8fafc', borderRadius: 4, textAlign: 'center' }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color, lineHeight: 1.2 }}>{value}<span style={{ fontSize: 10, color: '#94a3b8' }}>{sub}</span></div>
-      <div style={{ fontSize: 9, color: '#64748b' }}>{label}</div>
-    </div>
-  );
-}
+/* 복사된 뷰 제거됨 — work-log 컴포넌트 직접 import */
 
 /* ══════════════════════════════════════════════════════════════
    Main Page
@@ -1332,11 +936,28 @@ export default function CompanyGuidelinesPage() {
       {viewMode === 'classic' ? (
         <ClassicView items={filtered} onUpdate={handleUpdate} onDelete={handleDelete} onEdit={item => { setEditingItem(item); setShowForm(true); }} />
       ) : viewMode === 'franklin' ? (
-        <FranklinViewPanel items={filtered} onUpdate={handleUpdate} onDelete={handleDelete} />
+        <FranklinView
+          tasks={itemsToTasks(filtered)}
+          timeSlots={createEmptyTimeSlots('1hour')}
+          timeInterval="1hour"
+          onTasksChange={(tasks) => { const updated = tasksToItemUpdates(tasks, filtered); updateItems(() => { const rest = items.filter(i => i.tab !== activeTab || !filtered.find(f => f.id === i.id)); return [...rest, ...updated]; }); }}
+          onSlotTitleChange={() => {}}
+        />
       ) : viewMode === 'eisenhower' ? (
-        <EisenhowerViewPanel items={filtered} onUpdate={handleUpdate} onDelete={handleDelete} />
+        <EisenhowerView
+          tasks={itemsToTasks(filtered)}
+          timeSlots={createEmptyTimeSlots('1hour')}
+          onTasksChange={(tasks) => { const updated = tasksToItemUpdates(tasks, filtered); updateItems(() => { const rest = items.filter(i => i.tab !== activeTab || !filtered.find(f => f.id === i.id)); return [...rest, ...updated]; }); }}
+          onSlotTitleChange={() => {}}
+        />
       ) : (
-        <MandalartViewPanel cells={mandalartCells} items={filtered} onCellsChange={updateCells} onItemAdd={handleItemAdd} />
+        <MandalartView
+          cells={mandalartCells as WLMandalartCell[]}
+          tasks={itemsToTasks(filtered)}
+          onCellsChange={(cells) => updateCells(cells as MandalartCell[])}
+          onTasksChange={(tasks) => { const updated = tasksToItemUpdates(tasks, filtered); updateItems(() => { const rest = items.filter(i => i.tab !== activeTab || !filtered.find(f => f.id === i.id)); return [...rest, ...updated]; }); }}
+          onSlotTitleChange={() => {}}
+        />
       )}
 
       {/* Form Modal */}
