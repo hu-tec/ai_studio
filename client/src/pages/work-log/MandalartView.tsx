@@ -146,12 +146,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               draggable={!center && !!cell.text.trim()}
               onDragStart={e => onDragStart(e, cell)}
               onDragEnd={() => setDragCellId(null)}
-              onDoubleClick={() => !drillId && handleDrillDown(cell, idx)}
-              onClick={() => {
-                if (!center && cell.text.trim() && !drillId) {
-                  // 단순 클릭: 태스크로 변환
-                }
-              }}
+              onDoubleClick={() => !drillId && cell.text.trim() && handleDrillDown(cell, idx)}
+              onClick={() => setEditingId(cell.id)}
               style={{
                 position: 'relative',
                 minHeight: 80,
@@ -193,7 +189,6 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                 />
               ) : (
                 <div
-                  onClick={e => { e.stopPropagation(); setEditingId(cell.id); }}
                   style={{
                     flex: 1, padding: '8px 10px',
                     fontSize: center ? 14 : 12, fontWeight: center ? 700 : 400,
