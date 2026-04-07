@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
-import { loadLogs, saveLogs, currentEmployee, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
+import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
 import { PanelLeftClose, PanelLeftOpen, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
@@ -125,11 +125,13 @@ export function EmployeePage() {
   const [newEmpName, setNewEmpName] = useState('');
 
   const activeEmployee = employees.find(e => e.id === activeEmpId) || employees[0];
+  const flushRef = useRef<(() => void) | null>(null);
 
   const handleSwitchEmployee = (id: string) => {
+    // 전환 전에 현재 작성 중인 내용을 저장
+    if (flushRef.current) flushRef.current();
     setActiveEmpId(id);
     setCurrentEmployee(id);
-    window.location.reload(); // currentEmployee가 모듈 레벨이라 reload 필요
   };
 
   const handleAddEmployee = () => {
@@ -155,7 +157,7 @@ export function EmployeePage() {
     return () => { cancelled = true; };
   }, []);
 
-  const myLogs = logs.filter(l => l.employeeId === currentEmployee.id);
+  const myLogs = logs.filter(l => l.employeeId === activeEmpId);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const currentLog = myLogs.find(l => l.date === dateStr);
 
@@ -196,7 +198,7 @@ export function EmployeePage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "업무일지");
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(fileData, `업무일지_${currentEmployee.name}_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+    saveAs(fileData, `업무일지_${activeEmployee.name}_${format(new Date(), 'yyyyMMdd')}.xlsx`);
   };
 
   const downloadWord = async () => {
@@ -217,7 +219,7 @@ export function EmployeePage() {
       sections: [{
         children: [
           new Paragraph({
-            children: [new TextRun({ text: `업무일지 - ${currentEmployee.name}`, bold: true, size: 32 })],
+            children: [new TextRun({ text: `업무일지 - ${activeEmployee.name}`, bold: true, size: 32 })],
           }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -238,7 +240,7 @@ export function EmployeePage() {
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `업무일지_${currentEmployee.name}.docx`);
+    saveAs(blob, `업무일지_${activeEmployee.name}.docx`);
   };
 
   const downloadImage = async () => {
@@ -310,20 +312,20 @@ export function EmployeePage() {
 
       {pageMode === 'today' ? (
         /* Today mode — full width DailyDetail */
-        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} />
+        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
       ) : (
         /* Calendar mode — left calendar + right detail */
         <div className="flex gap-0 items-start">
           <div className="shrink-0 sticky top-3 flex flex-col gap-3" style={{ width: '50%' }}>
             <div className="pr-2">
-              <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} />
+              <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} employeeId={activeEmpId} />
             </div>
             <div className="pr-2">
               <PromptTemplateManager />
             </div>
           </div>
           <div className="flex-1 min-w-0 pl-1">
-            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} />
+            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
           </div>
         </div>
       )}

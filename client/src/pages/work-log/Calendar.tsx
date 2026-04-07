@@ -12,6 +12,7 @@ interface CalendarProps {
   onUpdateLog: (log: DailyLog) => void;
   compact?: boolean;
   mode?: 'monthly' | 'daily';
+  employeeId: string;
 }
 
 function recalcSummary(log: DailyLog): DailyLog {
@@ -23,7 +24,7 @@ function recalcSummary(log: DailyLog): DailyLog {
   return { ...log, summary };
 }
 
-export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compact = false, mode = 'monthly' }: CalendarProps) {
+export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compact = false, mode = 'monthly', employeeId }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate));
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
@@ -65,7 +66,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
       departmentCategories: [],
       timeInterval: '1hour',
       timeSlots: createEmptyTimeSlots('1hour'),
-      employeeId: currentEmployee.id,
+      employeeId,
     };
   };
 

@@ -245,6 +245,8 @@ export interface DailyLog {
   employeeId: string;
   viewMode?: ViewMode;
   franklinTasks?: FranklinTask[];
+  todayTasks?: string;
+  tomorrowTasks?: string;
 }
 
 export interface Employee {

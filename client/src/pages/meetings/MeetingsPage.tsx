@@ -383,109 +383,109 @@ export default function MeetingsPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col">
 
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-slate-800 rounded-xl text-white">
-            <Settings2 size={24} />
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-slate-800 rounded-lg text-white">
+            <Settings2 size={18} />
           </div>
           <div>
-            <h1 className="text-lg font-bold">스케줄링 대시보드</h1>
-            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">CEO Secretary Dashboard</p>
+            <h1 className="text-sm font-bold">스케줄링 대시보드</h1>
+            <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider">CEO Secretary Dashboard</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="p-2 text-slate-400 hover:text-slate-800 transition-colors"><Star size={20} /></button>
-          <button className="p-2 text-slate-400 hover:text-slate-800 transition-colors"><Activity size={20} /></button>
-          <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 overflow-hidden">
+        <div className="flex items-center gap-2">
+          <button className="p-1.5 text-slate-400 hover:text-slate-800 transition-colors"><Star size={16} /></button>
+          <button className="p-1.5 text-slate-400 hover:text-slate-800 transition-colors"><Activity size={16} /></button>
+          <div className="w-7 h-7 rounded-full bg-slate-200 border border-slate-300 overflow-hidden">
             <ImageWithFallback src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&h=100&fit=crop" alt="avatar" />
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex flex-col md:flex-row p-6 gap-6">
+      <main className="flex-1 overflow-hidden flex flex-col md:flex-row p-3 gap-3">
         {/* Main Content Area */}
-        <section className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-6 border-b border-slate-100 bg-slate-50/30">
-            <div className="flex flex-col gap-6">
+        <section className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+          <div className="p-3 border-b border-slate-100 bg-slate-50/30">
+            <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-2.5 bg-slate-800 text-white rounded-2xl shadow-lg">
-                    <CalendarIcon size={24} />
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-slate-800 text-white rounded-lg shadow-lg">
+                    <CalendarIcon size={18} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-800">통합 스케줄러</h2>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Master Scheduling Engine</p>
+                    <h2 className="text-sm font-bold text-slate-800">통합 스케줄러</h2>
+                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Master Scheduling Engine</p>
                   </div>
                 </div>
 
                 {/* Regulation 2: Mode Toggle */}
-                <div className="flex items-center bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200/50">
-                  <button 
+                <div className="flex items-center bg-slate-200/50 p-1 rounded-lg border border-slate-200/50">
+                  <button
                     onClick={() => setViewType('calendar')}
                     className={cn(
-                      "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                      viewType === 'calendar' ? "bg-white text-slate-800 shadow-md scale-[1.02]" : "text-slate-400 hover:text-slate-600"
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all",
+                      viewType === 'calendar' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600"
                     )}
                   >
-                    <LayoutGrid size={18} /> 캘린더형
+                    <LayoutGrid size={14} /> 캘린더형
                   </button>
-                  <button 
+                  <button
                     onClick={() => setViewType('list')}
                     className={cn(
-                      "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                      viewType === 'list' ? "bg-white text-slate-800 shadow-md scale-[1.02]" : "text-slate-400 hover:text-slate-600"
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all",
+                      viewType === 'list' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600"
                     )}
                   >
-                    <List size={18} /> 리스트형
+                    <List size={14} /> 리스트형
                   </button>
                 </div>
               </div>
 
               {/* Regulation 1: Visualized Summary Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[
                   { label: '전체 일정', value: schedules.length, icon: Briefcase, color: 'indigo', trend: '+12%' },
                   { label: '확정된 미팅', value: schedules.filter(s => s.status === 'confirmed').length, icon: CheckCircle2, color: 'emerald', trend: '최적' },
                   { label: '평균 소요', value: '35분', icon: Clock, color: 'amber', trend: '적정' },
                   { label: '예약 점유율', value: '84%', icon: TrendingUp, color: 'rose', trend: '+5.2%' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group">
+                  <div key={i} className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center gap-2.5 group">
                     <div className={cn(
-                      "p-3 rounded-2xl transition-transform group-hover:scale-110",
+                      "p-2 rounded-lg transition-transform group-hover:scale-110",
                       stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" :
                       stat.color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
                       stat.color === 'amber' ? "bg-amber-50 text-amber-600" : "bg-rose-50 text-rose-600"
                     )}>
-                      <stat.icon size={20} />
+                      <stat.icon size={16} />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                        <span className="text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">{stat.trend}</span>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                        <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-1 py-0 rounded-full">{stat.trend}</span>
                       </div>
-                      <p className="text-xl font-bold text-slate-800 leading-none mt-1">{stat.value}</p>
+                      <p className="text-base font-bold text-slate-800 leading-none mt-0.5">{stat.value}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Toolbar: Navigation & Filter */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100">
-                <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
-                  <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-                    <ChevronLeft size={20} className="text-slate-400" />
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                  <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-50 rounded-md transition-colors">
+                    <ChevronLeft size={16} className="text-slate-400" />
                   </button>
-                  <span className="text-sm font-black px-6 min-w-[140px] text-center text-slate-700">
+                  <span className="text-xs font-black px-3 min-w-[110px] text-center text-slate-700">
                     {format(currentMonth, 'yyyy년 MM월')}
                   </span>
-                  <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-                    <ChevronRight size={20} className="text-slate-400" />
+                  <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-50 rounded-md transition-colors">
+                    <ChevronRight size={16} className="text-slate-400" />
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-                  <Filter size={14} className="text-slate-400" />
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <Filter size={12} className="text-slate-400" />
+                  <div className="flex items-center gap-2.5">
                     {categories.map((cat, idx) => (
                       <label key={`filter-cat-${cat.id}-${idx}`} className="flex items-center gap-2 cursor-pointer group">
                         <input 
@@ -510,10 +510,10 @@ export default function MeetingsPage() {
           </div>
 
           {/* Dynamic Content View */}
-          <div className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="flex-1 overflow-y-auto p-3 bg-white">
             {viewType === 'calendar' ? (
               <div className="flex flex-col h-full">
-                <div className="grid grid-cols-7 border-b border-slate-100 pb-3">
+                <div className="grid grid-cols-7 border-b border-slate-100 pb-1.5">
                   {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d, i) => (
                     <div key={`weekday-${i}`} className={cn(
                       "text-center text-[10px] font-black uppercase tracking-[0.2em]",
@@ -524,7 +524,7 @@ export default function MeetingsPage() {
                   ))}
                 </div>
                 
-                <div className="grid grid-cols-7 flex-1 border-l border-t border-slate-100 mt-2">
+                <div className="grid grid-cols-7 flex-1 border-l border-t border-slate-100 mt-1">
                   {(() => {
                     const monthStart = startOfMonth(currentMonth);
                     const monthEnd = endOfMonth(monthStart);
@@ -544,7 +544,7 @@ export default function MeetingsPage() {
                           key={day.toISOString()}
                           onClick={() => setSelectedDate(day)}
                           className={cn(
-                            "min-h-[160px] p-3 border-r border-b border-slate-100 transition-all flex flex-col gap-2 relative group cursor-pointer",
+                            "min-h-[100px] p-1.5 border-r border-b border-slate-100 transition-all flex flex-col gap-1 relative group cursor-pointer",
                             !isCurrentMonth ? "bg-slate-50/40 opacity-50" : "bg-white",
                             isSelected ? "ring-2 ring-inset ring-slate-800 bg-slate-50/50 z-10" : "hover:bg-slate-50/80"
                           )}
@@ -561,7 +561,7 @@ export default function MeetingsPage() {
                           <div className="flex items-center justify-between">
                             <div className="flex flex-col">
                               <span className={cn(
-                                "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-2xl transition-all",
+                                "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg transition-all",
                                 isToday ? "bg-slate-800 text-white shadow-lg shadow-slate-200" : "text-slate-600",
                                 !isCurrentMonth && "text-slate-300"
                               )}>
@@ -569,15 +569,15 @@ export default function MeetingsPage() {
                               </span>
                               {isCurrentMonth && (
                                 <div className={cn(
-                                  "mt-1.5 px-2 py-1 rounded-xl text-[9px] font-black flex items-center gap-1.5 w-fit shadow-sm border transition-transform group-hover:scale-105",
+                                  "mt-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-black flex items-center gap-1 w-fit shadow-sm border transition-transform group-hover:scale-105",
                                   availability === 'OPEN' 
                                     ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
                                     : "bg-slate-50 text-slate-400 border-slate-100 opacity-60"
                                 )}>
-                                  <span className="text-[12px] leading-none shrink-0">
+                                  <span className="text-[10px] leading-none shrink-0">
                                     {availability === 'OPEN' ? '🟢' : '🔘'}
                                   </span>
-                                  <span className="tracking-tighter">{availability === 'OPEN' ? '요청가능' : '요청불가'}</span>
+                                  <span className="tracking-tighter">{availability === 'OPEN' ? '가능' : '불가'}</span>
                                 </div>
                               )}
                             </div>
@@ -586,7 +586,7 @@ export default function MeetingsPage() {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5 overflow-hidden mt-1">
+                          <div className="space-y-1 overflow-hidden mt-0.5">
                             {daySchedules.slice(0, 3).map((s, idx) => {
                               const cat = categories.find(c => c.id === s.categoryId);
                               return (
@@ -595,7 +595,7 @@ export default function MeetingsPage() {
                                   key={`cell-${day.toISOString()}-${s.id}-${idx}`}
                                   onClick={(e) => { e.stopPropagation(); setSelectedSchedule(s); }}
                                   className={cn(
-                                    "p-2 rounded-xl border text-[10px] font-bold flex flex-col gap-1 shadow-sm transition-all active:scale-95 cursor-pointer hover:shadow-md border-l-4",
+                                    "p-1.5 rounded-lg border text-[9px] font-bold flex flex-col gap-0.5 shadow-sm transition-all active:scale-95 cursor-pointer hover:shadow-md border-l-4",
                                     getDurationColor(s.duration)
                                   )}
                                 >
@@ -620,7 +620,7 @@ export default function MeetingsPage() {
               </div>
             ) : (
               /* List View Rendering */
-              <div className="max-w-4xl mx-auto space-y-6 pb-20">
+              <div className="max-w-4xl mx-auto space-y-2 pb-10">
                 {filteredSchedules.sort((a, b) => a.date.localeCompare(b.date)).map((s, idx) => {
                   const cat = categories.find(c => c.id === s.categoryId);
                   const sDate = parseISO(s.date);
@@ -629,38 +629,38 @@ export default function MeetingsPage() {
                       key={`list-item-${s.id}-${idx}`}
                       layoutId={`schedule-${s.id}`}
                       onClick={() => setSelectedSchedule(s)}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="group bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-2xl hover:shadow-slate-200 transition-all cursor-pointer flex items-center gap-8"
+                      className="group bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-lg transition-all cursor-pointer flex items-center gap-4"
                     >
-                      <div className="flex flex-col items-center justify-center w-20 h-20 bg-slate-50 rounded-[2rem] border border-slate-100 text-slate-400 group-hover:bg-slate-800 group-hover:text-white transition-all">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-1">{format(sDate, 'MMM')}</span>
-                        <span className="text-2xl font-black leading-none">{format(sDate, 'd')}</span>
+                      <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 rounded-xl border border-slate-100 text-slate-400 group-hover:bg-slate-800 group-hover:text-white transition-all">
+                        <span className="text-[9px] font-black uppercase tracking-wider">{format(sDate, 'MMM')}</span>
+                        <span className="text-lg font-black leading-none">{format(sDate, 'd')}</span>
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{cat?.emoji}</span>
-                          <h4 className="font-bold text-slate-800 text-xl tracking-tight">{s.title}</h4>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base">{cat?.emoji}</span>
+                          <h4 className="font-bold text-slate-800 text-sm tracking-tight">{s.title}</h4>
                           <span className={cn(
-                            "px-3 py-1 rounded-full text-[10px] font-black border tracking-widest uppercase",
+                            "px-2 py-0.5 rounded-full text-[9px] font-black border tracking-wider uppercase",
                             cat?.type === 'work' ? "bg-indigo-50 text-indigo-600 border-indigo-100" : "bg-orange-50 text-orange-600 border-orange-100"
                           )}>
                             {cat?.name}
                           </span>
                         </div>
-                        <div className="flex items-center gap-6 text-slate-500 text-sm font-bold opacity-70">
-                          <div className="flex items-center gap-2"><Clock size={16} /> <span>{s.time} ({s.duration}분)</span></div>
-                          <div className="flex items-center gap-2"><MapPin size={16} /> <span className="truncate">{s.location}</span></div>
+                        <div className="flex items-center gap-4 text-slate-500 text-xs font-bold opacity-70">
+                          <div className="flex items-center gap-1.5"><Clock size={13} /> <span>{s.time} ({s.duration}분)</span></div>
+                          <div className="flex items-center gap-1.5"><MapPin size={13} /> <span className="truncate">{s.location}</span></div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
                         <div className={cn(
-                          "px-4 py-2 rounded-2xl text-[11px] font-black border shadow-sm transition-all",
+                          "px-2.5 py-1 rounded-lg text-[10px] font-black border shadow-sm transition-all",
                           s.status === 'confirmed' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100"
                         )}>
                           {s.status === 'confirmed' ? 'CONFIRMED' : 'PENDING'}
                         </div>
-                        <ChevronRight size={24} className="text-slate-200 group-hover:text-slate-800 transition-all" />
+                        <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-800 transition-all" />
                       </div>
                     </motion.div>
                   );
@@ -671,24 +671,24 @@ export default function MeetingsPage() {
         </section>
 
         {/* Sidebar */}
-        <section className="w-full md:w-[360px] flex flex-col gap-6">
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 flex flex-col h-full overflow-hidden">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-3 mb-8">
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><PieChart size={20} /></div>
+        <section className="w-full md:w-[280px] flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex flex-col h-full overflow-hidden">
+            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><PieChart size={16} /></div>
               분석 리포트
             </h2>
-            <div className="flex-1 overflow-y-auto space-y-10 pr-2">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
               <div>
-                <p className="text-[10px] font-black text-slate-400 mb-6 uppercase tracking-widest">일정 타입 분포</p>
-                <div className="h-[220px] w-full">
+                <p className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">일정 타입 분포</p>
+                <div className="h-[160px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <RePieChart>
                       <Pie
                         data={statsData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={85}
+                        innerRadius={45}
+                        outerRadius={65}
                         paddingAngle={8}
                         dataKey="value"
                         nameKey="name"
@@ -701,25 +701,25 @@ export default function MeetingsPage() {
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="space-y-4 pt-6 border-t border-slate-100">
-                <button onClick={handleShareLink} className="w-full flex items-center justify-between p-5 bg-slate-800 text-white rounded-[2rem] shadow-xl shadow-slate-200 hover:bg-slate-700 transition-all group">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-white/10 rounded-xl"><Share2 size={20} /></div>
+              <div className="space-y-2 pt-3 border-t border-slate-100">
+                <button onClick={handleShareLink} className="w-full flex items-center justify-between p-3 bg-slate-800 text-white rounded-xl shadow-lg hover:bg-slate-700 transition-all group">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-white/10 rounded-lg"><Share2 size={16} /></div>
                     <div className="text-left">
-                      <p className="text-sm font-bold">신청 링크 복사</p>
-                      <p className="text-[10px] opacity-60 italic">Booking Link</p>
+                      <p className="text-xs font-bold">신청 링크 복사</p>
+                      <p className="text-[9px] opacity-60 italic">Booking Link</p>
                     </div>
                   </div>
-                  <ChevronRight size={18} className="opacity-40" />
+                  <ChevronRight size={14} className="opacity-40" />
                 </button>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => handleDownload('EXCEL')} className="flex flex-col items-start gap-4 p-5 bg-emerald-50 text-emerald-700 rounded-[2rem] border border-emerald-100 hover:bg-emerald-100 transition-all group">
-                    <div className="p-2.5 bg-emerald-600 text-white rounded-xl"><FileSpreadsheet size={18} /></div>
-                    <p className="text-xs font-black uppercase tracking-widest">Excel</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => handleDownload('EXCEL')} className="flex flex-col items-start gap-2 p-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-all group">
+                    <div className="p-1.5 bg-emerald-600 text-white rounded-lg"><FileSpreadsheet size={14} /></div>
+                    <p className="text-[10px] font-black uppercase tracking-widest">Excel</p>
                   </button>
-                  <button onClick={() => handleDownload('WORD')} className="flex flex-col items-start gap-4 p-5 bg-blue-50 text-blue-700 rounded-[2rem] border border-blue-100 hover:bg-blue-100 transition-all group">
-                    <div className="p-2.5 bg-blue-600 text-white rounded-xl"><FileText size={18} /></div>
-                    <p className="text-xs font-black uppercase tracking-widest">Word</p>
+                  <button onClick={() => handleDownload('WORD')} className="flex flex-col items-start gap-2 p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 hover:bg-blue-100 transition-all group">
+                    <div className="p-1.5 bg-blue-600 text-white rounded-lg"><FileText size={14} /></div>
+                    <p className="text-[10px] font-black uppercase tracking-widest">Word</p>
                   </button>
                 </div>
               </div>
@@ -743,26 +743,26 @@ export default function MeetingsPage() {
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-[400px] bg-white rounded-[3rem] overflow-hidden shadow-2xl border border-slate-200"
+              className="relative w-full max-w-[380px] bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200"
             >
-              <div className="h-56 relative overflow-hidden bg-slate-100">
+              <div className="h-40 relative overflow-hidden bg-slate-100">
                 <ImageWithFallback 
                   src="https://images.unsplash.com/photo-1722082839841-45473f5a15cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXAlMjBzYXRlbGxpdGUlMjB2aWV3JTIwY2l0eXxlbnwxfHx8fDE3NzMxMTA1Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
                   alt="Location Map"
                   className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <button onClick={() => setSelectedSchedule(null)} className="absolute top-6 right-6 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-lg hover:bg-slate-800 hover:text-white transition-all"><X size={20} /></button>
-                <div className="absolute bottom-6 left-6 flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/50">
-                  <MapPin size={18} className="text-slate-800" />
-                  <span className="text-xs font-black text-slate-800 tracking-tight">{selectedSchedule.location}</span>
+                <button onClick={() => setSelectedSchedule(null)} className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg hover:bg-slate-800 hover:text-white transition-all"><X size={16} /></button>
+                <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/50">
+                  <MapPin size={14} className="text-slate-800" />
+                  <span className="text-[11px] font-black text-slate-800 tracking-tight">{selectedSchedule.location}</span>
                 </div>
               </div>
 
-              <div className="p-8 space-y-6">
+              <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className={cn(
-                    "px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                    "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm",
                     categories.find(c => c.id === selectedSchedule.categoryId)?.type === 'work' 
                       ? "bg-slate-800 text-white border-slate-800" 
                       : "bg-orange-50 text-orange-600 border-orange-100"
@@ -775,29 +775,29 @@ export default function MeetingsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-slate-800 leading-tight">
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-black text-slate-800 leading-tight">
                     {categories.find(c => c.id === selectedSchedule.categoryId)?.emoji} {selectedSchedule.title}
                   </h3>
-                  <div className="flex items-center gap-4 text-slate-500 font-bold text-sm">
-                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100"><Clock size={16} className="text-slate-400" /> {selectedSchedule.time}</div>
-                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100"><Tag size={16} className="text-slate-400" /> {selectedSchedule.duration}분 소요</div>
+                  <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
+                    <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100"><Clock size={13} className="text-slate-400" /> {selectedSchedule.time}</div>
+                    <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100"><Tag size={13} className="text-slate-400" /> {selectedSchedule.duration}분 소요</div>
                   </div>
                 </div>
 
                 {selectedSchedule.note && (
-                  <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><Lock size={24} /></div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">비서 전용 메모 (Private)</p>
-                    <p className="text-sm text-slate-600 leading-relaxed font-bold italic">"{selectedSchedule.note}"</p>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity"><Lock size={18} /></div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">비서 전용 메모 (Private)</p>
+                    <p className="text-xs text-slate-600 leading-relaxed font-bold italic">"{selectedSchedule.note}"</p>
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 pt-2">
-                  <button className="flex-1 bg-slate-800 text-white py-4 rounded-2xl font-black text-md shadow-xl shadow-slate-200 hover:bg-slate-700 transition-all flex items-center justify-center gap-3">
-                    <Edit size={20} /> 일정 편집
+                <div className="flex items-center gap-2 pt-1">
+                  <button className="flex-1 bg-slate-800 text-white py-2.5 rounded-xl font-black text-sm shadow-lg hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                    <Edit size={16} /> 일정 편집
                   </button>
-                  <button className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-slate-800 transition-all"><Trash2 size={20} className="text-slate-400 hover:text-red-500 transition-colors" /></button>
+                  <button className="p-2.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-800 transition-all"><Trash2 size={16} className="text-slate-400 hover:text-red-500 transition-colors" /></button>
                 </div>
               </div>
             </motion.div>

@@ -15,11 +15,13 @@ interface DailyDetailProps {
   date: Date;
   log: DailyLog | undefined;
   onSave: (log: DailyLog) => void;
+  employeeId: string;
+  onFlushRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
+export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: DailyDetailProps) {
   const dateStr = format(date, 'yyyy-MM-dd');
-  const emp = employees.find(e => e.id === currentEmployee.id) || currentEmployee;
+  const emp = employees.find(e => e.id === employeeId) || currentEmployee;
 
   const [position, setPosition] = useState<Position>(emp.position);
   const [hpCategories, setHpCategories] = useState<string[]>([]);
@@ -27,6 +29,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   const [timeInterval, setTimeInterval] = useState<'30min' | '1hour' | 'half-day'>('1hour');
   const [timeSlots, setTimeSlots] = useState<TimeSlotEntry[]>([]);
   const [detail, setDetail] = useState('');
+  const [todayTasks, setTodayTasks] = useState('');
+  const [tomorrowTasks, setTomorrowTasks] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
@@ -46,10 +50,11 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     onSave({
       date: dateStr, summary, position,
       homepageCategories: hpCategories, departmentCategories: deptCategories,
-      timeInterval, timeSlots, employeeId: currentEmployee.id,
+      timeInterval, timeSlots, employeeId,
       detail, viewMode, franklinTasks, mandalartCells,
+      todayTasks, tomorrowTasks,
     });
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, emp.name, onSave]);
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -61,6 +66,12 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     doSave();
   }, [doSave]);
 
+  // Expose flushSave to parent so it can flush before switching employee
+  useEffect(() => {
+    if (onFlushRef) onFlushRef.current = flushSave;
+    return () => { if (onFlushRef) onFlushRef.current = null; };
+  }, [flushSave, onFlushRef]);
+
   // Trigger auto-save on data changes (skip prop-driven changes)
   const userEdited = useRef(false);
   const suppressAutoSave = useRef(false);
@@ -69,7 +80,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
     if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks]);
+  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, todayTasks, tomorrowTasks]);
 
   useEffect(() => {
     // When date or log changes from props, suppress next auto-save cycle
@@ -82,6 +93,8 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setTimeInterval(log.timeInterval);
       setTimeSlots(log.timeSlots);
       setDetail(log.detail || '');
+      setTodayTasks(log.todayTasks || '');
+      setTomorrowTasks(log.tomorrowTasks || '');
       setViewMode(log.viewMode || 'classic');
       setFranklinTasks(log.franklinTasks || []);
       setMandalartCells((log as any).mandalartCells || []);
@@ -92,13 +105,15 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setTimeInterval('1hour');
       setTimeSlots(createEmptyTimeSlots('1hour'));
       setDetail('');
+      setTodayTasks('');
+      setTomorrowTasks('');
       setViewMode('classic');
       setFranklinTasks([]);
       setMandalartCells([]);
     }
     // Allow auto-save after prop-driven setState batch completes
     requestAnimationFrame(() => { suppressAutoSave.current = false; });
-  }, [dateStr, log]);
+  }, [dateStr, log, employeeId]);
 
   const handleIntervalChange = useCallback((newInterval: '30min' | '1hour' | 'half-day') => {
     setTimeSlots(prev => {
@@ -178,8 +193,10 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       departmentCategories: deptCategories,
       timeInterval,
       timeSlots,
-      employeeId: currentEmployee.id,
+      employeeId,
       detail,
+      todayTasks,
+      tomorrowTasks,
       viewMode,
       franklinTasks,
     };
@@ -288,6 +305,44 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* 오늘의 업무 / 다음 날 업무 */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
+            <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200">
+              <span className="text-[11px] font-bold text-blue-700">오늘의 업무</span>
+            </div>
+            <textarea
+              value={todayTasks}
+              onChange={e => setTodayTasks(e.target.value)}
+              className="w-full px-2 py-1.5 bg-transparent outline-none resize-none text-[12px] min-h-[60px]"
+              rows={2}
+              placeholder="오늘 해야 할 주요 업무를 입력하세요."
+              onInput={e => {
+                const t = e.target as HTMLTextAreaElement;
+                t.style.height = 'auto';
+                t.style.height = Math.max(60, t.scrollHeight) + 'px';
+              }}
+            />
+          </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50/30 overflow-hidden">
+            <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200">
+              <span className="text-[11px] font-bold text-amber-700">다음 날 업무</span>
+            </div>
+            <textarea
+              value={tomorrowTasks}
+              onChange={e => setTomorrowTasks(e.target.value)}
+              className="w-full px-2 py-1.5 bg-transparent outline-none resize-none text-[12px] min-h-[60px]"
+              rows={2}
+              placeholder="내일 해야 할 주요 업무를 입력하세요."
+              onInput={e => {
+                const t = e.target as HTMLTextAreaElement;
+                t.style.height = 'auto';
+                t.style.height = Math.max(60, t.scrollHeight) + 'px';
+              }}
+            />
+          </div>
         </div>
 
         {/* Mode toggle — standalone */}
@@ -478,22 +533,6 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
           )}
         </div>
 
-        {/* ⑦ 세부 내용 */}
-        <div>
-          <label className="block mb-1 text-muted-foreground">⑦ 세부 내용</label>
-          <textarea
-            value={detail}
-            onChange={e => setDetail(e.target.value)}
-            className="w-full border border-border rounded px-2 py-1.5 bg-transparent outline-none resize-none min-h-[80px]"
-            rows={4}
-            placeholder="오늘 하루 업무에 대한 세부 내용을 입력하세요."
-            onInput={e => {
-              const t = e.target as HTMLTextAreaElement;
-              t.style.height = 'auto';
-              t.style.height = Math.max(80, t.scrollHeight) + 'px';
-            }}
-          />
-        </div>
       </div>
 
       {/* AI Detail Modal */}
