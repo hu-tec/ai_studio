@@ -486,10 +486,10 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
       try {
         const r = await fetch('/api/upload',{method:'POST',body:fd});
         const j = await r.json();
-        if(j.success) { setAttachments(p=>[...p,{type:isImg?'image':'file',url:j.s3_url,name:f.name,size:f.size}]); toast.success(`${f.name} 업로드 완료`); }
+        if(j.success && j.s3_url) { setAttachments(p=>[...p,{type:isImg?'image':'file',url:j.s3_url,name:f.name,size:f.size}]); toast.success(`${f.name} 업로드 완료`); }
+        else { toast.error(`${f.name} 업로드 실패`); }
       } catch {
-        const u = URL.createObjectURL(f);
-        setAttachments(p=>[...p,{type:isImg?'image':'file',url:u,name:f.name,size:f.size}]);
+        toast.error(`${f.name} 업로드 실패 — 서버 연결을 확인해주세요`);
       }
       setUploading(prev=>prev.filter(n=>n!==f.name));
     }
