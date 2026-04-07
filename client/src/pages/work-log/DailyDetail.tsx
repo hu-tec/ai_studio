@@ -58,7 +58,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(doSave, 2000);
+    autoSaveTimer.current = setTimeout(doSave, 300);
   }, [doSave]);
 
   const flushSave = useCallback(() => {
