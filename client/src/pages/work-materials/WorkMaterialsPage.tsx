@@ -471,13 +471,16 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
   const [showLink,setShowLink] = useState(false);
   const [linkUrl,setLinkUrl] = useState('');
   const [linkName,setLinkName] = useState('');
+  const [uploading, setUploading] = useState<string[]>([]); // 업로드 중인 파일명 목록
   const fileRef = useRef<HTMLInputElement>(null);
 
   const addLink = () => { if(!linkUrl)return; setAttachments([...attachments,{type:'link',url:linkUrl,name:linkName||linkUrl}]); setLinkUrl('');setLinkName('');setShowLink(false); };
 
   const handleFile = async (e:React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files; if(!files) return;
-    for (const f of Array.from(files)) {
+    const fileList = Array.from(files);
+    setUploading(prev=>[...prev, ...fileList.map(f=>f.name)]);
+    for (const f of fileList) {
       const isImg = f.type.startsWith('image/');
       const fd = new FormData(); fd.append('file',f); fd.append('category','work-materials');
       try {
@@ -488,6 +491,7 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
         const u = URL.createObjectURL(f);
         setAttachments(p=>[...p,{type:isImg?'image':'file',url:u,name:f.name,size:f.size}]);
       }
+      setUploading(prev=>prev.filter(n=>n!==f.name));
     }
     e.target.value='';
   };
@@ -534,9 +538,10 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
           <div>
             <label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:8,display:'block'}}>첨부</label>
             {attachments.length>0&&<div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:10}}>{attachments.map((att,i)=>(<div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 12px',background:'#f8fafc',borderRadius:8,fontSize:13}}>{att.type==='image'&&<ImageIcon size={14} color="#3B82F6"/>}{att.type==='link'&&<ExternalLink size={14} color="#10B981"/>}{att.type==='file'&&<File size={14} color="#F59E0B"/>}<span style={{flex:1,color:'#334155'}}>{att.name}</span>{att.size&&<span style={{fontSize:11,color:'#94a3b8'}}>{fmtSize(att.size)}</span>}<button onClick={()=>setAttachments(attachments.filter((_,j)=>j!==i))} style={{background:'none',border:'none',cursor:'pointer'}}><X size={14} color="#ef4444"/></button></div>))}</div>}
+            {uploading.length>0&&<div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:10}}>{uploading.map((name,i)=>(<div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 12px',background:'#EFF6FF',borderRadius:8,fontSize:13,border:'1px solid #BFDBFE'}}><div style={{width:14,height:14,border:'2px solid #3B82F6',borderTopColor:'transparent',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/><span style={{flex:1,color:'#3B82F6'}}>{name}</span><span style={{fontSize:11,color:'#93C5FD'}}>업로드 중...</span></div>))}<style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></div>}
             <div style={{display:'flex',gap:8}}>
               <input ref={fileRef} type="file" multiple hidden onChange={handleFile}/>
-              <button onClick={()=>fileRef.current?.click()} style={{display:'flex',alignItems:'center',gap:4,padding:'6px 12px',background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,cursor:'pointer',color:'#475569'}}><Upload size={14}/>파일/이미지</button>
+              <button onClick={()=>fileRef.current?.click()} disabled={uploading.length>0} style={{display:'flex',alignItems:'center',gap:4,padding:'6px 12px',background:uploading.length>0?'#E0E7FF':'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,cursor:uploading.length>0?'not-allowed':'pointer',color:'#475569',opacity:uploading.length>0?0.6:1}}><Upload size={14}/>{uploading.length>0?`업로드 중 (${uploading.length})`:'파일/이미지'}</button>
               <button onClick={()=>setShowLink(!showLink)} style={{display:'flex',alignItems:'center',gap:4,padding:'6px 12px',background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,cursor:'pointer',color:'#475569'}}><LinkIcon size={14}/>링크 추가</button>
             </div>
             {showLink&&<div style={{display:'flex',gap:8,marginTop:8}}><input value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="URL (https://...)" style={{flex:1,padding:'6px 10px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13}}/><input value={linkName} onChange={e=>setLinkName(e.target.value)} placeholder="표시 이름" style={{width:140,padding:'6px 10px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13}}/><button onClick={addLink} style={{padding:'6px 12px',background:'#10B981',color:'#fff',border:'none',borderRadius:8,fontSize:13,cursor:'pointer'}}>추가</button></div>}
