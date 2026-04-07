@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
-import { loadLogs, saveLogs, currentEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
-import type { DailyLog, PromptTemplate } from './data';
+import { loadLogs, saveLogs, currentEmployee, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
+import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
 import { PanelLeftClose, PanelLeftOpen, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
 import { saveAs } from 'file-saver';
@@ -120,6 +120,26 @@ export function EmployeePage() {
   const [pageMode, setPageMode] = useState<'today' | 'calendar'>('today');
   const [calendarMode, setCalendarMode] = useState<'monthly' | 'daily'>('monthly');
   const appRef = useRef<HTMLDivElement>(null);
+  const [activeEmpId, setActiveEmpId] = useState(getCurrentEmployee().id);
+  const [showAddEmployee, setShowAddEmployee] = useState(false);
+  const [newEmpName, setNewEmpName] = useState('');
+
+  const activeEmployee = employees.find(e => e.id === activeEmpId) || employees[0];
+
+  const handleSwitchEmployee = (id: string) => {
+    setActiveEmpId(id);
+    setCurrentEmployee(id);
+    window.location.reload(); // currentEmployee가 모듈 레벨이라 reload 필요
+  };
+
+  const handleAddEmployee = () => {
+    if (!newEmpName.trim()) return;
+    const newEmp: Employee = { id: `emp-custom-${Date.now()}`, name: newEmpName.trim(), department: '기타', position: '알바' };
+    addEmployee(newEmp);
+    setNewEmpName('');
+    setShowAddEmployee(false);
+    handleSwitchEmployee(newEmp.id);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -234,6 +254,34 @@ export function EmployeePage() {
       <div className="flex items-center justify-between mb-3 px-2">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-black text-primary tracking-tight">업무일지</h1>
+          {/* 작성자 선택 */}
+          <div className="flex items-center gap-1">
+            {employees.map(emp => (
+              <button key={emp.id} onClick={() => handleSwitchEmployee(emp.id)}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                  activeEmpId === emp.id
+                    ? 'bg-blue-50 text-blue-600 border-blue-300 font-bold'
+                    : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                }`}>
+                {emp.name}
+              </button>
+            ))}
+            {showAddEmployee ? (
+              <div className="flex items-center gap-1">
+                <input value={newEmpName} onChange={e => setNewEmpName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddEmployee()}
+                  placeholder="이름" autoFocus
+                  className="w-16 px-2 py-0.5 text-[11px] border border-gray-300 rounded-full outline-none" />
+                <button onClick={handleAddEmployee} className="text-[10px] text-blue-500 font-bold">확인</button>
+                <button onClick={() => { setShowAddEmployee(false); setNewEmpName(''); }} className="text-[10px] text-gray-400">취소</button>
+              </div>
+            ) : (
+              <button onClick={() => setShowAddEmployee(true)}
+                className="px-2 py-1 rounded-full text-[11px] text-gray-400 border border-dashed border-gray-300 hover:bg-gray-50">
+                +추가
+              </button>
+            )}
+          </div>
           <div className="flex bg-muted rounded-lg p-0.5">
             <button
               onClick={() => { setPageMode('today'); setSelectedDate(new Date()); }}

@@ -272,14 +272,43 @@ export const aiToolsList = [
 ];
 
 export const employees: Employee[] = [
-  { id: 'emp1', name: '김민수', department: '기획', position: '팀장' },
-  { id: 'emp2', name: '이지은', department: '마케팅', position: '신입' },
-  { id: 'emp3', name: '박서준', department: '홈피', position: '개발' },
-  { id: 'emp4', name: '최유나', department: '영업', position: '강사' },
-  { id: 'emp5', name: '정현우', department: '관리', position: '임원' },
+  { id: 'emp-ceo', name: '대표님', department: '경영', position: '대표' },
+  { id: 'emp-suyeon', name: '수연', department: '관리', position: '팀장' },
+  { id: 'emp-gayeon', name: '가연', department: '관리', position: '팀장' },
+  { id: 'emp-minhyuk', name: '민혁', department: '개발', position: '알바' },
 ];
 
-export const currentEmployee = employees[0];
+// localStorage 기반 현재 직원 선택
+export function getCurrentEmployee(): Employee {
+  try {
+    const stored = localStorage.getItem('current-employee-id');
+    if (stored) {
+      const found = employees.find(e => e.id === stored);
+      if (found) return found;
+    }
+  } catch {}
+  return employees[0];
+}
+
+export function setCurrentEmployee(id: string) {
+  localStorage.setItem('current-employee-id', id);
+}
+
+export function addEmployee(emp: Employee) {
+  employees.push(emp);
+  try { localStorage.setItem('custom-employees', JSON.stringify(employees.filter(e => e.id.startsWith('emp-custom')))); } catch {}
+}
+
+// 커스텀 직원 로드
+try {
+  const custom = localStorage.getItem('custom-employees');
+  if (custom) {
+    const parsed = JSON.parse(custom);
+    parsed.forEach((e: Employee) => { if (!employees.find(x => x.id === e.id)) employees.push(e); });
+  }
+} catch {}
+
+export const currentEmployee = getCurrentEmployee();
 
 function generateTimeSlots(interval: '30min' | '1hour' | 'half-day'): string[] {
   if (interval === 'half-day') return ['오전 (09:00~12:00)', '오후 (13:00~18:00)'];
