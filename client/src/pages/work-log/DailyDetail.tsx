@@ -405,13 +405,18 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
                     onDrop={e => {
                       e.preventDefault();
                       e.currentTarget.style.background = '';
-                      const taskId = e.dataTransfer.getData('text/plain');
-                      if (!taskId) return;
-                      const task = franklinTasks.find(t => t.id === taskId);
-                      if (!task) return;
+                      const droppedText = e.dataTransfer.getData('text/plain');
+                      if (!droppedText) return;
                       const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                      setFranklinTasks(prev => prev.map(t => t.id === taskId ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                      updateSlot(index, 'title', task.task);
+                      // 태스크 ID로 매칭 시도
+                      const task = franklinTasks.find(t => t.id === droppedText);
+                      if (task) {
+                        setFranklinTasks(prev => prev.map(t => t.id === droppedText ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        updateSlot(index, 'title', task.task);
+                      } else {
+                        // 만다라트 셀 텍스트 직접 배정
+                        updateSlot(index, 'title', droppedText);
+                      }
                     }}
                   >
                     <div className="flex items-center gap-1 px-1.5 py-1">
