@@ -363,32 +363,50 @@ function FormChips({ label, items, value, onChange }: { label: string; items: st
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Classic View (업무자료 테이블 스타일)
+   Classic View (업무자료 테이블 스타일 — 동적 분류 열)
    ══════════════════════════════════════════════════════════════ */
-function getItemTags(item: GuidelineItem): string[] {
-  const tags: string[] = [];
-  if (item.tab === '업무지침') {
-    if (item.workCat1) tags.push(item.workCat1);
-    if (item.workCat2) tags.push(item.workCat2);
-    if (item.workCat3) tags.push(item.workCat3);
-    if (item.workCat4) tags.push(item.workCat4);
-    if (item.workDb) tags.push(item.workDb);
-  } else if (item.tab === '사내규정') {
-    if (item.compWork) tags.push(item.compWork);
-    if (item.compDept) tags.push(item.compDept);
-    if (item.compPos) tags.push(item.compPos);
-    if (item.compContract) tags.push(item.compContract);
-  }
-  return tags;
+
+// 탭별 분류 열 정의: { key: GuidelineItem 필드명, label: 표시 이름 }
+interface CatColumn { key: keyof GuidelineItem; label: string }
+
+const WORK_COLUMNS: CatColumn[] = [
+  { key: 'workCat1', label: '분류별' },
+  { key: 'workCat2', label: '교육별' },
+  { key: 'workCat3', label: '급수별' },
+  { key: 'workCat4', label: '세부급수' },
+  { key: 'workDb', label: 'DB별' },
+];
+const COMPANY_COLUMNS: CatColumn[] = [
+  { key: 'compWork', label: '업무별' },
+  { key: 'compDept', label: '부서별' },
+  { key: 'compPos', label: '직급별' },
+  { key: 'compContract', label: '계약' },
+];
+
+function getActiveColumns(tab: GuidelineTab, activeFilters: Record<string, string[]>): CatColumn[] {
+  const defs = tab === '업무지침' ? WORK_COLUMNS : tab === '사내규정' ? COMPANY_COLUMNS : [];
+  // 선택된 필터가 있는 열만 표시 (아무것도 선택 안 하면 전체 열 표시)
+  const active = defs.filter(c => {
+    const filterKey = c.key as string;
+    return (activeFilters[filterKey]?.length ?? 0) > 0;
+  });
+  return active.length > 0 ? active : defs;
 }
 
-function ClassicView({ items, onUpdate, onDelete, onEdit }: {
+function ClassicView({ items, onUpdate, onDelete, onEdit, activeTab, activeFilters, expandAll }: {
   items: GuidelineItem[];
   onUpdate: (id: string, updates: Partial<GuidelineItem>) => void;
   onDelete: (id: string) => void;
   onEdit: (item: GuidelineItem) => void;
+  activeTab: GuidelineTab;
+  activeFilters: Record<string, string[]>;
+  expandAll: boolean;
 }) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (expandAll) setExpandedIds(new Set(items.map(i => i.id)));
+    else setExpandedIds(new Set());
+  }, [expandAll, items]);
   const [editingContentId, setEditingContentId] = useState<string | null>(null);
   const [editingContentValue, setEditingContentValue] = useState('');
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
@@ -396,28 +414,33 @@ function ClassicView({ items, onUpdate, onDelete, onEdit }: {
 
   const fmtDate = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`; };
 
+  const catCols = getActiveColumns(activeTab, activeFilters);
+  const catColTemplate = catCols.map(() => '64px').join(' ');
+  const gridTemplate = `64px ${catColTemplate} 180px 1fr 80px 60px 64px 48px`;
+
   return (
     <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ display: 'grid', gridTemplateColumns: '64px 64px auto 180px 1fr 80px 60px 64px 48px', padding: '10px 12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600, color: '#64748b', gap: 4 }}>
-        <div>유형</div><div>탭</div><div>분류</div><div>제목</div><div>내용</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
+      <div style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '10px 12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600, color: '#64748b', gap: 4 }}>
+        <div>유형</div>
+        {catCols.map(c => <div key={c.key as string}>{c.label}</div>)}
+        <div>제목</div><div>내용</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
       </div>
       {items.length === 0 ? (
         <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8', fontSize: 14 }}>등록된 지침이 없습니다</div>
       ) : items.map(item => {
         const isOpen = expandedIds.has(item.id);
         const rc = RULE_COLORS[item.ruleType];
-        const tags = getItemTags(item);
         return (
           <div key={item.id}>
             <div onClick={() => setExpandedIds(prev => { const n = new Set(prev); if (n.has(item.id)) n.delete(item.id); else n.add(item.id); return n; })}
-              style={{ display: 'grid', gridTemplateColumns: '64px 64px auto 180px 1fr 80px 60px 64px 48px', padding: '8px 12px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', alignItems: 'center', background: isOpen ? '#F8FAFC' : '#fff', transition: 'background 0.15s', gap: 4 }}
+              style={{ display: 'grid', gridTemplateColumns: gridTemplate, padding: '8px 12px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', alignItems: 'center', background: isOpen ? '#F8FAFC' : '#fff', transition: 'background 0.15s', gap: 4 }}
               onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = '#fafbfd'; }} onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = '#fff'; }}>
               <div><span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, fontWeight: 600, background: rc.bg, color: rc.color, border: `1px solid ${rc.border}` }}>{item.ruleType}</span></div>
-              <div><span style={{ padding: '2px 6px', borderRadius: 12, fontSize: 10, background: '#f1f5f9', color: '#475569' }}>{item.tab}</span></div>
-              <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                {tags.length > 0 ? tags.map(t => <span key={t} style={{ padding: '1px 6px', borderRadius: 10, fontSize: 10, background: '#EFF6FF', color: '#3B82F6' }}>{t}</span>) : <span style={{ fontSize: 10, color: '#cbd5e1' }}>—</span>}
-              </div>
+              {catCols.map(c => {
+                const val = (item as any)[c.key] as string;
+                return <div key={c.key as string}><span style={{ padding: '1px 6px', borderRadius: 10, fontSize: 10, background: val ? '#EFF6FF' : 'transparent', color: val ? '#3B82F6' : '#cbd5e1' }}>{val || '—'}</span></div>;
+              })}
               <div style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
                 {isOpen ? <ChevronUp size={13} color="#94a3b8" style={{ flexShrink: 0 }} /> : <ChevronDown size={13} color="#94a3b8" style={{ flexShrink: 0 }} />}
@@ -530,6 +553,7 @@ export default function CompanyGuidelinesPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<GuidelineItem | null>(null);
+  const [expandAll, setExpandAll] = useState(false);
 
   // Tab
   const [activeTab, setActiveTab] = useState<GuidelineTab>('사내규정');
@@ -861,6 +885,9 @@ export default function CompanyGuidelinesPage() {
           {anyFilterActive && (
             <button onClick={resetFilters} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#EF4444' }}><X size={14} />필터 초기화</button>
           )}
+          <button onClick={() => setExpandAll(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#475569' }}>
+            {expandAll ? '전체 접기' : '전체 펼치기'}
+          </button>
           <button onClick={() => { setEditingItem(null); setShowForm(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}><Plus size={16} />새 지침</button>
         </div>
       </div>
@@ -942,7 +969,14 @@ export default function CompanyGuidelinesPage() {
 
       {/* View Content */}
       {viewMode === 'classic' ? (
-        <ClassicView items={filtered} onUpdate={handleUpdate} onDelete={handleDelete} onEdit={item => { setEditingItem(item); setShowForm(true); }} />
+        <ClassicView items={filtered} onUpdate={handleUpdate} onDelete={handleDelete} onEdit={item => { setEditingItem(item); setShowForm(true); }}
+          activeTab={activeTab}
+          activeFilters={{
+            workCat1: fWorkCat1, workCat2: fWorkCat2, workCat3: fWorkCat3, workCat4: fWorkCat4, workDb: fWorkDb,
+            compWork: fCompWork, compDept: fCompDept, compPos: fCompPos, compContract: fCompContract,
+          }}
+          expandAll={expandAll}
+        />
       ) : viewMode === 'franklin' ? (
         <FranklinView
           tasks={itemsToTasks(filtered)}
