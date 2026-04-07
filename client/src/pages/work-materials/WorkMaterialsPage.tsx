@@ -84,6 +84,9 @@ export default function WorkMaterialsPage() {
   // inline content editing
   const [editingContentId, setEditingContentId] = useState<string|null>(null);
   const [editingContentValue, setEditingContentValue] = useState('');
+  // inline note editing
+  const [editingNoteId, setEditingNoteId] = useState<string|null>(null);
+  const [editingNoteValue, setEditingNoteValue] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -139,6 +142,17 @@ export default function WorkMaterialsPage() {
     setEditingContentId(null);
   };
 
+  const handleInlineNoteSave = async (row: MaterialRow) => {
+    if (editingNoteValue === (row.data.note||'')) { setEditingNoteId(null); return; }
+    const payload = { ...row.data, note: editingNoteValue };
+    try {
+      await fetch(`/api/work-materials/${row.material_id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      setRows(prev => prev.map(r => r.material_id === row.material_id ? { ...r, data: { ...r.data, note: editingNoteValue } } : r));
+      toast.success('비고가 수정되었습니다');
+    } catch { toast.error('수정 실패'); }
+    setEditingNoteId(null);
+  };
+
   const anyFilterActive = filterDept!=='전체'||filterCat2!=='전체'||filterCat3!=='전체'||filterPos!=='전체'||filterAuthor!=='전체'||!!searchText;
 
   if (loading) return <div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>;
@@ -149,7 +163,9 @@ export default function WorkMaterialsPage() {
   const mergedPos = [...DEF_POS, ...(custom['pos']||[])];
 
   return (
-    <div style={{padding:'24px 32px',maxWidth:1400,margin:'0 auto'}}>
+    <div style={{display:'flex',gap:0,padding:'24px 32px',maxWidth:1800,margin:'0 auto'}}>
+    {/* ── 왼쪽: 테이블 영역 ── */}
+    <div style={{flex:1,minWidth:0,transition:'all 0.3s ease'}}>
       {/* header */}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
         <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
@@ -225,12 +241,18 @@ export default function WorkMaterialsPage() {
                   </>
                 )}
               </div>
-              {/* 비고 */}
-              <div style={{fontSize:11,color:'#64748b',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.note||'—'}</div>
+              {/* 비고 — 클릭 시 인라인 수정 */}
+              <div onClick={e=>{e.stopPropagation();if(editingNoteId!==row.material_id){setEditingNoteId(row.material_id);setEditingNoteValue(row.data.note||'');}}} style={{fontSize:11,color:'#64748b',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',cursor:'text',borderRadius:4,padding:'2px 4px'}} title="클릭하여 수정">
+                {editingNoteId===row.material_id?(
+                  <input value={editingNoteValue} onChange={e=>setEditingNoteValue(e.target.value)} onBlur={()=>handleInlineNoteSave(row)} onKeyDown={e=>{if(e.key==='Escape')setEditingNoteId(null);if(e.key==='Enter'){e.preventDefault();handleInlineNoteSave(row);}}} autoFocus style={{width:'100%',fontSize:11,border:'1px solid #3B82F6',outline:'none',borderRadius:4,padding:'2px 4px',background:'#fff',boxSizing:'border-box'}}/>
+                ):(
+                  <span>{row.data.note||'—'}</span>
+                )}
+              </div>
               <div style={{fontSize:12,color:'#64748b'}}>{row.data.author}</div>
               <div style={{fontSize:11,color:'#94a3b8'}}>{fmtDate(row.data.created_at)}</div>
               <div style={{display:'flex',gap:2}} onClick={e=>e.stopPropagation()}>
-                <button onClick={()=>setPreviewRow(row)} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="미리보기"><Eye size={13} color="#3B82F6"/></button>
+                <button onClick={()=>setPreviewRow(prev=>prev?.material_id===row.material_id?null:row)} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="미리보기"><Eye size={13} color={previewRow?.material_id===row.material_id?'#1D4ED8':'#3B82F6'}/></button>
                 <button onClick={()=>{setEditingId(row.material_id);setShowForm(true);}} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="수정"><Pencil size={13} color="#94a3b8"/></button>
                 <button onClick={()=>handleDelete(row.material_id)} style={{background:'none',border:'none',cursor:'pointer',padding:3}} title="삭제"><Trash2 size={13} color="#ef4444"/></button>
               </div>
@@ -268,7 +290,9 @@ export default function WorkMaterialsPage() {
       <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{anyFilterActive?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
 
       {showForm&&<MaterialForm editData={editingId?rows.find(r=>r.material_id===editingId):undefined} onClose={()=>{setShowForm(false);setEditingId(null);}} onSaved={()=>{setShowForm(false);setEditingId(null);fetchData();}} custom={custom} updateCustom={updateCustom}/>}
-      {previewRow&&<PreviewModal row={previewRow} onClose={()=>setPreviewRow(null)}/>}
+    </div>
+    {/* ── 오른쪽: 미리보기 패널 ── */}
+    {previewRow&&<PreviewPanel row={previewRow} onClose={()=>setPreviewRow(null)}/>}
     </div>
   );
 }
@@ -335,9 +359,9 @@ function AttItem({a}:{a:Attachment}) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Preview Modal (Notion-like)
+   Preview Panel (right side, Notion-like)
    ══════════════════════════════════════════════════════════════ */
-function PreviewModal({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
+function PreviewPanel({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
   const d = row.data;
   const atts = d.attachments||[];
   const images = atts.filter(a=>a.type==='image');
@@ -346,90 +370,84 @@ function PreviewModal({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
   const isPdf = (name: string) => name.toLowerCase().endsWith('.pdf');
 
   return (
-    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:24}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:16,width:800,maxHeight:'90vh',overflow:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
-        {/* header */}
-        <div style={{padding:'24px 32px 0',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-          <div>
-            <div style={{display:'flex',gap:6,marginBottom:8}}>
-              <span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{d.department}</span>
-              {d.category2&&<span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#F0FDF4',color:'#22C55E'}}>{d.category2}</span>}
-              {d.category3&&<span style={{padding:'2px 10px',borderRadius:12,fontSize:11,fontWeight:500,background:'#FFFBEB',color:'#F59E0B'}}>{d.category3}</span>}
-            </div>
-            <h2 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>{d.title}</h2>
-            <div style={{fontSize:13,color:'#94a3b8',marginTop:6}}>{d.author} · {fmtDate(d.created_at)} · {d.position}</div>
+    <div style={{width:440,flexShrink:0,marginLeft:20,background:'#fff',borderRadius:12,border:'1px solid #e2e8f0',height:'calc(100vh - 100px)',position:'sticky',top:24,display:'flex',flexDirection:'column',boxShadow:'0 4px 20px rgba(0,0,0,0.06)'}}>
+      {/* header */}
+      <div style={{padding:'16px 20px',borderBottom:'1px solid #f1f5f9',flexShrink:0}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+            <span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{d.department}</span>
+            {d.category2&&<span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#F0FDF4',color:'#22C55E'}}>{d.category2}</span>}
+            {d.category3&&<span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#FFFBEB',color:'#F59E0B'}}>{d.category3}</span>}
           </div>
-          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><X size={22} color="#94a3b8"/></button>
+          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:2,flexShrink:0}}><X size={18} color="#94a3b8"/></button>
         </div>
+        <h3 style={{fontSize:17,fontWeight:700,color:'#1e293b',margin:0,lineHeight:1.3}}>{d.title}</h3>
+        <div style={{fontSize:12,color:'#94a3b8',marginTop:6}}>{d.author} · {fmtDate(d.created_at)}{d.position?` · ${d.position}`:''}</div>
+      </div>
 
-        {/* content */}
-        <div style={{padding:'20px 32px 24px'}}>
-          {d.content && (
-            <div style={{fontSize:15,color:'#334155',lineHeight:1.8,whiteSpace:'pre-wrap',padding:'20px 24px',background:'#f8fafc',borderRadius:12,marginBottom:20,border:'1px solid #f1f5f9'}}>{d.content}</div>
-          )}
+      {/* scrollable body */}
+      <div style={{flex:1,overflow:'auto',padding:'16px 20px'}}>
+        {d.content && (
+          <div style={{fontSize:14,color:'#334155',lineHeight:1.8,whiteSpace:'pre-wrap',padding:'16px',background:'#f8fafc',borderRadius:10,marginBottom:16,border:'1px solid #f1f5f9'}}>{d.content}</div>
+        )}
 
-          {d.note && (
-            <div style={{fontSize:14,color:'#64748b',padding:'12px 16px',background:'#FFFBEB',borderRadius:8,marginBottom:20,border:'1px solid #FDE68A'}}>
-              <strong style={{color:'#92400E'}}>비고</strong> &nbsp;{d.note}
-            </div>
-          )}
+        {d.note && (
+          <div style={{fontSize:13,color:'#64748b',padding:'10px 14px',background:'#FFFBEB',borderRadius:8,marginBottom:16,border:'1px solid #FDE68A'}}>
+            <strong style={{color:'#92400E'}}>비고</strong> &nbsp;{d.note}
+          </div>
+        )}
 
-          {/* images inline */}
-          {images.length>0&&(
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:10}}>이미지</div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:12}}>
-                {images.map((img,i)=>(
-                  <div key={i} style={{borderRadius:10,overflow:'hidden',border:'1px solid #e2e8f0',background:'#f8fafc'}}>
-                    <img src={img.url} alt={img.name} style={{width:'100%',maxHeight:300,objectFit:'contain',display:'block',background:'#fff'}}/>
-                    <div style={{padding:'8px 12px',fontSize:12,color:'#64748b',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                      <span>{img.name}</span>
-                      <a href={img.url} download={img.name} style={{color:'#3B82F6'}}><Download size={14}/></a>
-                    </div>
-                  </div>
-                ))}
+        {/* images inline */}
+        {images.length>0&&(
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:8}}>이미지</div>
+            {images.map((img,i)=>(
+              <div key={i} style={{borderRadius:8,overflow:'hidden',border:'1px solid #e2e8f0',background:'#f8fafc',marginBottom:8}}>
+                <img src={img.url} alt={img.name} style={{width:'100%',maxHeight:250,objectFit:'contain',display:'block',background:'#fff'}}/>
+                <div style={{padding:'6px 10px',fontSize:11,color:'#64748b',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span>{img.name}</span>
+                  <a href={img.url} download={img.name} style={{color:'#3B82F6'}}><Download size={13}/></a>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        )}
 
-          {/* PDF embed */}
-          {files.filter(f=>isPdf(f.name)).map((f,i)=>(
-            <div key={i} style={{marginBottom:20}}>
-              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>PDF 미리보기 — {f.name}</div>
-              {f.url==='#' ? (
-                <div style={{padding:24,background:'#f8fafc',borderRadius:10,border:'1px solid #e2e8f0',textAlign:'center',color:'#94a3b8',fontSize:13}}>데모 파일 — 실제 URL이 필요합니다</div>
-              ) : (
-                <iframe src={f.url} style={{width:'100%',height:500,borderRadius:10,border:'1px solid #e2e8f0'}}/>
-              )}
-            </div>
-          ))}
+        {/* PDF embed */}
+        {files.filter(f=>isPdf(f.name)).map((f,i)=>(
+          <div key={i} style={{marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6}}>PDF — {f.name}</div>
+            {f.url==='#' ? (
+              <div style={{padding:20,background:'#f8fafc',borderRadius:8,border:'1px solid #e2e8f0',textAlign:'center',color:'#94a3b8',fontSize:12}}>데모 파일 — 실제 URL이 필요합니다</div>
+            ) : (
+              <iframe src={f.url} style={{width:'100%',height:360,borderRadius:8,border:'1px solid #e2e8f0'}}/>
+            )}
+          </div>
+        ))}
 
-          {/* other files */}
-          {files.filter(f=>!isPdf(f.name)).length>0&&(
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>파일</div>
-              {files.filter(f=>!isPdf(f.name)).map((f,i)=>(
-                <a key={i} href={f.url} download={f.name} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'#f8fafc',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:14,marginBottom:6}}>
-                  <File size={18} color="#F59E0B"/><span style={{flex:1}}>{f.name}</span>{f.size&&<span style={{fontSize:12,color:'#94a3b8'}}>{fmtSize(f.size)}</span>}<Download size={16} color="#3B82F6"/>
-                </a>
-              ))}
-            </div>
-          )}
+        {/* other files */}
+        {files.filter(f=>!isPdf(f.name)).length>0&&(
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6}}>파일</div>
+            {files.filter(f=>!isPdf(f.name)).map((f,i)=>(
+              <a key={i} href={f.url} download={f.name} style={{display:'flex',alignItems:'center',gap:8,padding:'10px 12px',background:'#f8fafc',borderRadius:8,border:'1px solid #e2e8f0',textDecoration:'none',color:'#334155',fontSize:13,marginBottom:6}}>
+                <File size={16} color="#F59E0B"/><span style={{flex:1}}>{f.name}</span>{f.size&&<span style={{fontSize:11,color:'#94a3b8'}}>{fmtSize(f.size)}</span>}<Download size={14} color="#3B82F6"/>
+              </a>
+            ))}
+          </div>
+        )}
 
-          {/* links */}
-          {links.length>0&&(
-            <div>
-              <div style={{fontSize:14,fontWeight:600,color:'#475569',marginBottom:8}}>링크</div>
-              <div style={{display:'flex',flexDirection:'column',gap:6}}>
-                {links.map((l,i)=>(
-                  <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'#f0fdf4',borderRadius:8,border:'1px solid #BBF7D0',textDecoration:'none',color:'#15803D',fontSize:14}}>
-                    <ExternalLink size={16}/><span style={{flex:1}}>{l.name}</span><span style={{fontSize:12,color:'#94a3b8'}}>{l.url}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* links */}
+        {links.length>0&&(
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6}}>링크</div>
+            {links.map((l,i)=>(
+              <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',gap:8,padding:'10px 12px',background:'#f0fdf4',borderRadius:8,border:'1px solid #BBF7D0',textDecoration:'none',color:'#15803D',fontSize:13,marginBottom:6}}>
+                <ExternalLink size={14}/><span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{l.name}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
