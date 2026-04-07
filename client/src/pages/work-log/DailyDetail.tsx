@@ -399,7 +399,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                     <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
                       {FRANKLIN_STATUS_CONFIG[t.status].icon}
                     </span>
-                    <span className={t.status === 'done' ? 'line-through text-gray-400' : ''}>{t.task}</span>
+                    <span className={t.status === 'cancelled' ? 'line-through text-gray-400' : ''}>{t.task}</span>
                     {(t.achievement || 0) > 0 && <span className={`text-[8px] font-bold ${(t.achievement||0)>=4?'text-emerald-600':'text-amber-500'}`}>{t.achievement>=4?'질':'양'}{t.achievement}</span>}
                   </div>
                 ))}

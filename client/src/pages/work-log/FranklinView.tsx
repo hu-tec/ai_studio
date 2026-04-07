@@ -179,7 +179,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                       autoFocus className="flex-1 text-[12px] px-1 py-0.5 border border-primary rounded outline-none" />
                   ) : (
                     <span onClick={() => setEditingId(task.id)}
-                      className={`flex-1 text-[12px] cursor-pointer truncate ${task.status === 'done' ? 'line-through text-muted-foreground' : task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                      className={`flex-1 text-[12px] cursor-pointer truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
                       {task.task}
                     </span>
                   )}
@@ -270,7 +270,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                             <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                               className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0"
                               style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
-                            <span className={`flex-1 text-[11px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
+                            <span className={`flex-1 text-[11px] ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{sub.task}</span>
                             <div className="flex gap-[1px] shrink-0">
                               {[1,2,3,4,5].map(v => (
                                 <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}

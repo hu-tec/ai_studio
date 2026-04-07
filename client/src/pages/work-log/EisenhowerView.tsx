@@ -207,7 +207,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                             style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
                           <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
                           {task.isIssue && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
-                          <span className={`flex-1 text-[11px] truncate ${task.status === 'done' ? 'line-through text-muted-foreground' : task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{task.task}</span>
+                          <span className={`flex-1 text-[11px] truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{task.task}</span>
                           <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
                             {[1,2,3,4,5].map(v => {
                               const ach = calcTaskAchievement(task);
@@ -269,7 +269,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                                     <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                                       className="w-3.5 h-3.5 rounded flex items-center justify-center text-[8px] font-bold shrink-0"
                                       style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
-                                    <span className={`flex-1 text-[10px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
+                                    <span className={`flex-1 text-[10px] ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{sub.task}</span>
                                     <div className="flex gap-[1px] shrink-0">
                                       {[1,2,3,4,5].map(v => (
                                         <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
