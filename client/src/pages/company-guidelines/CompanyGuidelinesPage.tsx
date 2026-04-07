@@ -943,67 +943,66 @@ export default function CompanyGuidelinesPage() {
 
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 기존 규정관리 데이터 → 새 GuidelineItem[] 변환
-  const migrateOldRules = async (): Promise<GuidelineItem[]> => {
-    try {
-      const res = await fetch('/api/rules/company-rules');
-      if (!res.ok) return [];
-      const row = await res.json();
-      if (!row?.data) return [];
-      const d = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-      const migrated: GuidelineItem[] = [];
-      let counter = 0;
-      const ruleTypeMap: Record<string, RuleType> = { '규정': '규정', '준규정': '준규정', '선택사항': '선택규정' };
-
-      // 회사 전체 지침 → 사내규정 탭
-      const addRules = (ruleSet: any, section: string, group: string) => {
-        if (!ruleSet) return;
-        for (const [oldType, newType] of Object.entries(ruleTypeMap)) {
-          const arr = ruleSet[oldType];
-          if (!Array.isArray(arr)) continue;
-          for (const rule of arr) {
-            if (!rule.text?.trim()) continue;
-            counter++;
-            migrated.push({
-              id: `migrated-${counter}`,
-              tab: '사내규정',
-              workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
-              compWork: section === 'company' ? '' : '',
-              compDept: section === 'departments' ? group : '',
-              compPos: section === 'ranks' ? group : '',
-              compContract: '',
-              author: section === 'company' ? '회사' : group,
-              title: rule.text.length > 50 ? rule.text.slice(0, 50) + '...' : rule.text,
-              content: rule.text,
-              ruleType: newType as RuleType,
-              priority: newType === '규정' ? 'A' : newType === '준규정' ? 'B' : 'C',
-              number: counter,
-              status: 'pending',
-              urgent: newType === '규정',
-              important: newType !== '선택규정',
-              note: section === 'company' ? '회사 전체 지침' : section === 'departments' ? `${group} 부서 지침` : `${group} 직급 지침`,
-              created_at: new Date().toISOString(),
-            });
-          }
-        }
-      };
-
-      // 회사 전체
-      addRules(d.companyData, 'company', '');
-      // 부서별
-      if (d.deptData) {
-        for (const [dept, ruleSet] of Object.entries(d.deptData)) {
-          addRules(ruleSet, 'departments', dept);
-        }
+  // 기존 규정관리 초기 데이터를 새 포맷으로 생성
+  const generateInitialData = (): GuidelineItem[] => {
+    const migrated: GuidelineItem[] = [];
+    let counter = 0;
+    const ruleTypeMap: Record<string, RuleType> = { '규정': '규정', '준규정': '준규정', '선택사항': '선택규정' };
+    const makeGuideline = (text: string, ruleType: RuleType, tab: GuidelineTab, dept: string, pos: string, author: string, noteText: string) => {
+      counter++;
+      const priority: FranklinPriority = ruleType === '규정' ? 'A' : ruleType === '준규정' ? 'B' : 'C';
+      migrated.push({
+        id: `init-${counter}`, tab, workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
+        compWork: '', compDept: dept, compPos: pos, compContract: '',
+        author, title: text.length > 60 ? text.slice(0, 60) + '...' : text, content: text,
+        ruleType, priority, number: counter, status: 'pending',
+        urgent: ruleType === '규정', important: ruleType !== '선택규정',
+        note: noteText, created_at: new Date().toISOString(),
+      });
+    };
+    const addSet = (rules: Record<string, string[]>, tab: GuidelineTab, dept: string, pos: string, author: string, note: string) => {
+      for (const [oldType, texts] of Object.entries(rules)) {
+        const rt = ruleTypeMap[oldType] || '규정';
+        for (const text of texts) makeGuideline(text, rt, tab, dept, pos, author, note);
       }
-      // 직급별
-      if (d.rankData) {
-        for (const [rank, ruleSet] of Object.entries(d.rankData)) {
-          addRules(ruleSet, 'ranks', rank);
-        }
-      }
-      return migrated;
-    } catch { return []; }
+    };
+
+    // 회사 전체 지침
+    addSet({
+      '규정': ['모든 임직원은 출퇴근 시 근태관리 시스템에 기록해야 한다', '업무 관련 자료의 외부 반출 시 사전 승인을 받아야 한다', '고객 개인정보는 개인정보보호법에 따라 처리한다', '사내 보안 서약서를 연 1회 이상 갱신해야 한다', '업무용 PC에 허가되지 않은 소프트웨어 설치를 금지한다', '월간 업무보고서는 매월 마지막 영업일까지 제출한다'],
+      '준규정': ['재택근무 시 업무 시작/종료 시 메신저로 보고한다', '부서 간 협업 시 공유 문서를 사용하여 진행 상황을 기록한다', '외부 미팅 시 회의록을 작성하여 48시간 내 공유한다', '사내 메신저는 업무 시간 중 항시 접속 상태를 유지한다', '분기별 자기 역량 평가서를 작성하여 팀장에게 제출한다'],
+      '선택사항': ['업무 효율화를 위한 자동화 도구 사용을 권장한다', '사내 동호회 활동 참여를 장려한다', '개인 업무 일지 작성을 권장한다', '사내 지식 공유 세미나에 자발적으로 참여할 수 있다'],
+    }, '사내규정', '', '', '회사', '회사 전체 지침');
+
+    // 부서별 지침
+    const depts: Record<string, Record<string, string[]>> = {
+      '기획': { '규정': ['연간 사업계획서는 전년도 12월 15일까지 완성한다', '신규 프로젝트 착수 시 기획안 승인을 받아야 한다', 'KPI 산정 기준표를 분기 초에 확정한다'], '준규정': ['분기별 성과 보고서를 경영진에게 제출한다', '프로젝트 일정 관리는 사내 PM 도구를 활용한다'], '선택사항': ['시장 동향 보고서를 월간 발행할 수 있다'] },
+      '홈페이지': { '규정': ['웹사이트 콘텐츠 업로드 시 검수 절차를 거쳐야 한다', '디자인 시스템 가이드라인을 준수해야 한다'], '준규정': ['이미지 사용 시 저작권 확인 절차를 따른다', '웹 접근성 점검을 분기별 1회 실시한다'], '선택사항': ['A/B 테스트를 통한 UX 개선을 시도할 수 있다'] },
+      '영업': { '규정': ['고객사 계약 체결 시 법무 검토를 받아야 한다', '할인 정책 적용은 승인 권한자의 결재를 받아야 한다'], '준규정': ['영업 실적 보고서를 주간 단위로 제출한다', '고객 상담 내역을 CRM 시스템에 기록한다'], '선택사항': ['제휴 파트너 발굴 활동을 자율적으로 진행할 수 있다'] },
+      '마케팅': { '규정': ['광고 집행 시 마케팅 팀장의 사전 승인을 받아야 한다', '브랜드 가이드라인(CI/BI)을 반드시 준수해야 한다'], '준규정': ['SNS 콘텐츠는 사내 톤앤매너 가이드를 따른다'], '선택사항': ['경품 지급 이벤트를 기획할 수 있다'] },
+      '개발': { '규정': ['모든 코드는 코드 리뷰를 거친 후 머지해야 한다', '코딩 컨벤션 가이드를 준수해야 한다', '프로덕션 배포 시 배포 승인 절차를 따라야 한다'], '준규정': ['API 설계 시 사내 표준 스펙을 따른다', '백업 및 복구 정책에 따라 주간 백업을 실시한다'], '선택사항': ['사내 기술 블로그에 기고할 수 있다'] },
+      '인사': { '규정': ['채용 프로세스는 규정된 절차에 따라 진행해야 한다', '인사평가는 연 2회 정기적으로 실시해야 한다'], '준규정': ['면접 평가는 표준 평가 기준표를 활용한다'], '선택사항': ['직원 교육 프로그램을 자율적으로 이수할 수 있다'] },
+      '관리': { '규정': ['시스템 접근 권한은 직급/역할에 따라 부여해야 한다', '데이터 보관 기한 규정을 준수해야 한다'], '준규정': ['IT 자산 관리 대장을 분기별 갱신한다'], '선택사항': ['업무 효율화 제안을 자유롭게 제출할 수 있다'] },
+      '상담': { '규정': ['상담 접수 시 배정 절차를 따라야 한다', '상담 기록은 표준 양식에 따라 작성해야 한다'], '준규정': ['진로 상담 매뉴얼에 따라 상담을 진행한다'], '선택사항': ['상담 만족도 조사를 분기별 실시할 수 있다'] },
+      '총무': { '규정': ['안전 점검 체크리스트를 월 1회 이상 실시해야 한다'], '준규정': ['시설물 관리 지침에 따라 정기 점검을 실시한다', '업체 선정 시 3곳 이상 비교 견적을 받는다'], '선택사항': ['사무용품 구매를 자율적으로 신청할 수 있다'] },
+      '강사팀': { '규정': ['강사 채용 및 계약은 표준 계약서를 사용해야 한다', '강사 평가는 학기별 1회 이상 실시해야 한다'], '준규정': ['수업 편성 가이드라인을 참고하여 시간표를 구성한다'], '선택사항': ['학생 피드백 설문을 자율적으로 실시할 수 있다'] },
+    };
+    for (const [dept, rules] of Object.entries(depts)) {
+      addSet(rules, '사내규정', dept, '', dept, `${dept} 부서 지침`);
+    }
+
+    // 직급별 지침
+    const ranks: Record<string, Record<string, string[]>> = {
+      '신입': { '규정': ['입사 후 2주 이내 OJT 교육을 이수해야 한다', '수습 기간 동안 월간 업무 보고서를 제출해야 한다'], '준규정': ['사내 시스템 사용법 교육에 참여한다'], '선택사항': ['사내 동호회에 가입할 수 있다'] },
+      '팀장': { '규정': ['팀 운영 계획을 수립하고 이행해야 한다', '팀원 근태 관리 및 승인을 처리해야 한다', '팀 성과 목표를 설정하고 관리해야 한다'], '준규정': ['팀 내 업무 프로세스 개선을 주도한다'], '선택사항': ['타 팀과의 합동 프로젝트를 기획할 수 있다'] },
+      '임원': { '규정': ['회사 경영 전략 의사결정에 참여해야 한다', '연간 경영 실적 보고를 수행해야 한다'], '준규정': ['산업 동향 분석 및 전략 제안을 수행한다'], '선택사항': ['사내 비전/미션 공유 특강을 진행할 수 있다'] },
+      '대표': { '규정': ['회사 경영 총괄 및 최종 의사결정을 수행해야 한다'], '준규정': ['대외 협력 및 네트워킹 활동에 참여한다'], '선택사항': [] },
+    };
+    for (const [rank, rules] of Object.entries(ranks)) {
+      addSet(rules, '사내규정', '', rank, rank, `${rank} 직급 지침`);
+    }
+
+    return migrated;
   };
 
   // Load data
@@ -1018,22 +1017,13 @@ export default function CompanyGuidelinesPage() {
           setItems(d.items || []);
           setMandalartCells(d.mandalartCells || []);
         } else {
-          // 새 테이블이 비어있으면 → 기존 규정관리 데이터 마이그레이션
-          const migrated = await migrateOldRules();
-          if (migrated.length > 0) {
-            setItems(migrated);
-            // 자동 저장
-            const payload = { items: migrated, mandalartCells: [] };
-            localStorage.setItem(DATA_KEY, JSON.stringify(payload));
-            await fetch('/api/company-guidelines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guideline_id: 'main', data: payload }) });
-            toast.success(`기존 규정관리 데이터 ${migrated.length}건이 마이그레이션되었습니다`);
-          } else {
-            // localStorage fallback
-            try {
-              const ls = localStorage.getItem(DATA_KEY);
-              if (ls) { const d = JSON.parse(ls); setItems(d.items || []); setMandalartCells(d.mandalartCells || []); }
-            } catch {}
-          }
+          // 새 테이블이 비어있으면 → 초기 데이터 생성
+          const initial = generateInitialData();
+          setItems(initial);
+          const payload = { items: initial, mandalartCells: [] };
+          localStorage.setItem(DATA_KEY, JSON.stringify(payload));
+          await fetch('/api/company-guidelines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guideline_id: 'main', data: payload }) });
+          toast.success(`기존 규정관리 데이터 ${initial.length}건이 초기 등록되었습니다`);
         }
       } catch {
         try {

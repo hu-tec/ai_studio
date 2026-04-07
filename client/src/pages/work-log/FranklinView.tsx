@@ -4,7 +4,8 @@ import type { FranklinTask, FranklinPriority, TimeSlotEntry } from './data';
 import {
   FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getNextNumber, cycleStatus, syncPriorityToEisenhower,
-  getTimelinePosition,
+  getTimelinePosition, ACH_COLORS, ACH_LABELS,
+  addSubTask, updateSubTask, removeSubTask, calcTaskAchievement,
 } from './data';
 
 interface FranklinViewProps {
@@ -24,6 +25,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
   const [newEnd, setNewEnd] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [newSubText, setNewSubText] = useState('');
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<FranklinPriority | null>(null);
   const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];

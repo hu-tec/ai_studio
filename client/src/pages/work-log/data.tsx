@@ -74,6 +74,7 @@ export interface MandalartCell {
   children?: MandalartCell[]; // 하위 3×3 (최대 8개, center 제외)
   taskId?: string;           // 연결된 FranklinTask ID
   achievement?: number;      // 달성률 1~5 (1·2·3=양, 4·5=질)
+  status?: FranklinStatus;   // 진행 상태 (프랭클린과 동기화)
 }
 
 // 만다라트 기간 모드
@@ -96,6 +97,9 @@ export interface FranklinTask {
   isIssue?: boolean;        // ⚠ 이슈 표시
   urgent?: boolean;         // 아이젠하워: 긴급
   important?: boolean;      // 아이젠하워: 중요
+  achievement?: number;     // 달성률 0-5 (1-3=양, 4-5=질)
+  children?: FranklinTask[]; // 서브태스크
+  parentId?: string;        // 부모 태스크 ID
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';
@@ -231,6 +235,61 @@ export function getTimelinePosition(time: string, dayStart = 9, dayEnd = 18): nu
 export function cycleStatus(current: FranklinStatus): FranklinStatus {
   const order: FranklinStatus[] = ['pending', 'progress', 'done', 'forwarded', 'cancelled'];
   return order[(order.indexOf(current) + 1) % order.length];
+}
+
+// ── 공용 달성도 상수 ──
+export const ACH_COLORS = ['#e2e8f0','#f59e0b','#f59e0b','#f59e0b','#10B981','#10B981'];
+export const ACH_LABELS = ['','1(양)','2(양)','3(양)','4(질)','5(질)'];
+
+/** 서브태스크 가져오기 (children 배열 기반) */
+export function getSubTasks(task: FranklinTask): FranklinTask[] {
+  return task.children || [];
+}
+
+/** 태스크 달성도 계산 — 자식 있으면 평균, 없으면 자기 값 */
+export function calcTaskAchievement(task: FranklinTask): number {
+  const subs = getSubTasks(task);
+  if (subs.length === 0) return task.achievement || 0;
+  const filled = subs.filter(s => (s.achievement || 0) > 0);
+  if (filled.length === 0) return task.achievement || 0;
+  return Math.round(filled.reduce((s, t) => s + (t.achievement || 0), 0) / filled.length * 10) / 10;
+}
+
+/** 서브태스크 추가 */
+export function addSubTask(tasks: FranklinTask[], parentId: string, subText: string): FranklinTask[] {
+  return tasks.map(t => {
+    if (t.id !== parentId) return t;
+    const children = [...(t.children || [])];
+    const subNum = children.length + 1;
+    children.push({
+      id: `${parentId}-sub-${Date.now()}`,
+      priority: t.priority,
+      number: subNum,
+      task: subText,
+      status: 'pending',
+      achievement: 0,
+      parentId: parentId,
+    });
+    return { ...t, children };
+  });
+}
+
+/** 서브태스크 업데이트 */
+export function updateSubTask(tasks: FranklinTask[], parentId: string, subId: string, updates: Partial<FranklinTask>): FranklinTask[] {
+  return tasks.map(t => {
+    if (t.id !== parentId) return t;
+    const children = (t.children || []).map(c => c.id === subId ? { ...c, ...updates } : c);
+    return { ...t, children };
+  });
+}
+
+/** 서브태스크 삭제 */
+export function removeSubTask(tasks: FranklinTask[], parentId: string, subId: string): FranklinTask[] {
+  return tasks.map(t => {
+    if (t.id !== parentId) return t;
+    const children = (t.children || []).filter(c => c.id !== subId);
+    return { ...t, children };
+  });
 }
 
 export interface DailyLog {
