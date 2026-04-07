@@ -59,7 +59,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   // Drag handlers
   const onDragStart = (e: DragEvent, id: string) => {
     setDragId(id);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = 'copyMove';
     e.dataTransfer.setData('text/plain', id);
   };
 
@@ -162,17 +162,21 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                   <span className="text-[10px] font-bold" style={{ color: cfg.color }}>{cfg.desc}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => {
-                    const allExp = items.every(t => expandedIds.has(t.id));
-                    setExpandedIds(prev => {
-                      const s = new Set(prev);
-                      items.forEach(t => allExp ? s.delete(t.id) : s.add(t.id));
-                      return s;
-                    });
-                  }} className="text-[8px] px-1 py-0.5 rounded" style={{ background: cfg.border, color: cfg.color }}>
-                    {items.every(t => expandedIds.has(t.id)) ? '접기' : '펼치기'}
-                  </button>
-                  <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{ background: cfg.border }}>{items.length}</span>
+                  <span className="text-[10px] font-black" style={{ color: cfg.color }}>
+                    {items.filter(t => t.status === 'done').length}/{items.length}
+                  </span>
+                  {items.length > 0 && (
+                    <button onClick={() => {
+                      const allExp = items.every(t => expandedIds.has(t.id));
+                      setExpandedIds(prev => {
+                        const s = new Set(prev);
+                        items.forEach(t => allExp ? s.delete(t.id) : s.add(t.id));
+                        return s;
+                      });
+                    }} className="text-[8px] px-1 py-0.5 rounded" style={{ background: cfg.border, color: cfg.color }}>
+                      {items.every(t => expandedIds.has(t.id)) ? '▲' : '▼'}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -288,22 +292,6 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
         })}
       </div>
 
-      {/* 일정 섹션 제거 — 왼쪽 타임테이블에서 표시/DnD 처리 */}
-
-      {/* Summary */}
-      <div className="grid grid-cols-4 gap-2">
-        {(['q1', 'q2', 'q3', 'q4'] as EisenhowerQuadrant[]).map(q => {
-          const cfg = EISENHOWER_CONFIG[q];
-          const done = grouped[q].filter(t => t.status === 'done').length;
-          const total = grouped[q].length;
-          return (
-            <div key={q} className="text-center p-2 rounded" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
-              <div className="text-[10px] font-bold" style={{ color: cfg.color }}>{cfg.action}</div>
-              <div className="text-lg font-black" style={{ color: cfg.color }}>{done}/{total}</div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

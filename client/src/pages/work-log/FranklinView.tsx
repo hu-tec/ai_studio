@@ -34,7 +34,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
   // DnD handlers
   const onDragStart = (e: DragEvent, id: string) => {
     setDragId(id);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = 'copyMove';
     e.dataTransfer.setData('text/plain', id);
   };
   const onDragOver = (e: DragEvent, target: FranklinPriority) => {
@@ -125,19 +125,16 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
             <span className="text-[11px] font-semibold">업무 목록</span>
             <button onClick={() => { const allExp = sorted.every(t => expandedIds.has(t.id)); setExpandedIds(allExp ? new Set() : new Set(sorted.map(t => t.id))); }}
               className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300">
-              {sorted.every(t => expandedIds.has(t.id)) ? '전체접기' : '전체펼치기'}
+              {sorted.every(t => expandedIds.has(t.id)) ? '▲접기' : '▼펼치기'}
             </button>
           </div>
-          <div className="flex gap-2 text-[10px]">
+          <div className="flex items-center gap-2 text-[10px]">
             {priorities.map(p => {
               const cnt = tasks.filter(t => t.priority === p).length;
-              return cnt > 0 ? (
-                <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color }} className="font-bold">{p}({FRANKLIN_PRIORITY_CONFIG[p].desc}):{cnt}</span>
-              ) : null;
+              return cnt > 0 ? <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color }} className="font-bold">{p}:{cnt}</span> : null;
             })}
-            <span className="text-muted-foreground">
-              ●{tasks.filter(t => t.status === 'done').length} ◐{tasks.filter(t => t.status === 'progress').length} ○{tasks.filter(t => t.status === 'pending').length}
-            </span>
+            <span className="text-[10px] text-amber-500 font-bold">양{tasks.filter(t => (t.achievement||0) >= 1).length}/{tasks.length}</span>
+            <span className="text-[10px] text-emerald-600 font-bold">질{tasks.filter(t => (t.achievement||0) >= 4).length}/{tasks.length}</span>
           </div>
         </div>
 

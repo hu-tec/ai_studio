@@ -124,7 +124,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const onDragStart = (e: DragEvent, cell: MandalartCell) => {
     if (!cell.text.trim()) return;
     setDragCellId(cell.id);
-    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.effectAllowed = 'copyMove';
     // 태스크 ID가 있으면 ID로, 없으면 텍스트로 전달
     e.dataTransfer.setData('text/plain', cell.taskId || cell.text);
   };

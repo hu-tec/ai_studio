@@ -565,7 +565,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 return viewMode === 'classic' ? (
                   /* Classic: 확장 — 시간 + 제목 + 내용 + AI + 예정 인라인 편집 */
                   <div key={slot.id} className="border-b border-border/50 last:border-b-0"
-                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
@@ -575,15 +575,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       let task = franklinTasks.find(t => t.id === droppedText);
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        // 복사 배정: 슬롯에 태스크 이름 복사, 태스크 미배정이면 이 슬롯에 연결
-                        if (!task.timeSlotId) {
-                          const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                          setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                        }
-                        updateSlot(index, 'title', task.task);
-                        if (task.note) updateSlot(index, 'content', task.note);
+                        const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        const existing = slot.title.split(' / ').filter(Boolean);
+                        if (!existing.includes(task.task)) updateSlot(index, 'title', [...existing, task.task].join(' / '));
                       } else {
-                        updateSlot(index, 'title', droppedText);
+                        const existing = slot.title.split(' / ').filter(Boolean);
+                        if (!existing.includes(droppedText)) updateSlot(index, 'title', [...existing, droppedText].join(' / '));
                       }
                     }}>
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
@@ -622,7 +620,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   /* Franklin/Eisenhower/Mandalart: 축소 — 시간 + 블록 (DnD drop zone) */
                   <div key={slot.id}
                     className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
-                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; e.currentTarget.style.background = '#dbeafe'; }}
+                    onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
@@ -632,14 +630,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       let task = franklinTasks.find(t => t.id === droppedText);
                       if (!task) task = franklinTasks.find(t => t.task === droppedText);
                       if (task) {
-                        // 복사 배정: 슬롯에 태스크 복사, 미배정이면 이 슬롯 연결
-                        if (!task.timeSlotId) {
-                          const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                          setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
-                        }
-                        updateSlot(index, 'title', task.task);
+                        const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
+                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: t.endTime || slotEnd, timeSlotId: slot.id } : t));
+                        const existing = slot.title.split(' / ').filter(Boolean);
+                        if (!existing.includes(task.task)) updateSlot(index, 'title', [...existing, task.task].join(' / '));
                       } else {
-                        updateSlot(index, 'title', droppedText);
+                        const existing = slot.title.split(' / ').filter(Boolean);
+                        if (!existing.includes(droppedText)) updateSlot(index, 'title', [...existing, droppedText].join(' / '));
                       }
                     }}
                   >
