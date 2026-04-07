@@ -45,17 +45,38 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
     setMandalartByPeriod(prev => {
       const newCells = typeof cells === 'function' ? cells(prev[period] || []) : cells;
-      // 역방향 동기화: 만다라트 셀 → 연결된 FranklinTask achievement/status
+      // 역방향 동기화: 만다라트 셀 → FranklinTask 자동 생성/업데이트
       setFranklinTasks(tasks => {
+        let updated = [...tasks];
         let changed = false;
-        const updated = tasks.map(t => {
-          const cell = newCells.find(c => c.taskId === t.id);
-          if (!cell) return t;
-          const updates: Partial<FranklinTask> = {};
-          if (cell.achievement !== undefined && cell.achievement !== t.achievement) { updates.achievement = cell.achievement; changed = true; }
-          if (cell.status && cell.status !== t.status) { updates.status = cell.status; changed = true; }
-          return changed ? { ...t, ...updates } : t;
-        });
+        const processCell = (cell: MandalartCell) => {
+          if (!cell.text?.trim()) return;
+          if (cell.taskId) {
+            // 기존 연결 태스크 업데이트
+            const idx = updated.findIndex(t => t.id === cell.taskId);
+            if (idx >= 0) {
+              const t = updated[idx];
+              const needsUpdate = t.task !== cell.text || t.achievement !== cell.achievement || (cell.status && t.status !== cell.status);
+              if (needsUpdate) {
+                updated[idx] = { ...t, task: cell.text, achievement: cell.achievement, ...(cell.status ? { status: cell.status } : {}) };
+                changed = true;
+              }
+            }
+          } else {
+            // 새 셀 → FranklinTask 자동 생성
+            const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+            updated.push({
+              id: newId, priority: 'B', number: updated.filter(t => t.priority === 'B').length + 1,
+              task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
+              important: true, urgent: false,
+            });
+            cell.taskId = newId;
+            changed = true;
+          }
+          // 하위 셀도 처리
+          cell.children?.forEach(processCell);
+        };
+        newCells.forEach(processCell);
         return changed ? updated : tasks;
       });
       return { ...prev, [period]: newCells };

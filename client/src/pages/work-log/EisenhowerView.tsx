@@ -1,9 +1,9 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import type { FranklinTask, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry } from './data';
 import {
   EISENHOWER_CONFIG, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
-  getQuadrant, setQuadrant, getNextNumber, cycleStatus,
+  getQuadrant, setQuadrant, getNextNumber, cycleStatus, syncPriorityToEisenhower,
   ACH_COLORS, ACH_LABELS, calcTaskAchievement,
   addSubTask, updateSubTask, removeSubTask,
 } from './data';
@@ -20,8 +20,10 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   const [dropTarget, setDropTarget] = useState<EisenhowerQuadrant | 'slot' | null>(null);
   const [newText, setNewText] = useState('');
   const [newQuad, setNewQuad] = useState<EisenhowerQuadrant>('q1');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [newSubText, setNewSubText] = useState('');
+  const toggleExpand = (id: string) => setExpandedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+  const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
 
   // Group tasks by quadrant
   const grouped: Record<EisenhowerQuadrant, FranklinTask[]> = { q1: [], q2: [], q3: [], q4: [] };
@@ -152,23 +154,25 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
             >
               {/* Header */}
               <div
-                className="px-2.5 py-1.5 flex items-center justify-between shrink-0"
+                className="px-2.5 py-1 flex items-center justify-between shrink-0"
                 style={{ background: cfg.bg }}
               >
                 <div className="flex items-center gap-1.5">
-                  <span
-                    className="text-[10px] font-black px-1.5 py-0.5 rounded text-white"
-                    style={{ background: cfg.color }}
-                  >
-                    {cfg.label}
-                  </span>
-                  <span className="text-[11px] font-bold" style={{ color: cfg.color }}>{cfg.desc}</span>
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded text-white" style={{ background: cfg.color }}>{cfg.label}</span>
+                  <span className="text-[10px] font-bold" style={{ color: cfg.color }}>{cfg.desc}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold" style={{ color: cfg.color }}>{cfg.action}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: cfg.border }}>
-                    {items.length}
-                  </span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => {
+                    const allExp = items.every(t => expandedIds.has(t.id));
+                    setExpandedIds(prev => {
+                      const s = new Set(prev);
+                      items.forEach(t => allExp ? s.delete(t.id) : s.add(t.id));
+                      return s;
+                    });
+                  }} className="text-[8px] px-1 py-0.5 rounded" style={{ background: cfg.border, color: cfg.color }}>
+                    {items.every(t => expandedIds.has(t.id)) ? '접기' : '펼치기'}
+                  </button>
+                  <span className="text-[10px] font-bold px-1 py-0.5 rounded" style={{ background: cfg.border }}>{items.length}</span>
                 </div>
               </div>
 
@@ -182,30 +186,21 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                   items.map(task => {
                     const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
                     const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
-                    const isExpanded = expandedId === task.id;
+                    const isExpanded = expandedIds.has(task.id);
+                    const timeLabel = task.startTime ? `${task.startTime}${task.endTime ? '~'+task.endTime : '~'}` : '';
                     return (
                       <div key={task.id} className="border-b border-border/50">
-                        <div
-                          draggable
-                          onDragStart={e => onDragStart(e, task.id)}
-                          className="flex items-center gap-1 px-2 py-1.5 hover:bg-accent/20 cursor-grab active:cursor-grabbing group"
-                        >
-                          <button onClick={() => setExpandedId(isExpanded ? null : task.id)} className="w-3 h-3 shrink-0 text-muted-foreground">
+                        <div draggable onDragStart={e => onDragStart(e, task.id)}
+                          className="flex items-center gap-1 px-2 py-1 hover:bg-accent/20 cursor-grab active:cursor-grabbing group">
+                          <button onClick={() => toggleExpand(task.id)} className="w-3 h-3 shrink-0 text-muted-foreground">
                             {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                           </button>
-                          <button
-                            onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
+                          <button onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
                             className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 hover:scale-110"
-                            style={{ background: stCfg.bg, color: stCfg.color }}
-                          >{stCfg.icon}</button>
-                          <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>
-                            {task.priority}{task.number}
-                          </span>
-                          <span className={`flex-1 text-[11px] truncate ${
-                            task.status === 'done' ? 'line-through text-muted-foreground' :
-                            task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''
-                          }`}>{task.task}</span>
-                          {/* Achievement dots */}
+                            style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
+                          <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
+                          {task.isIssue && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
+                          <span className={`flex-1 text-[11px] truncate ${task.status === 'done' ? 'line-through text-muted-foreground' : task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{task.task}</span>
                           <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
                             {[1,2,3,4,5].map(v => {
                               const ach = calcTaskAchievement(task);
@@ -214,6 +209,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                                 style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />;
                             })}
                           </div>
+                          {timeLabel && <span className="text-[8px] font-mono text-blue-600 shrink-0">{timeLabel}</span>}
                           {task.children && task.children.length > 0 && (
                             <span className="text-[8px] px-1 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
                               {task.children.filter(c => c.status === 'done').length}/{task.children.length}
@@ -222,40 +218,64 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                           <button onClick={() => removeTask(task.id)}
                             className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[9px] shrink-0">✕</button>
                         </div>
-                        {/* Expanded: sub-tasks */}
+                        {/* Full expanded detail */}
                         {isExpanded && (
-                          <div className="px-3 py-1.5 bg-accent/5 border-t border-border/30 space-y-1">
-                            <div className="flex items-center gap-1">
-                              <input value={newSubText} onChange={e => setNewSubText(e.target.value)}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter' && newSubText.trim()) {
-                                    onTasksChange(addSubTask(tasks, task.id, newSubText.trim()));
-                                    setNewSubText('');
-                                  }
-                                }}
-                                placeholder="서브태스크 추가 (Enter)"
-                                className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none" />
+                          <div className="px-4 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-10">시간</span>
+                              <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
+                                className="px-1 py-0.5 border border-border rounded text-[10px] bg-background w-[80px]" />
+                              <span>~</span>
+                              <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
+                                className="px-1 py-0.5 border border-border rounded text-[10px] bg-background w-[80px]" />
+                              <label className="flex items-center gap-1 ml-2 cursor-pointer">
+                                <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })} className="w-3 h-3 accent-amber-500" />
+                                <span className="text-amber-600 font-bold">⚠이슈</span>
+                              </label>
                             </div>
-                            {(task.children || []).map(sub => {
-                              const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
-                              return (
-                                <div key={sub.id} className="flex items-center gap-1 pl-2 group/sub">
-                                  <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
-                                    className="w-3.5 h-3.5 rounded flex items-center justify-center text-[8px] font-bold shrink-0"
-                                    style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
-                                  <span className={`flex-1 text-[10px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
-                                  <div className="flex gap-[1px] shrink-0">
-                                    {[1,2,3,4,5].map(v => (
-                                      <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
-                                        className="w-2 h-2 rounded-full border-none p-0 cursor-pointer"
-                                        style={{ background: (sub.achievement||0) >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: (sub.achievement||0) >= v ? 1 : 0.3 }} />
-                                    ))}
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-10">우선순위</span>
+                              {priorities.map(p => {
+                                const pc = FRANKLIN_PRIORITY_CONFIG[p];
+                                return <button key={p} onClick={() => { const eis = syncPriorityToEisenhower(p); updateTask(task.id, { priority: p, number: getNextNumber(tasks, p), ...eis }); }}
+                                  className="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                                  style={{ background: task.priority === p ? pc.color : pc.bg, color: task.priority === p ? '#fff' : pc.color }}>{p} {pc.desc}</button>;
+                              })}
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-muted-foreground w-10 pt-0.5">메모</span>
+                              <textarea value={task.note || ''} onChange={e => updateTask(task.id, { note: e.target.value })}
+                                placeholder="상세 내용..."
+                                className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none resize-none min-h-[36px]" style={{ scrollbarWidth: 'none' }} />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-muted-foreground w-10">하위</span>
+                                <input value={newSubText} onChange={e => setNewSubText(e.target.value)}
+                                  onKeyDown={e => { if (e.key === 'Enter' && newSubText.trim()) { onTasksChange(addSubTask(tasks, task.id, newSubText.trim())); setNewSubText(''); } }}
+                                  placeholder="서브태스크 (Enter)" className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none" />
+                              </div>
+                              {(task.children || []).map(sub => {
+                                const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
+                                return (
+                                  <div key={sub.id} className="flex items-center gap-1 pl-12 py-0.5 group/sub">
+                                    <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
+                                      className="w-3.5 h-3.5 rounded flex items-center justify-center text-[8px] font-bold shrink-0"
+                                      style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
+                                    <span className={`flex-1 text-[10px] ${sub.status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{sub.task}</span>
+                                    <div className="flex gap-[1px] shrink-0">
+                                      {[1,2,3,4,5].map(v => (
+                                        <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
+                                          className="w-2 h-2 rounded-full border-none p-0 cursor-pointer"
+                                          style={{ background: (sub.achievement||0) >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: (sub.achievement||0) >= v ? 1 : 0.3 }} />
+                                      ))}
+                                    </div>
+                                    <button onClick={() => onTasksChange(removeSubTask(tasks, task.id, sub.id))}
+                                      className="text-muted-foreground hover:text-destructive opacity-0 group-hover/sub:opacity-100 text-[8px] shrink-0">✕</button>
                                   </div>
-                                  <button onClick={() => onTasksChange(removeSubTask(tasks, task.id, sub.id))}
-                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover/sub:opacity-100 text-[8px] shrink-0">✕</button>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>

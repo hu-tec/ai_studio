@@ -23,9 +23,10 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
   const [newPriority, setNewPriority] = useState<FranklinPriority>('A');
   const [newStart, setNewStart] = useState('');
   const [newEnd, setNewEnd] = useState('');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newSubText, setNewSubText] = useState('');
+  const toggleExpand = (id: string) => setExpandedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<FranklinPriority | null>(null);
   const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
@@ -120,12 +121,18 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
       {/* Task list (타임라인은 왼쪽 타임테이블에 표시됨) */}
       <div className="border border-border rounded-lg overflow-hidden">
         <div className="bg-accent/40 px-3 py-1 border-b border-border flex items-center justify-between">
-          <span className="text-[11px] font-semibold">업무 목록</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold">업무 목록</span>
+            <button onClick={() => { const allExp = sorted.every(t => expandedIds.has(t.id)); setExpandedIds(allExp ? new Set() : new Set(sorted.map(t => t.id))); }}
+              className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300">
+              {sorted.every(t => expandedIds.has(t.id)) ? '전체접기' : '전체펼치기'}
+            </button>
+          </div>
           <div className="flex gap-2 text-[10px]">
             {priorities.map(p => {
               const cnt = tasks.filter(t => t.priority === p).length;
               return cnt > 0 ? (
-                <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color }} className="font-bold">{p}:{cnt}</span>
+                <span key={p} style={{ color: FRANKLIN_PRIORITY_CONFIG[p].color }} className="font-bold">{p}({FRANKLIN_PRIORITY_CONFIG[p].desc}):{cnt}</span>
               ) : null;
             })}
             <span className="text-muted-foreground">
@@ -140,7 +147,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
           ) : sorted.map(task => {
             const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
             const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
-            const isExpanded = expandedId === task.id;
+            const isExpanded = expandedIds.has(task.id);
             const timeLabel = task.startTime
               ? `${task.startTime}${task.endTime ? '~' + task.endTime : '~'}`
               : '미배정';
@@ -154,7 +161,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange }: 
                   className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-accent/10 group cursor-grab active:cursor-grabbing"
                 >
                   {/* Expand */}
-                  <button onClick={() => setExpandedId(isExpanded ? null : task.id)} className="w-4 h-4 shrink-0 text-muted-foreground">
+                  <button onClick={() => toggleExpand(task.id)} className="w-4 h-4 shrink-0 text-muted-foreground">
                     {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </button>
                   {/* Status */}
