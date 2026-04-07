@@ -143,8 +143,54 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         {!drillId && <span style={{ fontSize: 11, color: '#94a3b8' }}>셀 더블클릭 → 하위 분해 / 드래그 → 타임테이블 배정</span>}
       </div>
 
+      {/* 메인 레이아웃: 드릴다운 시 미니맵(좌) + 서브그리드(우) */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+
+      {/* 미니맵: 드릴다운 시에만 표시 */}
+      {drillId && (
+        <div style={{ flexShrink: 0, width: 130 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>메인</div>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3,
+            background: '#f1f5f9', padding: 4, borderRadius: 8, border: '1px solid #e2e8f0',
+          }}>
+            {root.map((c, i) => (
+              <div
+                key={c.id}
+                onClick={() => {
+                  if (i === 4) { setDrillId(null); return; }
+                  if (c.text.trim()) {
+                    if (!c.children || c.children.length === 0) {
+                      const newRoot = root.map(r => r.id === c.id ? { ...r, children: Array.from({length:8}, () => emptyCell()) } : r);
+                      onCellsChange(newRoot);
+                    }
+                    setDrillId(c.id);
+                    setEditingId(null);
+                  }
+                }}
+                style={{
+                  minHeight: 32, padding: '2px 3px',
+                  background: i === 4 ? '#1e293b' : c.id === drillId ? '#3B82F6' : '#fff',
+                  borderRadius: 4, fontSize: 9, lineHeight: 1.2,
+                  color: i === 4 ? '#fff' : c.id === drillId ? '#fff' : c.text ? '#475569' : '#cbd5e1',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  textAlign: 'center', wordBreak: 'break-word',
+                  cursor: i === 4 ? 'pointer' : c.text.trim() ? 'pointer' : 'default',
+                  border: c.id === drillId ? '2px solid #3B82F6' : '1px solid #e2e8f0',
+                  fontWeight: c.id === drillId ? 700 : 400,
+                  transition: 'all 0.15s',
+                }}
+              >
+                {c.text || (i === 4 ? '목표' : '')}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 3×3 Grid */}
       <div style={{
+        flex: 1,
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
         background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
       }}>
@@ -242,6 +288,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           );
         })}
       </div>
+
+      </div>{/* 메인 레이아웃 flex 닫기 */}
 
       {/* 하위 그리드 안내 */}
       {!drillId && (
