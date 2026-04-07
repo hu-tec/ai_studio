@@ -483,6 +483,38 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           );
         })()}
 
+        {/* 미배정 업무 (Classic/Mandalart에서 표시) */}
+        {(viewMode === 'classic' || viewMode === 'mandalart') && (() => {
+          const assignedSlotIds = new Set(franklinTasks.filter(t => t.timeSlotId).map(t => t.id));
+          const assignedCellIds = new Set(mandalartCells.flatMap(c => [c.taskId, ...(c.children || []).map(ch => ch.taskId)].filter(Boolean)));
+          const unassigned = franklinTasks.filter(t => {
+            if (viewMode === 'classic') return !t.timeSlotId;
+            return !assignedCellIds.has(t.id);
+          });
+          if (unassigned.length === 0) return null;
+          return (
+            <div className="border border-dashed border-amber-300 rounded-lg bg-amber-50/30 p-2">
+              <div className="text-[10px] font-bold text-amber-700 mb-1">미배정 업무 ({unassigned.length}개) — 드래그하여 배정</div>
+              <div className="flex flex-wrap gap-1">
+                {unassigned.map(t => {
+                  const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
+                  const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
+                  return (
+                    <div key={t.id} draggable
+                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', viewMode === 'mandalart' ? t.task : t.id); }}
+                      className="flex items-center gap-1 px-2 py-1 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
+                      style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
+                      <span style={{ color: stCfg.color, fontSize: 9 }}>{stCfg.icon}</span>
+                      <span className="font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
+                      <span className="truncate max-w-[120px]">{t.task}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ⑥ 타임테이블 (Classic=확장, Franklin/Eisenhower=축소+우측패널) */}
         <div className="flex gap-3 items-start">
           {/* Timetable — Classic: 전체너비 확장, 나머지: 300px 축소 */}
