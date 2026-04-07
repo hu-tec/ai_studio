@@ -353,6 +353,23 @@ function FormChips({ label, items, value, onChange }: { label: string; items: st
 /* ══════════════════════════════════════════════════════════════
    Classic View (업무자료 테이블 스타일)
    ══════════════════════════════════════════════════════════════ */
+function getItemTags(item: GuidelineItem): string[] {
+  const tags: string[] = [];
+  if (item.tab === '업무지침') {
+    if (item.workCat1) tags.push(item.workCat1);
+    if (item.workCat2) tags.push(item.workCat2);
+    if (item.workCat3) tags.push(item.workCat3);
+    if (item.workCat4) tags.push(item.workCat4);
+    if (item.workDb) tags.push(item.workDb);
+  } else if (item.tab === '사내규정') {
+    if (item.compWork) tags.push(item.compWork);
+    if (item.compDept) tags.push(item.compDept);
+    if (item.compPos) tags.push(item.compPos);
+    if (item.compContract) tags.push(item.compContract);
+  }
+  return tags;
+}
+
 function ClassicView({ items, onUpdate, onDelete, onEdit }: {
   items: GuidelineItem[];
   onUpdate: (id: string, updates: Partial<GuidelineItem>) => void;
@@ -370,23 +387,25 @@ function ClassicView({ items, onUpdate, onDelete, onEdit }: {
   return (
     <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ display: 'grid', gridTemplateColumns: '64px 64px 64px 64px 180px 1fr 80px 60px 64px 48px', padding: '10px 12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600, color: '#64748b', gap: 4 }}>
-        <div>유형</div><div>대분류</div><div>중분류</div><div>소분류</div><div>제목</div><div>내용</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '64px 64px auto 180px 1fr 80px 60px 64px 48px', padding: '10px 12px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: 11, fontWeight: 600, color: '#64748b', gap: 4 }}>
+        <div>유형</div><div>탭</div><div>분류</div><div>제목</div><div>내용</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
       </div>
       {items.length === 0 ? (
         <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8', fontSize: 14 }}>등록된 지침이 없습니다</div>
       ) : items.map(item => {
         const isOpen = expandedIds.has(item.id);
         const rc = RULE_COLORS[item.ruleType];
+        const tags = getItemTags(item);
         return (
           <div key={item.id}>
             <div onClick={() => setExpandedIds(prev => { const n = new Set(prev); if (n.has(item.id)) n.delete(item.id); else n.add(item.id); return n; })}
-              style={{ display: 'grid', gridTemplateColumns: '64px 64px 64px 64px 180px 1fr 80px 60px 64px 48px', padding: '8px 12px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', alignItems: 'center', background: isOpen ? '#F8FAFC' : '#fff', transition: 'background 0.15s', gap: 4 }}
+              style={{ display: 'grid', gridTemplateColumns: '64px 64px auto 180px 1fr 80px 60px 64px 48px', padding: '8px 12px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', alignItems: 'center', background: isOpen ? '#F8FAFC' : '#fff', transition: 'background 0.15s', gap: 4 }}
               onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = '#fafbfd'; }} onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = '#fff'; }}>
               <div><span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, fontWeight: 600, background: rc.bg, color: rc.color, border: `1px solid ${rc.border}` }}>{item.ruleType}</span></div>
-              <div><span style={{ padding: '2px 6px', borderRadius: 12, fontSize: 10, background: '#EFF6FF', color: '#3B82F6' }}>{item.department}</span></div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>{item.category2 || '—'}</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>{item.category3 || '—'}</div>
+              <div><span style={{ padding: '2px 6px', borderRadius: 12, fontSize: 10, background: '#f1f5f9', color: '#475569' }}>{item.tab}</span></div>
+              <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                {tags.length > 0 ? tags.map(t => <span key={t} style={{ padding: '1px 6px', borderRadius: 10, fontSize: 10, background: '#EFF6FF', color: '#3B82F6' }}>{t}</span>) : <span style={{ fontSize: 10, color: '#cbd5e1' }}>—</span>}
+              </div>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
                 {isOpen ? <ChevronUp size={13} color="#94a3b8" style={{ flexShrink: 0 }} /> : <ChevronDown size={13} color="#94a3b8" style={{ flexShrink: 0 }} />}
@@ -900,14 +919,25 @@ export default function CompanyGuidelinesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<GuidelineItem | null>(null);
 
-  // Filters (업무자료 패턴)
-  const [filterDept, setFilterDept] = useState('전체');
-  const [filterCat2, setFilterCat2] = useState('전체');
-  const [filterCat3, setFilterCat3] = useState('전체');
-  const [filterPos, setFilterPos] = useState('전체');
-  const [filterAuthor, setFilterAuthor] = useState('전체');
+  // Tab
+  const [activeTab, setActiveTab] = useState<GuidelineTab>('프롬프트');
+
+  // Filters
   const [filterRuleType, setFilterRuleType] = useState<RuleType | '전체'>('전체');
+  const [filterAuthor, setFilterAuthor] = useState('전체');
   const [searchText, setSearchText] = useState('');
+  // 업무지침 필터
+  const [fWorkCat1, setFWorkCat1] = useState('전체');
+  const [fWorkCat2, setFWorkCat2] = useState('전체');
+  const [fWorkCat3, setFWorkCat3] = useState('전체');
+  const [fWorkCat4, setFWorkCat4] = useState('전체');
+  const [fWorkDb, setFWorkDb] = useState('전체');
+  // 사내규정 필터
+  const [fCompWork, setFCompWork] = useState('전체');
+  const [fCompDept, setFCompDept] = useState('전체');
+  const [fCompPos, setFCompPos] = useState('전체');
+  const [fCompContract, setFCompContract] = useState('전체');
+
   const [custom, setCustom] = useState<Record<string, string[]>>(loadCustom);
   const updateCustom = (key: string, vals: string[]) => { const next = { ...custom, [key]: vals }; setCustom(next); saveCustom(next); };
 
@@ -996,8 +1026,10 @@ export default function CompanyGuidelinesPage() {
 
   const handleItemAdd = (title: string) => {
     const item: GuidelineItem = {
-      id: `gi-${Date.now()}`, department: DEF_DEPTS[0], category2: '', category3: '', position: '', author: '',
-      title, content: '', ruleType: '규정', priority: 'B', number: getNextNumber(items, 'B'),
+      id: `gi-${Date.now()}`, tab: activeTab,
+      workCat1: '', workCat2: '', workCat3: '', workCat4: '', workDb: '',
+      compWork: '', compDept: '', compPos: '', compContract: '',
+      author: '', title, content: '', ruleType: '규정', priority: 'B', number: getNextNumber(items, 'B'),
       status: 'pending', urgent: false, important: true, note: '', created_at: new Date().toISOString(),
     };
     updateItems(prev => [...prev, item]);
@@ -1006,12 +1038,25 @@ export default function CompanyGuidelinesPage() {
   // Filtering
   const allAuthors = [...new Set(items.map(i => i.author).filter(Boolean))];
   const filtered = items.filter(i => {
-    if (filterDept !== '전체' && i.department !== filterDept) return false;
-    if (filterCat2 !== '전체' && i.category2 !== filterCat2) return false;
-    if (filterCat3 !== '전체' && i.category3 !== filterCat3) return false;
-    if (filterPos !== '전체' && i.position !== filterPos) return false;
-    if (filterAuthor !== '전체' && i.author !== filterAuthor) return false;
+    // 탭 필터 (항상 적용)
+    if (i.tab !== activeTab) return false;
     if (filterRuleType !== '전체' && i.ruleType !== filterRuleType) return false;
+    if (filterAuthor !== '전체' && i.author !== filterAuthor) return false;
+    // 업무지침 탭 필터
+    if (activeTab === '업무지침') {
+      if (fWorkCat1 !== '전체' && i.workCat1 !== fWorkCat1) return false;
+      if (fWorkCat2 !== '전체' && i.workCat2 !== fWorkCat2) return false;
+      if (fWorkCat3 !== '전체' && i.workCat3 !== fWorkCat3) return false;
+      if (fWorkCat4 !== '전체' && i.workCat4 !== fWorkCat4) return false;
+      if (fWorkDb !== '전체' && i.workDb !== fWorkDb) return false;
+    }
+    // 사내규정 탭 필터
+    if (activeTab === '사내규정') {
+      if (fCompWork !== '전체' && i.compWork !== fCompWork) return false;
+      if (fCompDept !== '전체' && i.compDept !== fCompDept) return false;
+      if (fCompPos !== '전체' && i.compPos !== fCompPos) return false;
+      if (fCompContract !== '전체' && i.compContract !== fCompContract) return false;
+    }
     if (searchText) {
       const s = searchText.toLowerCase();
       if (!i.title.toLowerCase().includes(s) && !i.content.toLowerCase().includes(s) && !i.author.toLowerCase().includes(s) && !i.note.toLowerCase().includes(s)) return false;
@@ -1019,13 +1064,14 @@ export default function CompanyGuidelinesPage() {
     return true;
   });
 
-  const anyFilterActive = filterDept !== '전체' || filterCat2 !== '전체' || filterCat3 !== '전체' || filterPos !== '전체' || filterAuthor !== '전체' || filterRuleType !== '전체' || !!searchText;
-  const resetFilters = () => { setFilterDept('전체'); setFilterCat2('전체'); setFilterCat3('전체'); setFilterPos('전체'); setFilterAuthor('전체'); setFilterRuleType('전체'); setSearchText(''); };
-
-  const mergedDepts = [...DEF_DEPTS, ...(custom['dept'] || [])];
-  const mergedCat2 = [...DEF_CAT2, ...(custom['cat2'] || [])];
-  const mergedCat3 = [...DEF_CAT3, ...(custom['cat3'] || [])];
-  const mergedPos = [...DEF_POS, ...(custom['pos'] || [])];
+  const anyFilterActive = filterRuleType !== '전체' || filterAuthor !== '전체' || !!searchText ||
+    (activeTab === '업무지침' && (fWorkCat1 !== '전체' || fWorkCat2 !== '전체' || fWorkCat3 !== '전체' || fWorkCat4 !== '전체' || fWorkDb !== '전체')) ||
+    (activeTab === '사내규정' && (fCompWork !== '전체' || fCompDept !== '전체' || fCompPos !== '전체' || fCompContract !== '전체'));
+  const resetFilters = () => {
+    setFilterRuleType('전체'); setFilterAuthor('전체'); setSearchText('');
+    setFWorkCat1('전체'); setFWorkCat2('전체'); setFWorkCat3('전체'); setFWorkCat4('전체'); setFWorkDb('전체');
+    setFCompWork('전체'); setFCompDept('전체'); setFCompPos('전체'); setFCompContract('전체');
+  };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>;
 
@@ -1045,13 +1091,23 @@ export default function CompanyGuidelinesPage() {
         </div>
       </div>
 
+      {/* 탭 선택 */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
+        {(['프롬프트', '업무지침', '사내규정'] as GuidelineTab[]).map(tab => (
+          <button key={tab} onClick={() => { setActiveTab(tab); resetFilters(); }}
+            style={{ padding: '8px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', border: `1px solid ${activeTab === tab ? '#1e293b' : '#e2e8f0'}`, background: activeTab === tab ? '#1e293b' : '#fff', color: activeTab === tab ? '#fff' : '#64748b', transition: 'all 0.15s' }}>
+            {tab}
+          </button>
+        ))}
+      </div>
+
       {/* Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
         <div style={{ position: 'relative', maxWidth: 360 }}>
           <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
           <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{ width: '100%', padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none', background: '#fff' }} />
         </div>
-        {/* 규정 유형 필터 */}
+        {/* 규정 유형 필터 (공통) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>유형</span>
           <button onClick={() => setFilterRuleType('전체')} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: filterRuleType === '전체' ? '#3B82F6' : '#e2e8f0', background: filterRuleType === '전체' ? '#EFF6FF' : '#fff', color: filterRuleType === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: filterRuleType === '전체' ? 600 : 400 }}>전체</button>
@@ -1065,10 +1121,22 @@ export default function CompanyGuidelinesPage() {
             );
           })}
         </div>
-        <DynFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom} />
-        <DynFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom} />
-        <DynFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom} />
-        <DynFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom} />
+        {/* 업무지침 탭 필터 */}
+        {activeTab === '업무지침' && (<>
+          <DynFilter label="분류별" items={[...WORK_CAT1, ...(custom['wc1'] || [])]} defaults={WORK_CAT1} value={fWorkCat1} onChange={setFWorkCat1} customKey="wc1" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="교육별" items={[...WORK_CAT2, ...(custom['wc2'] || [])]} defaults={WORK_CAT2} value={fWorkCat2} onChange={setFWorkCat2} customKey="wc2" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="급수별" items={[...WORK_CAT3, ...(custom['wc3'] || [])]} defaults={WORK_CAT3} value={fWorkCat3} onChange={setFWorkCat3} customKey="wc3" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="세부급수" items={[...WORK_CAT4, ...(custom['wc4'] || [])]} defaults={WORK_CAT4} value={fWorkCat4} onChange={setFWorkCat4} customKey="wc4" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="DB별" items={[...WORK_DB, ...(custom['wdb'] || [])]} defaults={WORK_DB} value={fWorkDb} onChange={setFWorkDb} customKey="wdb" custom={custom} updateCustom={updateCustom} />
+        </>)}
+        {/* 사내규정 탭 필터 */}
+        {activeTab === '사내규정' && (<>
+          <DynFilter label="업무별" items={[...COMPANY_WORK, ...(custom['cw'] || [])]} defaults={COMPANY_WORK} value={fCompWork} onChange={setFCompWork} customKey="cw" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="부서별" items={[...COMPANY_DEPT, ...(custom['cd'] || [])]} defaults={COMPANY_DEPT} value={fCompDept} onChange={setFCompDept} customKey="cd" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="직급별" items={[...COMPANY_POS, ...(custom['cp'] || [])]} defaults={COMPANY_POS} value={fCompPos} onChange={setFCompPos} customKey="cp" custom={custom} updateCustom={updateCustom} />
+          <DynFilter label="계약" items={[...COMPANY_CONTRACT, ...(custom['cc'] || [])]} defaults={COMPANY_CONTRACT} value={fCompContract} onChange={setFCompContract} customKey="cc" custom={custom} updateCustom={updateCustom} />
+        </>)}
+        {/* 작성자 필터 (공통) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>작성자</span>
           <button onClick={() => setFilterAuthor('전체')} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: filterAuthor === '전체' ? '#3B82F6' : '#e2e8f0', background: filterAuthor === '전체' ? '#EFF6FF' : '#fff', color: filterAuthor === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: filterAuthor === '전체' ? 600 : 400 }}>전체</button>
@@ -1113,7 +1181,7 @@ export default function CompanyGuidelinesPage() {
       {showForm && (
         <GuidelineForm
           item={editingItem}
-          depts={mergedDepts} cat2s={mergedCat2} cat3s={mergedCat3} positions={mergedPos}
+          activeTab={activeTab}
           onSave={handleAddOrEdit}
           onClose={() => { setShowForm(false); setEditingItem(null); }}
         />
