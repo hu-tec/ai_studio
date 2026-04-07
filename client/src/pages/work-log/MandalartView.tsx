@@ -9,15 +9,18 @@ interface MandalartViewProps {
   onCellsChange: (cells: MandalartCell[]) => void;
   onTasksChange: (tasks: FranklinTask[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
+  period?: MandalartPeriod;
 }
+
+const PERIOD_LABELS: Record<MandalartPeriod, string> = { daily: '오늘 목표', weekly: '이번 주 목표', monthly: '이번 달 목표' };
 
 let cellCounter = 0;
 function emptyCell(text = ''): MandalartCell {
   return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [], achievement: 0 };
 }
 
-function createInitialRoot(): MandalartCell[] {
-  return Array.from({length:9}, (_,i) => emptyCell(i===4 ? '오늘 목표' : ''));
+function createInitialRoot(periodLabel: string): MandalartCell[] {
+  return Array.from({length:9}, (_,i) => emptyCell(i===4 ? periodLabel : ''));
 }
 
 // 달성률 색상
@@ -45,18 +48,17 @@ export function calcGridAchievement(grid: MandalartCell[]): { filled: number; to
   return { filled: filled.length, total, yang, jil, avg };
 }
 
-export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange }: MandalartViewProps) {
+export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange, period = 'daily' }: MandalartViewProps) {
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!initialized.current && (!cells || cells.length < 9)) {
-      initialized.current = true;
-      onCellsChange(createInitialRoot());
+    if (!cells || cells.length < 9) {
+      onCellsChange(createInitialRoot(PERIOD_LABELS[period]));
     }
-  }, []);
+  }, [cells?.length, period]);
 
   if (!cells || cells.length < 9) {
     return <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:13}}>만다라트 초기화 중...</div>;
@@ -252,7 +254,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                   color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
                   lineHeight: 1.4, wordBreak: 'break-word',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  {cell.text || (center ? '목표 입력' : '+')}
+                  {cell.text || (center ? PERIOD_LABELS[period] : '+')}
                 </div>
               )}
 

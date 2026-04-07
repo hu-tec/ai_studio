@@ -22,6 +22,7 @@ const NAV_SECTIONS = [
       { to: '/work-log/admin', icon: ClipboardList, label: '업무일지(관리)' },
       { to: '/pledge', icon: ShieldCheck, label: '서약서' },
       { to: '/guidelines', icon: FileText, label: '사내업무지침' },
+      { to: '/company-guidelines', icon: Scale, label: '사내업무지침(통합-new)' },
       { to: '/lesson-plan', icon: BookOpen, label: '레슨플랜' },
       { to: '/coming/manual-list', icon: C, label: '매뉴얼 리스트' },
     ],

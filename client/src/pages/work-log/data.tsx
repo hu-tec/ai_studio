@@ -247,6 +247,7 @@ export interface DailyLog {
   franklinTasks?: FranklinTask[];
   todayTasks?: string;
   tomorrowTasks?: string;
+  mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>;
 }
 
 export interface Employee {

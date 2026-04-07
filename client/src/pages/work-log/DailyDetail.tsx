@@ -36,10 +36,18 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [franklinTasks, setFranklinTasks] = useState<FranklinTask[]>([]);
-  const [mandalartCells, setMandalartCells] = useState<MandalartCell[]>([]);
+  const [mandalartByPeriod, setMandalartByPeriod] = useState<Record<MandalartPeriod, MandalartCell[]>>({ daily: [], weekly: [], monthly: [] });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
   const [showStats, setShowStats] = useState(false);
+
+  const mandalartCells = mandalartByPeriod[period] || [];
+  const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
+    setMandalartByPeriod(prev => ({
+      ...prev,
+      [period]: typeof cells === 'function' ? cells(prev[period] || []) : cells,
+    }));
+  }, [period]);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
@@ -54,10 +62,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       date: dateStr, summary, position,
       homepageCategories: hpCategories, departmentCategories: deptCategories,
       timeInterval, timeSlots, employeeId,
-      detail, viewMode, franklinTasks, mandalartCells,
+      detail, viewMode, franklinTasks, mandalartByPeriod,
       todayTasks, tomorrowTasks,
     });
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartByPeriod, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -83,7 +91,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, todayTasks, tomorrowTasks]);
+  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartByPeriod, todayTasks, tomorrowTasks]);
 
   useEffect(() => {
     // When date or log changes from props, suppress next auto-save cycle
@@ -100,7 +108,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTomorrowTasks(log.tomorrowTasks || '');
       setViewMode(log.viewMode || 'classic');
       setFranklinTasks(log.franklinTasks || []);
-      setMandalartCells((log as any).mandalartCells || []);
+      // 기간별 만다라트: 기존 데이터 호환
+      if (log.mandalartByPeriod) {
+        setMandalartByPeriod(log.mandalartByPeriod);
+      } else {
+        const oldCells = (log as any).mandalartCells || [];
+        setMandalartByPeriod({ daily: oldCells, weekly: [], monthly: [] });
+      }
     } else {
       setPosition(emp.position);
       setHpCategories([]);
@@ -112,7 +126,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTomorrowTasks('');
       setViewMode('classic');
       setFranklinTasks([]);
-      setMandalartCells([]);
+      setMandalartByPeriod({ daily: [], weekly: [], monthly: [] });
     }
     // Allow auto-save after prop-driven setState batch completes
     requestAnimationFrame(() => { suppressAutoSave.current = false; });
@@ -202,6 +216,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       tomorrowTasks,
       viewMode,
       franklinTasks,
+      mandalartByPeriod,
     };
     const filledTitles = (viewMode !== 'classic')
       ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
@@ -563,6 +578,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   onCellsChange={setMandalartCells}
                   onTasksChange={handleFranklinTasksChange}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                  period={period}
                 />
               ) : viewMode === 'eisenhower' ? (
                 <EisenhowerView
