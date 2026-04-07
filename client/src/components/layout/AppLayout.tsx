@@ -8,6 +8,7 @@ import {
   CalendarClock, Settings, Scale, FileEdit, FileInput, ListChecks, Construction
 } from 'lucide-react';
 import { StoreProvider } from '../../pages/interview/interviewStore';
+import { MemoPanel } from '../memo/MemoPanel';
 
 const C = Construction; // 공사중 아이콘 약어
 
@@ -173,10 +174,11 @@ export function AppLayout() {
       </aside>
 
       {/* 메인 콘텐츠 */}
-      <main style={{ flex: 1, overflow: 'auto' }}>
+      <main style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
         <StoreProvider>
           <Outlet />
         </StoreProvider>
+        <MemoPanel />
       </main>
 
       <Toaster position="top-right" richColors />
