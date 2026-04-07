@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Save, FileDown, List, Target, Grid2x2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, FileDown, List, Target, Grid2x2, LayoutGrid, ChevronDown, ChevronUp } from 'lucide-react';
 import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask } from './data';
+import { MandalartView } from './MandalartView';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask, MandalartCell } from './data';
 import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { exportDailyLogToWord } from './exportWord';
 import { toast } from 'sonner';
@@ -30,12 +31,13 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [franklinTasks, setFranklinTasks] = useState<FranklinTask[]>([]);
+  const [mandalartCells, setMandalartCells] = useState<MandalartCell[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
   const doSave = useCallback(() => {
-    const filledTitles = viewMode === 'franklin' || viewMode === 'eisenhower'
+    const filledTitles = viewMode !== 'classic'
       ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
       : timeSlots.filter(s => s.title).map(s => s.title);
     const summary = filledTitles.length > 0
@@ -45,9 +47,9 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       date: dateStr, summary, position,
       homepageCategories: hpCategories, departmentCategories: deptCategories,
       timeInterval, timeSlots, employeeId: currentEmployee.id,
-      detail, viewMode, franklinTasks,
+      detail, viewMode, franklinTasks, mandalartCells,
     });
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, emp.name, onSave]);
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartCells, emp.name, onSave]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -82,6 +84,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setDetail(log.detail || '');
       setViewMode(log.viewMode || 'classic');
       setFranklinTasks(log.franklinTasks || []);
+      setMandalartCells((log as any).mandalartCells || []);
     } else {
       setPosition(emp.position);
       setHpCategories([]);
@@ -91,6 +94,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       setDetail('');
       setViewMode('classic');
       setFranklinTasks([]);
+      setMandalartCells([]);
     }
     // Allow auto-save after prop-driven setState batch completes
     requestAnimationFrame(() => { suppressAutoSave.current = false; });
@@ -179,7 +183,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
       viewMode,
       franklinTasks,
     };
-    const filledTitles = (viewMode === 'franklin' || viewMode === 'eisenhower')
+    const filledTitles = (viewMode !== 'classic')
       ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
       : timeSlots.filter(s => s.title).map(s => s.title);
     newLog.summary = filledTitles.length > 0
@@ -293,6 +297,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
               { mode: 'classic' as ViewMode, icon: List, label: 'Classic' },
               { mode: 'franklin' as ViewMode, icon: Target, label: 'Franklin' },
               { mode: 'eisenhower' as ViewMode, icon: Grid2x2, label: 'Eisenhower' },
+              { mode: 'mandalart' as ViewMode, icon: LayoutGrid, label: 'Mandalart' },
             ]).map(({ mode, icon: Icon, label }) => (
               <button
                 key={mode}
@@ -437,10 +442,18 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
             </div>
           </div>
 
-          {/* Right: Franklin/Eisenhower 패널 (Classic에서는 숨김) */}
+          {/* Right: Franklin/Eisenhower/Mandalart 패널 (Classic에서는 숨김) */}
           {viewMode !== 'classic' && (
             <div className="flex-1 min-w-0 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-right-2">
-              {viewMode === 'eisenhower' ? (
+              {viewMode === 'mandalart' ? (
+                <MandalartView
+                  cells={mandalartCells}
+                  tasks={franklinTasks}
+                  onCellsChange={setMandalartCells}
+                  onTasksChange={handleFranklinTasksChange}
+                  onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
+                />
+              ) : viewMode === 'eisenhower' ? (
                 <EisenhowerView
                   tasks={franklinTasks}
                   timeSlots={timeSlots}

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
   FileText, Image as ImageIcon, ChevronDown, ChevronUp,
-  Search, File, ExternalLink
+  Search, File, ExternalLink, Download
 } from 'lucide-react';
 
 interface Attachment {
@@ -53,6 +53,8 @@ export default function WorkMaterialsPage() {
   const [searchText, setSearchText] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string|null>(null);
+  const [editingContentId, setEditingContentId] = useState<string|null>(null);
+  const [editingContentValue, setEditingContentValue] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -89,6 +91,17 @@ export default function WorkMaterialsPage() {
   const handleDelete = async (mid: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try { await fetch(`/api/work-materials/${mid}`, { method:'DELETE' }); setRows(p=>p.filter(r=>r.material_id!==mid)); setExpandedIds(prev=>{const next=new Set(prev);next.delete(mid);return next;}); toast.success('삭제되었습니다'); } catch { toast.error('삭제 실패'); }
+  };
+
+  const handleInlineContentSave = async (row: MaterialRow) => {
+    if (editingContentValue === row.data.content) { setEditingContentId(null); return; }
+    const payload = { ...row.data, content: editingContentValue };
+    try {
+      await fetch(`/api/work-materials/${row.material_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      setRows(prev => prev.map(r => r.material_id === row.material_id ? { ...r, data: { ...r.data, content: editingContentValue } } : r));
+      toast.success('내용이 수정되었습니다');
+    } catch { toast.error('수정 실패'); }
+    setEditingContentId(null);
   };
 
   if (loading) return <div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>;
