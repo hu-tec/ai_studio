@@ -182,21 +182,29 @@ const DATA_KEY = 'company-guidelines-data';
    ══════════════════════════════════════════════════════════════ */
 function DynFilter({ label, items, defaults, value, onChange, customKey, custom, updateCustom }: {
   label: string; items: string[]; defaults: string[];
-  value: string; onChange: (v: string) => void;
+  value: string[]; onChange: (v: string[]) => void;
   customKey: string; custom: Record<string, string[]>; updateCustom: (k: string, v: string[]) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const allSelected = value.length === 0;
+  const toggle = (item: string) => {
+    if (value.includes(item)) { const next = value.filter(v => v !== item); onChange(next); }
+    else onChange([...value, item]);
+  };
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
       <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>{label}</span>
-      <button onClick={() => onChange('전체')} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: value === '전체' ? '#3B82F6' : '#e2e8f0', background: value === '전체' ? '#EFF6FF' : '#fff', color: value === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: value === '전체' ? 600 : 400 }}>전체</button>
-      {items.map(item => (
-        <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-          <button onClick={() => onChange(item)} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: value === item ? '#3B82F6' : '#e2e8f0', background: value === item ? '#EFF6FF' : '#fff', color: value === item ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: value === item ? 600 : 400 }}>{item}</button>
-          {!defaults.includes(item) && <button onClick={() => { updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item)); if (value === item) onChange('전체'); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 11, padding: 0, lineHeight: 1 }}>✕</button>}
-        </span>
-      ))}
+      <button onClick={() => onChange([])} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: allSelected ? '#3B82F6' : '#e2e8f0', background: allSelected ? '#EFF6FF' : '#fff', color: allSelected ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: allSelected ? 600 : 400 }}>전체</button>
+      {items.map(item => {
+        const sel = value.includes(item);
+        return (
+          <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+            <button onClick={() => toggle(item)} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: sel ? '#3B82F6' : '#e2e8f0', background: sel ? '#EFF6FF' : '#fff', color: sel ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: sel ? 600 : 400 }}>{item}</button>
+            {!defaults.includes(item) && <button onClick={() => { updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item)); if (sel) onChange(value.filter(v => v !== item)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 11, padding: 0, lineHeight: 1 }}>✕</button>}
+          </span>
+        );
+      })}
       {adding ? (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           <input ref={inputRef} autoFocus placeholder="새 항목" onKeyDown={e => { if (e.key === 'Enter') { const v = inputRef.current?.value.trim(); if (v && !items.includes(v)) updateCustom(customKey, [...(custom[customKey] || []), v]); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} style={{ width: 80, padding: '3px 8px', fontSize: 12, border: '1px solid #3B82F6', borderRadius: 12, outline: 'none' }} />
@@ -530,17 +538,17 @@ export default function CompanyGuidelinesPage() {
   const [filterRuleType, setFilterRuleType] = useState<RuleType | '전체'>('전체');
   const [filterAuthor, setFilterAuthor] = useState('전체');
   const [searchText, setSearchText] = useState('');
-  // 업무지침 필터
-  const [fWorkCat1, setFWorkCat1] = useState('전체');
-  const [fWorkCat2, setFWorkCat2] = useState('전체');
-  const [fWorkCat3, setFWorkCat3] = useState('전체');
-  const [fWorkCat4, setFWorkCat4] = useState('전체');
-  const [fWorkDb, setFWorkDb] = useState('전체');
-  // 사내규정 필터
-  const [fCompWork, setFCompWork] = useState('전체');
-  const [fCompDept, setFCompDept] = useState('전체');
-  const [fCompPos, setFCompPos] = useState('전체');
-  const [fCompContract, setFCompContract] = useState('전체');
+  // 업무지침 필터 (다중선택: 빈 배열 = 전체)
+  const [fWorkCat1, setFWorkCat1] = useState<string[]>([]);
+  const [fWorkCat2, setFWorkCat2] = useState<string[]>([]);
+  const [fWorkCat3, setFWorkCat3] = useState<string[]>([]);
+  const [fWorkCat4, setFWorkCat4] = useState<string[]>([]);
+  const [fWorkDb, setFWorkDb] = useState<string[]>([]);
+  // 사내규정 필터 (다중선택)
+  const [fCompWork, setFCompWork] = useState<string[]>([]);
+  const [fCompDept, setFCompDept] = useState<string[]>([]);
+  const [fCompPos, setFCompPos] = useState<string[]>([]);
+  const [fCompContract, setFCompContract] = useState<string[]>([]);
 
   const [custom, setCustom] = useState<Record<string, string[]>>(loadCustom);
   const updateCustom = (key: string, vals: string[]) => { const next = { ...custom, [key]: vals }; setCustom(next); saveCustom(next); };
@@ -808,20 +816,20 @@ export default function CompanyGuidelinesPage() {
     if (i.tab !== activeTab) return false;
     if (filterRuleType !== '전체' && i.ruleType !== filterRuleType) return false;
     if (filterAuthor !== '전체' && i.author !== filterAuthor) return false;
-    // 업무지침 탭 필터
+    // 업무지침 탭 필터 (다중선택: 빈 배열=전체)
     if (activeTab === '업무지침') {
-      if (fWorkCat1 !== '전체' && i.workCat1 !== fWorkCat1) return false;
-      if (fWorkCat2 !== '전체' && i.workCat2 !== fWorkCat2) return false;
-      if (fWorkCat3 !== '전체' && i.workCat3 !== fWorkCat3) return false;
-      if (fWorkCat4 !== '전체' && i.workCat4 !== fWorkCat4) return false;
-      if (fWorkDb !== '전체' && i.workDb !== fWorkDb) return false;
+      if (fWorkCat1.length > 0 && !fWorkCat1.includes(i.workCat1)) return false;
+      if (fWorkCat2.length > 0 && !fWorkCat2.includes(i.workCat2)) return false;
+      if (fWorkCat3.length > 0 && !fWorkCat3.includes(i.workCat3)) return false;
+      if (fWorkCat4.length > 0 && !fWorkCat4.includes(i.workCat4)) return false;
+      if (fWorkDb.length > 0 && !fWorkDb.includes(i.workDb)) return false;
     }
-    // 사내규정 탭 필터
+    // 사내규정 탭 필터 (다중선택)
     if (activeTab === '사내규정') {
-      if (fCompWork !== '전체' && i.compWork !== fCompWork) return false;
-      if (fCompDept !== '전체' && i.compDept !== fCompDept) return false;
-      if (fCompPos !== '전체' && i.compPos !== fCompPos) return false;
-      if (fCompContract !== '전체' && i.compContract !== fCompContract) return false;
+      if (fCompWork.length > 0 && !fCompWork.includes(i.compWork)) return false;
+      if (fCompDept.length > 0 && !fCompDept.includes(i.compDept)) return false;
+      if (fCompPos.length > 0 && !fCompPos.includes(i.compPos)) return false;
+      if (fCompContract.length > 0 && !fCompContract.includes(i.compContract)) return false;
     }
     if (searchText) {
       const s = searchText.toLowerCase();
@@ -831,12 +839,12 @@ export default function CompanyGuidelinesPage() {
   });
 
   const anyFilterActive = filterRuleType !== '전체' || filterAuthor !== '전체' || !!searchText ||
-    (activeTab === '업무지침' && (fWorkCat1 !== '전체' || fWorkCat2 !== '전체' || fWorkCat3 !== '전체' || fWorkCat4 !== '전체' || fWorkDb !== '전체')) ||
-    (activeTab === '사내규정' && (fCompWork !== '전체' || fCompDept !== '전체' || fCompPos !== '전체' || fCompContract !== '전체'));
+    (activeTab === '업무지침' && (fWorkCat1.length > 0 || fWorkCat2.length > 0 || fWorkCat3.length > 0 || fWorkCat4.length > 0 || fWorkDb.length > 0)) ||
+    (activeTab === '사내규정' && (fCompWork.length > 0 || fCompDept.length > 0 || fCompPos.length > 0 || fCompContract.length > 0));
   const resetFilters = () => {
     setFilterRuleType('전체'); setFilterAuthor('전체'); setSearchText('');
-    setFWorkCat1('전체'); setFWorkCat2('전체'); setFWorkCat3('전체'); setFWorkCat4('전체'); setFWorkDb('전체');
-    setFCompWork('전체'); setFCompDept('전체'); setFCompPos('전체'); setFCompContract('전체');
+    setFWorkCat1([]); setFWorkCat2([]); setFWorkCat3([]); setFWorkCat4([]); setFWorkDb([]);
+    setFCompWork([]); setFCompDept([]); setFCompPos([]); setFCompContract([]);
   };
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>;
