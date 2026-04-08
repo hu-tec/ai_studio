@@ -34,11 +34,8 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'A5',   to: '/manual-list',        icon: BookOpen,      label: '매뉴얼 리스트' },
 
   // ─── B: 채용/인사 ───
-  { code: 'B1',   to: '/interview',           icon: ClipboardCheck, label: '면접 입력' },
-  { code: 'B1-1', to: '/interview/dashboard', icon: ClipboardCheck, label: '면접 대시보드' },
+  { code: 'B0',   to: '/recruitment',         icon: ClipboardCheck, label: '채용관리(통합)', consolidated: true },
   { code: 'B2',   to: '/attendance',          icon: Clock,          label: '출퇴근 관리' },
-  { code: 'B3',   to: '/instructor-eval',     icon: ClipboardCheck, label: '강사채점' },
-  { code: 'B4',   to: '/instructor-flow',     icon: ClipboardList,  label: '면접플로우' },
 
   // ─── C: 관리/운영 ───
   { code: 'C1',   to: '/meetings',        icon: Calendar,     label: '미팅 관리' },
@@ -65,10 +62,14 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   // ─── F: 영규 ───
   { code: 'F1', to: '/hutechc-homepage', icon: Home, label: '영규-hutechc' },
 
-  // ─── X: 미사용 (업무총괄 등으로 대체된 페이지) ───
-  { code: 'X1', to: '/shortcuts',       icon: Home,         label: '바로가기(→업무총괄)' },
-  { code: 'X2', to: '/work-log-old',    icon: ClipboardList, label: '업무일지(old→new대체)' },
-  { code: 'X3', to: '/guidelines',      icon: FileText,      label: '사내지침(old→통합대체)' },
+  // ─── X: 쓰레기통 (통합 완료로 대체된 페이지) ───
+  { code: 'X1', to: '/shortcuts',           icon: Home,          label: '바로가기(→업무총괄)' },
+  { code: 'X2', to: '/work-log-old',        icon: ClipboardList, label: '업무일지(old→new대체)' },
+  { code: 'X3', to: '/guidelines',          icon: FileText,      label: '사내지침(old→통합대체)' },
+  { code: 'X4', to: '/interview',           icon: ClipboardCheck, label: '면접입력(→채용통합)' },
+  { code: 'X5', to: '/interview/dashboard', icon: ClipboardCheck, label: '면접대시보드(→채용통합)' },
+  { code: 'X6', to: '/instructor-eval',     icon: ClipboardCheck, label: '강사채점(→채용통합)' },
+  { code: 'X7', to: '/instructor-flow',     icon: ClipboardList,  label: '면접플로우(→채용통합)' },
 ];
 
 /* ── 기본 그룹 배치 ── */
@@ -99,8 +100,8 @@ export const DEFAULT_GROUPS: NavGroup[] = [
     items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('E')),
   },
   {
-    id: 'grp-unused',
-    title: '미사용',
+    id: 'grp-trash',
+    title: '쓰레기통',
     items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('X')),
   },
 ];
