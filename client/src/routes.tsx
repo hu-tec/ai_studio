@@ -30,6 +30,7 @@ export const router = createBrowserRouter(
         // ===== 구현 완료 =====
         // 직원 도구
         { path: 'work-hub', element: lazyPage(() => import('./pages/work-hub/WorkHubPage')) },
+        { path: 'work-hub-a', element: lazyPage(() => import('./pages/work-hub-a/WorkHubVerA')) },
         { path: 'work-materials', element: lazyPage(() => import('./pages/work-materials/WorkMaterialsPage')) },
         { path: 'work-log', element: lazyPage(() => import('./pages/work-log/EmployeePage')) },
         { path: 'work-log-old', element: lazyPage(() => import('./pages/work-log-old/EmployeePage')) },
@@ -66,7 +67,15 @@ export const router = createBrowserRouter(
         { path: 'coming/ai-studio', element: comingSoon },
         { path: 'instructor-eval', element: lazyPage(() => import('./pages/instructor-eval/InstructorEvalPage')) },
         { path: 'instructor-flow', element: lazyPage(() => import('./pages/instructor-flow/InstructorFlowPage')) },
+        // ===== 영규-hutechc (hutechc_hompage_real 변환) =====
         { path: 'hutechc-homepage', element: lazyPage(() => import('./pages/hutechc-homepage/HutechcHomepagePage')) },
+        { path: 'hutechc-homepage/exam', element: lazyPage(() => import('./pages/hutechc-homepage/exam/ExamEntryPage')) },
+        { path: 'hutechc-homepage/translate', element: lazyPage(() => import('./pages/hutechc-homepage/translate/TranslatePage')) },
+        { path: 'hutechc-homepage/exhibition', element: lazyPage(() => import('./pages/hutechc-homepage/exhibition/ExhibitionPage')) },
+        { path: 'hutechc-homepage/admin', element: lazyPage(() => import('./pages/hutechc-homepage/admin/AdminDashboardPage')) },
+        { path: 'hutechc-homepage/payment-guide', element: lazyPage(() => import('./pages/hutechc-homepage/payment-guide/PaymentGuidePage')) },
+        { path: 'hutechc-homepage/expert', element: lazyPage(() => import('./pages/hutechc-homepage/expert/ExpertApplyPage')) },
+        { path: 'hutechc-homepage/question-bank', element: lazyPage(() => import('./pages/hutechc-homepage/question-bank/QuestionBankPage')) },
         // 아래 항목은 work_studio로 이관됨:
         // tesol-landing, ceo-homepage, arabic-translation, tongdok, translation-all,
         // ceo-v3-deploy, classic-translation, aite, hutechc-homepage, combined-homepage,
