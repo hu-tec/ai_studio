@@ -1,155 +1,87 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-  GripVertical,
   BarChart3, LayoutDashboard, FileInput, Home,
 } from 'lucide-react';
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
 import {
   type NavItem, type NavGroup,
-  DEFAULT_GROUPS, loadLayout, saveLayout, restoreGroups, toLayout,
+  DEFAULT_GROUPS,
 } from './navData';
 
-/* ── DnD 타입 ── */
-const DND_ITEM = 'NAV_ITEM';
-const DND_GROUP = 'NAV_GROUP';
-
-interface DragItem { code: string; fromGroupId: string }
-interface DragGroup { groupId: string; index: number }
-
-/* ── 드래그 가능 네비 아이템 ── */
-function DraggableNavItem({
-  item, groupId, isActive, memoCount, collapsed,
+/* ── 네비 아이템 ── */
+function NavItemRow({
+  item, isActive, memoCount, collapsed,
 }: {
-  item: NavItem; groupId: string; isActive: boolean; memoCount: number; collapsed: boolean;
+  item: NavItem; isActive: boolean; memoCount: number; collapsed: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [{ isDragging }, drag] = useDrag({
-    type: DND_ITEM,
-    item: (): DragItem => ({ code: item.code, fromGroupId: groupId }),
-    collect: m => ({ isDragging: m.isDragging() }),
-  });
-
-  drag(ref);
-
   return (
-    <div ref={ref} style={{ opacity: isDragging ? 0.4 : 1 }}>
-      <NavLink
-        to={item.to}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          padding: collapsed ? '6px 14px' : '3px 6px',
-          borderRadius: 4, fontSize: 11,
-          fontWeight: isActive ? 600 : 400,
-          color: isActive ? '#3b82f6' : '#475569',
-          background: isActive ? '#eff6ff' : 'transparent',
-          textDecoration: 'none',
-          transition: 'all 0.15s', whiteSpace: 'nowrap',
-          cursor: 'grab',
-        }}
-        title={`${item.code} ${item.label}`}
-      >
-        {!collapsed && (
-          <GripVertical size={10} style={{ flexShrink: 0, color: '#cbd5e1', cursor: 'grab' }} />
-        )}
-        <item.icon size={13} style={{ flexShrink: 0 }} />
-        {!collapsed && (
-          <>
+    <NavLink
+      to={item.to}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        padding: collapsed ? '6px 14px' : '3px 6px',
+        borderRadius: 4, fontSize: 11,
+        fontWeight: isActive ? 600 : 400,
+        color: isActive ? '#3b82f6' : '#475569',
+        background: isActive ? '#eff6ff' : 'transparent',
+        textDecoration: 'none',
+        transition: 'all 0.15s', whiteSpace: 'nowrap',
+      }}
+      title={`${item.code} ${item.label}`}
+    >
+      <item.icon size={13} style={{ flexShrink: 0 }} />
+      {!collapsed && (
+        <>
+          <span style={{
+            fontSize: 9, fontWeight: 700, color: isActive ? '#2563eb' : '#94a3b8',
+            minWidth: 28, flexShrink: 0,
+          }}>
+            {item.code}
+          </span>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {item.label}
+          </span>
+          {item.consolidated && (
             <span style={{
-              fontSize: 9, fontWeight: 700, color: isActive ? '#2563eb' : '#94a3b8',
-              minWidth: 28, flexShrink: 0,
+              fontSize: 8, background: '#dcfce7', color: '#16a34a',
+              padding: '0px 4px', borderRadius: 3, fontWeight: 600, flexShrink: 0,
             }}>
-              {item.code}
+              통합
             </span>
-            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {item.label}
+          )}
+          {memoCount > 0 && (
+            <span style={{
+              background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 600,
+              borderRadius: 9999, padding: '0px 5px', minWidth: 16,
+              textAlign: 'center', lineHeight: '14px',
+            }}>
+              {memoCount}
             </span>
-            {item.consolidated && (
-              <span style={{
-                fontSize: 8, background: '#dcfce7', color: '#16a34a',
-                padding: '0px 4px', borderRadius: 3, fontWeight: 600, flexShrink: 0,
-              }}>
-                통합
-              </span>
-            )}
-            {memoCount > 0 && (
-              <span style={{
-                background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 600,
-                borderRadius: 9999, padding: '0px 5px', minWidth: 16,
-                textAlign: 'center', lineHeight: '14px',
-              }}>
-                {memoCount}
-              </span>
-            )}
-          </>
-        )}
-      </NavLink>
-    </div>
+          )}
+        </>
+      )}
+    </NavLink>
   );
 }
 
-/* ── 드래그 가능 그룹 섹션 ── */
+/* ── 그룹 섹션 ── */
 function GroupSection({
-  group, index, collapsed, location, memoCounts,
-  onDropItem, onMoveGroup,
+  group, collapsed, location, memoCounts,
   collapsedGroups, toggleGroupCollapse,
 }: {
   group: NavGroup;
-  index: number;
   collapsed: boolean;
   location: { pathname: string };
   memoCounts: Record<string, number>;
-  onDropItem: (code: string, fromGroupId: string, toGroupId: string) => void;
-  onMoveGroup: (fromIdx: number, toIdx: number) => void;
   collapsedGroups: Set<string>;
   toggleGroupCollapse: (groupId: string) => void;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const isGroupCollapsed = collapsedGroups.has(group.id);
 
-  // 그룹 드래그
-  const [{ isDragging }, drag] = useDrag({
-    type: DND_GROUP,
-    item: (): DragGroup => ({ groupId: group.id, index }),
-    collect: m => ({ isDragging: m.isDragging() }),
-  });
-
-  // 그룹 드롭 (아이템 받기 + 그룹 위치교환)
-  const [{ isOver }, drop] = useDrop({
-    accept: [DND_ITEM, DND_GROUP],
-    drop: (dragObj: DragItem | DragGroup, monitor) => {
-      if (monitor.getItemType() === DND_ITEM) {
-        const d = dragObj as DragItem;
-        if (d.fromGroupId !== group.id) {
-          onDropItem(d.code, d.fromGroupId, group.id);
-        }
-      }
-      if (monitor.getItemType() === DND_GROUP) {
-        const d = dragObj as DragGroup;
-        if (d.index !== index) onMoveGroup(d.index, index);
-      }
-    },
-    collect: m => ({ isOver: m.isOver({ shallow: true }) }),
-  });
-
-  drag(drop(ref));
-
   return (
-    <div
-      ref={ref}
-      style={{
-        marginBottom: 4,
-        opacity: isDragging ? 0.4 : 1,
-        background: isOver ? '#f0f9ff' : 'transparent',
-        borderRadius: 6,
-        border: isOver ? '1px dashed #93c5fd' : '1px solid transparent',
-        transition: 'all 0.15s',
-      }}
-    >
+    <div style={{ marginBottom: 4 }}>
       {/* 그룹 헤더 */}
       {!collapsed && (
         <div
@@ -159,7 +91,6 @@ function GroupSection({
             padding: '2px 6px', cursor: 'pointer',
           }}
         >
-          <GripVertical size={9} style={{ color: '#cbd5e1', flexShrink: 0 }} />
           <span
             style={{
               flex: 1, fontSize: 9, fontWeight: 600, color: '#64748b',
@@ -179,10 +110,9 @@ function GroupSection({
         const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
         const memoCount = memoCounts[toPageKey(item.to)] || 0;
         return (
-          <DraggableNavItem
+          <NavItemRow
             key={item.code}
             item={item}
-            groupId={group.id}
             isActive={isActive}
             memoCount={memoCount}
             collapsed={collapsed}
@@ -200,46 +130,8 @@ export function CategorySidebar() {
   const location = useLocation();
   const memoCounts = useAllMemoCounts();
 
-  // 그룹 상태 초기화
-  const [groups, setGroups] = useState<NavGroup[]>(() => {
-    const saved = loadLayout();
-    return saved ? restoreGroups(saved) : DEFAULT_GROUPS;
-  });
+  const groups = DEFAULT_GROUPS;
 
-  // 그룹 변경 시 저장
-  const persist = useCallback((next: NavGroup[]) => {
-    setGroups(next);
-    saveLayout(toLayout(next));
-  }, []);
-
-  // 아이템 드롭 → 그룹 이동
-  const handleDropItem = useCallback((code: string, fromGroupId: string, toGroupId: string) => {
-    setGroups(prev => {
-      const next = prev.map(g => ({ ...g, items: [...g.items] }));
-      const fromG = next.find(g => g.id === fromGroupId);
-      const toG = next.find(g => g.id === toGroupId);
-      if (!fromG || !toG) return prev;
-      const idx = fromG.items.findIndex(i => i.code === code);
-      if (idx < 0) return prev;
-      const [item] = fromG.items.splice(idx, 1);
-      toG.items.push(item);
-      saveLayout(toLayout(next));
-      return next;
-    });
-  }, []);
-
-  // 그룹 순서 교환
-  const handleMoveGroup = useCallback((fromIdx: number, toIdx: number) => {
-    setGroups(prev => {
-      const next = [...prev];
-      const [moved] = next.splice(fromIdx, 1);
-      next.splice(toIdx, 0, moved);
-      saveLayout(toLayout(next));
-      return next;
-    });
-  }, []);
-
-  // 그룹 접기/펼치기
   const toggleGroupCollapse = useCallback((groupId: string) => {
     setCollapsedGroups(prev => {
       const next = new Set(prev);
@@ -249,99 +141,72 @@ export function CategorySidebar() {
     });
   }, []);
 
-  // 레이아웃 초기화
-  const handleReset = useCallback(() => {
-    persist(DEFAULT_GROUPS);
-    setCollapsedGroups(new Set());
-  }, [persist]);
-
   return (
-    <DndProvider backend={HTML5Backend}>
-      <aside
-        style={{
-          width: sidebarCollapsed ? 48 : 210,
-          minWidth: sidebarCollapsed ? 48 : 210,
-          background: '#fff',
-          borderRight: '1px solid #e2e8f0',
-          display: 'flex', flexDirection: 'column',
-          transition: 'width 0.2s, min-width 0.2s',
-          overflow: 'hidden',
-        }}
-      >
-        {/* 로고 */}
-        <div style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #e2e8f0' }}>
-          <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
-          {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>AI Studio</span>}
-        </div>
+    <aside
+      style={{
+        width: sidebarCollapsed ? 48 : 210,
+        minWidth: sidebarCollapsed ? 48 : 210,
+        background: '#fff',
+        borderRight: '1px solid #e2e8f0',
+        display: 'flex', flexDirection: 'column',
+        transition: 'width 0.2s, min-width 0.2s',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 로고 */}
+      <div style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
+        {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>AI Studio</span>}
+      </div>
 
-        {/* 네비게이션 */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 3px' }}>
-          {groups.map((group, idx) => (
-            <GroupSection
-              key={group.id}
-              group={group}
-              index={idx}
-              collapsed={sidebarCollapsed}
-              location={location}
-              memoCounts={memoCounts}
-              onDropItem={handleDropItem}
-              onMoveGroup={handleMoveGroup}
-              collapsedGroups={collapsedGroups}
-              toggleGroupCollapse={toggleGroupCollapse}
-            />
-          ))}
+      {/* 네비게이션 */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 3px' }}>
+        {groups.map(group => (
+          <GroupSection
+            key={group.id}
+            group={group}
+            collapsed={sidebarCollapsed}
+            location={location}
+            memoCounts={memoCounts}
+            collapsedGroups={collapsedGroups}
+            toggleGroupCollapse={toggleGroupCollapse}
+          />
+        ))}
+      </nav>
 
-          {/* 초기화 */}
-          {!sidebarCollapsed && (
-            <div style={{ padding: '2px 6px' }}>
-              <button
-                onClick={handleReset}
-                title="기본 배치로 초기화"
-                style={{
-                  width: '100%', padding: '3px 0', border: '1px dashed #cbd5e1', borderRadius: 4,
-                  background: 'none', cursor: 'pointer', fontSize: 9, color: '#94a3b8',
-                }}
-              >
-                초기화
-              </button>
-            </div>
-          )}
-        </nav>
-
-        {/* 하단 링크 + 접기 */}
-        <div style={{ borderTop: '1px solid #e2e8f0', padding: '4px' }}>
-          {[
-            { href: '/admin.html', icon: BarChart3, label: '데이터 관리' },
-            { href: '/dashboard.html', icon: LayoutDashboard, label: '프로세스' },
-            { href: '/면접_main.html', icon: FileInput, label: '면접 폼(입력)' },
-            { href: '/home.html', icon: Home, label: '홈으로' },
-          ].map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '3px 8px', borderRadius: 4,
-                fontSize: 11, color: '#64748b', textDecoration: 'none',
-              }}
-            >
-              <link.icon size={12} />
-              {!sidebarCollapsed && link.label}
-            </a>
-          ))}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+      {/* 하단 링크 + 접기 */}
+      <div style={{ borderTop: '1px solid #e2e8f0', padding: '4px' }}>
+        {[
+          { href: '/admin.html', icon: BarChart3, label: '데이터 관리' },
+          { href: '/dashboard.html', icon: LayoutDashboard, label: '프로세스' },
+          { href: '/면접_main.html', icon: FileInput, label: '면접 폼(입력)' },
+          { href: '/home.html', icon: Home, label: '홈으로' },
+        ].map(link => (
+          <a
+            key={link.href}
+            href={link.href}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center',
-              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-              gap: 6, padding: '3px 8px', border: 'none', background: 'none',
-              borderRadius: 4, cursor: 'pointer', fontSize: 11, color: '#94a3b8',
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '3px 8px', borderRadius: 4,
+              fontSize: 11, color: '#64748b', textDecoration: 'none',
             }}
           >
-            {sidebarCollapsed ? <ChevronRight size={12} /> : <><ChevronLeft size={12} /> 접기</>}
-          </button>
-        </div>
-      </aside>
-    </DndProvider>
+            <link.icon size={12} />
+            {!sidebarCollapsed && link.label}
+          </a>
+        ))}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center',
+            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+            gap: 6, padding: '3px 8px', border: 'none', background: 'none',
+            borderRadius: 4, cursor: 'pointer', fontSize: 11, color: '#94a3b8',
+          }}
+        >
+          {sidebarCollapsed ? <ChevronRight size={12} /> : <><ChevronLeft size={12} /> 접기</>}
+        </button>
+      </div>
+    </aside>
   );
 }
