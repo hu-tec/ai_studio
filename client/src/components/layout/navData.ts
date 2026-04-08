@@ -12,7 +12,6 @@ export interface NavItem {
   icon: LucideIcon;
   label: string;
   code: string;          // A1, A1-1, B2 …
-  consolidated?: boolean; // 통합완료 표시
 }
 
 export interface NavGroup {
@@ -30,12 +29,12 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'A1-1', to: '/work-log',           icon: ClipboardList, label: '업무일지(직원-new)' },
   { code: 'A1-3', to: '/work-log/admin',     icon: ClipboardList, label: '업무일지(관리)' },
   { code: 'A2',   to: '/pledge',             icon: ShieldCheck,   label: '서약서' },
-  { code: 'A3-1', to: '/company-guidelines', icon: Scale,         label: '사내업무지침(통합-new)', consolidated: true },
+  { code: 'A3-1', to: '/company-guidelines', icon: Scale,         label: '사내업무지침(통합-new)' },
   { code: 'A4',   to: '/lesson-plan',        icon: BookOpen,      label: '레슨플랜' },
   { code: 'A5',   to: '/manual-list',        icon: BookOpen,      label: '매뉴얼 리스트' },
 
   // ─── B: 채용/인사 ───
-  { code: 'B0',   to: '/recruitment',         icon: ClipboardCheck, label: '채용관리(통합)', consolidated: true },
+  { code: 'B0',   to: '/recruitment',         icon: ClipboardCheck, label: '채용관리(통합)' },
   { code: 'B2',   to: '/attendance',          icon: Clock,          label: '출퇴근 관리(A)' },
   { code: 'B2-1', to: '/attendance-b',        icon: Clock,          label: '출퇴근 관리(B)' },
 

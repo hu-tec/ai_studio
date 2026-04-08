@@ -283,9 +283,10 @@ export default function ClaudeRulesPage() {
           <span className="rounded-md bg-violet-600 px-1.5 py-0.5 text-[10px] font-bold text-white">TEST PAGE</span>
           <span className="text-[13px] font-bold text-violet-800">규정 (임시_혁_test)</span>
         </div>
-        <div className="mt-0.5 flex gap-4 text-[10px] text-violet-600">
-          <span>1. Claude가 어떤 규정들을 메모리로 학습하였는지 <b>한 눈에 보기</b></span>
-          <span>2. 규정들을 어떻게 적용해서 페이지를 만드는지 <b>테스트</b></span>
+        <div className="mt-0.5 flex flex-col gap-0.5 text-[10px] text-violet-600">
+          <span>1. Claude가 어떤 규정들을 메모리로 학습하였는지 <b>한 눈에 보기</b> 위함</span>
+          <span>2. 규정들을 어떻게 적용해서 페이지를 만드는지 <b>테스트해보는 페이지</b></span>
+          <span>3. 적용되지 않은 것 같은 규정이 있다면, 우측 상단의 <b>Memo</b>에 추가해주세요.</span>
         </div>
       </div>
 

@@ -43,15 +43,7 @@ function NavItemRow({
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {item.label}
           </span>
-          {item.consolidated && (
-            <span style={{
-              fontSize: 8, background: '#dcfce7', color: '#16a34a',
-              padding: '0px 4px', borderRadius: 3, fontWeight: 600, flexShrink: 0,
-            }}>
-              통합
-            </span>
-          )}
-          {memoCount > 0 && (
+{memoCount > 0 && (
             <span style={{
               background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 600,
               borderRadius: 9999, padding: '0px 5px', minWidth: 16,
