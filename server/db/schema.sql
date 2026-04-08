@@ -177,6 +177,22 @@ CREATE TABLE IF NOT EXISTS company_guidelines (
   updated_at TEXT DEFAULT (datetime('now'))
 );
 
+-- 업무 총괄 (Slack형 업무 허브)
+CREATE TABLE IF NOT EXISTS work_hub (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id TEXT NOT NULL UNIQUE,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS work_hub_comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  comment_id TEXT NOT NULL UNIQUE,
+  post_id TEXT NOT NULL,
+  data TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 -- 페이지별 메모
 CREATE TABLE IF NOT EXISTS page_memos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

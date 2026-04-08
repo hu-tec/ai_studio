@@ -15,10 +15,10 @@ interface Attachment {
 }
 
 interface MaterialData {
-  department: string;   // 대분류
-  category2: string;    // 중분류
-  category3: string;    // 소분류
-  position: string;     // 직급
+  department: string[];   // 대분류 (멀티)
+  category2: string[];    // 중분류 (멀티)
+  category3: string[];    // 소분류 (멀티)
+  position: string[];     // 직급 (멀티)
   title: string;
   content: string;
   attachments: Attachment[];
@@ -26,6 +26,10 @@ interface MaterialData {
   note: string;         // 비고
   created_at: string;
 }
+
+/* ── helpers ── */
+const toArr = (v: unknown): string[] => Array.isArray(v) ? v : typeof v === 'string' && v ? [v] : [];
+const arrLabel = (v: string[]) => v.length ? v.join(', ') : '—';
 
 interface MaterialRow {
   id: number;
@@ -65,11 +69,11 @@ export default function WorkMaterialsPage() {
   const [previewRow, setPreviewRow] = useState<MaterialRow|null>(null);
   const [diskInfo, setDiskInfo] = useState<{total:number;used:number;available:number;uploadsSize:number;dbSize:number}|null>(null);
 
-  // filters
-  const [filterDept, setFilterDept] = useState('전체');
-  const [filterCat2, setFilterCat2] = useState('전체');
-  const [filterCat3, setFilterCat3] = useState('전체');
-  const [filterPos, setFilterPos] = useState('전체');
+  // filters (빈 배열 = 전체)
+  const [filterDept, setFilterDept] = useState<string[]>([]);
+  const [filterCat2, setFilterCat2] = useState<string[]>([]);
+  const [filterCat3, setFilterCat3] = useState<string[]>([]);
+  const [filterPos, setFilterPos] = useState<string[]>([]);
   const [filterAuthor, setFilterAuthor] = useState('전체');
   const [searchText, setSearchText] = useState('');
 
@@ -90,7 +94,7 @@ export default function WorkMaterialsPage() {
       const raw = await res.json();
       const data: MaterialRow[] = Array.isArray(raw) ? raw.map((r: any) => {
         const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
-        return { ...r, data: { ...d, attachments: d.attachments||[], content: d.content||'', author: d.author||'', created_at: d.created_at||r.updated_at||'', category2: d.category2||'', category3: d.category3||'', note: d.note||'' } };
+        return { ...r, data: { ...d, department: toArr(d.department), category2: toArr(d.category2), category3: toArr(d.category3), position: toArr(d.position), attachments: d.attachments||[], content: d.content||'', author: d.author||'', created_at: d.created_at||r.updated_at||'', note: d.note||'' } };
       }) : [];
 
       // 기존 더미 데이터 자동 삭제 (한 번만 실행)
@@ -121,10 +125,10 @@ export default function WorkMaterialsPage() {
 
   const filtered = rows.filter(r => {
     const d = r.data;
-    if (filterDept !== '전체' && d.department !== filterDept) return false;
-    if (filterCat2 !== '전체' && d.category2 !== filterCat2) return false;
-    if (filterCat3 !== '전체' && d.category3 !== filterCat3) return false;
-    if (filterPos !== '전체' && d.position !== filterPos) return false;
+    if (filterDept.length && !filterDept.some(f => d.department.includes(f))) return false;
+    if (filterCat2.length && !filterCat2.some(f => d.category2.includes(f))) return false;
+    if (filterCat3.length && !filterCat3.some(f => d.category3.includes(f))) return false;
+    if (filterPos.length && !filterPos.some(f => d.position.includes(f))) return false;
     if (filterAuthor !== '전체' && d.author !== filterAuthor) return false;
     if (searchText) { const s = searchText.toLowerCase(); if (!d.title.toLowerCase().includes(s) && !d.content.toLowerCase().includes(s) && !d.author.toLowerCase().includes(s) && !(d.note||'').toLowerCase().includes(s)) return false; }
     return true;
@@ -157,7 +161,7 @@ export default function WorkMaterialsPage() {
     setEditingNoteId(null);
   };
 
-  const anyFilterActive = filterDept!=='전체'||filterCat2!=='전체'||filterCat3!=='전체'||filterPos!=='전체'||filterAuthor!=='전체'||!!searchText;
+  const anyFilterActive = filterDept.length>0||filterCat2.length>0||filterCat3.length>0||filterPos.length>0||filterAuthor!=='전체'||!!searchText;
 
   if (loading) return <div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>;
 
@@ -174,7 +178,7 @@ export default function WorkMaterialsPage() {
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
         <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
         <div style={{display:'flex',gap:8}}>
-          {anyFilterActive && <button onClick={()=>{setFilterDept('전체');setFilterCat2('전체');setFilterCat3('전체');setFilterPos('전체');setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:8,fontSize:13,cursor:'pointer',color:'#EF4444'}}><X size={14}/>필터 초기화</button>}
+          {anyFilterActive && <button onClick={()=>{setFilterDept([]);setFilterCat2([]);setFilterCat3([]);setFilterPos([]);setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:8,fontSize:13,cursor:'pointer',color:'#EF4444'}}><X size={14}/>필터 초기화</button>}
           <button onClick={()=>{
             const allIds = filtered.map(r=>r.material_id);
             const allExpanded = allIds.every(id=>expandedIds.has(id));
@@ -218,10 +222,10 @@ export default function WorkMaterialsPage() {
           <Search size={16} style={{position:'absolute',left:10,top:10,color:'#94a3b8'}}/>
           <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{width:'100%',padding:'8px 12px 8px 32px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',background:'#fff'}}/>
         </div>
-        <DynFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom}/>
-        <DynFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom}/>
-        <DynFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom}/>
-        <DynFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom}/>
+        <DynFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom} multi/>
+        <DynFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom} multi/>
+        <DynFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom} multi/>
+        <DynFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom} multi/>
         <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
           <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>작성자</span>
           <button onClick={()=>setFilterAuthor('전체')} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:filterAuthor==='전체'?'#3B82F6':'#e2e8f0',background:filterAuthor==='전체'?'#EFF6FF':'#fff',color:filterAuthor==='전체'?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:filterAuthor==='전체'?600:400}}>전체</button>
@@ -244,9 +248,9 @@ export default function WorkMaterialsPage() {
           return (
           <div key={row.material_id}>
             <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'72px 72px 72px 150px 1fr 80px 110px 60px 72px 64px',padding:'10px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:6}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
-              <div><span style={{padding:'2px 8px',borderRadius:12,fontSize:11,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{row.data.department}</span></div>
-              <div style={{fontSize:11,color:'#64748b'}}>{row.data.category2||'—'}</div>
-              <div style={{fontSize:11,color:'#64748b'}}>{row.data.category3||'—'}</div>
+              <div style={{display:'flex',gap:2,flexWrap:'wrap'}}>{row.data.department.map((dep,i)=><span key={i} style={{padding:'2px 6px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{dep}</span>)}</div>
+              <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category2)}</div>
+              <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category3)}</div>
               <div style={{fontSize:13,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:4,overflow:'hidden'}}>
                 <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.title}</span>
                 {isOpen?<ChevronUp size={13} color="#94a3b8" style={{flexShrink:0}}/>:<ChevronDown size={13} color="#94a3b8" style={{flexShrink:0}}/>}
@@ -329,10 +333,24 @@ export default function WorkMaterialsPage() {
 /* ══════════════════════════════════════════════════════════════
    Dynamic Filter Chips with +추가 / 삭제
    ══════════════════════════════════════════════════════════════ */
-function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateCustom}:{label:string;items:string[];defaults:string[];value:string;onChange:(v:string)=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
+function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateCustom,multi}:{label:string;items:string[];defaults:string[];value:string|string[];onChange:(v:any)=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void;multi?:boolean}) {
   const [adding, setAdding] = useState(false);
   const [newVal, setNewVal] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const sel = multi ? (Array.isArray(value) ? value : []) : value;
+  const isAll = multi ? (sel as string[]).length === 0 : sel === '전체';
+  const isActive = (d: string) => multi ? (sel as string[]).includes(d) : sel === d;
+
+  const toggle = (d: string) => {
+    if (multi) {
+      const arr = sel as string[];
+      onChange(arr.includes(d) ? arr.filter(x=>x!==d) : [...arr, d]);
+    } else {
+      onChange(d);
+    }
+  };
+  const clearAll = () => onChange(multi ? [] : '전체');
 
   const handleAdd = () => {
     const v = newVal.trim();
@@ -342,9 +360,9 @@ function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateC
   };
 
   const handleRemove = (item: string) => {
-    if (defaults.includes(item)) return; // 기본값 삭제 불가
+    if (defaults.includes(item)) return;
     updateCustom(customKey, (custom[customKey]||[]).filter(c=>c!==item));
-    if (value === item) onChange('전체');
+    if (multi) { onChange((sel as string[]).filter(x=>x!==item)); } else { if (value === item) onChange('전체'); }
   };
 
   useEffect(()=>{ if(adding) inputRef.current?.focus(); }, [adding]);
@@ -352,10 +370,10 @@ function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateC
   return (
     <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
       <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>{label}</span>
-      <button onClick={()=>onChange('전체')} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:value==='전체'?'#3B82F6':'#e2e8f0',background:value==='전체'?'#EFF6FF':'#fff',color:value==='전체'?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value==='전체'?600:400}}>전체</button>
+      <button onClick={clearAll} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:isAll?'#3B82F6':'#e2e8f0',background:isAll?'#EFF6FF':'#fff',color:isAll?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:isAll?600:400}}>전체</button>
       {items.map(d=>(
         <span key={d} style={{display:'inline-flex',alignItems:'center',position:'relative'}}>
-          <button onClick={()=>onChange(d)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:value===d?'#3B82F6':'#e2e8f0',background:value===d?'#EFF6FF':'#fff',color:value===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value===d?600:400,paddingRight:defaults.includes(d)?undefined:24}}>{d}</button>
+          <button onClick={()=>toggle(d)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:isActive(d)?'#3B82F6':'#e2e8f0',background:isActive(d)?'#EFF6FF':'#fff',color:isActive(d)?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:isActive(d)?600:400,paddingRight:defaults.includes(d)?undefined:24}}>{d}</button>
           {!defaults.includes(d)&&<button onClick={e=>{e.stopPropagation();handleRemove(d);}} style={{position:'absolute',right:4,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',lineHeight:1}}><X size={11} color="#EF4444"/></button>}
         </span>
       ))}
@@ -413,14 +431,14 @@ function PreviewPanel({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
       <div style={{padding:'16px 20px',borderBottom:'1px solid #f1f5f9',flexShrink:0}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
           <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
-            <span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{d.department}</span>
-            {d.category2&&<span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#F0FDF4',color:'#22C55E'}}>{d.category2}</span>}
-            {d.category3&&<span style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#FFFBEB',color:'#F59E0B'}}>{d.category3}</span>}
+            {d.department.map((dep,i)=><span key={i} style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{dep}</span>)}
+            {d.category2.map((c,i)=><span key={i} style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#F0FDF4',color:'#22C55E'}}>{c}</span>)}
+            {d.category3.map((c,i)=><span key={i} style={{padding:'2px 8px',borderRadius:12,fontSize:10,fontWeight:500,background:'#FFFBEB',color:'#F59E0B'}}>{c}</span>)}
           </div>
           <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:2,flexShrink:0}}><X size={18} color="#94a3b8"/></button>
         </div>
         <h3 style={{fontSize:17,fontWeight:700,color:'#1e293b',margin:0,lineHeight:1.3}}>{d.title}</h3>
-        <div style={{fontSize:12,color:'#94a3b8',marginTop:6}}>{d.author} · {fmtDate(d.created_at)}{d.position?` · ${d.position}`:''}</div>
+        <div style={{fontSize:12,color:'#94a3b8',marginTop:6}}>{d.author} · {fmtDate(d.created_at)}{d.position.length?` · ${d.position.join(', ')}`:''}</div>
       </div>
 
       {/* scrollable body */}
@@ -496,10 +514,10 @@ function PreviewPanel({row, onClose}:{row:MaterialRow;onClose:()=>void}) {
    ══════════════════════════════════════════════════════════════ */
 function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:MaterialRow;onClose:()=>void;onSaved:()=>void;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
   const isEdit = !!editData;
-  const [dept,setDept] = useState(editData?.data.department||'');
-  const [cat2,setCat2] = useState(editData?.data.category2||'');
-  const [cat3,setCat3] = useState(editData?.data.category3||'');
-  const [pos,setPos] = useState(editData?.data.position||'');
+  const [dept,setDept] = useState<string[]>(editData?.data.department||[]);
+  const [cat2,setCat2] = useState<string[]>(editData?.data.category2||[]);
+  const [cat3,setCat3] = useState<string[]>(editData?.data.category3||[]);
+  const [pos,setPos] = useState<string[]>(editData?.data.position||[]);
   const [title,setTitle] = useState(editData?.data.title||'');
   const [content,setContent] = useState(editData?.data.content||'');
   const [author,setAuthor] = useState(editData?.data.author||'');
@@ -540,7 +558,7 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
     for (const f of fileList) {
       const isImg = f.type.startsWith('image/');
       const j = await uploadOne(f);
-      if(j.success && j.s3_url) { setAttachments(p=>[...p,{type:isImg?'image':'file',url:j.s3_url,name:f.name,size:f.size}]); toast.success(`${f.name} 업로드 완료`); }
+      if(j.success && j.s3_url) { setAttachments(p=>[...p,{type:isImg?'image':'file' as const,url:j.s3_url!,name:f.name,size:f.size}]); toast.success(`${f.name} 업로드 완료`); }
       else { toast.error(`${f.name} 업로드 실패`); }
       setUploading(prev=>prev.filter(u=>u.name!==f.name));
     }
@@ -548,7 +566,7 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
   };
 
   const save = async () => {
-    if(!dept||!title||!author){toast.error('대분류, 제목, 작성자를 입력해주세요');return;}
+    if(!dept.length||!title||!author){toast.error('대분류, 제목, 작성자를 입력해주세요');return;}
     setSaving(true);
     const payload:MaterialData = {department:dept,category2:cat2,category3:cat3,position:pos,title,content,attachments,author,note,created_at:editData?.data.created_at||new Date().toISOString()};
     try {
@@ -563,9 +581,9 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
   const cat3s = [...DEF_CAT3,...(custom['cat3']||[])];
   const poss = [...DEF_POS,...(custom['pos']||[])];
 
-  const chipRow = (label:string, items:string[], val:string, set:(v:string)=>void, customKey:string) => (
+  const chipRow = (label:string, items:string[], val:string[], set:(v:string[])=>void, customKey:string) => (
     <div>
-      <label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>{label}</label>
+      <label style={{fontSize:13,fontWeight:600,color:'#475569',marginBottom:6,display:'block'}}>{label} {val.length>0&&<span style={{fontSize:11,color:'#3B82F6',fontWeight:400}}>({val.length}개 선택)</span>}</label>
       <FormChips items={items} defaults={customKey==='dept'?DEF_DEPTS:customKey==='cat2'?DEF_CAT2:customKey==='cat3'?DEF_CAT3:DEF_POS} value={val} onChange={set} customKey={customKey} custom={custom} updateCustom={updateCustom}/>
     </div>
   );
@@ -616,17 +634,18 @@ function MaterialForm({editData,onClose,onSaved,custom,updateCustom}:{editData?:
   );
 }
 
-/* ── Form Chips (with +추가 in modal) ── */
-function FormChips({items,defaults,value,onChange,customKey,custom,updateCustom}:{items:string[];defaults:string[];value:string;onChange:(v:string)=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
+/* ── Form Chips (멀티선택 + 추가) ── */
+function FormChips({items,defaults,value,onChange,customKey,custom,updateCustom}:{items:string[];defaults:string[];value:string[];onChange:(v:string[])=>void;customKey:string;custom:Record<string,string[]>;updateCustom:(k:string,v:string[])=>void}) {
   const [adding, setAdding] = useState(false);
   const [newVal, setNewVal] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const handleAdd = () => { const v=newVal.trim(); if(!v||items.includes(v)){setNewVal('');setAdding(false);return;} updateCustom(customKey,[...(custom[customKey]||[]),v]); onChange(v); setNewVal('');setAdding(false); };
+  const toggle = (d:string) => onChange(value.includes(d) ? value.filter(x=>x!==d) : [...value, d]);
+  const handleAdd = () => { const v=newVal.trim(); if(!v||items.includes(v)){setNewVal('');setAdding(false);return;} updateCustom(customKey,[...(custom[customKey]||[]),v]); onChange([...value,v]); setNewVal('');setAdding(false); };
   useEffect(()=>{ if(adding) inputRef.current?.focus(); },[adding]);
   return (
     <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
       {items.map(d=>(
-        <button key={d} type="button" onClick={()=>onChange(value===d?'':d)} style={{padding:'6px 14px',borderRadius:16,border:'1px solid',borderColor:value===d?'#3B82F6':'#e2e8f0',background:value===d?'#EFF6FF':'#fff',color:value===d?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value===d?600:400}}>{d}</button>
+        <button key={d} type="button" onClick={()=>toggle(d)} style={{padding:'6px 14px',borderRadius:16,border:'1px solid',borderColor:value.includes(d)?'#3B82F6':'#e2e8f0',background:value.includes(d)?'#EFF6FF':'#fff',color:value.includes(d)?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:value.includes(d)?600:400}}>{d}</button>
       ))}
       {adding?(
         <span style={{display:'inline-flex',alignItems:'center',gap:4}}>

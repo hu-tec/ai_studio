@@ -29,6 +29,7 @@ export const router = createBrowserRouter(
 
         // ===== 구현 완료 =====
         // 직원 도구
+        { path: 'work-hub', element: lazyPage(() => import('./pages/work-hub/WorkHubPage')) },
         { path: 'work-materials', element: lazyPage(() => import('./pages/work-materials/WorkMaterialsPage')) },
         { path: 'work-log', element: lazyPage(() => import('./pages/work-log/EmployeePage')) },
         { path: 'work-log-old', element: lazyPage(() => import('./pages/work-log-old/EmployeePage')) },

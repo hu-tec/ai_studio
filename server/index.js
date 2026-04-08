@@ -36,6 +36,8 @@ app.use('/api/eval-criteria', createGenericRouter('eval_criteria', 'criteria_id'
 app.use('/api/work-materials', createGenericRouter('work_materials', 'material_id'));
 app.use('/api/company-guidelines', createGenericRouter('company_guidelines', 'guideline_id'));
 app.use('/api/page-memos', createGenericRouter('page_memos', 'memo_id'));
+app.use('/api/work-hub', createGenericRouter('work_hub', 'post_id'));
+app.use('/api/work-hub-comments', createGenericRouter('work_hub_comments', 'comment_id'));
 
 // 서버 디스크 용량 API
 app.get('/api/disk-usage', (req, res) => {
