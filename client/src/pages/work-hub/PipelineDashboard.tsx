@@ -203,6 +203,97 @@ export default function PipelineDashboard({ filterType }: Props) {
           );
         })}
       </div>
+
+      {/* ═══ 바로가기 링크 (ShortcutsPage 통합) ═══ */}
+      <div style={{ marginTop: 14 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>바로가기 · 서비스 링크</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          {SHORTCUT_GROUPS.map(g => (
+            <div key={g.title} style={{ background: '#fff', borderRadius: 8, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+              <div style={{ padding: '5px 8px', background: g.bg, fontSize: 10, fontWeight: 700, color: g.color, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>{g.emoji}</span> {g.title} <span style={{ marginLeft: 'auto', fontSize: 9, color: '#94a3b8' }}>{g.links.length}</span>
+              </div>
+              <div style={{ padding: '3px 0' }}>
+                {g.links.map((l, i) => (
+                  <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', fontSize: 10, color: '#475569', textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = ''}>
+                    <ExternalLink size={8} color="#94a3b8" style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+
+/* ═══ 바로가기 데이터 (ShortcutsPage에서 이관) ═══ */
+const SHORTCUT_GROUPS = [
+  { title: '핵심 시스템', emoji: '🖥️', color: '#3B82F6', bg: '#EFF6FF', links: [
+    { name: 'AI Studio (직원업무)', url: 'http://54.116.15.136:81/app' },
+    { name: 'Work Studio (관리자)', url: 'http://54.116.15.136:80' },
+    { name: 'AITe CBT (시험)', url: 'http://54.116.15.136:82' },
+    { name: 'API Gateway', url: 'https://bmidcy9z17.execute-api.ap-northeast-2.amazonaws.com' },
+  ]},
+  { title: '홈페이지', emoji: '🌐', color: '#10B981', bg: '#F0FDF4', links: [
+    { name: 'TESOL 교육', url: 'https://hu-tec.github.io/TESOL/' },
+    { name: '번역 허브', url: 'https://hu-tec.github.io/translation-hub/' },
+    { name: 'AI 윤리', url: 'https://hu-tec.github.io/ai-ethics/' },
+    { name: '고전번역', url: 'https://hu-tec.github.io/classic-translation/' },
+    { name: '휴텍씨', url: 'https://hu-tec.github.io/company_hutec/' },
+    { name: '대표 블로그', url: 'https://hu-tec.github.io/personal_page/' },
+  ]},
+  { title: 'Figma 디자인', emoji: '🎨', color: '#7C3AED', bg: '#F5F3FF', links: [
+    { name: '강사 커리', url: 'https://www.figma.com/make/60eyAaz66uEvV18k3WWbNS/' },
+    { name: '교재', url: 'https://www.figma.com/make/Tvkp0caVoCt1lHp5iUOqaB/' },
+    { name: '마케팅 관리', url: 'https://www.figma.com/make/rKsKUorM8F7DDmVHvCaOqc/' },
+    { name: '문제은행', url: 'https://www.figma.com/make/cRwrhKVBI5U9iSTopaS1DB/' },
+    { name: 'DB 페이지', url: 'https://www.figma.com/make/Vxx6ETPoYGEr5R6Ue754Qa/' },
+    { name: 'DB v2', url: 'https://www.figma.com/make/uGCONfLFy7YzzZEbu1yiQQ/' },
+    { name: '신청서 관리', url: 'https://www.figma.com/make/ity5waanbLT9oPRRExZKvb/' },
+    { name: '신청서 v2', url: 'https://www.figma.com/make/wBm9HdOhHnS2qPECVAjZR8/' },
+    { name: '바로가기', url: 'https://www.figma.com/make/eHP8SI0rLMYd5IUmZgHiHa/' },
+    { name: '랜딩페이지', url: 'https://www.figma.com/make/Fn89JyeeaizgKWgdZgKnvg/' },
+  ]},
+  { title: 'Figma 사이트', emoji: '📄', color: '#F59E0B', bg: '#FFFBEB', links: [
+    { name: '원페이지', url: 'https://www.figma.com/make/iof9l7wW8Z0C9qOl5qbnsf/' },
+    { name: '대표님 브랜딩', url: 'https://www.figma.com/make/s4NzrfoNsGb8iUrzOrOHte/' },
+    { name: '대표님 v2', url: 'https://www.figma.com/make/R7OHhpRkfYjPOFvy1vSW8g/' },
+    { name: 'HUTECH 홈페이지', url: 'https://www.figma.com/make/c1RFhsKK1j8TN4aLGaboES/' },
+    { name: '서비스 소개', url: 'https://www.figma.com/make/0nGaGvepD5B0K70TAj4NUd/' },
+    { name: '전문가 신청', url: 'https://www.figma.com/make/gHkjoPMMFmD4WcNmr5DvAg/' },
+    { name: '반도체/조선/방산', url: 'https://www.figma.com/make/LPtNYUdip137Y9nR8lKIt9/' },
+    { name: '피지컬', url: 'https://www.figma.com/make/IYMoNGvNPwDKknlxmKE52S/' },
+    { name: '고전번역', url: 'https://www.figma.com/make/Io5vr1qbMIyZ16PpwsOtGL/' },
+  ]},
+  { title: 'Figma UIUX/매뉴얼', emoji: '📖', color: '#EC4899', bg: '#FDF2F8', links: [
+    { name: 'TESOL UIUX', url: 'https://www.figma.com/make/kWloAMfn7fpvjGuP8HexYe/' },
+    { name: '매뉴얼 리스트', url: 'https://www.figma.com/make/KI4I6C2gW90ox9gF2GCpW9/' },
+    { name: '규정관리', url: 'https://www.figma.com/make/huQZzxU7XBHTQgW057Sejx/' },
+  ]},
+  { title: 'Figma 기타', emoji: '🧩', color: '#6366F1', bg: '#EEF2FF', links: [
+    { name: '업무일지', url: 'https://www.figma.com/make/AaTBV4kZ3hTTaSfvwJJyZl/' },
+    { name: '레벨테스트', url: 'https://www.figma.com/make/ySCF7q7vGNEmwJzWXEucKR/' },
+    { name: '레슨플랜', url: 'https://www.figma.com/make/06sEVqoowsAdlhMcrlkgq6/' },
+    { name: 'AI STUDIO', url: 'https://www.figma.com/make/cT4lO1pvdmRev3J9EwSnxZ/' },
+  ]},
+  { title: '배포 홈페이지', emoji: '🚀', color: '#0EA5E9', bg: '#F0F9FF', links: [
+    { name: '대표님홈페이지', url: 'https://www.figma.com/make/UitESewEV8DEcjURgkVKxX/' },
+    { name: '휴텍씨홈페이지', url: 'https://www.figma.com/make/SOZJUzzTnX6RtPnfCQaxcb/' },
+    { name: 'TESOL 홈페이지', url: 'https://www.figma.com/make/TjnmN0iVLDVrCQ6qqo2Dmn/' },
+    { name: 'IITA협회', url: 'https://www.figma.com/make/QjixZHU8IpzxvN3DGwbZ80/' },
+    { name: 'AITE', url: 'https://www.figma.com/make/ziRs8LdTN0OQi3u6wJsujd/' },
+    { name: '번역_아랍어', url: 'https://www.figma.com/make/bCylC0wkVJptWB7pcAXp5W/' },
+    { name: '통독 전체 v2', url: 'https://www.figma.com/make/akUxACaLlCP9OvFCxl4Soi/' },
+    { name: '번역전체', url: 'https://www.figma.com/make/0nGaGvepD5B0K70TAj4NUd/' },
+  ]},
+  { title: 'GitHub 리포', emoji: '📦', color: '#475569', bg: '#F8FAFC', links: [
+    { name: 'ai_studio', url: 'https://github.com/hu-tec/ai_studio' },
+    { name: 'work_studio', url: 'https://github.com/hu-tec/work_studio' },
+    { name: 'AITe_CBT', url: 'https://github.com/hu-tec/AITe_CBT' },
+  ]},
+];
