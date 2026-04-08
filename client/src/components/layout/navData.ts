@@ -100,6 +100,11 @@ export const DEFAULT_GROUPS: NavGroup[] = [
     items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('E')),
   },
   {
+    id: 'grp-uncategorized',
+    title: '미분류',
+    items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('F')),
+  },
+  {
     id: 'grp-trash',
     title: '쓰레기통',
     items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('X')),
