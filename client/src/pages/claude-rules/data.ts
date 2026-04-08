@@ -187,16 +187,21 @@ export const CLAUDE_RULES: ClaudeRule[] = [
       '.gitignore: node_modules/, dist/, .env',
       'git remote: SSH (HTTPS 인증 안 됨)',
       'git add -A / git add . 금지 — 해당 세션에서 수정한 파일만 개별 지정하여 add',
+      'EC2에 SSH키 없음 → WSL에서 push → EC2에서 pull',
+      'EC2 빌드: t3.small OK, t3.micro OOM → WSL에서 빌드 후 push',
+      'ai_studio: 빌드결과 public/app/ git 포함 → pull만 하면 됨',
     ],
   },
   {
     id: 'cr-deploy', category: '코드', title: '배포 안전', level: '고정',
     rules: [
-      '"배포해" → deploy.sh 사용',
+      '"배포해" → deploy.sh 사용 (DB백업→pull→pm2 reload→integrity check)',
       'pm2 restart 절대 금지 → pm2 reload 또는 deploy.sh',
       'public/, dist/ 빌드결과 확인 없이 수정/삭제 금지',
       'git push --force 금지',
+      'EC2에서 git checkout/git reset 금지',
       '짧은 시간에 반복 배포 금지 — 모아서 한 번에',
+      '배포 전 필수 확인: git status + git fetch + EC2 pm2 list',
     ],
   },
   {
@@ -214,6 +219,7 @@ export const CLAUDE_RULES: ClaudeRule[] = [
       '모든 목록 항목에 편집 + 삭제 버튼',
       '추가 버튼 항상 보이게',
       '삭제 시 confirm 필수',
+      '펼친 상태에서 바로 편집/삭제 가능해야 함',
     ],
   },
   {
@@ -222,6 +228,7 @@ export const CLAUDE_RULES: ClaudeRule[] = [
       '전체 펼치기/접기: 상단 토글 버튼',
       '항목별 펼치기/접기: 행 클릭 → 해당 행만',
       '둘 다 있어야 함 — "전체"만 있으면 안 됨',
+      '기본적으로 최대한 많이 보여주기 — 정보가 숨겨져 있으면 안 됨',
     ],
   },
   {
@@ -230,7 +237,8 @@ export const CLAUDE_RULES: ClaudeRule[] = [
       '멀티선택 → rounded-full (원형/pill)',
       '싱글선택 → rounded-md (네모형)',
       '구현 전 멀티/싱글 반드시 판단',
-      '드롭다운 금지 → 칩/버튼/리스트',
+      '드롭다운(select) 금지 → 칩/버튼/리스트로 대체',
+      '실시간 반영 (클릭 즉시 필터 적용)',
     ],
   },
   {
@@ -263,9 +271,14 @@ export const CLAUDE_RULES: ClaudeRule[] = [
     id: 'cr-prompt', category: '대화', title: '답변 규칙', level: '준고정',
     rules: [
       '설계는 처음부터 디테일하게',
-      '기능 풀구현 → 피드백 받아 삭제',
+      '기능 풀구현 → 피드백 받아 삭제 (부족한 것보다 넘치는 게 나음)',
+      '항상 구체적인 목표 명시',
+      '메인(주인공)과 서브(조연) 구분해서 알려주기',
+      '금지사항 명시 필수',
+      '규정을 먼저 학습시키기 (메모리 관리)',
       '주제별 숫자 나열',
-      '답변 끝에 표 1개 필수',
+      '답변 끝에 표 1개 필수 — 최대한 컴팩트하게 압축',
+      'A/B/C안 추천 + 사유 포함',
     ],
   },
   {
@@ -274,11 +287,11 @@ export const CLAUDE_RULES: ClaudeRule[] = [
   },
   {
     id: 'cr-ta', category: '단축어', title: '"ta" 입력', level: '선택',
-    rules: ['~/_task.md 통합 업데이트 (총괄 요약 5열: T#/프로젝트/제목/핵심변경/URL + 상세 표)'],
+    rules: ['~/_task_all.md 통합 업데이트 (총괄 요약 5열: T#/프로젝트/제목/핵심변경/URL + 상세 표)'],
   },
   {
     id: 'cr-t', category: '단축어', title: '"t숫자" 입력', level: '선택',
-    rules: ['~/_task.md에 해당 세션 작업 추가 (개별 파일 금지, 모두 _task.md 1개에 통합)'],
+    rules: ['~/_task_all.md에 해당 세션 작업 추가 (개별 파일 금지, 모두 _task.md 1개에 통합)'],
   },
   {
     id: 'cr-tt', category: '단축어', title: '"tt" 입력', level: '선택',
