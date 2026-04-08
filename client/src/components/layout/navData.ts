@@ -62,6 +62,9 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'E2', to: '/marketing',        icon: BarChart3, label: '마케팅' },
   { code: 'E3', to: '/prompt-guide',     icon: Settings,  label: '프롬사용법' },
 
+  // ─── F: 영규 ───
+  { code: 'F1', to: '/hutechc-homepage', icon: Home, label: '영규-hutechc' },
+
   // ─── X: 미사용 (업무총괄 등으로 대체된 페이지) ───
   { code: 'X1', to: '/shortcuts',       icon: Home,         label: '바로가기(→업무총괄)' },
   { code: 'X2', to: '/work-log-old',    icon: ClipboardList, label: '업무일지(old→new대체)' },

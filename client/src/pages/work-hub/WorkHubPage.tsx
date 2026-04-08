@@ -10,6 +10,7 @@ import {
 
 const PipelineDashboard = lazy(() => import('./PipelineDashboard'));
 const StatusTable = lazy(() => import('./StatusTable'));
+import FeedView from './FeedView';
 
 /* ══════════════════════════════════════════════════════════════
    Types
@@ -421,131 +422,21 @@ export default function WorkHubPage() {
         {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard filterType={filterType} /></Suspense>}
         {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable filterType={filterType} /></Suspense>}
 
-        {/* 피드 탭 — 기존 콘텐츠 */}
-        {activeTab === 'feed' && <>
-        {/* 상단 바 */}
-        <div style={{ padding: '6px 12px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {activePath.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11 }}>
-                <button onClick={() => setActivePath([])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3B82F6', fontSize: 11 }}>전체</button>
-                {activePath.map((seg, i) => (
-                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <ChevronRight size={10} color="#94a3b8" />
-                    <button onClick={() => setActivePath(activePath.slice(0, i + 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: i === activePath.length - 1 ? '#1e293b' : '#3B82F6', fontWeight: i === activePath.length - 1 ? 700 : 400, fontSize: 11 }}>{seg}</button>
-                  </span>
-                ))}
-              </div>
-            )}
-            <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
-              <Search size={12} style={{ position: 'absolute', left: 8, top: 7, color: '#94a3b8' }} />
-              <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="검색..."
-                style={{ width: '100%', padding: '5px 8px 5px 26px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
-            </div>
-            {anyFilterActive && (
-              <button onClick={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setFilterAuthor(''); setSearchText(''); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 8px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, fontSize: 11, cursor: 'pointer', color: '#EF4444' }}>
-                <X size={10} />초기화
-              </button>
-            )}
-            <span style={{ fontSize: 11, color: '#94a3b8' }}>{sorted.length}건</span>
-            <button onClick={() => { setEditingId(null); setShowForm(true); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 12px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-              <Plus size={12} />새 글
-            </button>
-          </div>
-        </div>
-
-        {/* 피드 */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '8px 12px' }}>
-          {sorted.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
-              <Briefcase size={32} style={{ marginBottom: 8, opacity: 0.3 }} />
-              <div style={{ fontSize: 12 }}>등록된 글이 없습니다</div>
-            </div>
-          ) : sorted.map((post, idx) => {
-            const pt = POST_TYPES.find(p => p.type === post.data.type) || POST_TYPES[2];
-            const postComments = getPostComments(post.post_id);
-            const isThreadOpen = threadOpen === post.post_id;
-            const globalIdx = posts.indexOf(post) + 1;
-
-            return (
-              <div key={post.post_id} style={{ marginBottom: 6, background: '#fff', borderRadius: 8, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: post.data.pinned ? '0 0 0 1.5px #FBBF24' : 'none' }}>
-                {/* 포스트 헤더 */}
-                <div style={{ padding: '8px 12px 0' }}>
-                  {/* 경로 + 유형 + 핀 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                    {post.data.pinned && <Pin size={10} color="#F59E0B" style={{ flexShrink: 0 }} />}
-                    <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 9, fontWeight: 700, background: pt.bg, color: pt.color, display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <pt.icon size={9} /> {post.data.type}
-                    </span>
-                    <span style={{ fontSize: 10, color: '#64748b', display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <FolderOpen size={9} /> {buildPathLabel(post.data)}
-                    </span>
-                    {post.data.position.map((p, i) => <span key={i} style={{ padding: '1px 5px', borderRadius: 8, fontSize: 9, background: '#F5F3FF', color: '#7C3AED' }}>{p}</span>)}
-                    <span style={{ flex: 1 }} />
-                    <span style={{ fontSize: 10, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</span>
-                  </div>
-
-                  {/* 제목 + 작성자 한 줄 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.data.title}</span>
-                    <span style={{ fontSize: 10, color: '#64748b', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3 }}><User size={10} />{post.data.author}</span>
-                  </div>
-                </div>
-
-                {/* 본문 */}
-                {post.data.content && (
-                  <div style={{ padding: '0 12px 8px', fontSize: 12, color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                    {post.data.content}
-                  </div>
-                )}
-
-                {/* 첨부 */}
-                {post.data.attachments.length > 0 && (
-                  <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {post.data.attachments.map((att, i) => (
-                      <a key={i} href={att.url} {...(att.type === 'link' ? { target: '_blank', rel: 'noopener noreferrer' } : { download: att.name })}
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0', textDecoration: 'none', color: '#475569', fontSize: 10 }}>
-                        {att.type === 'image' && <ImageIcon size={10} color="#3B82F6" />}
-                        {att.type === 'file' && <File size={10} color="#F59E0B" />}
-                        {att.type === 'link' && <ExternalLink size={10} color="#10B981" />}
-                        <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</span>
-                        {att.size && <span style={{ fontSize: 10, color: '#94a3b8' }}>{fmtSize(att.size)}</span>}
-                      </a>
-                    ))}
-                  </div>
-                )}
-
-                {/* 액션 바 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 1, padding: '4px 10px', borderTop: '1px solid #f1f5f9', background: '#fafbfd' }}>
-                  <button onClick={() => setThreadOpen(isThreadOpen ? null : post.post_id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: isThreadOpen ? '#EFF6FF' : 'transparent', color: isThreadOpen ? '#3B82F6' : '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
-                    <MessageSquare size={10} />{postComments.length > 0 ? `${postComments.length}` : '댓글'}
-                  </button>
-                  <button onClick={() => handleTogglePin(post)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: post.data.pinned ? '#F59E0B' : '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
-                    {post.data.pinned ? <PinOff size={10} /> : <Pin size={10} />}{post.data.pinned ? '해제' : '고정'}
-                  </button>
-                  <button onClick={() => { setEditingId(post.post_id); setShowForm(true); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
-                    <Pencil size={10} />수정
-                  </button>
-                  <button onClick={() => handleDelete(post.post_id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
-                    <Trash2 size={10} />삭제
-                  </button>
-                </div>
-
-                {/* 댓글 스레드 */}
-                {isThreadOpen && (
-                  <CommentThread postId={post.post_id} comments={postComments} onRefresh={fetchData} />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </>}
+        {/* 피드 탭 — 테이블/그리드 + 팝업 */}
+        {activeTab === 'feed' && (
+          <FeedView
+            sorted={sorted} posts={posts} comments={comments}
+            searchText={searchText} setSearchText={setSearchText}
+            anyFilterActive={anyFilterActive}
+            resetFilters={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setFilterAuthor(''); setSearchText(''); }}
+            activePath={activePath} setActivePath={setActivePath}
+            setShowForm={setShowForm} setEditingId={setEditingId}
+            handleDelete={handleDelete} handleTogglePin={handleTogglePin}
+            getPostComments={getPostComments} fetchData={fetchData}
+            POST_TYPES={POST_TYPES} buildPathLabel={buildPathLabel}
+            fmtDate={fmtDate} fmtSize={fmtSize}
+          />
+        )}
       </div>
 
       {/* 글 작성/수정 모달 */}
