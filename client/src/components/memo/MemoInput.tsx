@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Send, Paperclip, Crosshair, X, Loader2 } from 'lucide-react';
 import { api } from '@/api/api';
-import { MEMO_CATEGORIES, MEMO_SUB_CATEGORIES, MEMO_AUTHORS, type MemoAttachment, type MemoTarget, type MemoCategory } from './memoTypes';
+import { MEMO_CATEGORIES, MEMO_SUB_CATEGORIES, MEMO_EMPLOYEES, type MemoAttachment, type MemoTarget, type MemoCategory } from './memoTypes';
 
 interface Props {
   onSubmit: (data: { author: string; category: MemoCategory; subCategory?: string; toName?: string; text: string; attachments: MemoAttachment[]; target: MemoTarget | null }) => void;
@@ -87,17 +87,17 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
       {/* 작성자 선택 (인라인 버튼) */}
       <div className="flex items-center gap-1 flex-wrap">
         <span className="text-[10px] text-slate-400 font-medium mr-0.5">작성자</span>
-        {MEMO_AUTHORS.map((name) => (
+        {MEMO_EMPLOYEES.map((emp) => (
           <button
-            key={name}
-            onClick={() => { setAuthor(name); localStorage.setItem(AUTHOR_KEY, name); }}
+            key={emp.id}
+            onClick={() => { setAuthor(emp.name); localStorage.setItem(AUTHOR_KEY, emp.name); }}
             className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium transition-all ${
-              author === name
+              author === emp.name
                 ? 'bg-slate-700 text-white'
                 : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
             }`}
           >
-            {name}
+            {emp.name}
           </button>
         ))}
       </div>
@@ -140,17 +140,17 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
       {/* 대상자 (누구에게) */}
       <div className="flex items-center gap-1 flex-wrap">
         <span className="text-[10px] text-slate-400 mr-0.5">대상</span>
-        {MEMO_AUTHORS.map((name) => (
+        {MEMO_EMPLOYEES.map((emp) => (
           <button
-            key={name}
-            onClick={() => setToName(toName === name ? '' : name)}
+            key={emp.id}
+            onClick={() => setToName(toName === emp.name ? '' : emp.name)}
             className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
-              toName === name
+              toName === emp.name
                 ? 'bg-purple-500 text-white'
                 : 'bg-white border border-slate-200 text-slate-500 hover:bg-purple-50'
             }`}
           >
-            {name}
+            {emp.name}
           </button>
         ))}
       </div>

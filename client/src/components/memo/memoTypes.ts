@@ -29,8 +29,8 @@ export const MEMO_SUB_CATEGORIES: Record<MemoCategory, string[]> = {
   reference: ['참고', '공유', '학습', '링크'],
 };
 
-/** 직원 목록 (업무일지 연동) */
-export const MEMO_AUTHORS = ['대표님', '수연', '가연', '민혁'] as const;
+/** 직원 목록 — 업무일지 employees에서 가져옴 */
+export { employees as MEMO_EMPLOYEES } from '@/pages/work-log/data';
 
 export interface MemoReply {
   id: string;

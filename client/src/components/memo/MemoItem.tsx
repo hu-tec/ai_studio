@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Trash2, Crosshair, Paperclip, ExternalLink, Pencil, Check, X, Loader2, MessageCircle, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '@/api/api';
-import { MEMO_CATEGORIES, MEMO_SUB_CATEGORIES, MEMO_AUTHORS, type MemoItemData, type MemoAttachment, type MemoTarget, type MemoCategory, type MemoReply } from './memoTypes';
+import { MEMO_CATEGORIES, MEMO_SUB_CATEGORIES, MEMO_EMPLOYEES, type MemoItemData, type MemoAttachment, type MemoTarget, type MemoCategory, type MemoReply } from './memoTypes';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -131,11 +131,11 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
         {/* 작성자 */}
         <div className="flex items-center gap-1 flex-wrap">
           <span className="text-[10px] text-slate-400 font-medium">작성자</span>
-          {MEMO_AUTHORS.map((name) => (
-            <button key={name} onClick={() => setEditAuthor(name)}
+          {MEMO_EMPLOYEES.map((emp) => (
+            <button key={emp.id} onClick={() => setEditAuthor(emp.name)}
               className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
-                editAuthor === name ? 'bg-slate-700 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
-              }`}>{name}</button>
+                editAuthor === emp.name ? 'bg-slate-700 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
+              }`}>{emp.name}</button>
           ))}
         </div>
 
@@ -164,11 +164,11 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
         {/* 대상자 */}
         <div className="flex items-center gap-1 flex-wrap">
           <span className="text-[10px] text-slate-400">대상</span>
-          {MEMO_AUTHORS.map((name) => (
-            <button key={name} onClick={() => setEditToName(editToName === name ? '' : name)}
+          {MEMO_EMPLOYEES.map((emp) => (
+            <button key={emp.id} onClick={() => setEditToName(editToName === emp.name ? '' : emp.name)}
               className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
-                editToName === name ? 'bg-purple-500 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-purple-50'
-              }`}>{name}</button>
+                editToName === emp.name ? 'bg-purple-500 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-purple-50'
+              }`}>{emp.name}</button>
           ))}
         </div>
 
@@ -333,11 +333,11 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
           {/* 댓글 입력 */}
           <div className="flex flex-col gap-1 pt-0.5">
             <div className="flex items-center gap-0.5 flex-wrap">
-              {MEMO_AUTHORS.map((name) => (
-                <button key={name} onClick={() => setReplyAuthor(name)}
+              {MEMO_EMPLOYEES.map((emp) => (
+                <button key={emp.id} onClick={() => setReplyAuthor(emp.name)}
                   className={`rounded px-1 py-px text-[9px] font-medium transition-all ${
-                    replyAuthor === name ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                  }`}>{name}</button>
+                    replyAuthor === emp.name ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                  }`}>{emp.name}</button>
               ))}
             </div>
             <div className="flex items-center gap-1">

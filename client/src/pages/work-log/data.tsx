@@ -340,6 +340,7 @@ export const employees: Employee[] = [
   { id: 'emp-ceo', name: '대표님', department: '경영', position: '대표' },
   { id: 'emp-suyeon', name: '수연', department: '관리', position: '팀장' },
   { id: 'emp-gayeon', name: '가연', department: '관리', position: '팀장' },
+  { id: 'emp-jiye', name: '지예', department: '디자인', position: '알바' },
   { id: 'emp-minhyuk', name: '민혁', department: '개발', position: '알바' },
 ];
 
