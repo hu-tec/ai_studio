@@ -70,6 +70,7 @@ export default function WorkMaterialsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string|null>(null);
   const [previewRow, setPreviewRow] = useState<MaterialRow|null>(null);
+  const [diskInfo, setDiskInfo] = useState<{total:number;used:number;available:number;uploadsSize:number;dbSize:number}|null>(null);
 
   // filters (빈 배열 = 전체)
   const [filterDept, setFilterDept] = useState<string[]>([]);
@@ -120,6 +121,7 @@ export default function WorkMaterialsPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetch('/api/disk-usage').then(r=>r.json()).then(setDiskInfo).catch(()=>{}); }, []);
 
   // gather unique authors from data
   const allAuthors = [...new Set(rows.map(r=>r.data.author).filter(Boolean))];
@@ -172,45 +174,60 @@ export default function WorkMaterialsPage() {
   const mergedPos = [...DEF_POS, ...(custom['pos']||[])];
 
   return (
-    <div style={{display:'flex',gap:0,padding:'24px 32px',maxWidth:1800,margin:'0 auto'}}>
+    <div style={{display:'flex',gap:0,padding:'10px 16px',margin:'0 auto'}}>
     {/* ── 왼쪽: 테이블 영역 ── */}
-    <div style={{flex:1,minWidth:0,transition:'all 0.3s ease'}}>
+    <div style={{flex:1,minWidth:0}}>
       {/* header + tabs */}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-        <div style={{display:'flex',alignItems:'center',gap:16}}>
-          <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
-          <div style={{display:'flex',gap:4,background:'#f1f5f9',borderRadius:8,padding:3}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <h2 style={{fontSize:14,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h2>
+          <div style={{display:'flex',gap:2,background:'#f1f5f9',borderRadius:6,padding:2}}>
             {([['materials','자료 목록'],['storage','서버 저장소 (S3)']] as const).map(([key,label])=>(
               <button key={key} onClick={()=>setActiveTab(key)}
-                style={{padding:'6px 14px',borderRadius:6,border:'none',fontSize:13,fontWeight:activeTab===key?600:400,
+                style={{padding:'3px 10px',borderRadius:4,border:'none',fontSize:11,fontWeight:activeTab===key?600:400,
                   background:activeTab===key?'#fff':'transparent',
                   color:activeTab===key?'#1e293b':'#64748b',
-                  boxShadow:activeTab===key?'0 1px 3px rgba(0,0,0,0.08)':'none',
+                  boxShadow:activeTab===key?'0 1px 2px rgba(0,0,0,0.06)':'none',
                   cursor:'pointer',transition:'all 0.15s'}}>
-                {key==='storage'&&<HardDrive size={13} style={{marginRight:4,verticalAlign:'-2px'}}/>}{label}
+                {key==='storage'&&<HardDrive size={11} style={{marginRight:3,verticalAlign:'-2px'}}/>}{label}
               </button>
             ))}
           </div>
+          {/* 디스크 상태 — 컴팩트 */}
+          {diskInfo&&(()=>{
+            const pct = diskInfo.total>0?Math.round(diskInfo.used/diskInfo.total*100):0;
+            const gb = (b:number)=>(b/1073741824).toFixed(1);
+            const barColor = pct>90?'#EF4444':pct>70?'#F59E0B':'#3B82F6';
+            return (
+              <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#94a3b8',marginLeft:8}}>
+                <HardDrive size={11} color={barColor}/>
+                <div style={{width:80,height:5,background:'#e2e8f0',borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${pct}%`,background:barColor,borderRadius:3}}/>
+                </div>
+                <span>{gb(diskInfo.used)}/{gb(diskInfo.total)}GB ({pct}%)</span>
+              </div>
+            );
+          })()}
         </div>
         {activeTab==='materials'&&(
-        <div style={{display:'flex',gap:8}}>
-          {anyFilterActive && <button onClick={()=>{setFilterDept([]);setFilterCat2([]);setFilterCat3([]);setFilterPos([]);setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:8,fontSize:13,cursor:'pointer',color:'#EF4444'}}><X size={14}/>필터 초기화</button>}
+        <div style={{display:'flex',gap:4}}>
+          {anyFilterActive && <button onClick={()=>{setFilterDept([]);setFilterCat2([]);setFilterCat3([]);setFilterPos([]);setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:3,padding:'4px 10px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:6,fontSize:11,cursor:'pointer',color:'#EF4444'}}><X size={11}/>초기화</button>}
           <button onClick={()=>{
             const allIds = filtered.map(r=>r.material_id);
             const allExpanded = allIds.every(id=>expandedIds.has(id));
             if(allExpanded) setExpandedIds(new Set());
             else setExpandedIds(new Set(allIds));
-          }} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:8,fontSize:13,cursor:'pointer',color:'#475569'}}>
-            {filtered.length>0 && filtered.every(r=>expandedIds.has(r.material_id)) ? '전체 접기' : '전체 펼치기'}
+          }} style={{display:'flex',alignItems:'center',gap:3,padding:'4px 10px',background:'#f1f5f9',border:'1px solid #e2e8f0',borderRadius:6,fontSize:11,cursor:'pointer',color:'#475569'}}>
+            {filtered.length>0 && filtered.every(r=>expandedIds.has(r.material_id)) ? '접기' : '펼치기'}
           </button>
-          <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}><Plus size={16}/>새 자료</button>
+          <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:4,padding:'4px 12px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer'}}><Plus size={12}/>새 자료</button>
         </div>
         )}
       </div>
 
       {/* ── 서버 저장소 탭 ── */}
       {activeTab==='storage'&&(
-        <Suspense fallback={<div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>}>
+        <Suspense fallback={<div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:12}}>로딩 중...</div>}>
           <StoragePanel/>
         </Suspense>
       )}
@@ -218,40 +235,38 @@ export default function WorkMaterialsPage() {
       {/* ── 자료 목록 탭 ── */}
       {activeTab==='materials'&&(<>
 
-      {/* 디스크 용량 — 서버 저장소 탭으로 이동 */}
-
       {/* 필터 */}
-      <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:20}}>
-        <div style={{position:'relative',maxWidth:360}}>
-          <Search size={16} style={{position:'absolute',left:10,top:10,color:'#94a3b8'}}/>
-          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{width:'100%',padding:'8px 12px 8px 32px',border:'1px solid #e2e8f0',borderRadius:8,fontSize:14,outline:'none',background:'#fff'}}/>
+      <div style={{display:'flex',flexDirection:'column',gap:5,marginBottom:10}}>
+        <div style={{position:'relative',maxWidth:300}}>
+          <Search size={13} style={{position:'absolute',left:8,top:7,color:'#94a3b8'}}/>
+          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{width:'100%',padding:'5px 10px 5px 28px',border:'1px solid #e2e8f0',borderRadius:6,fontSize:12,outline:'none',background:'#fff'}}/>
         </div>
         <DynFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom} multi/>
         <DynFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom} multi/>
         <DynFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom} multi/>
         <DynFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom} multi/>
-        <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-          <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>작성자</span>
-          <button onClick={()=>setFilterAuthor('전체')} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:filterAuthor==='전체'?'#3B82F6':'#e2e8f0',background:filterAuthor==='전체'?'#EFF6FF':'#fff',color:filterAuthor==='전체'?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:filterAuthor==='전체'?600:400}}>전체</button>
+        <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,color:'#64748b',fontWeight:600,minWidth:40}}>작성자</span>
+          <button onClick={()=>setFilterAuthor('전체')} style={{padding:'2px 8px',borderRadius:12,border:'1px solid',borderColor:filterAuthor==='전체'?'#3B82F6':'#e2e8f0',background:filterAuthor==='전체'?'#EFF6FF':'#fff',color:filterAuthor==='전체'?'#3B82F6':'#64748b',fontSize:11,cursor:'pointer',fontWeight:filterAuthor==='전체'?600:400}}>전체</button>
           {allAuthors.map(a=>(
-            <button key={a} onClick={()=>setFilterAuthor(a)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:filterAuthor===a?'#3B82F6':'#e2e8f0',background:filterAuthor===a?'#EFF6FF':'#fff',color:filterAuthor===a?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:filterAuthor===a?600:400}}>{a}</button>
+            <button key={a} onClick={()=>setFilterAuthor(a)} style={{padding:'2px 8px',borderRadius:12,border:'1px solid',borderColor:filterAuthor===a?'#3B82F6':'#e2e8f0',background:filterAuthor===a?'#EFF6FF':'#fff',color:filterAuthor===a?'#3B82F6':'#64748b',fontSize:11,cursor:'pointer',fontWeight:filterAuthor===a?600:400}}>{a}</button>
           ))}
         </div>
       </div>
 
       {/* 테이블 */}
-      <div style={{background:'#fff',borderRadius:12,border:'1px solid #e2e8f0',overflow:'hidden'}}>
-        <div style={{display:'grid',gridTemplateColumns:'72px 72px 72px 150px 1fr 80px 110px 60px 72px 64px',padding:'12px 16px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:12,fontWeight:600,color:'#64748b',gap:6}}>
+      <div style={{background:'#fff',borderRadius:8,border:'1px solid #e2e8f0',overflow:'hidden'}}>
+        <div style={{display:'grid',gridTemplateColumns:'60px 60px 60px 140px 1fr 70px 100px 50px 64px 56px',padding:'6px 10px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',fontSize:10,fontWeight:600,color:'#64748b',gap:4}}>
           <div>대분류</div><div>중분류</div><div>소분류</div><div>제목</div><div>내용</div><div>첨부</div><div>비고</div><div>작성자</div><div>날짜</div><div></div>
         </div>
         {filtered.length===0 ? (
-          <div style={{padding:40,textAlign:'center',color:'#94a3b8',fontSize:14}}>등록된 자료가 없습니다</div>
+          <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:12}}>등록된 자료가 없습니다</div>
         ) : filtered.map(row=>{
           const atts = row.data.attachments||[];
           const isOpen = expandedIds.has(row.material_id);
           return (
           <div key={row.material_id}>
-            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'72px 72px 72px 150px 1fr 80px 110px 60px 72px 64px',padding:'10px 16px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:6}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
+            <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'60px 60px 60px 140px 1fr 70px 100px 50px 64px 56px',padding:'5px 10px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:4}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
               <div style={{display:'flex',gap:2,flexWrap:'wrap'}}>{row.data.department.map((dep,i)=><span key={i} style={{padding:'2px 6px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{dep}</span>)}</div>
               <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category2)}</div>
               <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category3)}</div>
@@ -373,22 +388,22 @@ function DynFilter({label,items,defaults,value,onChange,customKey,custom,updateC
   useEffect(()=>{ if(adding) inputRef.current?.focus(); }, [adding]);
 
   return (
-    <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-      <span style={{fontSize:13,color:'#64748b',fontWeight:600,minWidth:48}}>{label}</span>
-      <button onClick={clearAll} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:isAll?'#3B82F6':'#e2e8f0',background:isAll?'#EFF6FF':'#fff',color:isAll?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:isAll?600:400}}>전체</button>
+    <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
+      <span style={{fontSize:11,color:'#64748b',fontWeight:600,minWidth:40}}>{label}</span>
+      <button onClick={clearAll} style={{padding:'2px 8px',borderRadius:12,border:'1px solid',borderColor:isAll?'#3B82F6':'#e2e8f0',background:isAll?'#EFF6FF':'#fff',color:isAll?'#3B82F6':'#64748b',fontSize:11,cursor:'pointer',fontWeight:isAll?600:400}}>전체</button>
       {items.map(d=>(
         <span key={d} style={{display:'inline-flex',alignItems:'center',position:'relative'}}>
-          <button onClick={()=>toggle(d)} style={{padding:'4px 12px',borderRadius:16,border:'1px solid',borderColor:isActive(d)?'#3B82F6':'#e2e8f0',background:isActive(d)?'#EFF6FF':'#fff',color:isActive(d)?'#3B82F6':'#64748b',fontSize:13,cursor:'pointer',fontWeight:isActive(d)?600:400,paddingRight:defaults.includes(d)?undefined:24}}>{d}</button>
-          {!defaults.includes(d)&&<button onClick={e=>{e.stopPropagation();handleRemove(d);}} style={{position:'absolute',right:4,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',lineHeight:1}}><X size={11} color="#EF4444"/></button>}
+          <button onClick={()=>toggle(d)} style={{padding:'2px 8px',borderRadius:12,border:'1px solid',borderColor:isActive(d)?'#3B82F6':'#e2e8f0',background:isActive(d)?'#EFF6FF':'#fff',color:isActive(d)?'#3B82F6':'#64748b',fontSize:11,cursor:'pointer',fontWeight:isActive(d)?600:400,paddingRight:defaults.includes(d)?undefined:20}}>{d}</button>
+          {!defaults.includes(d)&&<button onClick={e=>{e.stopPropagation();handleRemove(d);}} style={{position:'absolute',right:3,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',lineHeight:1}}><X size={9} color="#EF4444"/></button>}
         </span>
       ))}
       {adding ? (
-        <span style={{display:'inline-flex',alignItems:'center',gap:4}}>
-          <input ref={inputRef} value={newVal} onChange={e=>setNewVal(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')handleAdd();if(e.key==='Escape'){setAdding(false);setNewVal('');}}} placeholder="입력 후 Enter" style={{padding:'4px 10px',borderRadius:16,border:'1px solid #3B82F6',fontSize:13,outline:'none',width:100}}/>
-          <button onClick={()=>{setAdding(false);setNewVal('');}} style={{background:'none',border:'none',cursor:'pointer',padding:0}}><X size={14} color="#94a3b8"/></button>
+        <span style={{display:'inline-flex',alignItems:'center',gap:3}}>
+          <input ref={inputRef} value={newVal} onChange={e=>setNewVal(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')handleAdd();if(e.key==='Escape'){setAdding(false);setNewVal('');}}} placeholder="입력 후 Enter" style={{padding:'2px 8px',borderRadius:12,border:'1px solid #3B82F6',fontSize:11,outline:'none',width:80}}/>
+          <button onClick={()=>{setAdding(false);setNewVal('');}} style={{background:'none',border:'none',cursor:'pointer',padding:0}}><X size={11} color="#94a3b8"/></button>
         </span>
       ) : (
-        <button onClick={()=>setAdding(true)} style={{padding:'4px 10px',borderRadius:16,border:'1px dashed #cbd5e1',background:'#fff',color:'#94a3b8',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',gap:2}}><Plus size={12}/>추가</button>
+        <button onClick={()=>setAdding(true)} style={{padding:'2px 8px',borderRadius:12,border:'1px dashed #cbd5e1',background:'#fff',color:'#94a3b8',fontSize:10,cursor:'pointer',display:'flex',alignItems:'center',gap:2}}><Plus size={10}/>추가</button>
       )}
     </div>
   );

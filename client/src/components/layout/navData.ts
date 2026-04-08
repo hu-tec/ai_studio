@@ -27,10 +27,8 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'A0',   to: '/work-hub',           icon: Home,          label: '업무 총괄' },
   { code: 'A1',   to: '/work-materials',     icon: FolderOpen,    label: '업무 자료' },
   { code: 'A1-1', to: '/work-log',           icon: ClipboardList, label: '업무일지(직원-new)' },
-  { code: 'A1-2', to: '/work-log-old',       icon: ClipboardList, label: '업무일지(직원-old)' },
   { code: 'A1-3', to: '/work-log/admin',     icon: ClipboardList, label: '업무일지(관리)' },
   { code: 'A2',   to: '/pledge',             icon: ShieldCheck,   label: '서약서' },
-  { code: 'A3',   to: '/guidelines',         icon: FileText,      label: '사내업무지침' },
   { code: 'A3-1', to: '/company-guidelines', icon: Scale,         label: '사내업무지침(통합-new)', consolidated: true },
   { code: 'A4',   to: '/lesson-plan',        icon: BookOpen,      label: '레슨플랜' },
   { code: 'A5',   to: '/manual-list',        icon: BookOpen,      label: '매뉴얼 리스트' },
@@ -49,7 +47,6 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'C3',   to: '/photo-dashboard', icon: Image,        label: '사진모음' },
   { code: 'C4',   to: '/schedule',        icon: CalendarClock, label: '강의시간표' },
   { code: 'C5',   to: '/overdue',         icon: FileText,     label: '미수금관리' },
-  { code: 'C6',   to: '/shortcuts',       icon: Home,         label: '바로가기' },
   { code: 'C7',   to: '/admin-system',    icon: Settings,     label: '관리자통합' },
 
   // ─── D: 규정 ───
@@ -64,6 +61,11 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'E1', to: '/instructor-curri', icon: BookOpen,  label: '강사커리' },
   { code: 'E2', to: '/marketing',        icon: BarChart3, label: '마케팅' },
   { code: 'E3', to: '/prompt-guide',     icon: Settings,  label: '프롬사용법' },
+
+  // ─── X: 미사용 (업무총괄 등으로 대체된 페이지) ───
+  { code: 'X1', to: '/shortcuts',       icon: Home,         label: '바로가기(→업무총괄)' },
+  { code: 'X2', to: '/work-log-old',    icon: ClipboardList, label: '업무일지(old→new대체)' },
+  { code: 'X3', to: '/guidelines',      icon: FileText,      label: '사내지침(old→통합대체)' },
 ];
 
 /* ── 기본 그룹 배치 ── */
@@ -92,6 +94,11 @@ export const DEFAULT_GROUPS: NavGroup[] = [
     id: 'grp-edu',
     title: '교육/콘텐츠',
     items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('E')),
+  },
+  {
+    id: 'grp-unused',
+    title: '미사용',
+    items: ALL_NAV_ITEMS.filter(i => i.code.startsWith('X')),
   },
 ];
 
