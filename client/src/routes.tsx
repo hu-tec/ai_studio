@@ -67,6 +67,42 @@ export const router = createBrowserRouter(
         { path: 'manual-list', element: lazyPage(() => import('./pages/manual-list/ManualListPage')) },
         { path: 'claude-rules', element: lazyPage(() => import('./pages/claude-rules/ClaudeRulesPage')) },
         { path: 'coming/ai-studio', element: comingSoon },
+
+        // ===== G: 커뮤니티 (gw + 신규) =====
+        { path: 'community-notice', element: comingSoon },
+        { path: 'community-team-notice', element: comingSoon },
+        { path: 'community-center-notice', element: comingSoon },
+        { path: 'community-work-notice', element: comingSoon },
+        { path: 'community-free-board', element: comingSoon },
+        { path: 'community-qna', element: comingSoon },
+        { path: 'community-memo', element: comingSoon },
+        { path: 'community-meeting-board', element: comingSoon },
+
+        // ===== H: 학생관리 (gw) =====
+        { path: 'student-tesol', element: comingSoon },
+        { path: 'student-tesol-old', element: comingSoon },
+        { path: 'student-accounting', element: comingSoon },
+        { path: 'student-certi', element: comingSoon },
+        { path: 'student-translator', element: comingSoon },
+        { path: 'student-ics', element: comingSoon },
+        { path: 'student-etc', element: comingSoon },
+
+        // ===== I: 서식/확인서 (gw) =====
+        { path: 'form-mgmt', element: comingSoon },
+        { path: 'design-materials', element: comingSoon },
+        { path: 'cert-kukton', element: comingSoon },
+        { path: 'cert-tesol', element: comingSoon },
+        { path: 'cert-itt', element: comingSoon },
+
+        // ===== J: 출장관리 (gw) =====
+        { path: 'dispatch-instructor', element: comingSoon },
+        { path: 'dispatch-client', element: comingSoon },
+
+        // ===== C 추가: 관리/운영 (gw) =====
+        { path: 'staff-info', element: comingSoon },
+        { path: 'client-mgmt', element: comingSoon },
+        { path: 'online-meeting-search', element: comingSoon },
+        { path: 'online-project', element: comingSoon },
         { path: 'instructor-eval', element: lazyPage(() => import('./pages/instructor-eval/InstructorEvalPage')) },
         { path: 'instructor-flow', element: lazyPage(() => import('./pages/instructor-flow/InstructorFlowPage')) },
         // ===== 영규-hutechc (hutechc_hompage_real 변환) =====

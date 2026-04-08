@@ -7,8 +7,9 @@ import {
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
 import {
   type NavItem, type NavGroup,
-  DEFAULT_GROUPS,
+  DEFAULT_GROUPS, ROLE_COLORS,
 } from './navData';
+import { useRole } from './useRole';
 
 /* ── 네비 아이템 ── */
 function NavItemRow({
@@ -75,27 +76,41 @@ function GroupSection({
   return (
     <div style={{ marginBottom: 4 }}>
       {/* 그룹 헤더 */}
-      {!collapsed && (
-        <div
-          onClick={() => toggleGroupCollapse(group.id)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 3,
-            padding: '2px 6px', cursor: 'pointer',
-          }}
-        >
-          <span
+      {!collapsed && (() => {
+        const rc = ROLE_COLORS[group.role];
+        const roleLabel = group.role === 'staff' ? '직원' : group.role === 'admin' ? '관리' : '공통';
+        return (
+          <div
+            onClick={() => toggleGroupCollapse(group.id)}
             style={{
-              flex: 1, fontSize: 9, fontWeight: 600, color: '#64748b',
-              textTransform: 'uppercase', letterSpacing: '0.04em',
-              userSelect: 'none',
+              display: 'flex', alignItems: 'center', gap: 3,
+              padding: '2px 6px', cursor: 'pointer',
+              background: isGroupCollapsed ? 'transparent' : rc.bg + '60',
+              borderLeft: `2px solid ${rc.badge}`,
+              marginBottom: 1,
             }}
           >
-            {group.title}
-            <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 3 }}>({group.items.length})</span>
-          </span>
-          {isGroupCollapsed ? <ChevronDown size={10} color="#94a3b8" /> : <ChevronUp size={10} color="#94a3b8" />}
-        </div>
-      )}
+            <span style={{
+              fontSize: 7, fontWeight: 700, color: rc.text,
+              background: rc.badge + '20', padding: '0 3px', borderRadius: 2,
+              flexShrink: 0,
+            }}>
+              {roleLabel}
+            </span>
+            <span
+              style={{
+                flex: 1, fontSize: 9, fontWeight: 600, color: '#475569',
+                letterSpacing: '0.02em',
+                userSelect: 'none',
+              }}
+            >
+              {group.title}
+              <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 3 }}>({group.items.length})</span>
+            </span>
+            {isGroupCollapsed ? <ChevronDown size={10} color="#94a3b8" /> : <ChevronUp size={10} color="#94a3b8" />}
+          </div>
+        );
+      })()}
 
       {/* 아이템 목록 */}
       {!isGroupCollapsed && group.items.map(item => {
@@ -121,8 +136,15 @@ export function CategorySidebar() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const location = useLocation();
   const memoCounts = useAllMemoCounts();
+  const viewRole = useRole();
 
-  const groups = DEFAULT_GROUPS;
+  const groups = DEFAULT_GROUPS.filter(g => {
+    if (viewRole === 'all') return true;
+    if (viewRole === 'staff') return g.role === 'staff' || g.role === 'all';
+    if (viewRole === 'admin') return g.role === 'admin' || g.role === 'all';
+    if (viewRole === 'guest') return g.role === 'all';
+    return true;
+  });
 
   const toggleGroupCollapse = useCallback((groupId: string) => {
     setCollapsedGroups(prev => {

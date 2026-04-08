@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router';
 
-const PAGE_INFO: Record<string, { title: string; category: string; status: string }> = {
+const PAGE_INFO: Record<string, { title: string; category: string; status: string; desc?: string }> = {
   '/coming/meeting-form': { title: 'F-0.대표미팅신폼', category: '개인', status: '조금고치기' },
   '/coming/overdue': { title: 'B.미수금관리', category: '관리', status: '보류' },
   '/coming/shortcuts': { title: 'B.바로가기페이지 v2', category: '관리', status: '많이고치기' },
@@ -41,11 +41,49 @@ const PAGE_INFO: Record<string, { title: string; category: string; status: strin
   '/coming/instructor-flow': { title: '강사면접플로우_출력용', category: '전문가', status: '조금고치기' },
   '/coming/expert-admin': { title: '전문가_관리자용', category: '전문가', status: '조금고치기' },
   '/coming/expert-consult': { title: '전문가 리스트와 상담관리 v3', category: '전문가', status: '조금고치기' },
+
+  // ─── G: 커뮤니티 ───
+  '/community-notice':        { title: '(gw) 전체공지',       category: '커뮤니티', status: '보류', desc: 'timestesol 전체공지 게시판 — 사내 공지사항 등록/조회' },
+  '/community-team-notice':   { title: '(gw) 팀별공지',       category: '커뮤니티', status: '보류', desc: 'timestesol 본부 팀별공지 — 팀/부서별 공지사항 게시판' },
+  '/community-center-notice': { title: '(gw) 센터별공지',     category: '커뮤니티', status: '보류', desc: 'timestesol 전국 센터별공지 — 지역 센터 공지 게시판' },
+  '/community-work-notice':   { title: '(gw) 업무별공지',     category: '커뮤니티', status: '보류', desc: 'timestesol 전국 업무별공지 — 업무 카테고리별 공지' },
+  '/community-free-board':    { title: '(gw) 자유게시판',     category: '커뮤니티', status: '보류', desc: 'timestesol 자유게시판 — 사내 자유 소통 게시판' },
+  '/community-qna':           { title: '(gw) Q&A',            category: '커뮤니티', status: '보류', desc: 'timestesol Q&A 게시판 — 질문/답변 게시판' },
+  '/community-memo':          { title: '메모 모아보기',        category: '커뮤니티', status: '보류', desc: '각 페이지별 작성된 메모를 한 눈에 모아보는 대시보드' },
+  '/community-meeting-board': { title: '회의 게시판',          category: '커뮤니티', status: '보류', desc: '회의록 작성/공유 게시판 — 회의 내용 기록 및 공유' },
+
+  // ─── H: 학생관리 ───
+  '/student-tesol':      { title: '(gw) 테솔 학생관리',  category: '학생관리', status: '보류', desc: 'timestesol 테솔 수강생 관리 — 등록/수강현황/수료 관리' },
+  '/student-tesol-old':  { title: '(gw) 테솔(이전자료)', category: '학생관리', status: '보류', desc: 'timestesol 테솔 이전 자료 열람' },
+  '/student-accounting': { title: '(gw) 회계관리',       category: '학생관리', status: '보류', desc: 'timestesol 회계관리 — 수강료 입금/환불/미수금 처리' },
+  '/student-certi':      { title: '(gw) Certi관리',      category: '학생관리', status: '보류', desc: 'timestesol 자격증(Certificate) 발급/관리' },
+  '/student-translator': { title: '(gw) 번역사',         category: '학생관리', status: '보류', desc: 'timestesol 번역사 수강생 관리' },
+  '/student-ics':        { title: '(gw) ICS',             category: '학생관리', status: '보류', desc: 'timestesol ICS 과정 수강생 관리' },
+  '/student-etc':        { title: '(gw) 기타',            category: '학생관리', status: '보류', desc: 'timestesol 기타 과정 수강생 관리' },
+
+  // ─── C 추가: 관리/운영 ───
+  '/staff-info':   { title: '(gw) 사내정보',   category: '관리/운영', status: '보류', desc: 'timestesol 사내정보 — 직원 정보/조직도 조회' },
+  '/client-mgmt':  { title: '(gw) 거래처관리', category: '관리/운영', status: '보류', desc: 'timestesol 거래처관리 — 거래처 등록/조회/관리' },
+
+  // ─── I: 서식/확인서 ───
+  '/form-mgmt':          { title: '(gw) 서식관리',    category: '서식/확인서', status: '보류', desc: 'timestesol 서식관리 — 사내 서식 템플릿 관리' },
+  '/design-materials':   { title: '(gw) 디자인물',    category: '서식/확인서', status: '보류', desc: 'timestesol 디자인물 — 디자인 자료 관리/다운로드' },
+  '/cert-kukton':        { title: '(gw) 확인서-국통',  category: '서식/확인서', status: '보류', desc: 'timestesol 국통 확인서 발급/관리' },
+  '/cert-tesol':         { title: '(gw) 확인서-테솔',  category: '서식/확인서', status: '보류', desc: 'timestesol 테솔 확인서 발급/관리' },
+  '/cert-itt':           { title: '(gw) 확인서-ITT',   category: '서식/확인서', status: '보류', desc: 'timestesol ITT 확인서 발급/관리' },
+
+  // ─── J: 출장관리 ───
+  '/dispatch-instructor': { title: '(gw) 출강강사관리',     category: '출장관리', status: '보류', desc: 'timestesol 출강강사 배정/스케줄/이력 관리' },
+  '/dispatch-client':     { title: '(gw) 거래처관리(출장)', category: '출장관리', status: '보류', desc: 'timestesol 출장 거래처 관리 — 출강 대상 기관 관리' },
+
+  // ─── C 추가: 온라인미팅 ───
+  '/online-meeting-search':  { title: '(gw) 온라인미팅 검색', category: '관리/운영', status: '보류', desc: 'timestesol 온라인미팅 검색 — 미팅 이력 통합 검색' },
+  '/online-project':         { title: '(gw) 프로젝트관리',    category: '관리/운영', status: '보류', desc: 'timestesol 프로젝트 진행현황 관리 — 참여/진행중 프로젝트' },
 };
 
 export default function ComingSoon() {
   const location = useLocation();
-  const info = PAGE_INFO[location.pathname] || { title: '알 수 없는 페이지', category: '-', status: '-' };
+  const info = PAGE_INFO[location.pathname] || { title: '알 수 없는 페이지', category: '-', status: '-', desc: '' };
 
   const statusColor: Record<string, string> = {
     '완성': '#10b981', '조금고치기': '#3b82f6', '많이고치기': '#f59e0b',
@@ -61,6 +99,7 @@ export default function ComingSoon() {
           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: '#f1f5f9', color: '#64748b', fontWeight: 600 }}>{info.category}</span>
           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: statusColor[info.status] || '#94a3b8', color: '#fff', fontWeight: 600 }}>{info.status}</span>
         </div>
+        {info.desc && <p style={{ fontSize: 12, color: '#64748b', marginBottom: 6, maxWidth: 320 }}>{info.desc}</p>}
         <p style={{ fontSize: 13, color: '#94a3b8' }}>이 페이지는 준비 중입니다.</p>
       </div>
     </div>
