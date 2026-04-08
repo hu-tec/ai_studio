@@ -357,16 +357,16 @@ export default function WorkHubPage() {
 
       {/* ── 중앙 영역 ── */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-        {/* 탭 바 — 컴팩트 */}
-        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, padding: '0 16px' }}>
+        {/* 탭 바 */}
+        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, padding: '0 10px' }}>
           {([
             { key: 'feed' as TabKey, label: '피드', icon: MessageCircle },
             { key: 'dashboard' as TabKey, label: '대시보드', icon: LayoutDashboard },
             { key: 'table' as TabKey, label: '현황표', icon: Table2 },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', border: 'none', borderBottom: `2px solid ${activeTab === tab.key ? '#3B82F6' : 'transparent'}`, background: 'none', color: activeTab === tab.key ? '#3B82F6' : '#64748b', fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer' }}>
-              <tab.icon size={13} /> {tab.label}
+              style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 10px', border: 'none', borderBottom: `2px solid ${activeTab === tab.key ? '#3B82F6' : 'transparent'}`, background: 'none', color: activeTab === tab.key ? '#3B82F6' : '#64748b', fontSize: 11, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer' }}>
+              <tab.icon size={11} /> {tab.label}
             </button>
           ))}
         </div>
@@ -378,49 +378,44 @@ export default function WorkHubPage() {
         {/* 피드 탭 — 기존 콘텐츠 */}
         {activeTab === 'feed' && <>
         {/* 상단 바 */}
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: activePath.length ? 8 : 0 }}>
-            {/* 현재 경로 브레드크럼 */}
+        <div style={{ padding: '6px 12px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {activePath.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
-                <button onClick={() => setActivePath([])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3B82F6', fontSize: 13 }}>전체</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11 }}>
+                <button onClick={() => setActivePath([])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3B82F6', fontSize: 11 }}>전체</button>
                 {activePath.map((seg, i) => (
-                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <ChevronRight size={12} color="#94a3b8" />
-                    <button onClick={() => setActivePath(activePath.slice(0, i + 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: i === activePath.length - 1 ? '#1e293b' : '#3B82F6', fontWeight: i === activePath.length - 1 ? 700 : 400, fontSize: 13 }}>{seg}</button>
+                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <ChevronRight size={10} color="#94a3b8" />
+                    <button onClick={() => setActivePath(activePath.slice(0, i + 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: i === activePath.length - 1 ? '#1e293b' : '#3B82F6', fontWeight: i === activePath.length - 1 ? 700 : 400, fontSize: 11 }}>{seg}</button>
                   </span>
                 ))}
               </div>
             )}
-            <div style={{ flex: 1 }} />
-            <span style={{ fontSize: 13, color: '#94a3b8' }}>{sorted.length}건{anyFilterActive ? ` / ${posts.length}` : ''}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
-              <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
-              <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자 검색..."
-                style={{ width: '100%', padding: '8px 12px 8px 34px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} />
+            <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
+              <Search size={12} style={{ position: 'absolute', left: 8, top: 7, color: '#94a3b8' }} />
+              <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="검색..."
+                style={{ width: '100%', padding: '5px 8px 5px 26px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
             </div>
             {anyFilterActive && (
               <button onClick={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setSearchText(''); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#EF4444' }}>
-                <X size={14} /> 초기화
+                style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 8px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, fontSize: 11, cursor: 'pointer', color: '#EF4444' }}>
+                <X size={10} />초기화
               </button>
             )}
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>{sorted.length}건</span>
             <button onClick={() => { setEditingId(null); setShowForm(true); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-              <Plus size={16} /> 새 글
+              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 12px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              <Plus size={12} />새 글
             </button>
           </div>
         </div>
 
         {/* 피드 */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: '8px 12px' }}>
           {sorted.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8' }}>
-              <Briefcase size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
-              <div style={{ fontSize: 15 }}>등록된 글이 없습니다</div>
-              <div style={{ fontSize: 13, marginTop: 4 }}>새 글을 작성해 업무를 공유하세요</div>
+            <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
+              <Briefcase size={32} style={{ marginBottom: 8, opacity: 0.3 }} />
+              <div style={{ fontSize: 12 }}>등록된 글이 없습니다</div>
             </div>
           ) : sorted.map((post, idx) => {
             const pt = POST_TYPES.find(p => p.type === post.data.type) || POST_TYPES[2];
@@ -429,49 +424,47 @@ export default function WorkHubPage() {
             const globalIdx = posts.indexOf(post) + 1;
 
             return (
-              <div key={post.post_id} style={{ marginBottom: 12, background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: post.data.pinned ? '0 0 0 2px #FBBF24' : 'none' }}>
+              <div key={post.post_id} style={{ marginBottom: 6, background: '#fff', borderRadius: 8, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: post.data.pinned ? '0 0 0 1.5px #FBBF24' : 'none' }}>
                 {/* 포스트 헤더 */}
-                <div style={{ padding: '14px 20px 0' }}>
+                <div style={{ padding: '8px 12px 0' }}>
                   {/* 경로 + 유형 + 핀 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    {post.data.pinned && <Pin size={12} color="#F59E0B" style={{ flexShrink: 0 }} />}
-                    <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: pt.bg, color: pt.color, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <pt.icon size={12} /> {post.data.type}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                    {post.data.pinned && <Pin size={10} color="#F59E0B" style={{ flexShrink: 0 }} />}
+                    <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 9, fontWeight: 700, background: pt.bg, color: pt.color, display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <pt.icon size={9} /> {post.data.type}
                     </span>
-                    <span style={{ fontSize: 11, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <FolderOpen size={11} /> {buildPathLabel(post.data)}
+                    <span style={{ fontSize: 10, color: '#64748b', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <FolderOpen size={9} /> {buildPathLabel(post.data)}
                     </span>
-                    {post.data.position.map((p, i) => <span key={i} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#F5F3FF', color: '#7C3AED' }}>{p}</span>)}
+                    {post.data.position.map((p, i) => <span key={i} style={{ padding: '1px 5px', borderRadius: 8, fontSize: 9, background: '#F5F3FF', color: '#7C3AED' }}>{p}</span>)}
                     <span style={{ flex: 1 }} />
-                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</span>
+                    <span style={{ fontSize: 10, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</span>
                   </div>
 
-                  {/* 제목 */}
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', margin: '4px 0 6px', lineHeight: 1.4 }}>{post.data.title}</h3>
-
-                  {/* 작성자 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', marginBottom: 8 }}>
-                    <User size={13} /> {post.data.author}
+                  {/* 제목 + 작성자 한 줄 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.data.title}</span>
+                    <span style={{ fontSize: 10, color: '#64748b', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3 }}><User size={10} />{post.data.author}</span>
                   </div>
                 </div>
 
                 {/* 본문 */}
                 {post.data.content && (
-                  <div style={{ padding: '0 20px 12px', fontSize: 14, color: '#334155', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                  <div style={{ padding: '0 12px 8px', fontSize: 12, color: '#334155', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                     {post.data.content}
                   </div>
                 )}
 
                 {/* 첨부 */}
                 {post.data.attachments.length > 0 && (
-                  <div style={{ padding: '0 20px 12px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ padding: '0 12px 6px', display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {post.data.attachments.map((att, i) => (
                       <a key={i} href={att.url} {...(att.type === 'link' ? { target: '_blank', rel: 'noopener noreferrer' } : { download: att.name })}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', textDecoration: 'none', color: '#475569', fontSize: 12 }}>
-                        {att.type === 'image' && <ImageIcon size={13} color="#3B82F6" />}
-                        {att.type === 'file' && <File size={13} color="#F59E0B" />}
-                        {att.type === 'link' && <ExternalLink size={13} color="#10B981" />}
-                        <span style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</span>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0', textDecoration: 'none', color: '#475569', fontSize: 10 }}>
+                        {att.type === 'image' && <ImageIcon size={10} color="#3B82F6" />}
+                        {att.type === 'file' && <File size={10} color="#F59E0B" />}
+                        {att.type === 'link' && <ExternalLink size={10} color="#10B981" />}
+                        <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.name}</span>
                         {att.size && <span style={{ fontSize: 10, color: '#94a3b8' }}>{fmtSize(att.size)}</span>}
                       </a>
                     ))}
@@ -479,22 +472,22 @@ export default function WorkHubPage() {
                 )}
 
                 {/* 액션 바 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '8px 16px', borderTop: '1px solid #f1f5f9', background: '#fafbfd' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 1, padding: '4px 10px', borderTop: '1px solid #f1f5f9', background: '#fafbfd' }}>
                   <button onClick={() => setThreadOpen(isThreadOpen ? null : post.post_id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, border: 'none', background: isThreadOpen ? '#EFF6FF' : 'transparent', color: isThreadOpen ? '#3B82F6' : '#94a3b8', fontSize: 12, cursor: 'pointer' }}>
-                    <MessageSquare size={13} /> {postComments.length > 0 ? `댓글 ${postComments.length}` : '댓글'}
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: isThreadOpen ? '#EFF6FF' : 'transparent', color: isThreadOpen ? '#3B82F6' : '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
+                    <MessageSquare size={10} />{postComments.length > 0 ? `${postComments.length}` : '댓글'}
                   </button>
                   <button onClick={() => handleTogglePin(post)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'transparent', color: post.data.pinned ? '#F59E0B' : '#94a3b8', fontSize: 12, cursor: 'pointer' }}>
-                    {post.data.pinned ? <PinOff size={13} /> : <Pin size={13} />} {post.data.pinned ? '고정 해제' : '고정'}
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: post.data.pinned ? '#F59E0B' : '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
+                    {post.data.pinned ? <PinOff size={10} /> : <Pin size={10} />}{post.data.pinned ? '해제' : '고정'}
                   </button>
                   <button onClick={() => { setEditingId(post.post_id); setShowForm(true); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 12, cursor: 'pointer' }}>
-                    <Pencil size={13} /> 수정
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
+                    <Pencil size={10} />수정
                   </button>
                   <button onClick={() => handleDelete(post.post_id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 12, cursor: 'pointer' }}>
-                    <Trash2 size={13} /> 삭제
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, border: 'none', background: 'transparent', color: '#94a3b8', fontSize: 10, cursor: 'pointer' }}>
+                    <Trash2 size={10} />삭제
                   </button>
                 </div>
 
