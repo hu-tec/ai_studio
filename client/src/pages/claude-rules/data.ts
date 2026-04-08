@@ -287,11 +287,17 @@ export const CLAUDE_RULES: ClaudeRule[] = [
   },
   {
     id: 'cr-ta', category: '단축어', title: '"ta" 입력', level: '선택',
-    rules: ['~/_task_all.md 통합 업데이트 (총괄 요약 5열: T#/프로젝트/제목/핵심변경/URL + 상세 표)'],
+    rules: [
+      '~/_task_all.md 통합 업데이트',
+      '총괄 요약: T#/시각/프로젝트(+URL)/제목/핵심변경',
+      '총괄 헤더 밑에 한 줄 요약 (최대 압축, | 구분)',
+      '상세 표: #/시각/프로젝트(+URL)/페이지(+URL)/작업/내용',
+      '시각은 git 커밋 시간 활용 (HH:MM)',
+    ],
   },
   {
     id: 'cr-t', category: '단축어', title: '"t숫자" 입력', level: '선택',
-    rules: ['~/_task_all.md에 해당 세션 작업 추가 (개별 파일 금지, 모두 _task.md 1개에 통합)'],
+    rules: ['~/_task_all.md에 해당 세션 작업 추가 (개별 파일 금지, 모두 _task_all.md 1개에 통합)'],
   },
   {
     id: 'cr-tt', category: '단축어', title: '"tt" 입력', level: '선택',
