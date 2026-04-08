@@ -4,13 +4,13 @@ let s3;
 
 function getS3Client() {
   if (!s3) {
-    s3 = new S3Client({
-      region: process.env.AWS_REGION || 'ap-northeast-2',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
-    });
+    // IAM 역할 자동 인증 (EC2 인스턴스 프로파일)
+    // .env에 키가 있으면 그걸 사용, 없으면 IAM 역할 자동
+    const opts = { region: process.env.AWS_REGION || 'ap-northeast-2' };
+    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+      opts.credentials = { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY };
+    }
+    s3 = new S3Client(opts);
   }
   return s3;
 }
@@ -27,8 +27,8 @@ async function uploadToS3(fileBuffer, key, contentType) {
   const client = getS3Client();
   const bucket = getBucket();
 
-  if (!bucket || !process.env.AWS_ACCESS_KEY_ID) {
-    console.warn('S3 not configured, skipping upload for:', key);
+  if (!bucket) {
+    console.warn('S3 bucket not configured, skipping upload for:', key);
     return null;
   }
 
