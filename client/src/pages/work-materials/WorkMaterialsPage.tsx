@@ -267,10 +267,10 @@ export default function WorkMaterialsPage() {
           return (
           <div key={row.material_id}>
             <div onClick={()=>setExpandedIds(prev=>{const next=new Set(prev);if(next.has(row.material_id))next.delete(row.material_id);else next.add(row.material_id);return next;})} style={{display:'grid',gridTemplateColumns:'60px 60px 60px 140px 1fr 70px 100px 50px 64px 56px',padding:'5px 10px',borderBottom:'1px solid #f1f5f9',cursor:'pointer',alignItems:'center',background:isOpen?'#F8FAFC':'#fff',transition:'background 0.15s',gap:4}} onMouseEnter={e=>{if(!isOpen)e.currentTarget.style.background='#fafbfd'}} onMouseLeave={e=>{if(!isOpen)e.currentTarget.style.background='#fff'}}>
-              <div style={{display:'flex',gap:2,flexWrap:'wrap'}}>{row.data.department.map((dep,i)=><span key={i} style={{padding:'2px 6px',borderRadius:12,fontSize:10,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{dep}</span>)}</div>
-              <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category2)}</div>
-              <div style={{fontSize:11,color:'#64748b'}}>{arrLabel(row.data.category3)}</div>
-              <div style={{fontSize:13,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:4,overflow:'hidden'}}>
+              <div style={{display:'flex',gap:2,flexWrap:'wrap'}}>{row.data.department.map((dep,i)=><span key={i} style={{padding:'1px 5px',borderRadius:10,fontSize:9,fontWeight:500,background:'#EFF6FF',color:'#3B82F6'}}>{dep}</span>)}</div>
+              <div style={{fontSize:10,color:'#64748b'}}>{arrLabel(row.data.category2)}</div>
+              <div style={{fontSize:10,color:'#64748b'}}>{arrLabel(row.data.category3)}</div>
+              <div style={{fontSize:12,fontWeight:500,color:'#1e293b',display:'flex',alignItems:'center',gap:3,overflow:'hidden'}}>
                 <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.data.title}</span>
                 {isOpen?<ChevronUp size={13} color="#94a3b8" style={{flexShrink:0}}/>:<ChevronDown size={13} color="#94a3b8" style={{flexShrink:0}}/>}
               </div>
@@ -339,7 +339,7 @@ export default function WorkMaterialsPage() {
           );
         })}
       </div>
-      <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{anyFilterActive?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
+      <div style={{marginTop:6,fontSize:11,color:'#94a3b8'}}>총 {filtered.length}건{anyFilterActive?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
 
       {showForm&&<MaterialForm editData={editingId?rows.find(r=>r.material_id===editingId):undefined} onClose={()=>{setShowForm(false);setEditingId(null);}} onSaved={()=>{setShowForm(false);setEditingId(null);fetchData();}} custom={custom} updateCustom={updateCustom}/>}
     </>)}
