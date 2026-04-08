@@ -1,6 +1,6 @@
 /* 원본: hutechc_hompage_real/app/translate/translator/requests/page.tsx */
 import { useState } from 'react';
-import { useTranslator, type WorkingRequest } from '../../../lib/translatorContext';
+import { TranslatorProvider, useTranslator, type WorkingRequest } from '../../../lib/translatorContext';
 
 type RequestStatus = '신청대기' | '최종대기' | '진행중' | '완료' | '거절됨';
 
@@ -76,7 +76,7 @@ const mockRequests: TranslationRequest[] = [
   },
 ];
 
-export default function RequestsPage() {
+function RequestsPageInner() {
   const [requests, setRequests] = useState<TranslationRequest[]>(mockRequests);
   const [filterStatus, setFilterStatus] = useState<RequestStatus | '전체'>('신청대기');
   const { addWorkingRequest } = useTranslator();
@@ -293,4 +293,8 @@ export default function RequestsPage() {
       </div>
     </div>
   );
+}
+
+export default function RequestsPage() {
+  return <TranslatorProvider><RequestsPageInner /></TranslatorProvider>;
 }

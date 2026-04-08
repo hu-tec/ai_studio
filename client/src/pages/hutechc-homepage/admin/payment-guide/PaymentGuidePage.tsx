@@ -1,7 +1,7 @@
 /* 원본: hutechc_hompage_real/app/(client-layout)/admin/payment-guide/page.tsx */
 import { useNavigate } from 'react-router';
-import { usePrice } from '../../lib/priceContext';
-export default function PaymentGuidePage() {
+import { PriceProvider, usePrice } from '../../lib/priceContext';
+function PaymentGuidePageInner() {
   const navigate = useNavigate();
   const { prices } = usePrice();
 
@@ -506,4 +506,8 @@ export default function PaymentGuidePage() {
       </main>
     </div>
   );
+}
+
+export default function PaymentGuidePage() {
+  return <PriceProvider><PaymentGuidePageInner /></PriceProvider>;
 }

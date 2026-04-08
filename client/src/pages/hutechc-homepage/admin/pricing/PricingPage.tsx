@@ -1,6 +1,6 @@
 /* 원본: hutechc_hompage_real/app/(client-layout)/admin/pricing/page.tsx */
 import { Link } from 'react-router';
-import { usePrice, type PriceSettings } from '../../lib/priceContext';
+import { PriceProvider, usePrice, type PriceSettings } from '../../lib/priceContext';
 import { useLanguageConfig, type LanguageTier } from '../../lib/languageConfig';
 import { useEffect, useRef, useState } from 'react';
 
@@ -68,7 +68,7 @@ const EXPERT_REVIEW_ITEMS: { key: string; label: string }[] = [
   { key: 'expert_kakao', label: '7. 카톡' },
 ];
 
-export default function PricingPage() {
+function PricingPageInner() {
   const { prices, updatePrices } = usePrice();
   const {
     tiers,
@@ -2596,4 +2596,8 @@ export default function PricingPage() {
       </main>
     </div>
   );
+}
+
+export default function PricingPage() {
+  return <PriceProvider><PricingPageInner /></PriceProvider>;
 }

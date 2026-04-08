@@ -98,9 +98,9 @@ export default function FeedView(props: FeedViewProps) {
         <button onClick={() => setViewMode('table')} style={{ padding: '3px 6px', borderRadius: 4, border: 'none', background: viewMode === 'table' ? '#EFF6FF' : 'transparent', color: viewMode === 'table' ? '#3B82F6' : '#94a3b8', cursor: 'pointer' }}><List size={12} /></button>
         <button onClick={() => setViewMode('grid')} style={{ padding: '3px 6px', borderRadius: 4, border: 'none', background: viewMode === 'grid' ? '#EFF6FF' : 'transparent', color: viewMode === 'grid' ? '#3B82F6' : '#94a3b8', cursor: 'pointer' }}><LayoutGrid size={12} /></button>
         <span style={{ fontSize: 10, color: '#94a3b8' }}>{sorted.length}건</span>
-        {diskInfo && (() => { const pct = Math.round(diskInfo.used / diskInfo.total * 100); const gb = (b: number) => (b / 1073741824).toFixed(1); return (
+        {diskInfo && (() => { const pct = Math.round(diskInfo.used / diskInfo.total * 100); const gb = (b: number) => (b / 1073741824).toFixed(1); const mb = (b: number) => (b / 1048576).toFixed(1); return (
           <span style={{ fontSize: 9, color: pct > 90 ? '#EF4444' : pct > 70 ? '#F59E0B' : '#94a3b8', display: 'flex', alignItems: 'center', gap: 3 }}>
-            S3:{(diskInfo.uploadsSize / 1048576).toFixed(0)}MB DB:{(diskInfo.dbSize / 1048576).toFixed(1)}MB 디스크:{gb(diskInfo.used)}/{gb(diskInfo.total)}GB
+            S3:{diskInfo.s3Count ?? '?'}개/{mb(diskInfo.s3Size || 0)}MB DB:{mb(diskInfo.dbSize)}MB 디스크:{gb(diskInfo.used)}/{gb(diskInfo.total)}GB
           </span>);
         })()}
         <button onClick={() => { setEditingId(null); setShowForm(true); }}

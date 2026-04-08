@@ -1,1 +1,0 @@
-import{r}from"./index-BQKpUHO0.js";const o=r.createContext(void 0);function n(){const t=r.useContext(o);if(!t)throw new Error("useTranslator must be used within TranslatorProvider");return t}export{n as u};

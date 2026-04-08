@@ -1,9 +1,9 @@
 /* 원본: hutechc_hompage_real/app/translate/translator/working/page.tsx */
-import { useTranslator, type WorkingRequest } from '../../../lib/translatorContext';
+import { TranslatorProvider, useTranslator, type WorkingRequest } from '../../../lib/translatorContext';
 
 type UrgencyTier = 'normal' | 'urgent1' | 'urgent2'; // normal: 일반(5일+), urgent1: 긴급1(3일), urgent2: 긴급2(1일)
 
-export default function WorkingPage() {
+function WorkingPageInner() {
   const { workingRequests, removeWorkingRequest } = useTranslator();
   const handleSubmit = (id: string) => {
     removeWorkingRequest(id);
@@ -190,4 +190,8 @@ export default function WorkingPage() {
       </div>
     </div>
   );
+}
+
+export default function WorkingPage() {
+  return <TranslatorProvider><WorkingPageInner /></TranslatorProvider>;
 }

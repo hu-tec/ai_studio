@@ -26,10 +26,19 @@ export default function SystemSection() {
               </div>
               <span style={{ fontSize: 10, color: '#475569' }}>{gb(disk.used)}/{gb(disk.total)}GB ({pct}%)</span>
             </div>
-            <div style={{ display: 'flex', gap: 12, fontSize: 10, color: '#64748b' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Upload size={10} color="#F59E0B" />업로드: {mb(disk.uploadsSize)}MB</span>
+            <div style={{ display: 'flex', gap: 12, fontSize: 10, color: '#64748b', flexWrap: 'wrap' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Database size={10} color="#8B5CF6" />DB: {mb(disk.dbSize)}MB</span>
               <span>여유: {gb(disk.available)}GB</span>
+            </div>
+            {/* S3 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+              <Upload size={14} color="#F59E0B" />
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#475569' }}>S3 버킷 (work-studio-uploads)</div>
+                <div style={{ fontSize: 10, color: '#64748b' }}>
+                  {disk.s3Count != null ? `${disk.s3Count}개 파일 · ${mb(disk.s3Size || 0)}MB` : '정보 없음'}
+                </div>
+              </div>
             </div>
           </div>
         );

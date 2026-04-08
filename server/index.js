@@ -41,7 +41,7 @@ app.use('/api/work-hub', createGenericRouter('work_hub', 'post_id'));
 app.use('/api/work-hub-comments', createGenericRouter('work_hub_comments', 'comment_id'));
 
 // 서버 디스크 용량 API
-app.get('/api/disk-usage', (req, res) => {
+app.get('/api/disk-usage', async (req, res) => {
   const { execSync } = require('child_process');
   try {
     // df: 전체 디스크
@@ -66,7 +66,16 @@ app.get('/api/disk-usage', (req, res) => {
       if (fs.existsSync(dbPath)) dbSize = fs.statSync(dbPath).size;
     } catch {}
 
-    res.json({ total, used, available, uploadsSize, dbSize });
+    // S3 버킷 사용량
+    let s3Size = 0, s3Count = 0;
+    try {
+      const { listAllS3Objects } = require('./utils/s3');
+      const objs = await listAllS3Objects();
+      s3Count = objs.length;
+      s3Size = objs.reduce((sum, o) => sum + (o.size || 0), 0);
+    } catch {}
+
+    res.json({ total, used, available, uploadsSize, dbSize, s3Size, s3Count });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
