@@ -101,6 +101,7 @@ export interface FranklinTask {
   children?: FranklinTask[]; // 서브태스크
   parentId?: string;        // 부모 태스크 ID
   period?: MandalartPeriod; // 일간/주간/월간
+  queued?: boolean;         // 대기함에 명시적으로 넣은 태스크
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';

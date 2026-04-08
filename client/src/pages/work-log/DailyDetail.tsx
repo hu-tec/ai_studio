@@ -582,13 +582,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           );
         })()}
 
-        {/* ⑤ 대기함 — 시간 미배정 업무, 타임테이블에서 드래그하여 배정 해제 가능 */}
+        {/* ⑤ 대기함 — 타임테이블에서 빼낸 업무만 표시 */}
         {(() => {
           const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
-          const queued = allFlat.filter(t => !t.startTime && !t.timeSlotId);
-          return (
+          const queued = allFlat.filter(t => t.queued);
+          if (queued.length === 0) return (
             <div
-              className={`border border-dashed rounded-lg p-2 transition-colors ${queued.length > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200 bg-slate-50/30'}`}
+              className="border border-dashed border-slate-200 rounded-lg p-1.5 bg-slate-50/20 transition-colors"
               onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
               onDragLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = ''; }}
               onDrop={e => {
@@ -597,45 +597,63 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 e.currentTarget.style.background = '';
                 const droppedId = e.dataTransfer.getData('text/plain');
                 if (!droppedId) return;
-                // 배정 해제: startTime/endTime/timeSlotId 제거
-                setFranklinTasks(prev => prev.map(t => {
-                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined };
-                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined } : c) };
-                  return t;
-                }));
-                // 슬롯 제목도 정리
                 const allF = franklinTasks.flatMap(ft => [ft, ...(ft.children || [])]);
                 const task = allF.find(ft => ft.id === droppedId);
                 if (task?.timeSlotId) {
                   const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
                   if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
                 }
+                setFranklinTasks(prev => prev.map(t => {
+                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
+                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
+                  return t;
+                }));
               }}
             >
-              <div className="text-[10px] font-bold text-amber-700 mb-1">
-                대기함 ({queued.length}개) {queued.length > 0 ? '— 드래그하여 배정' : '— 타임테이블에서 여기로 드래그하여 해제'}
+              <div className="text-[9px] text-slate-400 italic text-center py-0.5">대기함 — 타임테이블에서 여기로 드래그하여 해제</div>
+            </div>
+          );
+          return (
+            <div
+              className="border border-dashed border-amber-300 rounded-lg p-2 bg-amber-50/30 transition-colors"
+              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
+              onDragLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = ''; }}
+              onDrop={e => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = '';
+                e.currentTarget.style.background = '';
+                const droppedId = e.dataTransfer.getData('text/plain');
+                if (!droppedId) return;
+                const allF = franklinTasks.flatMap(ft => [ft, ...(ft.children || [])]);
+                const task = allF.find(ft => ft.id === droppedId);
+                if (task?.timeSlotId) {
+                  const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
+                  if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
+                }
+                setFranklinTasks(prev => prev.map(t => {
+                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
+                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
+                  return t;
+                }));
+              }}
+            >
+              <div className="text-[10px] font-bold text-amber-700 mb-1">대기함 ({queued.length}개)</div>
+              <div className="grid grid-cols-4 gap-1">
+                {queued.map(t => {
+                  const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
+                  const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
+                  return (
+                    <div key={t.id} draggable
+                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
+                      className="flex items-center gap-1 px-1.5 py-1 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
+                      style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
+                      <span style={{ color: stCfg.color, fontSize: 9 }}>{stCfg.icon}</span>
+                      <span className="font-bold shrink-0" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
+                      <span className="truncate text-[9px]">{t.task}</span>
+                    </div>
+                  );
+                })}
               </div>
-              {queued.length > 0 ? (
-                <div className="flex flex-col gap-1">
-                  {queued.map(t => {
-                    const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
-                    const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
-                    return (
-                      <div key={t.id} draggable
-                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
-                        className="flex items-center gap-1.5 px-2 py-1.5 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
-                        style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
-                        <span style={{ color: stCfg.color, fontSize: 10 }}>{stCfg.icon}</span>
-                        <span className="font-bold shrink-0" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
-                        <span className="truncate">{t.task}</span>
-                        {t.parentId && <span className="text-[8px] text-slate-400 shrink-0">서브</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-[9px] text-slate-400 italic py-1">모든 업무가 배정됨</div>
-              )}
             </div>
           );
         })()}
@@ -710,8 +728,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                         // 태스크 시간만 설정 — top-level이든 children이든 업데이트
                         const tid = task.id;
                         setFranklinTasks(prev => prev.map(t => {
-                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id } : c) };
+                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
                         }));
                       } else {
@@ -771,8 +789,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       if (task) {
                         const tid = task.id;
                         setFranklinTasks(prev => prev.map(t => {
-                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id } : c) };
+                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
                         }));
                         updateSlot(index, 'title', task.task);

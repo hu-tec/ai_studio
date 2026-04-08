@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-  Plus, GripVertical, X, Pencil, Check,
+  Plus, GripVertical,
   BarChart3, LayoutDashboard, FileInput, Home,
 } from 'lucide-react';
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
@@ -111,8 +111,6 @@ function GroupSection({
   toggleGroupCollapse: (groupId: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(group.title);
   const isGroupCollapsed = collapsedGroups.has(group.id);
 
   // 그룹 드래그
@@ -142,11 +140,6 @@ function GroupSection({
 
   drag(drop(ref));
 
-  const handleRename = () => {
-    if (editTitle.trim()) onRenameGroup(group.id, editTitle.trim());
-    setEditing(false);
-  };
-
   return (
     <div
       ref={ref}
@@ -162,53 +155,24 @@ function GroupSection({
       {/* 그룹 헤더 */}
       {!collapsed && (
         <div
+          onClick={() => toggleGroupCollapse(group.id)}
           style={{
             display: 'flex', alignItems: 'center', gap: 4,
-            padding: '4px 8px', cursor: 'grab',
+            padding: '4px 8px', cursor: 'pointer',
           }}
         >
           <GripVertical size={11} style={{ color: '#cbd5e1', flexShrink: 0 }} />
-          {editing ? (
-            <>
-              <input
-                value={editTitle}
-                onChange={e => setEditTitle(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleRename()}
-                autoFocus
-                style={{
-                  flex: 1, fontSize: 10, fontWeight: 600, border: '1px solid #93c5fd',
-                  borderRadius: 4, padding: '2px 4px', outline: 'none',
-                  background: '#f8fafc',
-                }}
-              />
-              <button onClick={handleRename} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>
-                <Check size={12} color="#16a34a" />
-              </button>
-            </>
-          ) : (
-            <>
-              <span
-                onClick={() => toggleGroupCollapse(group.id)}
-                style={{
-                  flex: 1, fontSize: 10, fontWeight: 600, color: '#64748b',
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                  cursor: 'pointer', userSelect: 'none',
-                }}
-              >
-                {group.title}
-                <span style={{ fontSize: 9, color: '#94a3b8', marginLeft: 4 }}>({group.items.length})</span>
-              </span>
-              <button onClick={() => toggleGroupCollapse(group.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>
-                {isGroupCollapsed ? <ChevronDown size={12} color="#94a3b8" /> : <ChevronUp size={12} color="#94a3b8" />}
-              </button>
-              <button onClick={() => { setEditTitle(group.title); setEditing(true); }} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>
-                <Pencil size={10} color="#94a3b8" />
-              </button>
-              <button onClick={() => onDeleteGroup(group.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>
-                <X size={10} color="#94a3b8" />
-              </button>
-            </>
-          )}
+          <span
+            style={{
+              flex: 1, fontSize: 10, fontWeight: 600, color: '#64748b',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+              userSelect: 'none',
+            }}
+          >
+            {group.title}
+            <span style={{ fontSize: 9, color: '#94a3b8', marginLeft: 4 }}>({group.items.length})</span>
+          </span>
+          {isGroupCollapsed ? <ChevronDown size={12} color="#94a3b8" /> : <ChevronUp size={12} color="#94a3b8" />}
         </div>
       )}
 
