@@ -1,7 +1,7 @@
 /* 원본: hutechc_hompage_real/app/(client-layout)/admin/pricing/page.tsx */
 import { Link } from 'react-router';
 import { PriceProvider, usePrice, type PriceSettings } from '../../lib/priceContext';
-import { useLanguageConfig, type LanguageTier } from '../../lib/languageConfig';
+import { LanguageConfigProvider, useLanguageConfig, type LanguageTier } from '../../lib/languageConfig';
 import { useEffect, useRef, useState } from 'react';
 
 const tierLabelFallback = (tier: LanguageTier) => tier;
@@ -2599,5 +2599,5 @@ function PricingPageInner() {
 }
 
 export default function PricingPage() {
-  return <PriceProvider><PricingPageInner /></PriceProvider>;
+  return <PriceProvider><LanguageConfigProvider><PricingPageInner /></LanguageConfigProvider></PriceProvider>;
 }

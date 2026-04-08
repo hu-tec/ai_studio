@@ -1,6 +1,6 @@
 /* 원본: hutechc_hompage_real/app/translate/translator/settings/page.tsx */
 import { useState } from 'react';
-import { useLanguageConfig } from '../../../lib/languageConfig';
+import { LanguageConfigProvider, useLanguageConfig } from '../../../lib/languageConfig';
 
 interface RequestSettings {
   autoMatch: boolean;
@@ -20,7 +20,7 @@ const CATEGORIES = [
   { id: 'general', label: '일반' },
 ];
 
-export default function SettingsPage() {
+function SettingsPageInner() {
   const { languages } = useLanguageConfig();
   const enabledLanguages = languages.filter((l) => l.enabled);
 
@@ -400,4 +400,8 @@ export default function SettingsPage() {
       </div>
     </div>
   );
+}
+
+export default function SettingsPage() {
+  return <LanguageConfigProvider><SettingsPageInner /></LanguageConfigProvider>;
 }
