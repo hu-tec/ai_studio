@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExternalLink, ChevronDown, ChevronUp, Search, User } from 'lucide-react';
-import { STAGES, STATUSES, DUMMY_ITEMS, statusOf, POST_TYPE_STYLES, type PipelineStage, type ItemStatus, type PostType, type PipelineItem } from './pipeline-data';
+import { PIPELINES, STATUSES, DUMMY_ITEMS, statusOf, POST_TYPE_STYLES, type ItemStatus, type PostType, type PipelineItem } from './pipeline-data';
 
 /* ══════════════════════════════════════════════════════════════
    Status Table — 빽빽한 현황표
@@ -12,7 +12,7 @@ interface Props { filterType?: string; activePath?: string[]; }
 export default function StatusTable({ filterType, activePath = [] }: Props) {
   const [items] = useState<PipelineItem[]>(DUMMY_ITEMS);
   const [searchText, setSearchText] = useState('');
-  const [filterStage, setFilterStage] = useState<PipelineStage[]>([]);
+  const [filterStage, setFilterStage] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<ItemStatus[]>([]);
   const [filterPostType, setFilterPostType] = useState<PostType[]>([]);
   const [sortKey, setSortKey] = useState<'stage'|'type'|'status'|'title'|'date'|'assignee'>('stage');
@@ -28,18 +28,18 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
     let result = [...items];
     // sidebar type filter
     if (filterType && filterType !== '전체') result = result.filter(i => i.type === filterType);
-    if (filterStage.length) result = result.filter(i => filterStage.includes(i.stage));
+    if (filterStage.length) result = result.filter(i => filterStage.includes(i.pipelineId));
     if (filterStatus.length) result = result.filter(i => filterStatus.includes(i.status));
     if (filterPostType.length) result = result.filter(i => filterPostType.includes(i.type));
     if (searchText) {
       const s = searchText.toLowerCase();
       result = result.filter(i => i.title.toLowerCase().includes(s) || i.sub1.toLowerCase().includes(s) || (i.sub2||'').toLowerCase().includes(s) || (i.assignee||'').toLowerCase().includes(s) || (i.note||'').toLowerCase().includes(s));
     }
-    const stageOrder = STAGES.map(s => s.key);
+    const stageOrder = PIPELINES.map(s => s.id);
     const statusOrder = STATUSES.map(s => s.key);
     result.sort((a, b) => {
       let cmp = 0;
-      if (sortKey === 'stage') cmp = stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage);
+      if (sortKey === 'stage') cmp = stageOrder.indexOf(a.pipelineId) - stageOrder.indexOf(b.pipelineId);
       else if (sortKey === 'status') cmp = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
       else if (sortKey === 'type') cmp = a.type.localeCompare(b.type);
       else if (sortKey === 'title') cmp = a.title.localeCompare(b.title);
@@ -70,7 +70,7 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
         {/* 3줄 필터 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 40 }}>파이프라인</span>
-          {STAGES.map(s => { const a = filterStage.includes(s.key); return <button key={s.key} onClick={() => setFilterStage(prev => a ? prev.filter(x=>x!==s.key) : [...prev,s.key])} style={{ padding: '2px 6px', borderRadius: 8, border: '1px solid', borderColor: a ? s.color : '#e2e8f0', background: a ? s.bg : '#fff', color: a ? s.color : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: a ? 600 : 400 }}>{s.label}</button>; })}
+          {PIPELINES.map(s => { const a = filterStage.includes(s.id); return <button key={s.id} onClick={() => setFilterStage(prev => a ? prev.filter(x=>x!==s.id) : [...prev,s.id])} style={{ padding: '2px 6px', borderRadius: 8, border: '1px solid', borderColor: a ? s.color : '#e2e8f0', background: a ? s.bg : '#fff', color: a ? s.color : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: a ? 600 : 400 }}>{s.name}</button>; })}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 40 }}>유형</span>
@@ -104,7 +104,7 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
               <tr><td colSpan={10} style={{ padding: 20, textAlign: 'center', color: '#94a3b8', fontSize: 11 }}>해당 항목 없음</td></tr>
             ) : filtered.map((item, idx) => {
               const st = statusOf(item.status);
-              const stg = STAGES.find(s => s.key === item.stage)!;
+              const stg = PIPELINES.find(s => s.id === item.pipelineId) || PIPELINES[0];
               const pt = POST_TYPE_STYLES[item.type];
               const isOpen = expandedIds.has(item.id);
               return (
@@ -112,7 +112,7 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
                   onMouseEnter={e => { if (!isOpen) (e.currentTarget as HTMLElement).style.background = '#fafbfd'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; }}>
                   <td style={{ padding: '3px 6px', color: '#94a3b8', fontSize: 9 }}>{idx + 1}</td>
-                  <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 5px', borderRadius: 6, fontSize: 9, background: stg.bg, color: stg.color, fontWeight: 600, lineHeight: '15px', display: 'inline-block' }}>{stg.label}</span></td>
+                  <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 5px', borderRadius: 6, fontSize: 9, background: stg.bg, color: stg.color, fontWeight: 600, lineHeight: '15px', display: 'inline-block' }}>{stg.name}</span></td>
                   <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 4px', borderRadius: 4, fontSize: 8, background: pt.bg, color: pt.color, fontWeight: 700, lineHeight: '14px', display: 'inline-block' }}>{item.type}</span></td>
                   <td style={{ padding: '3px 6px', fontSize: 10, color: '#475569', fontWeight: 500 }}>{item.sub1}</td>
                   <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{item.sub2 || '—'}</td>
@@ -135,7 +135,7 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
 
       {/* 하단 요약 */}
       <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 10 }}>
-        {STAGES.map(s => { const c = filtered.filter(i => i.stage === s.key).length; return c ? <span key={s.key} style={{ color: s.color, fontWeight: 600 }}>{s.label}:{c}</span> : null; })}
+        {PIPELINES.map(s => { const c = filtered.filter(i => i.pipelineId === s.id).length; return c ? <span key={s.id} style={{ color: s.color, fontWeight: 600 }}>{s.name}:{c}</span> : null; })}
         <span style={{ color: '#e2e8f0' }}>|</span>
         {STATUSES.map(s => { const c = filtered.filter(i => i.status === s.key).length; return c ? <span key={s.key} style={{ color: s.color, fontWeight: 600 }}>{s.key}:{c}</span> : null; })}
       </div>
