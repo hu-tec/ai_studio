@@ -36,7 +36,8 @@ export const ALL_NAV_ITEMS: NavItem[] = [
 
   // ─── B: 채용/인사 ───
   { code: 'B0',   to: '/recruitment',         icon: ClipboardCheck, label: '채용관리(통합)', consolidated: true },
-  { code: 'B2',   to: '/attendance',          icon: Clock,          label: '출퇴근 관리' },
+  { code: 'B2',   to: '/attendance',          icon: Clock,          label: '출퇴근 관리(A)' },
+  { code: 'B2-1', to: '/attendance-b',        icon: Clock,          label: '출퇴근 관리(B)' },
 
   // ─── C: 관리/운영 ───
   { code: 'C1',   to: '/meetings',        icon: Calendar,     label: '미팅 관리' },

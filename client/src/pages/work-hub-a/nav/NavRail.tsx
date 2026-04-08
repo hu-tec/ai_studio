@@ -1,14 +1,15 @@
-import { ClipboardList, MessageCircle, Table2, FolderOpen, ExternalLink, HardDrive } from 'lucide-react';
+import { ClipboardList, MessageCircle, Table2, FolderOpen, ExternalLink, HardDrive, BarChart3 } from 'lucide-react';
 import { PIPELINES } from '../data/pipeline-data';
 import type { SectionKey } from '../types';
 
 const SECTIONS: { key: SectionKey; icon: typeof ClipboardList; label: string }[] = [
-  { key: 'board',   icon: ClipboardList,  label: '업무보드' },
-  { key: 'feed',    icon: MessageCircle,   label: '피드' },
-  { key: 'status',  icon: Table2,          label: '현황표' },
-  { key: 'archive', icon: FolderOpen,      label: '자료실' },
-  { key: 'links',   icon: ExternalLink,    label: '바로가기' },
-  { key: 'system',  icon: HardDrive,       label: '시스템' },
+  { key: 'board',    icon: ClipboardList,  label: '업무보드' },
+  { key: 'feed',     icon: MessageCircle,   label: '피드' },
+  { key: 'pipeline', icon: BarChart3,       label: '파이프라인' },
+  { key: 'status',   icon: Table2,          label: '현황표' },
+  { key: 'archive',  icon: FolderOpen,      label: '자료실' },
+  { key: 'links',    icon: ExternalLink,    label: '바로가기' },
+  { key: 'system',   icon: HardDrive,       label: '시스템' },
 ];
 
 interface Props {

@@ -44,6 +44,7 @@ export const router = createBrowserRouter(
         { path: 'interview', element: lazyPage(() => import('./pages/interview/InterviewForm')) },
         { path: 'interview/dashboard', element: lazyPage(() => import('./pages/interview/Dashboard')) },
         { path: 'attendance', element: lazyPage(() => import('./pages/attendance/AttendancePage')) },
+        { path: 'attendance-b', element: lazyPage(() => import('./pages/attendance/AttendancePageB')) },
         { path: 'meetings', element: lazyPage(() => import('./pages/meetings/MeetingsPage')) },
         { path: 'outbound-calls', element: lazyPage(() => import('./pages/outbound-calls/OutboundCallsPage')) },
         { path: 'photo-dashboard', element: lazyPage(() => import('./pages/photo-dashboard/PhotoDashboardPage')) },

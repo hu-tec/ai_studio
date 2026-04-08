@@ -51,4 +51,4 @@ export interface HubComment {
   created_at: string;
 }
 
-export type SectionKey = 'board' | 'feed' | 'status' | 'archive' | 'links' | 'system';
+export type SectionKey = 'board' | 'feed' | 'pipeline' | 'status' | 'archive' | 'links' | 'system';

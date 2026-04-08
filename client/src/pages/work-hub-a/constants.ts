@@ -31,6 +31,7 @@ export const SERVICE_URLS: Record<string, string> = {
 };
 
 export const DEF_POS = ['대표','임원','팀장','강사','신입','알바','외부'];
+export const STAFF_NAMES = ['민혁','가연','지예','수연','준걸','시온','박미진'];
 
 export const POST_TYPE_STYLES: Record<PostType, { color: string; bg: string; icon: string }> = {
   '공지':     { color:'#DC2626', bg:'#FEF2F2', icon:'📢' },

@@ -114,6 +114,7 @@ const SERVICE_URLS: Record<string, string> = {
 
 const DEF_LARGE = Object.keys(CATEGORY_TREE);
 const DEF_POS = ['대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
+const STAFF_NAMES = ['민혁','가연','지예','수연','준걸','시온','박미진'];
 
 const POST_TYPES: { type: PostType; icon: typeof Megaphone; color: string; bg: string }[] = [
   { type: '공지',     icon: Megaphone,     color: '#DC2626', bg: '#FEF2F2' },

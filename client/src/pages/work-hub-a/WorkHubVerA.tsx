@@ -8,8 +8,9 @@ import TaskBoard from './sections/TaskBoard';
 import LinksSection from './sections/LinksSection';
 import SystemSection from './sections/SystemSection';
 import ArchiveSection from './sections/ArchiveSection';
+import PipelineSection from './sections/PipelineSection';
 import type { HubPost } from './types';
-import { genId, CATEGORY_TREE, DEF_LARGE, DEF_POS, POST_TYPE_STYLES, TASK_STATUSES, TASK_STATUS_STYLES } from './constants';
+import { genId, CATEGORY_TREE, DEF_LARGE, DEF_POS, POST_TYPE_STYLES, TASK_STATUSES, TASK_STATUS_STYLES, STAFF_NAMES } from './constants';
 
 // lazy load heavier sections
 const FeedSection = lazy(() => import('./sections/FeedSection'));
@@ -95,12 +96,23 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: { editData?: HubP
             </div>}
           </div>
 
-          {/* 입력 필드 */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="작성자*" style={{ width: 70, padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
-            <input value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="담당자" style={{ width: 70, padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목*" style={{ flex: 1, padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
+          {/* 작성자 + 담당자 — 칩 선택 */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>작성자*</span>
+              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginTop: 2 }}>
+                {STAFF_NAMES.map(n => <button key={n} type="button" onClick={() => { setAuthor(n); localStorage.setItem('wh-author', n); }} style={{ ...S, borderColor: author === n ? '#3B82F6' : '#e2e8f0', background: author === n ? '#EFF6FF' : '#fff', color: author === n ? '#3B82F6' : '#64748b', fontWeight: author === n ? 600 : 400 }}>{n}</button>)}
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>담당자</span>
+              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginTop: 2 }}>
+                {STAFF_NAMES.map(n => <button key={n} type="button" onClick={() => setAssignee(assignee === n ? '' : n)} style={{ ...S, borderColor: assignee === n ? '#10B981' : '#e2e8f0', background: assignee === n ? '#F0FDF4' : '#fff', color: assignee === n ? '#10B981' : '#64748b', fontWeight: assignee === n ? 600 : 400 }}>{n}</button>)}
+              </div>
+            </div>
           </div>
+          {/* 제목 */}
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목*" style={{ width: '100%', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
           <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="내용..." rows={3} style={{ width: '100%', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none', resize: 'vertical', fontFamily: 'inherit' }} />
           <input value={note} onChange={e => setNote(e.target.value)} placeholder="비고" style={{ width: '100%', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
         </div>
@@ -188,6 +200,9 @@ export default function WorkHubVerA() {
               getPostComments={getPostComments} fetchData={fetchData}
             />
           </Suspense>
+        )}
+        {filter.activeSection === 'pipeline' && (
+          <PipelineSection filterType={filter.filterType === '전체' ? undefined : filter.filterType} activePath={filter.activePath} activePipeline={filter.activePipeline} />
         )}
         {filter.activeSection === 'status' && (
           <Suspense fallback={<div style={{ padding: 20, color: '#94a3b8', fontSize: 11 }}>로딩...</div>}>
