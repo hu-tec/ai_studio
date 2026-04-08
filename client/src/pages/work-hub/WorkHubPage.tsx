@@ -555,7 +555,7 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
   const [title, setTitle] = useState(editData?.data.title || '');
   const [content, setContent] = useState(editData?.data.content || '');
   const [author, setAuthor] = useState(editData?.data.author || localStorage.getItem('wh-author') || '');
-  const [note, setNote] = useState((editData?.data as any).note || '');
+  const [note, setNote] = useState(editData ? (editData.data as any).note || '' : '');
   const [attachments, setAttachments] = useState<Attachment[]>(editData?.data.attachments || []);
   const [saving, setSaving] = useState(false);
   const [showLink, setShowLink] = useState(false);
