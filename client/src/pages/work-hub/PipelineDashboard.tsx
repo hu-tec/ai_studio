@@ -7,10 +7,11 @@ import { STAGES, STATUSES, DUMMY_ITEMS, statusOf, POST_TYPE_STYLES, type Pipelin
    ══════════════════════════════════════════════════════════════ */
 
 interface Props {
-  filterType?: string; // from sidebar: 공지/업무지시/... or 전체
+  filterType?: string;
+  activePath?: string[]; // 사이드바 폴더 경로
 }
 
-export default function PipelineDashboard({ filterType }: Props) {
+export default function PipelineDashboard({ filterType, activePath = [] }: Props) {
   const [items] = useState<PipelineItem[]>(DUMMY_ITEMS);
   const [expandedStages, setExpandedStages] = useState<Set<PipelineStage>>(new Set(STAGES.map(s => s.key)));
   const [stageFilters, setStageFilters] = useState<Record<string, string[]>>({});
@@ -206,7 +207,9 @@ export default function PipelineDashboard({ filterType }: Props) {
 
       {/* ═══ 바로가기 링크 (ShortcutsPage 통합) ═══ */}
       <div style={{ marginTop: 14 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>바로가기 · 서비스 링크</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
+          바로가기 · 서비스 링크 {activePath.length > 0 && <span style={{ color: '#3B82F6' }}>({activePath.join(' > ')})</span>}
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
           {SHORTCUT_GROUPS.map(g => (
             <div key={g.title} style={{ background: '#fff', borderRadius: 8, border: '1px solid #e2e8f0', overflow: 'hidden' }}>

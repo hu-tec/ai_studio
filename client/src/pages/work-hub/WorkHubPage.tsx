@@ -435,8 +435,8 @@ export default function WorkHubPage() {
         </div>
 
         {/* 대시보드 / 현황표 탭 */}
-        {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard filterType={filterType} /></Suspense>}
-        {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable filterType={filterType} /></Suspense>}
+        {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard filterType={filterType} activePath={activePath} /></Suspense>}
+        {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable filterType={filterType} activePath={activePath} /></Suspense>}
 
         {/* 피드 탭 — 테이블/그리드 + 팝업 */}
         {activeTab === 'feed' && (

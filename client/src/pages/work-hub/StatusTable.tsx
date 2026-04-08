@@ -7,9 +7,9 @@ import { STAGES, STATUSES, DUMMY_ITEMS, statusOf, POST_TYPE_STYLES, type Pipelin
    ══════════════════════════════════════════════════════════════ */
 const POST_TYPES: PostType[] = ['공지','업무지시','메모','파일','프로세스','보고'];
 
-interface Props { filterType?: string; }
+interface Props { filterType?: string; activePath?: string[]; }
 
-export default function StatusTable({ filterType }: Props) {
+export default function StatusTable({ filterType, activePath = [] }: Props) {
   const [items] = useState<PipelineItem[]>(DUMMY_ITEMS);
   const [searchText, setSearchText] = useState('');
   const [filterStage, setFilterStage] = useState<PipelineStage[]>([]);
