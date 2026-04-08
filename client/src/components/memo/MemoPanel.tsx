@@ -86,21 +86,40 @@ export function MemoPanel() {
 
   return (
     <>
-      {/* 플로팅 메모 버튼 */}
-      <button
-        data-memo-panel
-        onClick={() => setOpen(true)}
-        className="fixed top-[72px] right-4 z-40 flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-md border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
-        title="페이지 메모"
-      >
-        <StickyNote size={16} />
-        Memo
-        {items.length > 0 && (
-          <span className="ml-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-500 px-1.5 text-[11px] font-semibold text-white">
-            {items.length}
-          </span>
-        )}
-      </button>
+      {/* 플로팅 메모 버튼 — 숨기기/보이기 토글 */}
+      {hidden ? (
+        <button
+          onClick={() => { setHidden(false); localStorage.setItem('memo-btn-hidden', '0'); }}
+          className="fixed top-[72px] right-0 z-40 flex items-center justify-center w-6 h-10 rounded-l-md bg-slate-200/80 text-slate-400 hover:bg-blue-100 hover:text-blue-500 transition-all"
+          title="Memo 버튼 보이기"
+        >
+          <StickyNote size={12} />
+        </button>
+      ) : (
+        <div className="fixed top-[72px] right-4 z-40 flex items-center gap-0">
+          <button
+            onClick={() => { setHidden(true); localStorage.setItem('memo-btn-hidden', '1'); }}
+            className="flex items-center justify-center w-5 h-8 rounded-l-full bg-slate-100 border border-r-0 border-slate-200 text-slate-300 hover:text-slate-500 hover:bg-slate-200 transition-all"
+            title="Memo 버튼 숨기기"
+          >
+            <span style={{ fontSize: 10, lineHeight: 1 }}>&rsaquo;</span>
+          </button>
+          <button
+            data-memo-panel
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-1.5 rounded-r-full bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-md border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
+            title="페이지 메모"
+          >
+            <StickyNote size={16} />
+            Memo
+            {items.length > 0 && (
+              <span className="ml-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-500 px-1.5 text-[11px] font-semibold text-white">
+                {items.length}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Sheet 패널 */}
       <Sheet open={open} onOpenChange={setOpen}>

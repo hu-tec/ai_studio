@@ -3,9 +3,9 @@ import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
   Image as ImageIcon, Send, MessageSquare, Pin, PinOff,
-  Search, File, ExternalLink, Download, ChevronDown, ChevronRight,
+  Search, File, ExternalLink, ChevronDown, ChevronRight,
   Megaphone, FileText, Briefcase, FolderOpen, ClipboardList, BarChart3,
-  Filter, Hash, Paperclip, Clock, User
+  Hash, User
 } from 'lucide-react';
 
 /* ══════════════════════════════════════════════════════════════
@@ -20,9 +20,7 @@ interface Attachment {
 
 interface HubPostData {
   type: PostType;
-  department: string[];   // 대분류
-  category2: string[];    // 중분류
-  category3: string[];    // 소분류
+  path: [string, string?, string?];  // [대분류, 중분류?, 소분류?]  e.g. ['개발','TESOL','DB']
   position: string[];     // 대상 직급
   title: string;
   content: string;
@@ -57,11 +55,28 @@ interface HubComment {
 type PostType = '공지' | '업무지시' | '메모' | '파일' | '프로세스' | '보고';
 
 /* ══════════════════════════════════════════════════════════════
-   Constants — C_시스템3축 분류
+   Constants — C_시스템3축 분류 (바탕화면 폴더 구조 기반)
    ══════════════════════════════════════════════════════════════ */
-const DEF_DEPTS = ['경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
-const DEF_CAT2 = ['규정', '교육', '홍보', '기술', '운영'];
-const DEF_CAT3 = ['급여', '복무', '교안', '브로슈어', '서버', '시스템', '기타'];
+const SITES = ['AI번역_AITe', 'ITT_정통번역', 'TESOL', '고전번역_통독', '대표님페이지', '반도체_조선_방산', '번역_메타트랜스', '윤리', '전문가매칭', '전시회', '프롬프트', '휴텍씨'];
+const DEV_SUB = ['DB', 'UI', '기획', '산출물'];
+
+type TreeNode = Record<string, string[] | Record<string, string[]>>;
+
+/** 3축 트리: 대분류 > 중분류 > 소분류 */
+const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
+  '개발':       Object.fromEntries([...SITES, '공통_플러그인_모듈'].map(s => [s, DEV_SUB])),
+  '회계':       { '거래처원장': [], '부가세': [], '세금계산서': [], '수익': SITES, '연도별_결산': [], '지출': SITES },
+  '마케팅':     Object.fromEntries([...SITES, 'SNS_카드뉴스', '공통_브랜딩'].map(s => [s, []])),
+  '인사':       { '근로계약_서약서': [], '면접자료': [], '신입교육': [], '인수인계': [] },
+  '법무':       { '공정거래_애니릭스': [], '세무조사_구룡': [], '티맥스소송': [], '행정서류': [] },
+  '기획_사업':  { '데이터가치평가': [], '벤처_인증': [], '예비창업패키지': [], '정부제안서': [] },
+  '매뉴얼_규정': { '검토중': [], '아카이브': [], '최신본': [] },
+  '직원별':     { '박가연': [], '박미진': [], '시온': [], '조수연': [], '지예': [], '퇴사자_아카이브': [] },
+  '삭제대기':   {},
+  '미분류_창고': {},
+};
+
+const DEF_LARGE = Object.keys(CATEGORY_TREE);
 const DEF_POS = ['대표', '임원', '팀장', '강사', '신입', '알바', '외부'];
 
 const POST_TYPES: { type: PostType; icon: typeof Megaphone; color: string; bg: string }[] = [
@@ -73,13 +88,7 @@ const POST_TYPES: { type: PostType; icon: typeof Megaphone; color: string; bg: s
   { type: '보고',     icon: BarChart3,      color: '#6366F1', bg: '#EEF2FF' },
 ];
 
-const LS_KEY = 'wh-custom-filters';
 const toArr = (v: unknown): string[] => Array.isArray(v) ? v : typeof v === 'string' && v ? [v] : [];
-
-function loadCustom(): Record<string, string[]> {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
-}
-function saveCustom(c: Record<string, string[]>) { localStorage.setItem(LS_KEY, JSON.stringify(c)); }
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -97,16 +106,18 @@ function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 }
 
-/** 경로 표시: 001 신입 경영_규정_급여 */
-function buildPath(idx: number, post: HubPostData) {
-  const num = String(idx).padStart(3, '0');
-  const pos = post.position.length ? post.position[0] : '—';
-  const cat = [
-    post.department.join('+') || '—',
-    post.category2.length ? post.category2.join('+') : null,
-    post.category3.length ? post.category3.join('+') : null,
-  ].filter(Boolean).join('_');
-  return `${num} ${pos} ${cat}`;
+/** 경로 표시: 001 신입 개발 > TESOL > DB */
+function buildPathLabel(post: HubPostData) {
+  return post.path.filter(Boolean).join(' > ');
+}
+
+/** 포스트가 특정 경로에 속하는지 */
+function matchesPath(post: HubPostData, activePath: string[]) {
+  if (!activePath.length) return true;
+  for (let i = 0; i < activePath.length; i++) {
+    if ((post.path[i] || '') !== activePath[i]) return false;
+  }
+  return true;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -123,20 +134,13 @@ export default function WorkHubPage() {
   const [threadOpen, setThreadOpen] = useState<string|null>(null);
   const [searchText, setSearchText] = useState('');
 
-  // filters
+  // filters — path-based
   const [filterType, setFilterType] = useState<PostType|'전체'>('전체');
-  const [filterDept, setFilterDept] = useState<string[]>([]);
-  const [filterCat2, setFilterCat2] = useState<string[]>([]);
-  const [filterCat3, setFilterCat3] = useState<string[]>([]);
+  const [activePath, setActivePath] = useState<string[]>([]); // e.g. ['개발','TESOL','DB']
   const [filterPos, setFilterPos] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
 
-  // custom
-  const [custom, setCustom] = useState<Record<string,string[]>>(loadCustom);
-  const updateCustom = (key: string, items: string[]) => { const next = {...custom, [key]: items}; setCustom(next); saveCustom(next); };
-
-  // sidebar category tree collapse
-  const [collapsedDepts, setCollapsedDepts] = useState<Set<string>>(new Set());
+  // sidebar tree collapse
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   const fetchData = useCallback(async () => {
     try {
@@ -148,12 +152,20 @@ export default function WorkHubPage() {
 
       const parsed: HubPost[] = (Array.isArray(postsRaw) ? postsRaw : []).map((r: any) => {
         const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+        // legacy migration: department/category2/category3 → path
+        let path = d.path;
+        if (!path && d.department) {
+          const dept = Array.isArray(d.department) ? d.department[0] : d.department;
+          const c2 = Array.isArray(d.category2) ? d.category2[0] : d.category2;
+          const c3 = Array.isArray(d.category3) ? d.category3[0] : d.category3;
+          path = [dept, c2, c3].filter(Boolean);
+        }
         return {
           ...r, data: {
             ...d,
             type: d.type || '메모',
-            department: toArr(d.department), category2: toArr(d.category2),
-            category3: toArr(d.category3), position: toArr(d.position),
+            path: path || ['미분류_창고'],
+            position: toArr(d.position),
             attachments: d.attachments || [], content: d.content || '',
             author: d.author || '', pinned: !!d.pinned,
             created_at: d.created_at || r.updated_at || '',
@@ -174,18 +186,11 @@ export default function WorkHubPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // derived
-  const mergedDepts = [...DEF_DEPTS, ...(custom['dept']||[])];
-  const mergedCat2 = [...DEF_CAT2, ...(custom['cat2']||[])];
-  const mergedCat3 = [...DEF_CAT3, ...(custom['cat3']||[])];
-  const mergedPos = [...DEF_POS, ...(custom['pos']||[])];
-
+  // filtering
   const filtered = posts.filter(r => {
     const d = r.data;
     if (filterType !== '전체' && d.type !== filterType) return false;
-    if (filterDept.length && !filterDept.some(f => d.department.includes(f))) return false;
-    if (filterCat2.length && !filterCat2.some(f => d.category2.includes(f))) return false;
-    if (filterCat3.length && !filterCat3.some(f => d.category3.includes(f))) return false;
+    if (!matchesPath(d, activePath)) return false;
     if (filterPos.length && !filterPos.some(f => d.position.includes(f))) return false;
     if (searchText) {
       const s = searchText.toLowerCase();
@@ -194,14 +199,16 @@ export default function WorkHubPage() {
     return true;
   });
 
-  // pinned first, then by date desc
   const sorted = [...filtered].sort((a, b) => {
     if (a.data.pinned && !b.data.pinned) return -1;
     if (!a.data.pinned && b.data.pinned) return 1;
     return new Date(b.data.created_at).getTime() - new Date(a.data.created_at).getTime();
   });
 
-  const anyFilterActive = filterType !== '전체' || filterDept.length > 0 || filterCat2.length > 0 || filterCat3.length > 0 || filterPos.length > 0 || !!searchText;
+  const anyFilterActive = filterType !== '전체' || activePath.length > 0 || filterPos.length > 0 || !!searchText;
+
+  // count posts per large category
+  const pathCounts = (prefix: string[]) => posts.filter(p => matchesPath(p.data, prefix)).length;
 
   const handleDelete = async (pid: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
@@ -225,9 +232,7 @@ export default function WorkHubPage() {
     } catch { toast.error('실패'); }
   };
 
-  // sidebar: count by department
-  const deptCounts = new Map<string, number>();
-  posts.forEach(p => p.data.department.forEach(d => deptCounts.set(d, (deptCounts.get(d) || 0) + 1)));
+  const toggleExpand = (key: string) => setExpandedNodes(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n; });
 
   const getPostComments = (pid: string) => comments.filter(c => c.data.post_id === pid).sort((a, b) => new Date(a.data.created_at).getTime() - new Date(b.data.created_at).getTime());
 
@@ -235,55 +240,83 @@ export default function WorkHubPage() {
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
-      {/* ── 좌측: 카테고리 사이드바 ── */}
-      <div style={{ width: 240, flexShrink: 0, borderRight: '1px solid #e2e8f0', background: '#f8fafc', overflow: 'auto', padding: '16px 0' }}>
-        <div style={{ padding: '0 16px', marginBottom: 16 }}>
+      {/* ── 좌측: 폴더 트리 사이드바 ── */}
+      <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid #e2e8f0', background: '#f8fafc', overflow: 'auto', padding: '16px 0' }}>
+        <div style={{ padding: '0 16px', marginBottom: 12 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1e293b', margin: '0 0 12px' }}>업무 총괄</h2>
           {/* 유형별 필터 */}
-          <button onClick={() => setFilterType('전체')}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 10px', borderRadius: 8, border: 'none', background: filterType === '전체' ? '#EFF6FF' : 'transparent', color: filterType === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, fontWeight: filterType === '전체' ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
-            <Hash size={15} /> 전체 <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{posts.length}</span>
+          <button onClick={() => { setFilterType('전체'); setActivePath([]); }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, border: 'none', background: filterType === '전체' && !activePath.length ? '#EFF6FF' : 'transparent', color: filterType === '전체' && !activePath.length ? '#3B82F6' : '#64748b', fontSize: 13, fontWeight: filterType === '전체' && !activePath.length ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
+            <Hash size={14} /> 전체 <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{posts.length}</span>
           </button>
           {POST_TYPES.map(pt => (
-            <button key={pt.type} onClick={() => setFilterType(pt.type)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 10px', borderRadius: 8, border: 'none', background: filterType === pt.type ? pt.bg : 'transparent', color: filterType === pt.type ? pt.color : '#64748b', fontSize: 13, fontWeight: filterType === pt.type ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
-              <pt.icon size={15} /> {pt.type}
+            <button key={pt.type} onClick={() => { setFilterType(pt.type); setActivePath([]); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, border: 'none', background: filterType === pt.type ? pt.bg : 'transparent', color: filterType === pt.type ? pt.color : '#64748b', fontSize: 13, fontWeight: filterType === pt.type ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
+              <pt.icon size={14} /> {pt.type}
               <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{posts.filter(p => p.data.type === pt.type).length}</span>
             </button>
           ))}
         </div>
 
-        {/* 부서별 트리 */}
-        <div style={{ borderTop: '1px solid #e2e8f0', padding: '12px 16px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 0.5 }}>C_시스템3축 분류</div>
-          {mergedDepts.filter(d => deptCounts.has(d)).map(dept => {
-            const isCollapsed = collapsedDepts.has(dept);
-            const count = deptCounts.get(dept) || 0;
-            const isActive = filterDept.includes(dept);
+        {/* 3축 폴더 트리 */}
+        <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 12px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 1, padding: '0 4px' }}>C_시스템3축</div>
+          {DEF_LARGE.map(lg => {
+            const lgKey = lg;
+            const lgActive = activePath[0] === lg;
+            const lgExpanded = expandedNodes.has(lgKey);
+            const mids = CATEGORY_TREE[lg];
+            const midKeys = Object.keys(mids);
+            const cnt = pathCounts([lg]);
             return (
-              <div key={dept}>
-                <button onClick={() => {
-                  setFilterDept(prev => prev.includes(dept) ? prev.filter(x => x !== dept) : [...prev, dept]);
-                }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '6px 8px', borderRadius: 6, border: 'none', background: isActive ? '#EFF6FF' : 'transparent', color: isActive ? '#3B82F6' : '#475569', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
-                  <span onClick={e => { e.stopPropagation(); setCollapsedDepts(prev => { const n = new Set(prev); if (n.has(dept)) n.delete(dept); else n.add(dept); return n; }); }} style={{ display: 'flex', cursor: 'pointer' }}>
-                    {isCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
-                  </span>
-                  <FolderOpen size={13} />
-                  <span style={{ flex: 1 }}>{dept}</span>
-                  <span style={{ fontSize: 10, color: '#94a3b8' }}>{count}</span>
+              <div key={lg}>
+                <button
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '5px 6px', borderRadius: 6, border: 'none', background: lgActive && activePath.length === 1 ? '#EFF6FF' : 'transparent', color: lgActive ? '#3B82F6' : '#475569', fontSize: 13, cursor: 'pointer', textAlign: 'left', fontWeight: lgActive ? 600 : 400 }}
+                  onClick={() => { setActivePath([lg]); setFilterType('전체'); if (!lgExpanded) toggleExpand(lgKey); }}>
+                  {midKeys.length > 0 ? (
+                    <span onClick={e => { e.stopPropagation(); toggleExpand(lgKey); }} style={{ display: 'flex' }}>
+                      {lgExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                    </span>
+                  ) : <span style={{ width: 12 }} />}
+                  <FolderOpen size={13} style={{ flexShrink: 0 }} />
+                  <span style={{ flex: 1 }}>{lg}</span>
+                  {cnt > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>{cnt}</span>}
                 </button>
-                {!isCollapsed && (
-                  <div style={{ paddingLeft: 28 }}>
-                    {mergedCat2.filter(c2 => posts.some(p => p.data.department.includes(dept) && p.data.category2.includes(c2))).map(c2 => (
-                      <button key={c2} onClick={() => { setFilterDept(prev => prev.includes(dept) ? prev : [...prev, dept]); setFilterCat2(prev => prev.includes(c2) ? prev.filter(x => x !== c2) : [...prev, c2]); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '4px 6px', borderRadius: 4, border: 'none', background: filterCat2.includes(c2) ? '#F0FDF4' : 'transparent', color: filterCat2.includes(c2) ? '#22C55E' : '#94a3b8', fontSize: 12, cursor: 'pointer', textAlign: 'left' }}>
-                        <span style={{ width: 4, height: 4, borderRadius: 2, background: '#cbd5e1', flexShrink: 0 }} />
-                        {c2}
+                {lgExpanded && midKeys.map(mid => {
+                  const midKey = `${lg}/${mid}`;
+                  const midActive = activePath[0] === lg && activePath[1] === mid;
+                  const midExpanded = expandedNodes.has(midKey);
+                  const smalls = mids[mid];
+                  const midCnt = pathCounts([lg, mid]);
+                  return (
+                    <div key={mid} style={{ paddingLeft: 16 }}>
+                      <button
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '4px 6px', borderRadius: 5, border: 'none', background: midActive && activePath.length === 2 ? '#F0FDF4' : 'transparent', color: midActive ? '#22C55E' : '#64748b', fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: midActive ? 600 : 400 }}
+                        onClick={() => { setActivePath([lg, mid]); setFilterType('전체'); if (smalls.length && !midExpanded) toggleExpand(midKey); }}>
+                        {smalls.length > 0 ? (
+                          <span onClick={e => { e.stopPropagation(); toggleExpand(midKey); }} style={{ display: 'flex' }}>
+                            {midExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                          </span>
+                        ) : <span style={{ width: 11 }} />}
+                        <span style={{ flex: 1 }}>{mid}</span>
+                        {midCnt > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>{midCnt}</span>}
                       </button>
-                    ))}
-                  </div>
-                )}
+                      {midExpanded && smalls.map(sm => {
+                        const smActive = activePath[0] === lg && activePath[1] === mid && activePath[2] === sm;
+                        const smCnt = pathCounts([lg, mid, sm]);
+                        return (
+                          <button key={sm}
+                            style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '3px 6px 3px 28px', borderRadius: 4, border: 'none', background: smActive ? '#FFFBEB' : 'transparent', color: smActive ? '#F59E0B' : '#94a3b8', fontSize: 11, cursor: 'pointer', textAlign: 'left', fontWeight: smActive ? 600 : 400 }}
+                            onClick={() => { setActivePath([lg, mid, sm]); setFilterType('전체'); }}>
+                            <span style={{ width: 4, height: 4, borderRadius: 2, background: smActive ? '#F59E0B' : '#cbd5e1', flexShrink: 0 }} />
+                            <span style={{ flex: 1 }}>{sm}</span>
+                            {smCnt > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>{smCnt}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
             );
           })}
@@ -293,39 +326,41 @@ export default function WorkHubPage() {
       {/* ── 중앙: 피드 영역 ── */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
         {/* 상단 바 */}
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
-            <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
-            <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자 검색..."
-              style={{ width: '100%', padding: '8px 12px 8px 34px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} />
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: activePath.length ? 8 : 0 }}>
+            {/* 현재 경로 브레드크럼 */}
+            {activePath.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                <button onClick={() => setActivePath([])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3B82F6', fontSize: 13 }}>전체</button>
+                {activePath.map((seg, i) => (
+                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <ChevronRight size={12} color="#94a3b8" />
+                    <button onClick={() => setActivePath(activePath.slice(0, i + 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: i === activePath.length - 1 ? '#1e293b' : '#3B82F6', fontWeight: i === activePath.length - 1 ? 700 : 400, fontSize: 13 }}>{seg}</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ flex: 1 }} />
+            <span style={{ fontSize: 13, color: '#94a3b8' }}>{sorted.length}건{anyFilterActive ? ` / ${posts.length}` : ''}</span>
           </div>
-          <button onClick={() => setShowFilters(!showFilters)}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: showFilters ? '#EFF6FF' : '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: showFilters ? '#3B82F6' : '#64748b' }}>
-            <Filter size={14} /> 상세 필터
-          </button>
-          {anyFilterActive && (
-            <button onClick={() => { setFilterType('전체'); setFilterDept([]); setFilterCat2([]); setFilterCat3([]); setFilterPos([]); setSearchText(''); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#EF4444' }}>
-              <X size={14} /> 초기화
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+              <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
+              <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자 검색..."
+                style={{ width: '100%', padding: '8px 12px 8px 34px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} />
+            </div>
+            {anyFilterActive && (
+              <button onClick={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setSearchText(''); }}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#EF4444' }}>
+                <X size={14} /> 초기화
+              </button>
+            )}
+            <button onClick={() => { setEditingId(null); setShowForm(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+              <Plus size={16} /> 새 글
             </button>
-          )}
-          <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 13, color: '#94a3b8' }}>{sorted.length}건{anyFilterActive ? ` / ${posts.length}건` : ''}</span>
-          <button onClick={() => { setEditingId(null); setShowForm(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-            <Plus size={16} /> 새 글
-          </button>
-        </div>
-
-        {/* 상세 필터 패널 */}
-        {showFilters && (
-          <div style={{ padding: '12px 24px', borderBottom: '1px solid #e2e8f0', background: '#fafbfd', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <MultiChipFilter label="대분류" items={mergedDepts} defaults={DEF_DEPTS} value={filterDept} onChange={setFilterDept} customKey="dept" custom={custom} updateCustom={updateCustom} />
-            <MultiChipFilter label="중분류" items={mergedCat2} defaults={DEF_CAT2} value={filterCat2} onChange={setFilterCat2} customKey="cat2" custom={custom} updateCustom={updateCustom} />
-            <MultiChipFilter label="소분류" items={mergedCat3} defaults={DEF_CAT3} value={filterCat3} onChange={setFilterCat3} customKey="cat3" custom={custom} updateCustom={updateCustom} />
-            <MultiChipFilter label="직급" items={mergedPos} defaults={DEF_POS} value={filterPos} onChange={setFilterPos} customKey="pos" custom={custom} updateCustom={updateCustom} />
           </div>
-        )}
+        </div>
 
         {/* 피드 */}
         <div style={{ flex: 1, overflow: 'auto', padding: '16px 24px' }}>
@@ -345,23 +380,18 @@ export default function WorkHubPage() {
               <div key={post.post_id} style={{ marginBottom: 12, background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: post.data.pinned ? '0 0 0 2px #FBBF24' : 'none' }}>
                 {/* 포스트 헤더 */}
                 <div style={{ padding: '14px 20px 0' }}>
-                  {/* 경로 + 핀 */}
+                  {/* 경로 + 유형 + 핀 */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     {post.data.pinned && <Pin size={12} color="#F59E0B" style={{ flexShrink: 0 }} />}
-                    <span style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace' }}>{buildPath(globalIdx, post.data)}</span>
-                    <span style={{ flex: 1 }} />
-                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</span>
-                  </div>
-
-                  {/* 유형 배지 + 분류 태그 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
                     <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: pt.bg, color: pt.color, display: 'flex', alignItems: 'center', gap: 4 }}>
                       <pt.icon size={12} /> {post.data.type}
                     </span>
-                    {post.data.department.map((d, i) => <span key={`d${i}`} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#EFF6FF', color: '#3B82F6' }}>{d}</span>)}
-                    {post.data.category2.map((c, i) => <span key={`c2${i}`} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#F0FDF4', color: '#22C55E' }}>{c}</span>)}
-                    {post.data.category3.map((c, i) => <span key={`c3${i}`} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#FFFBEB', color: '#F59E0B' }}>{c}</span>)}
-                    {post.data.position.map((p, i) => <span key={`p${i}`} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#F5F3FF', color: '#7C3AED' }}>{p}</span>)}
+                    <span style={{ fontSize: 11, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <FolderOpen size={11} /> {buildPathLabel(post.data)}
+                    </span>
+                    {post.data.position.map((p, i) => <span key={i} style={{ padding: '2px 8px', borderRadius: 12, fontSize: 10, background: '#F5F3FF', color: '#7C3AED' }}>{p}</span>)}
+                    <span style={{ flex: 1 }} />
+                    <span style={{ fontSize: 11, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</span>
                   </div>
 
                   {/* 제목 */}
@@ -430,10 +460,9 @@ export default function WorkHubPage() {
       {showForm && (
         <PostForm
           editData={editingId ? posts.find(p => p.post_id === editingId) : undefined}
+          defaultPath={activePath}
           onClose={() => { setShowForm(false); setEditingId(null); }}
           onSaved={() => { setShowForm(false); setEditingId(null); fetchData(); }}
-          custom={custom}
-          updateCustom={updateCustom}
         />
       )}
     </div>
@@ -511,70 +540,18 @@ function CommentThread({ postId, comments, onRefresh }: { postId: string; commen
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Multi Chip Filter (inline)
-   ══════════════════════════════════════════════════════════════ */
-function MultiChipFilter({ label, items, defaults, value, onChange, customKey, custom, updateCustom }: {
-  label: string; items: string[]; defaults: string[]; value: string[]; onChange: (v: string[]) => void;
-  customKey: string; custom: Record<string, string[]>; updateCustom: (k: string, v: string[]) => void;
-}) {
-  const [adding, setAdding] = useState(false);
-  const [newVal, setNewVal] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const toggle = (d: string) => onChange(value.includes(d) ? value.filter(x => x !== d) : [...value, d]);
-  const handleAdd = () => {
-    const v = newVal.trim();
-    if (!v || items.includes(v)) { setNewVal(''); setAdding(false); return; }
-    updateCustom(customKey, [...(custom[customKey] || []), v]);
-    setNewVal(''); setAdding(false);
-  };
-  const handleRemove = (item: string) => {
-    if (defaults.includes(item)) return;
-    updateCustom(customKey, (custom[customKey] || []).filter(c => c !== item));
-    onChange(value.filter(x => x !== item));
-  };
-
-  useEffect(() => { if (adding) inputRef.current?.focus(); }, [adding]);
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600, minWidth: 44 }}>{label}</span>
-      <button onClick={() => onChange([])}
-        style={{ padding: '3px 10px', borderRadius: 14, border: '1px solid', borderColor: value.length === 0 ? '#3B82F6' : '#e2e8f0', background: value.length === 0 ? '#EFF6FF' : '#fff', color: value.length === 0 ? '#3B82F6' : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: value.length === 0 ? 600 : 400 }}>전체</button>
-      {items.map(d => (
-        <span key={d} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
-          <button onClick={() => toggle(d)}
-            style={{ padding: '3px 10px', borderRadius: 14, border: '1px solid', borderColor: value.includes(d) ? '#3B82F6' : '#e2e8f0', background: value.includes(d) ? '#EFF6FF' : '#fff', color: value.includes(d) ? '#3B82F6' : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: value.includes(d) ? 600 : 400, paddingRight: defaults.includes(d) ? undefined : 22 }}>{d}</button>
-          {!defaults.includes(d) && <button onClick={e => { e.stopPropagation(); handleRemove(d); }} style={{ position: 'absolute', right: 3, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}><X size={10} color="#EF4444" /></button>}
-        </span>
-      ))}
-      {adding ? (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <input ref={inputRef} value={newVal} onChange={e => setNewVal(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewVal(''); } }}
-            placeholder="Enter" style={{ padding: '3px 8px', borderRadius: 14, border: '1px solid #3B82F6', fontSize: 12, outline: 'none', width: 80 }} />
-          <button onClick={() => { setAdding(false); setNewVal(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}><X size={13} color="#94a3b8" /></button>
-        </span>
-      ) : (
-        <button onClick={() => setAdding(true)} style={{ padding: '3px 8px', borderRadius: 14, border: '1px dashed #cbd5e1', background: '#fff', color: '#94a3b8', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}><Plus size={11} />추가</button>
-      )}
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════
    Post Form (create / edit)
    ══════════════════════════════════════════════════════════════ */
-function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
-  editData?: HubPost; onClose: () => void; onSaved: () => void;
-  custom: Record<string, string[]>; updateCustom: (k: string, v: string[]) => void;
+function PostForm({ editData, defaultPath, onClose, onSaved }: {
+  editData?: HubPost; defaultPath: string[]; onClose: () => void; onSaved: () => void;
 }) {
   const isEdit = !!editData;
   const [postType, setPostType] = useState<PostType>(editData?.data.type || '메모');
-  const [dept, setDept] = useState<string[]>(editData?.data.department || []);
-  const [cat2, setCat2] = useState<string[]>(editData?.data.category2 || []);
-  const [cat3, setCat3] = useState<string[]>(editData?.data.category3 || []);
+  const [selLarge, setSelLarge] = useState(editData?.data.path[0] || defaultPath[0] || '');
+  const [selMid, setSelMid] = useState(editData?.data.path[1] || defaultPath[1] || '');
+  const [selSmall, setSelSmall] = useState(editData?.data.path[2] || defaultPath[2] || '');
   const [pos, setPos] = useState<string[]>(editData?.data.position || []);
   const [title, setTitle] = useState(editData?.data.title || '');
   const [content, setContent] = useState(editData?.data.content || '');
@@ -587,10 +564,9 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
   const [uploading, setUploading] = useState<{ name: string; progress: number }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const depts = [...DEF_DEPTS, ...(custom['dept'] || [])];
-  const cat2s = [...DEF_CAT2, ...(custom['cat2'] || [])];
-  const cat3s = [...DEF_CAT3, ...(custom['cat3'] || [])];
-  const poss = [...DEF_POS, ...(custom['pos'] || [])];
+  // derived mid/small options from tree
+  const midOptions = selLarge && CATEGORY_TREE[selLarge] ? Object.keys(CATEGORY_TREE[selLarge]) : [];
+  const smallOptions = selLarge && selMid && CATEGORY_TREE[selLarge]?.[selMid] ? CATEGORY_TREE[selLarge][selMid] : [];
 
   const addLink = () => { if (!linkUrl) return; setAttachments([...attachments, { type: 'link', url: linkUrl, name: linkName || linkUrl }]); setLinkUrl(''); setLinkName(''); setShowLink(false); };
 
@@ -620,10 +596,13 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
   };
 
   const save = async () => {
-    if (!dept.length || !title || !author) { toast.error('대분류, 제목, 작성자를 입력해주세요'); return; }
+    if (!selLarge || !title || !author) { toast.error('경로(대분류), 제목, 작성자를 입력해주세요'); return; }
     setSaving(true);
     localStorage.setItem('wh-author', author);
-    const payload: HubPostData = { type: postType, department: dept, category2: cat2, category3: cat3, position: pos, title, content, attachments, author, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
+    const path: [string, string?, string?] = [selLarge];
+    if (selMid) path.push(selMid);
+    if (selSmall) path.push(selSmall);
+    const payload: HubPostData = { type: postType, path, position: pos, title, content, attachments, author, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
     try {
       if (isEdit && editData) {
         await fetch(`/api/work-hub/${editData.post_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -636,14 +615,15 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
     } catch { toast.error('저장 실패'); } finally { setSaving(false); }
   };
 
-  const chipRow = (label: string, items: string[], val: string[], set: (v: string[]) => void, cKey: string) => (
+  const chip = (label: string, val: string, items: string[], set: (v: string) => void, color: string, bg: string) => (
     <div>
-      <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>{label} {val.length > 0 && <span style={{ fontSize: 11, color: '#3B82F6', fontWeight: 400 }}>({val.length})</span>}</label>
+      <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>{label}</label>
       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
         {items.map(d => (
-          <button key={d} type="button" onClick={() => set(val.includes(d) ? val.filter(x => x !== d) : [...val, d])}
-            style={{ padding: '5px 12px', borderRadius: 16, border: '1px solid', borderColor: val.includes(d) ? '#3B82F6' : '#e2e8f0', background: val.includes(d) ? '#EFF6FF' : '#fff', color: val.includes(d) ? '#3B82F6' : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: val.includes(d) ? 600 : 400 }}>{d}</button>
+          <button key={d} type="button" onClick={() => set(val === d ? '' : d)}
+            style={{ padding: '5px 12px', borderRadius: 16, border: '1px solid', borderColor: val === d ? color : '#e2e8f0', background: val === d ? bg : '#fff', color: val === d ? color : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: val === d ? 600 : 400 }}>{d}</button>
         ))}
+        {items.length === 0 && <span style={{ fontSize: 12, color: '#94a3b8', padding: '5px 0' }}>상위 분류를 먼저 선택하세요</span>}
       </div>
     </div>
   );
@@ -656,7 +636,7 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#94a3b8" /></button>
         </div>
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* 유형 선택 */}
+          {/* 유형 */}
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>유형 *</label>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -669,10 +649,29 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
             </div>
           </div>
 
-          {chipRow('대분류 *', depts, dept, setDept, 'dept')}
-          {chipRow('중분류', cat2s, cat2, setCat2, 'cat2')}
-          {chipRow('소분류', cat3s, cat3, setCat3, 'cat3')}
-          {chipRow('대상 직급', poss, pos, setPos, 'pos')}
+          {/* 경로 선택 — 3축 계단식 */}
+          {chip('경로: 대분류 *', selLarge, DEF_LARGE, v => { setSelLarge(v); setSelMid(''); setSelSmall(''); }, '#3B82F6', '#EFF6FF')}
+          {midOptions.length > 0 && chip('경로: 중분류', selMid, midOptions, v => { setSelMid(v); setSelSmall(''); }, '#22C55E', '#F0FDF4')}
+          {smallOptions.length > 0 && chip('경로: 소분류', selSmall, smallOptions, v => setSelSmall(v), '#F59E0B', '#FFFBEB')}
+
+          {/* 현재 경로 미리보기 */}
+          {selLarge && (
+            <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FolderOpen size={13} color="#3B82F6" />
+              <span style={{ fontWeight: 600 }}>{[selLarge, selMid, selSmall].filter(Boolean).join(' > ')}</span>
+            </div>
+          )}
+
+          {/* 대상 직급 */}
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>대상 직급</label>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+              {DEF_POS.map(d => (
+                <button key={d} type="button" onClick={() => setPos(pos.includes(d) ? pos.filter(x => x !== d) : [...pos, d])}
+                  style={{ padding: '5px 12px', borderRadius: 16, border: '1px solid', borderColor: pos.includes(d) ? '#7C3AED' : '#e2e8f0', background: pos.includes(d) ? '#F5F3FF' : '#fff', color: pos.includes(d) ? '#7C3AED' : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: pos.includes(d) ? 600 : 400 }}>{d}</button>
+              ))}
+            </div>
+          </div>
 
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}><label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>작성자 *</label><input value={author} onChange={e => setAuthor(e.target.value)} placeholder="이름" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} /></div>
@@ -713,7 +712,7 @@ function PostForm({ editData, onClose, onSaved, custom, updateCustom }: {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '16px 24px', borderTop: '1px solid #f1f5f9' }}>
           <button onClick={onClose} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: 8, fontSize: 14, cursor: 'pointer', color: '#64748b' }}>취소</button>
           <button onClick={save} disabled={saving}
-            style={{ padding: '8px 20px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? '저��� 중...' : isEdit ? '수정' : '등록'}</button>
+            style={{ padding: '8px 20px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? '저장 중...' : isEdit ? '수정' : '등록'}</button>
         </div>
       </div>
     </div>
