@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
   Image as ImageIcon, ChevronDown, ChevronUp,
   Search, File, ExternalLink, Download, Eye, Paperclip, HardDrive, Database
 } from 'lucide-react';
+
+const StoragePanel = lazy(() => import('../storage/StoragePage'));
 
 /* ── types ── */
 interface Attachment {
@@ -61,6 +63,7 @@ const DUMMY_TITLES = ['Work Studio API 가이드','TESOL 홍보 브로슈어 초
    Main Page
    ══════════════════════════════════════════════════════════════ */
 export default function WorkMaterialsPage() {
+  const [activeTab, setActiveTab] = useState<'materials'|'storage'>('materials');
   const [rows, setRows] = useState<MaterialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -174,9 +177,24 @@ export default function WorkMaterialsPage() {
     <div style={{display:'flex',gap:0,padding:'24px 32px',maxWidth:1800,margin:'0 auto'}}>
     {/* ── 왼쪽: 테이블 영역 ── */}
     <div style={{flex:1,minWidth:0,transition:'all 0.3s ease'}}>
-      {/* header */}
+      {/* header + tabs */}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-        <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
+        <div style={{display:'flex',alignItems:'center',gap:16}}>
+          <h1 style={{fontSize:22,fontWeight:700,color:'#1e293b',margin:0}}>업무 자료</h1>
+          <div style={{display:'flex',gap:4,background:'#f1f5f9',borderRadius:8,padding:3}}>
+            {([['materials','자료 목록'],['storage','서버 저장소 (S3)']] as const).map(([key,label])=>(
+              <button key={key} onClick={()=>setActiveTab(key)}
+                style={{padding:'6px 14px',borderRadius:6,border:'none',fontSize:13,fontWeight:activeTab===key?600:400,
+                  background:activeTab===key?'#fff':'transparent',
+                  color:activeTab===key?'#1e293b':'#64748b',
+                  boxShadow:activeTab===key?'0 1px 3px rgba(0,0,0,0.08)':'none',
+                  cursor:'pointer',transition:'all 0.15s'}}>
+                {key==='storage'&&<HardDrive size={13} style={{marginRight:4,verticalAlign:'-2px'}}/>}{label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {activeTab==='materials'&&(
         <div style={{display:'flex',gap:8}}>
           {anyFilterActive && <button onClick={()=>{setFilterDept([]);setFilterCat2([]);setFilterCat3([]);setFilterPos([]);setFilterAuthor('전체');setSearchText('');}} style={{display:'flex',alignItems:'center',gap:4,padding:'8px 14px',background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:8,fontSize:13,cursor:'pointer',color:'#EF4444'}}><X size={14}/>필터 초기화</button>}
           <button onClick={()=>{
@@ -189,7 +207,18 @@ export default function WorkMaterialsPage() {
           </button>
           <button onClick={()=>{setEditingId(null);setShowForm(true);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'#3B82F6',color:'#fff',border:'none',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}><Plus size={16}/>새 자료</button>
         </div>
+        )}
       </div>
+
+      {/* ── 서버 저장소 탭 ── */}
+      {activeTab==='storage'&&(
+        <Suspense fallback={<div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>로딩 중...</div>}>
+          <StoragePanel/>
+        </Suspense>
+      )}
+
+      {/* ── 자료 목록 탭 ── */}
+      {activeTab==='materials'&&(<>
 
       {/* 디스크 용량 */}
       {diskInfo&&(()=>{
@@ -323,9 +352,10 @@ export default function WorkMaterialsPage() {
       <div style={{marginTop:12,fontSize:13,color:'#94a3b8'}}>총 {filtered.length}건{anyFilterActive?` (필터 적용 · 전체 ${rows.length}건)`:''}</div>
 
       {showForm&&<MaterialForm editData={editingId?rows.find(r=>r.material_id===editingId):undefined} onClose={()=>{setShowForm(false);setEditingId(null);}} onSaved={()=>{setShowForm(false);setEditingId(null);fetchData();}} custom={custom} updateCustom={updateCustom}/>}
+    </>)}
     </div>
     {/* ── 오른쪽: 미리보기 패널 ── */}
-    {previewRow&&<PreviewPanel row={previewRow} onClose={()=>setPreviewRow(null)}/>}
+    {activeTab==='materials'&&previewRow&&<PreviewPanel row={previewRow} onClose={()=>setPreviewRow(null)}/>}
     </div>
   );
 }

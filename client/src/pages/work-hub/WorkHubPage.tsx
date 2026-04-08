@@ -346,23 +346,23 @@ export default function WorkHubPage() {
 
       {/* ── 중앙 영역 ── */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-        {/* 탭 바 */}
-        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, padding: '0 24px' }}>
+        {/* 탭 바 — 컴팩트 */}
+        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, padding: '0 16px' }}>
           {([
             { key: 'feed' as TabKey, label: '피드', icon: MessageCircle },
             { key: 'dashboard' as TabKey, label: '대시보드', icon: LayoutDashboard },
             { key: 'table' as TabKey, label: '현황표', icon: Table2 },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '12px 18px', border: 'none', borderBottom: `2px solid ${activeTab === tab.key ? '#3B82F6' : 'transparent'}`, background: 'none', color: activeTab === tab.key ? '#3B82F6' : '#64748b', fontSize: 14, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s' }}>
-              <tab.icon size={15} /> {tab.label}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', border: 'none', borderBottom: `2px solid ${activeTab === tab.key ? '#3B82F6' : 'transparent'}`, background: 'none', color: activeTab === tab.key ? '#3B82F6' : '#64748b', fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer' }}>
+              <tab.icon size={13} /> {tab.label}
             </button>
           ))}
         </div>
 
         {/* 대시보드 / 현황표 탭 */}
-        {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard /></Suspense>}
-        {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable /></Suspense>}
+        {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard filterType={filterType} /></Suspense>}
+        {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable filterType={filterType} /></Suspense>}
 
         {/* 피드 탭 — 기존 콘텐츠 */}
         {activeTab === 'feed' && <>

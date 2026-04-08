@@ -72,9 +72,9 @@ const CATEGORIES = [
 ];
 
 /* ══════════════════════════════════════════════════════════
-   StoragePage
+   StoragePanel — 임베드 가능한 S3 파일 브라우저
    ══════════════════════════════════════════════════════════ */
-export default function StoragePage() {
+export default function StoragePanel() {
   const [files, setFiles] = useState<S3File[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
   const [prefix, setPrefix] = useState('');
@@ -185,14 +185,9 @@ export default function StoragePage() {
   });
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 1400, margin: '0 auto' }}>
-
-      {/* ── 헤더 ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <HardDrive size={24} color="#6366f1" />
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1e293b', margin: 0 }}>서버 저장소 (S3)</h1>
-        </div>
+    <div>
+      {/* ── ��로고침 ── */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
         <button onClick={() => { fetchFiles(prefix); fetchInfo(); }}
           style={{ ...btnStyle(), display: 'flex', alignItems: 'center', gap: 6 }}>
           <RefreshCw size={14} /> 새로고침
@@ -211,7 +206,7 @@ export default function StoragePage() {
             <div style={{ fontSize: 20, fontWeight: 700, color: '#1e293b' }}>{info.totalCount}개</div>
           </div>
           <div style={{ flex: 1, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {Object.entries(info.categories).map(([cat, d]) => (
+            {Object.entries(info.categories || {}).map(([cat, d]) => (
               <button key={cat} onClick={() => navigate(`uploads/${cat}/`)}
                 style={{ ...btnStyle(), fontSize: 12, padding: '4px 10px' }}>
                 {cat} <span style={{ color: '#94a3b8', marginLeft: 4 }}>{d.count}개 · {fmtSize(d.size)}</span>
