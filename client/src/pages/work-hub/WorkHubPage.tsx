@@ -58,14 +58,12 @@ interface HubComment {
 type PostType = '공지' | '업무지시' | '메모' | '파일' | '프로세스' | '보고';
 
 /* ══════════════════════════════════════════════════════════════
-   Constants — C_시스템3축 분류 (바탕화면 폴더 구조 기반)
+   Constants — 부서별 자료 + 서비스 URL 매핑
    ══════════════════════════════════════════════════════════════ */
 const SITES = ['AI번역_AITe', 'ITT_정통번역', 'TESOL', '고전번역_통독', '대표님페이지', '반도체_조선_방산', '번역_메타트랜스', '윤리', '전문가매칭', '전시회', '프롬프트', '휴텍씨'];
 const DEV_SUB = ['DB', 'UI', '기획', '산출물'];
 
-type TreeNode = Record<string, string[] | Record<string, string[]>>;
-
-/** 3축 트리: 대분류 > 중분류 > 소분류 */
+/** 부서별 폴더 트리 */
 const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
   '개발':       Object.fromEntries([...SITES, '공통_플러그인_모듈'].map(s => [s, DEV_SUB])),
   '회계':       { '거래처원장': [], '부가세': [], '세금계산서': [], '수익': SITES, '연도별_결산': [], '지출': SITES },
@@ -77,6 +75,18 @@ const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
   '직원별':     { '박가연': [], '박미진': [], '시온': [], '조수연': [], '지예': [], '퇴사자_아카이브': [] },
   '삭제대기':   {},
   '미분류_창고': {},
+};
+
+/** 항목명 → 실제 서비스 URL (항목 옆에 링크 아이콘 표시) */
+const SERVICE_URLS: Record<string, string> = {
+  // 핵심 시스템
+  'AI번역_AITe':    'http://54.116.15.136:82',
+  'TESOL':          'https://hu-tec.github.io/TESOL/',
+  '고전번역_통독':   'https://hu-tec.github.io/classic-translation/',
+  '번역_메타트랜스': 'https://hu-tec.github.io/translation-hub/',
+  '윤리':           'https://hu-tec.github.io/ai-ethics/',
+  '휴텍씨':         'https://hu-tec.github.io/company_hutec/',
+  '대표님페이지':    'https://hu-tec.github.io/personal_page/',
 };
 
 const DEF_LARGE = Object.keys(CATEGORY_TREE);
@@ -269,10 +279,10 @@ export default function WorkHubPage() {
           </div>
         </div>
 
-        {/* 3축 폴더 트리 */}
+        {/* 부서별 자료 (서비스 URL 통합) */}
         <div style={{ borderTop: '1px solid #e2e8f0', padding: '6px 8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4, padding: '0 4px' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>C_시스템3축</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', flex: 1 }}>부서별 자료</span>
             <button onClick={() => {
               const allKeys: string[] = [];
               DEF_LARGE.forEach(lg => { allKeys.push(lg); Object.keys(CATEGORY_TREE[lg]).forEach(mid => { allKeys.push(`${lg}/${mid}`); }); });
@@ -320,6 +330,7 @@ export default function WorkHubPage() {
                           </span>
                         ) : <span style={{ width: 11 }} />}
                         <span style={{ flex: 1 }}>{mid}</span>
+                        {SERVICE_URLS[mid] && <a href={SERVICE_URLS[mid]} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ color: '#3B82F6', display: 'flex', flexShrink: 0 }} title={SERVICE_URLS[mid]}><ExternalLink size={9} /></a>}
                         {midCnt > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>{midCnt}</span>}
                       </button>
                       {midExpanded && smalls.map(sm => {
