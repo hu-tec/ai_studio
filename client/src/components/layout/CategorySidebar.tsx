@@ -41,27 +41,27 @@ function DraggableNavItem({
       <NavLink
         to={item.to}
         style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          padding: collapsed ? '8px 14px' : '5px 8px',
-          borderRadius: 6, fontSize: 12.5,
+          display: 'flex', alignItems: 'center', gap: 4,
+          padding: collapsed ? '6px 14px' : '3px 6px',
+          borderRadius: 4, fontSize: 11,
           fontWeight: isActive ? 600 : 400,
           color: isActive ? '#3b82f6' : '#475569',
           background: isActive ? '#eff6ff' : 'transparent',
-          marginBottom: 1, textDecoration: 'none',
+          textDecoration: 'none',
           transition: 'all 0.15s', whiteSpace: 'nowrap',
           cursor: 'grab',
         }}
         title={`${item.code} ${item.label}`}
       >
         {!collapsed && (
-          <GripVertical size={12} style={{ flexShrink: 0, color: '#cbd5e1', cursor: 'grab' }} />
+          <GripVertical size={10} style={{ flexShrink: 0, color: '#cbd5e1', cursor: 'grab' }} />
         )}
-        <item.icon size={15} style={{ flexShrink: 0 }} />
+        <item.icon size={13} style={{ flexShrink: 0 }} />
         {!collapsed && (
           <>
             <span style={{
-              fontSize: 10, fontWeight: 700, color: isActive ? '#2563eb' : '#94a3b8',
-              minWidth: 32, flexShrink: 0,
+              fontSize: 9, fontWeight: 700, color: isActive ? '#2563eb' : '#94a3b8',
+              minWidth: 28, flexShrink: 0,
             }}>
               {item.code}
             </span>
@@ -70,17 +70,17 @@ function DraggableNavItem({
             </span>
             {item.consolidated && (
               <span style={{
-                fontSize: 9, background: '#dcfce7', color: '#16a34a',
-                padding: '1px 5px', borderRadius: 4, fontWeight: 600, flexShrink: 0,
+                fontSize: 8, background: '#dcfce7', color: '#16a34a',
+                padding: '0px 4px', borderRadius: 3, fontWeight: 600, flexShrink: 0,
               }}>
                 통합
               </span>
             )}
             {memoCount > 0 && (
               <span style={{
-                background: '#3b82f6', color: '#fff', fontSize: 10, fontWeight: 600,
-                borderRadius: 9999, padding: '1px 6px', minWidth: 18,
-                textAlign: 'center', lineHeight: '16px',
+                background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 600,
+                borderRadius: 9999, padding: '0px 5px', minWidth: 16,
+                textAlign: 'center', lineHeight: '14px',
               }}>
                 {memoCount}
               </span>
@@ -142,10 +142,10 @@ function GroupSection({
     <div
       ref={ref}
       style={{
-        marginBottom: 8,
+        marginBottom: 4,
         opacity: isDragging ? 0.4 : 1,
         background: isOver ? '#f0f9ff' : 'transparent',
-        borderRadius: 8,
+        borderRadius: 6,
         border: isOver ? '1px dashed #93c5fd' : '1px solid transparent',
         transition: 'all 0.15s',
       }}
@@ -155,22 +155,22 @@ function GroupSection({
         <div
           onClick={() => toggleGroupCollapse(group.id)}
           style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '4px 8px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 3,
+            padding: '2px 6px', cursor: 'pointer',
           }}
         >
-          <GripVertical size={11} style={{ color: '#cbd5e1', flexShrink: 0 }} />
+          <GripVertical size={9} style={{ color: '#cbd5e1', flexShrink: 0 }} />
           <span
             style={{
-              flex: 1, fontSize: 10, fontWeight: 600, color: '#64748b',
-              textTransform: 'uppercase', letterSpacing: '0.05em',
+              flex: 1, fontSize: 9, fontWeight: 600, color: '#64748b',
+              textTransform: 'uppercase', letterSpacing: '0.04em',
               userSelect: 'none',
             }}
           >
             {group.title}
-            <span style={{ fontSize: 9, color: '#94a3b8', marginLeft: 4 }}>({group.items.length})</span>
+            <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 3 }}>({group.items.length})</span>
           </span>
-          {isGroupCollapsed ? <ChevronDown size={12} color="#94a3b8" /> : <ChevronUp size={12} color="#94a3b8" />}
+          {isGroupCollapsed ? <ChevronDown size={10} color="#94a3b8" /> : <ChevronUp size={10} color="#94a3b8" />}
         </div>
       )}
 
@@ -259,8 +259,8 @@ export function CategorySidebar() {
     <DndProvider backend={HTML5Backend}>
       <aside
         style={{
-          width: sidebarCollapsed ? 52 : 230,
-          minWidth: sidebarCollapsed ? 52 : 230,
+          width: sidebarCollapsed ? 48 : 210,
+          minWidth: sidebarCollapsed ? 48 : 210,
           background: '#fff',
           borderRight: '1px solid #e2e8f0',
           display: 'flex', flexDirection: 'column',
@@ -269,13 +269,13 @@ export function CategorySidebar() {
         }}
       >
         {/* 로고 */}
-        <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #e2e8f0' }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
-          {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 14 }}>AI Studio</span>}
+        <div style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #e2e8f0' }}>
+          <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
+          {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>AI Studio</span>}
         </div>
 
         {/* 네비게이션 */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '6px 4px' }}>
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 3px' }}>
           {groups.map((group, idx) => (
             <GroupSection
               key={group.id}

@@ -80,22 +80,43 @@ export default function PipelineDashboard({ filterType }: Props) {
         <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{globalFiltered.length}건</span>
       </div>
 
-      {/* 파이프라인 흐름 — 클릭 가능, 멀티선택 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 10, padding: '5px 8px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+      {/* 파이프라인 흐름 — 멀티선택 + 하위 필터 인라인 */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 10, overflowX: 'auto' }}>
         {STAGES.map((s, i) => {
           const cnt = globalFiltered.filter(x => x.stage === s.key).length;
           const active = selectedStages.includes(s.key);
           return (
-            <span key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              {i > 0 && <span style={{ color: '#cbd5e1', fontSize: 12 }}>&rarr;</span>}
-              <button onClick={() => togglePipelineStage(s.key)}
-                style={{ padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600, background: active ? s.color : s.bg, color: active ? '#fff' : s.color, border: `1px solid ${active ? s.color : 'transparent'}`, cursor: 'pointer', transition: 'all 0.1s' }}>
-                {s.label} {cnt}
-              </button>
-            </span>
+            <div key={s.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 2, flexShrink: 0 }}>
+              {i > 0 && <span style={{ color: '#cbd5e1', fontSize: 12, marginTop: 4 }}>&rarr;</span>}
+              <div style={{ background: '#f8fafc', borderRadius: 8, border: `1px solid ${active ? s.color : '#e2e8f0'}`, padding: '4px 6px', minWidth: 0 }}>
+                {/* 단계 헤더 */}
+                <button onClick={() => togglePipelineStage(s.key)}
+                  style={{ display: 'block', width: '100%', padding: '2px 6px', borderRadius: 6, fontSize: 11, fontWeight: 700, background: active ? s.color : s.bg, color: active ? '#fff' : s.color, border: 'none', cursor: 'pointer', marginBottom: 3, textAlign: 'left' }}>
+                  {s.label} {cnt}
+                </button>
+                {/* 하위 필터들 */}
+                {s.filters.map(f => (
+                  <div key={f.label} style={{ marginBottom: 2 }}>
+                    <div style={{ fontSize: 8, color: '#94a3b8', fontWeight: 600, marginBottom: 1 }}>{f.label}</div>
+                    <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      {f.options.map(opt => {
+                        const sel = getSubFilter(s.key, f.label);
+                        const isActive = sel.includes(opt);
+                        return (
+                          <button key={opt} onClick={() => toggleSubFilter(s.key, f.label, opt)}
+                            style={{ padding: '1px 5px', borderRadius: 6, border: '1px solid', borderColor: isActive ? s.color : '#e2e8f0', background: isActive ? `${s.color}18` : '#fff', color: isActive ? s.color : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: isActive ? 600 : 400, lineHeight: 1.3 }}>
+                            {opt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           );
         })}
-        {selectedStages.length > 0 && <button onClick={() => setSelectedStages([])} style={{ padding: '2px 7px', borderRadius: 10, border: '1px solid #FECACA', background: '#FEF2F2', color: '#EF4444', fontSize: 10, cursor: 'pointer', marginLeft: 4 }}>초기화</button>}
+        {selectedStages.length > 0 && <button onClick={() => { setSelectedStages([]); setStageFilters({}); }} style={{ padding: '2px 7px', borderRadius: 8, border: '1px solid #FECACA', background: '#FEF2F2', color: '#EF4444', fontSize: 10, cursor: 'pointer', alignSelf: 'flex-start', marginTop: 4, flexShrink: 0 }}>초기화</button>}
       </div>
 
       {/* 카드 그리드 */}
