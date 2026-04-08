@@ -676,11 +676,18 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
-                      let task = franklinTasks.find(t => t.id === droppedText);
-                      if (!task) task = franklinTasks.find(t => t.task === droppedText);
+                      // top-level + children 모두 검색
+                      const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                      let task = allFlat.find(t => t.id === droppedText);
+                      if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
-                        // 태스크 시간만 설정 — 시간 겹침으로 자동 표시됨
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id } : t));
+                        // 태스크 시간만 설정 — top-level이든 children이든 업데이트
+                        const tid = task.id;
+                        setFranklinTasks(prev => prev.map(t => {
+                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id } : c) };
+                          return t;
+                        }));
                       } else {
                         // 프리텍스트 드롭은 슬롯 제목에 추가
                         updateSlot(index, 'title', slot.title ? slot.title + ' / ' + droppedText : droppedText);
@@ -729,10 +736,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
-                      let task = franklinTasks.find(t => t.id === droppedText);
-                      if (!task) task = franklinTasks.find(t => t.task === droppedText);
+                      // top-level + children 모두 검색
+                      const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                      let task = allFlat.find(t => t.id === droppedText);
+                      if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
-                        setFranklinTasks(prev => prev.map(t => t.id === task!.id ? { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id } : t));
+                        const tid = task.id;
+                        setFranklinTasks(prev => prev.map(t => {
+                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id } : c) };
+                          return t;
+                        }));
                         updateSlot(index, 'title', task.task);
                       } else {
                         updateSlot(index, 'title', droppedText);
