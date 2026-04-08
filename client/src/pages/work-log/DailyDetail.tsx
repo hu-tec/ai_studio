@@ -582,34 +582,60 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           );
         })()}
 
-        {/* 미배정 업무 (Classic/Mandalart에서 표시) */}
-        {(viewMode === 'classic' || viewMode === 'mandalart') && (() => {
-          const assignedSlotIds = new Set(franklinTasks.filter(t => t.timeSlotId).map(t => t.id));
-          const assignedCellIds = new Set(mandalartCells.flatMap(c => [c.taskId, ...(c.children || []).map(ch => ch.taskId)].filter(Boolean)));
-          const unassigned = franklinTasks.filter(t => {
-            if (viewMode === 'classic') return !t.timeSlotId;
-            return !assignedCellIds.has(t.id);
-          });
-          if (unassigned.length === 0) return null;
+        {/* ⑤ 대기함 — 시간 미배정 업무, 타임테이블에서 드래그하여 배정 해제 가능 */}
+        {(() => {
+          const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+          const queued = allFlat.filter(t => !t.startTime && !t.timeSlotId);
           return (
-            <div className="border border-dashed border-amber-300 rounded-lg bg-amber-50/30 p-2">
-              <div className="text-[10px] font-bold text-amber-700 mb-1">미배정 업무 ({unassigned.length}개) — 드래그하여 배정</div>
-              <div className="flex flex-wrap gap-1">
-                {unassigned.map(t => {
-                  const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
-                  const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
-                  return (
-                    <div key={t.id} draggable
-                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
-                      className="flex items-center gap-1 px-2 py-1 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
-                      style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
-                      <span style={{ color: stCfg.color, fontSize: 9 }}>{stCfg.icon}</span>
-                      <span className="font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
-                      <span className="truncate max-w-[120px]">{t.task}</span>
-                    </div>
-                  );
-                })}
+            <div
+              className={`border border-dashed rounded-lg p-2 transition-colors ${queued.length > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200 bg-slate-50/30'}`}
+              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
+              onDragLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = ''; }}
+              onDrop={e => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = '';
+                e.currentTarget.style.background = '';
+                const droppedId = e.dataTransfer.getData('text/plain');
+                if (!droppedId) return;
+                // 배정 해제: startTime/endTime/timeSlotId 제거
+                setFranklinTasks(prev => prev.map(t => {
+                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined };
+                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined } : c) };
+                  return t;
+                }));
+                // 슬롯 제목도 정리
+                const allF = franklinTasks.flatMap(ft => [ft, ...(ft.children || [])]);
+                const task = allF.find(ft => ft.id === droppedId);
+                if (task?.timeSlotId) {
+                  const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
+                  if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
+                }
+              }}
+            >
+              <div className="text-[10px] font-bold text-amber-700 mb-1">
+                대기함 ({queued.length}개) {queued.length > 0 ? '— 드래그하여 배정' : '— 타임테이블에서 여기로 드래그하여 해제'}
               </div>
+              {queued.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  {queued.map(t => {
+                    const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
+                    const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
+                    return (
+                      <div key={t.id} draggable
+                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
+                        style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
+                        <span style={{ color: stCfg.color, fontSize: 10 }}>{stCfg.icon}</span>
+                        <span className="font-bold shrink-0" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
+                        <span className="truncate">{t.task}</span>
+                        {t.parentId && <span className="text-[8px] text-slate-400 shrink-0">서브</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-[9px] text-slate-400 italic py-1">모든 업무가 배정됨</div>
+              )}
             </div>
           );
         })()}
@@ -697,7 +723,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1 flex-wrap">
                         <span className="text-[10px] font-mono text-muted-foreground shrink-0">{slot.timeSlot}</span>
                         {tasks_.map(t => (
-                          <span key={t.id} className="text-[8px] font-bold px-1 rounded" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
+                          <span key={t.id} draggable
+                            onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
+                            className="text-[8px] font-bold px-1 rounded cursor-grab active:cursor-grabbing" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
                             {t.priority}{t.number}{FRANKLIN_STATUS_CONFIG[t.status].icon}
                           </span>
                         ))}
@@ -762,7 +790,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                           const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
                           const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                           return (
-                            <div key={t.id} className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
+                            <div key={t.id} draggable
+                              onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
+                              className="flex items-center gap-1 rounded px-1 py-0.5 cursor-grab active:cursor-grabbing" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
                               <span className="text-[9px] font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
                               <span className="text-[9px]" style={{ color: stCfg.color }}>{stCfg.icon}</span>
                               <span className="text-[10px] truncate">{t.task}</span>
