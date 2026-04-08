@@ -63,8 +63,20 @@ type PostType = '공지' | '업무지시' | '메모' | '파일' | '프로세스'
 const SITES = ['AI번역_AITe', 'ITT_정통번역', 'TESOL', '고전번역_통독', '대표님페이지', '반도체_조선_방산', '번역_메타트랜스', '윤리', '전문가매칭', '전시회', '프롬프트', '휴텍씨'];
 const DEV_SUB = ['DB', 'UI', '기획', '산출물'];
 
-/** 부서별 폴더 트리 */
+/** 업무 자료 중분류/소분류 (기능 기준) */
+const FUNC_MID = ['규정', '교육', '홍보', '기술', '운영'];
+const FUNC_SMALL: Record<string, string[]> = {
+  '규정': ['급여', '복무', '기타'],
+  '교육': ['교안', '기타'],
+  '홍보': ['브로슈어', '기타'],
+  '기술': ['서버', '시스템', '기타'],
+  '운영': ['기타'],
+};
+const funcEntries = () => Object.fromEntries(FUNC_MID.map(m => [m, FUNC_SMALL[m] || []]));
+
+/** 부서별 폴더 트리 (데스크톱 구조 + 업무 자료 부서 통합) */
 const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
+  // 데스크톱 폴더 기반
   '개발':       Object.fromEntries([...SITES, '공통_플러그인_모듈'].map(s => [s, DEV_SUB])),
   '회계':       { '거래처원장': [], '부가세': [], '세금계산서': [], '수익': SITES, '연도별_결산': [], '지출': SITES },
   '마케팅':     Object.fromEntries([...SITES, 'SNS_카드뉴스', '공통_브랜딩'].map(s => [s, []])),
@@ -73,6 +85,15 @@ const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
   '기획_사업':  { '데이터가치평가': [], '벤처_인증': [], '예비창업패키지': [], '정부제안서': [] },
   '매뉴얼_규정': { '검토중': [], '아카이브': [], '최신본': [] },
   '직원별':     { '박가연': [], '박미진': [], '시온': [], '조수연': [], '지예': [], '퇴사자_아카이브': [] },
+  // 업무 자료에서 추가 (기능 기준 분류)
+  '경영':       funcEntries(),
+  '영업':       funcEntries(),
+  '강사팀':     funcEntries(),
+  '홈페이지':   funcEntries(),
+  '상담':       funcEntries(),
+  '총무':       funcEntries(),
+  '관리':       funcEntries(),
+  // 기타
   '삭제대기':   {},
   '미분류_창고': {},
 };
@@ -155,6 +176,7 @@ export default function WorkHubPage() {
   const [filterType, setFilterType] = useState<PostType|'전체'>('전체');
   const [activePath, setActivePath] = useState<string[]>([]); // e.g. ['개발','TESOL','DB']
   const [filterPos, setFilterPos] = useState<string[]>([]);
+  const [filterAuthor, setFilterAuthor] = useState('');
 
   // sidebar tree collapse
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -203,12 +225,16 @@ export default function WorkHubPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // derived
+  const allAuthors = [...new Set(posts.map(r => r.data.author).filter(Boolean))];
+
   // filtering
   const filtered = posts.filter(r => {
     const d = r.data;
     if (filterType !== '전체' && d.type !== filterType) return false;
     if (!matchesPath(d, activePath)) return false;
     if (filterPos.length && !filterPos.some(f => d.position.includes(f))) return false;
+    if (filterAuthor && d.author !== filterAuthor) return false;
     if (searchText) {
       const s = searchText.toLowerCase();
       if (!d.title.toLowerCase().includes(s) && !d.content.toLowerCase().includes(s) && !d.author.toLowerCase().includes(s)) return false;
@@ -222,7 +248,7 @@ export default function WorkHubPage() {
     return new Date(b.data.created_at).getTime() - new Date(a.data.created_at).getTime();
   });
 
-  const anyFilterActive = filterType !== '전체' || activePath.length > 0 || filterPos.length > 0 || !!searchText;
+  const anyFilterActive = filterType !== '전체' || activePath.length > 0 || filterPos.length > 0 || !!filterAuthor || !!searchText;
 
   // count posts per large category
   const pathCounts = (prefix: string[]) => posts.filter(p => matchesPath(p.data, prefix)).length;
@@ -277,6 +303,26 @@ export default function WorkHubPage() {
               );
             })}
           </div>
+          {/* 직급 필터 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 4 }}>
+            <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginRight: 2 }}>직급</span>
+            {DEF_POS.map(p => {
+              const active = filterPos.includes(p);
+              return <button key={p} onClick={() => setFilterPos(prev => active ? prev.filter(x=>x!==p) : [...prev, p])}
+                style={{ padding: '1px 6px', borderRadius: 6, border: '1px solid', borderColor: active ? '#7C3AED' : '#e2e8f0', background: active ? '#F5F3FF' : '#fff', color: active ? '#7C3AED' : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>{p}</button>;
+            })}
+          </div>
+          {/* 작성자 필터 (동적) */}
+          {allAuthors.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 4 }}>
+              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginRight: 2 }}>작성자</span>
+              {allAuthors.map(a => {
+                const active = filterAuthor === a;
+                return <button key={a} onClick={() => setFilterAuthor(active ? '' : a)}
+                  style={{ padding: '1px 6px', borderRadius: 6, border: '1px solid', borderColor: active ? '#0EA5E9' : '#e2e8f0', background: active ? '#F0F9FF' : '#fff', color: active ? '#0EA5E9' : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>{a}</button>;
+              })}
+            </div>
+          )}
         </div>
 
         {/* 부서별 자료 (서비스 URL 통합) */}
@@ -397,7 +443,7 @@ export default function WorkHubPage() {
                 style={{ width: '100%', padding: '5px 8px 5px 26px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
             </div>
             {anyFilterActive && (
-              <button onClick={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setSearchText(''); }}
+              <button onClick={() => { setFilterType('전체'); setActivePath([]); setFilterPos([]); setFilterAuthor(''); setSearchText(''); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 8px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, fontSize: 11, cursor: 'pointer', color: '#EF4444' }}>
                 <X size={10} />초기화
               </button>
