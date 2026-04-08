@@ -248,26 +248,40 @@ export default function WorkHubPage() {
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
       {/* ── 좌측: 폴더 트리 사이드바 ── */}
-      <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid #e2e8f0', background: '#f8fafc', overflow: 'auto', padding: '16px 0' }}>
-        <div style={{ padding: '0 16px', marginBottom: 12 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#1e293b', margin: '0 0 12px' }}>업무 총괄</h2>
-          {/* 유형별 필터 */}
-          <button onClick={() => { setFilterType('전체'); setActivePath([]); }}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, border: 'none', background: filterType === '전체' && !activePath.length ? '#EFF6FF' : 'transparent', color: filterType === '전체' && !activePath.length ? '#3B82F6' : '#64748b', fontSize: 13, fontWeight: filterType === '전체' && !activePath.length ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
-            <Hash size={14} /> 전체 <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{posts.length}</span>
-          </button>
-          {POST_TYPES.map(pt => (
-            <button key={pt.type} onClick={() => { setFilterType(pt.type); setActivePath([]); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, border: 'none', background: filterType === pt.type ? pt.bg : 'transparent', color: filterType === pt.type ? pt.color : '#64748b', fontSize: 13, fontWeight: filterType === pt.type ? 600 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
-              <pt.icon size={14} /> {pt.type}
-              <span style={{ marginLeft: 'auto', fontSize: 11, color: '#94a3b8' }}>{posts.filter(p => p.data.type === pt.type).length}</span>
+      <div style={{ width: 240, flexShrink: 0, borderRight: '1px solid #e2e8f0', background: '#f8fafc', overflow: 'auto', padding: '8px 0' }}>
+        <div style={{ padding: '0 10px', marginBottom: 6 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', margin: '0 0 6px' }}>업무 총괄</h2>
+          {/* 유형별 필터 — 컴팩트 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 4 }}>
+            <button onClick={() => { setFilterType('전체'); setActivePath([]); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: 'none', background: filterType === '전체' && !activePath.length ? '#EFF6FF' : 'transparent', color: filterType === '전체' && !activePath.length ? '#3B82F6' : '#64748b', fontSize: 11, fontWeight: filterType === '전체' && !activePath.length ? 600 : 400, cursor: 'pointer' }}>
+              <Hash size={11} />전체 <span style={{ fontSize: 10, color: '#94a3b8' }}>{posts.length}</span>
             </button>
-          ))}
+            {POST_TYPES.map(pt => {
+              const cnt = posts.filter(p => p.data.type === pt.type).length;
+              return (
+                <button key={pt.type} onClick={() => { setFilterType(pt.type); setActivePath([]); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px', borderRadius: 6, border: 'none', background: filterType === pt.type ? pt.bg : 'transparent', color: filterType === pt.type ? pt.color : '#64748b', fontSize: 11, fontWeight: filterType === pt.type ? 600 : 400, cursor: 'pointer' }}>
+                  <pt.icon size={10} />{pt.type}{cnt > 0 && <span style={{ fontSize: 9, color: '#94a3b8' }}>{cnt}</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 3축 폴더 트리 */}
-        <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 12px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 1, padding: '0 4px' }}>C_시스템3축</div>
+        <div style={{ borderTop: '1px solid #e2e8f0', padding: '6px 8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4, padding: '0 4px' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, flex: 1 }}>C_시스템3축</span>
+            <button onClick={() => {
+              const allKeys: string[] = [];
+              DEF_LARGE.forEach(lg => { allKeys.push(lg); Object.keys(CATEGORY_TREE[lg]).forEach(mid => { allKeys.push(`${lg}/${mid}`); }); });
+              const allOpen = allKeys.every(k => expandedNodes.has(k));
+              setExpandedNodes(allOpen ? new Set() : new Set(allKeys));
+            }} style={{ fontSize: 9, color: '#94a3b8', background: 'none', border: '1px solid #e2e8f0', borderRadius: 4, padding: '1px 6px', cursor: 'pointer' }}>
+              {(() => { const allKeys: string[] = []; DEF_LARGE.forEach(lg => { allKeys.push(lg); Object.keys(CATEGORY_TREE[lg]).forEach(mid => { allKeys.push(`${lg}/${mid}`); }); }); return allKeys.every(k => expandedNodes.has(k)) ? '전체접기' : '전체펼치기'; })()}
+            </button>
+          </div>
           {DEF_LARGE.map(lg => {
             const lgKey = lg;
             const lgActive = activePath[0] === lg;
@@ -278,7 +292,7 @@ export default function WorkHubPage() {
             return (
               <div key={lg}>
                 <button
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '5px 6px', borderRadius: 6, border: 'none', background: lgActive && activePath.length === 1 ? '#EFF6FF' : 'transparent', color: lgActive ? '#3B82F6' : '#475569', fontSize: 13, cursor: 'pointer', textAlign: 'left', fontWeight: lgActive ? 600 : 400 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%', padding: '3px 4px', borderRadius: 5, border: 'none', background: lgActive && activePath.length === 1 ? '#EFF6FF' : 'transparent', color: lgActive ? '#3B82F6' : '#475569', fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: lgActive ? 600 : 400 }}
                   onClick={() => { setActivePath([lg]); setFilterType('전체'); if (!lgExpanded) toggleExpand(lgKey); }}>
                   {midKeys.length > 0 ? (
                     <span onClick={e => { e.stopPropagation(); toggleExpand(lgKey); }} style={{ display: 'flex' }}>
@@ -296,9 +310,9 @@ export default function WorkHubPage() {
                   const smalls = mids[mid];
                   const midCnt = pathCounts([lg, mid]);
                   return (
-                    <div key={mid} style={{ paddingLeft: 16 }}>
+                    <div key={mid} style={{ paddingLeft: 14 }}>
                       <button
-                        style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '4px 6px', borderRadius: 5, border: 'none', background: midActive && activePath.length === 2 ? '#F0FDF4' : 'transparent', color: midActive ? '#22C55E' : '#64748b', fontSize: 12, cursor: 'pointer', textAlign: 'left', fontWeight: midActive ? 600 : 400 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%', padding: '2px 4px', borderRadius: 4, border: 'none', background: midActive && activePath.length === 2 ? '#F0FDF4' : 'transparent', color: midActive ? '#22C55E' : '#64748b', fontSize: 11, cursor: 'pointer', textAlign: 'left', fontWeight: midActive ? 600 : 400 }}
                         onClick={() => { setActivePath([lg, mid]); setFilterType('전체'); if (smalls.length && !midExpanded) toggleExpand(midKey); }}>
                         {smalls.length > 0 ? (
                           <span onClick={e => { e.stopPropagation(); toggleExpand(midKey); }} style={{ display: 'flex' }}>
@@ -313,7 +327,7 @@ export default function WorkHubPage() {
                         const smCnt = pathCounts([lg, mid, sm]);
                         return (
                           <button key={sm}
-                            style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '3px 6px 3px 28px', borderRadius: 4, border: 'none', background: smActive ? '#FFFBEB' : 'transparent', color: smActive ? '#F59E0B' : '#94a3b8', fontSize: 11, cursor: 'pointer', textAlign: 'left', fontWeight: smActive ? 600 : 400 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%', padding: '2px 4px 2px 22px', borderRadius: 3, border: 'none', background: smActive ? '#FFFBEB' : 'transparent', color: smActive ? '#F59E0B' : '#94a3b8', fontSize: 10, cursor: 'pointer', textAlign: 'left', fontWeight: smActive ? 600 : 400 }}
                             onClick={() => { setActivePath([lg, mid, sm]); setFilterType('전체'); }}>
                             <span style={{ width: 4, height: 4, borderRadius: 2, background: smActive ? '#F59E0B' : '#cbd5e1', flexShrink: 0 }} />
                             <span style={{ flex: 1 }}>{sm}</span>
