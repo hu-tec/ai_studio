@@ -20,6 +20,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/interviews', require('./routes/interviews'));
 app.use('/api/worklogs', require('./routes/worklogs'));
 app.use('/api/upload', require('./routes/uploads'));
+app.use('/api/storage', require('./routes/storage'));
 // tesol, level-test → work_studio로 이관 완료
 
 // 범용 CRUD API (JSON blob 테이블)

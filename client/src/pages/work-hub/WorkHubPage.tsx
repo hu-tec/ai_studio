@@ -1,12 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import {
   Plus, Trash2, Pencil, X, Upload, Link as LinkIcon,
   Image as ImageIcon, Send, MessageSquare, Pin, PinOff,
   Search, File, ExternalLink, ChevronDown, ChevronRight,
   Megaphone, FileText, Briefcase, FolderOpen, ClipboardList, BarChart3,
-  Hash, User
+  Hash, User, LayoutDashboard, Table2, MessageCircle
 } from 'lucide-react';
+
+const PipelineDashboard = lazy(() => import('./PipelineDashboard'));
+const StatusTable = lazy(() => import('./StatusTable'));
 
 /* ══════════════════════════════════════════════════════════════
    Types
@@ -127,6 +130,10 @@ export default function WorkHubPage() {
   const [posts, setPosts] = useState<HubPost[]>([]);
   const [comments, setComments] = useState<HubComment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // tabs
+  type TabKey = 'feed' | 'dashboard' | 'table';
+  const [activeTab, setActiveTab] = useState<TabKey>('feed');
 
   // UI state
   const [showForm, setShowForm] = useState(false);
@@ -323,8 +330,28 @@ export default function WorkHubPage() {
         </div>
       </div>
 
-      {/* ── 중앙: 피드 영역 ── */}
+      {/* ── 중앙 영역 ── */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+        {/* 탭 바 */}
+        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0, padding: '0 24px' }}>
+          {([
+            { key: 'feed' as TabKey, label: '피드', icon: MessageCircle },
+            { key: 'dashboard' as TabKey, label: '대시보드', icon: LayoutDashboard },
+            { key: 'table' as TabKey, label: '현황표', icon: Table2 },
+          ]).map(tab => (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '12px 18px', border: 'none', borderBottom: `2px solid ${activeTab === tab.key ? '#3B82F6' : 'transparent'}`, background: 'none', color: activeTab === tab.key ? '#3B82F6' : '#64748b', fontSize: 14, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s' }}>
+              <tab.icon size={15} /> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 대시보드 / 현황표 탭 */}
+        {activeTab === 'dashboard' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><PipelineDashboard /></Suspense>}
+        {activeTab === 'table' && <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩...</div>}><StatusTable /></Suspense>}
+
+        {/* 피드 탭 — 기존 콘텐츠 */}
+        {activeTab === 'feed' && <>
         {/* 상단 바 */}
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: activePath.length ? 8 : 0 }}>
@@ -454,6 +481,7 @@ export default function WorkHubPage() {
             );
           })}
         </div>
+      </>}
       </div>
 
       {/* 글 작성/수정 모달 */}

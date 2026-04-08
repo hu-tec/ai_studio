@@ -1,0 +1,126 @@
+/* ══════════════════════════════════════════════════════════════
+   파이프라인 데이터 정의 + 더미 데이터
+   ══════════════════════════════════════════════════════════════ */
+
+export type PipelineStage = '과목' | '급수' | '기능' | '산업전문' | '규정' | '상품화';
+export type ItemStatus = '아이디어' | '기획' | '디자인' | '개발' | '테스트' | '배포' | '운영';
+
+export interface PipelineItem {
+  id: string;
+  stage: PipelineStage;
+  sub1: string;
+  sub2?: string;
+  title: string;
+  status: ItemStatus;
+  assignee?: string;
+  link?: string;
+  note?: string;
+  date?: string;
+}
+
+export const STAGES: { key: PipelineStage; label: string; color: string; bg: string; filters: { label: string; options: string[] }[] }[] = [
+  { key: '과목', label: '과목', color: '#DC2626', bg: '#FEF2F2', filters: [
+    { label: '종목', options: ['프롬', '테솔', '번역', '윤리'] },
+  ]},
+  { key: '급수', label: '급수', color: '#7C3AED', bg: '#F5F3FF', filters: [
+    { label: '구분', options: ['교육', '일반', '전문'] },
+    { label: '급', options: ['1급','2급','3급','4급','5급','6급','7급','8급'] },
+  ]},
+  { key: '기능', label: '기능', color: '#0EA5E9', bg: '#F0F9FF', filters: [
+    { label: '형태', options: ['문서', '음성', '영상', '개발', '창의적활동'] },
+  ]},
+  { key: '산업전문', label: '산업/전문영역', color: '#F59E0B', bg: '#FFFBEB', filters: [
+    { label: '영역', options: ['법률', '의료', 'IT', '금융', '교육', '요리', '부동산', '기타'] },
+  ]},
+  { key: '규정', label: '규정 레이어', color: '#10B981', bg: '#F0FDF4', filters: [
+    { label: '유형', options: ['규정(A)', '준규정(B)', '선택규정(C)'] },
+    { label: '적용', options: ['영상', '텍스트', '음성'] },
+  ]},
+  { key: '상품화', label: '상품화', color: '#6366F1', bg: '#EEF2FF', filters: [
+    { label: '목적', options: ['상품(팔것)', '교육(운영)', '강사(인증)', '직원권한'] },
+  ]},
+];
+
+export const STATUSES: { key: ItemStatus; color: string; bg: string }[] = [
+  { key: '아이디어', color: '#94a3b8', bg: '#f1f5f9' },
+  { key: '기획',     color: '#8B5CF6', bg: '#F5F3FF' },
+  { key: '디자인',   color: '#EC4899', bg: '#FDF2F8' },
+  { key: '개발',     color: '#F59E0B', bg: '#FFFBEB' },
+  { key: '테스트',   color: '#0EA5E9', bg: '#F0F9FF' },
+  { key: '배포',     color: '#10B981', bg: '#F0FDF4' },
+  { key: '운영',     color: '#3B82F6', bg: '#EFF6FF' },
+];
+
+export const statusOf = (s: ItemStatus) => STATUSES.find(x => x.key === s)!;
+
+/* ── 더미 데이터 ── */
+let _id = 0;
+const it = (stage: PipelineStage, sub1: string, title: string, status: ItemStatus, assignee?: string, link?: string, sub2?: string, note?: string, date?: string): PipelineItem =>
+  ({ id: `pi${++_id}`, stage, sub1, sub2, title, status, assignee, link, note, date });
+
+export const DUMMY_ITEMS: PipelineItem[] = [
+  // ── 과목 ──
+  it('과목','프롬','프롬프트 공학 교육과정 설계','배포','김OO','/instructor-curri',undefined,'v2 완료','03.15'),
+  it('과목','프롬','AI 프롬프트 자격시험 문항 개발','개발','이OO',undefined,undefined,'Sprint 2','04.01'),
+  it('과목','프롬','프롬프트 엔지니어 양성 가이드','기획',undefined,undefined,undefined,undefined,'04.05'),
+  it('과목','테솔','TESOL 교육 커리큘럼 v2','배포','박OO','/instructor-curri',undefined,'런칭완료','02.20'),
+  it('과목','테솔','TESOL 레벨테스트 시스템','운영','최OO','/instructor-eval',undefined,'안정화','01.10'),
+  it('과목','테솔','TESOL 온라인 교육 플랫폼','디자인','정OO',undefined,undefined,'UI 작업중','04.03'),
+  it('과목','번역','AI번역 서비스 고도화','운영','김OO','http://54.116.15.136:81',undefined,'MAU 관리','01.01'),
+  it('과목','번역','법률번역 전문과정 개설','개발','이OO',undefined,undefined,'DB 설계중','04.01'),
+  it('과목','번역','109개 언어 확장','기획',undefined,undefined,undefined,'시장조사','04.08'),
+  it('과목','윤리','AI윤리 인증과정 설계','기획','박OO',undefined,undefined,'윤리위 검토','04.05'),
+  it('과목','윤리','윤리교육 온라인 모듈','디자인','최OO',undefined,undefined,'Figma 진행','04.02'),
+  it('과목','윤리','윤리 자격시험 출제기준','아이디어',undefined,undefined,undefined,'초안 구상중',undefined),
+
+  // ── 급수 ──
+  it('급수','교육','교육 1-2급 초등 교안','배포','강사A',undefined,'1급','교안 배포','02.15'),
+  it('급수','교육','교육 3-4급 중등 교안','개발','강사B',undefined,'3급','집필중','03.20'),
+  it('급수','교육','교육 5-6급 고등 교안','기획','강사C',undefined,'5급','커리 설계','04.01'),
+  it('급수','교육','교육 7-8급 대학 교안','아이디어',undefined,undefined,'7급',undefined,undefined),
+  it('급수','일반','일반 1급 대학생 과정','배포','강사D',undefined,'1급','운영중','01.10'),
+  it('급수','일반','일반 2급 실무자 과정','개발','강사E',undefined,'2급','실습 설계','03.25'),
+  it('급수','일반','일반 3급 실무 심화','디자인','강사F',undefined,'3급','UI 제작','04.03'),
+  it('급수','전문','전문 1급 전문가 인증','테스트','강사G',undefined,'1급','파일럿','03.28'),
+  it('급수','전문','전문 2급 마스터 인증','기획',undefined,undefined,'2급','기준 수립','04.05'),
+
+  // ── 기능 ──
+  it('기능','문서','계약서/소송장 번역 모듈','배포','개발1',undefined,undefined,'법률팀 연동','02.01'),
+  it('기능','문서','논문/교재 번역 엔진','개발','개발2',undefined,undefined,'NMT 고도화','03.15'),
+  it('기능','문서','의료 문서 특화 번역','기획',undefined,undefined,undefined,'의학 용어DB','04.05'),
+  it('기능','영상','유튜브 자막 자동생성','배포','개발3',undefined,undefined,'API 안정화','01.20'),
+  it('기능','영상','영화/드라마 자막 번역','개발','개발4',undefined,undefined,'타임코드 동기화','03.25'),
+  it('기능','영상','실시간 스트리밍 자막','아이디어',undefined,undefined,undefined,'기술 검토 필요',undefined),
+  it('기능','음성','실시간 동시통역 엔진','개발','개발5',undefined,undefined,'지연시간 최적화','03.30'),
+  it('기능','음성','강의 음성 텍스트 변환','배포','개발6',undefined,undefined,'STT 배포완료','02.10'),
+  it('기능','개발','웹 프론트엔드 공통모듈','운영','개발7','/work-materials',undefined,'컴포넌트 라이브러리','01.01'),
+  it('기능','창의적활동','웹툰/소설 번역 파이프라인','아이디어',undefined,undefined,undefined,'문체 보존 연구',undefined),
+
+  // ── 산업/전문영역 ──
+  it('산업전문','법률','소송장/준비서면 번역 규정','배포','법률팀','/rules-jungeol',undefined,'v1 적용중','02.01'),
+  it('산업전문','법률','형사/민사 전문 용어DB','개발','법률팀',undefined,undefined,'5만 항목','03.20'),
+  it('산업전문','의료','의료 번역 인증기준','기획','의료팀',undefined,undefined,'의학회 협의','04.03'),
+  it('산업전문','의료','의료 문서 템플릿','디자인',undefined,undefined,undefined,'표준 서식','04.05'),
+  it('산업전문','IT','IT/보안 번역 가이드','배포','개발팀',undefined,undefined,'내부 적용','01.15'),
+  it('산업전문','IT','AI/에이전트 전문 번역','개발','개발팀',undefined,undefined,'전문 코퍼스','03.28'),
+  it('산업전문','금융','금융 번역 표준 용어집','기획',undefined,undefined,undefined,'금융감독원 참조','04.08'),
+  it('산업전문','교육','교육 콘텐츠 현지화 가이드','테스트',undefined,undefined,undefined,'4개국 테스트','03.30'),
+
+  // ── 규정 ──
+  it('규정','규정(A)','번역 품질 고정규정 A','배포','규정팀','/rules-jungeol','텍스트','Type A 확정','02.01'),
+  it('규정','규정(A)','영상 자막 고정규정 A','배포','규정팀','/rules-jungeol','영상','Type A 확정','02.15'),
+  it('규정','준규정(B)','번역 형식 준규정 B','배포','규정팀','/rules-editor','텍스트','B-1~B-3 확정','02.20'),
+  it('규정','준규정(B)','음성 처리 준규정 B','개발','규정팀',undefined,'음성','B-2 조율중','03.28'),
+  it('규정','선택규정(C)','고객 맞춤 선택규정 C','개발','규정팀',undefined,'텍스트','C-1~C-3 정의','04.01'),
+  it('규정','선택규정(C)','프리미엄 옵션 규정 C','기획',undefined,undefined,'영상','기획 초안','04.05'),
+
+  // ── 상품화 ──
+  it('상품화','상품(팔것)','AI번역 패키지 (Basic/Pro/Enterprise)','배포','영업팀',undefined,undefined,'3 tier 런칭','01.01'),
+  it('상품화','상품(팔것)','법률번역 전문 패키지','개발','영업팀',undefined,undefined,'가격 산정','03.25'),
+  it('상품화','교육(운영)','TESOL 온라인 교육과정','운영','교육팀',undefined,undefined,'수강생 200명','01.01'),
+  it('상품화','교육(운영)','AI프롬프트 교육 프로그램','개발','교육팀',undefined,undefined,'LMS 구축','03.30'),
+  it('상품화','강사(인증)','강사 채용 프로세스','배포','인사팀','/instructor-flow',undefined,'5단계 확립','02.01'),
+  it('상품화','강사(인증)','강사 평가/인증 시스템','테스트','인사팀','/instructor-eval',undefined,'파일럿 진행','03.28'),
+  it('상품화','직원권한','RBAC 권한 매트릭스 설계','기획','개발팀',undefined,undefined,'8역할 정의','04.05'),
+  it('상품화','직원권한','직원별 데이터 접근제어','아이디어',undefined,undefined,undefined,'설계 구상',undefined),
+];
