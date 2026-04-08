@@ -65,6 +65,7 @@ export const router = createBrowserRouter(
         { path: 'rules-manual', element: lazyPage(() => import('./pages/rules-manual/RulesManualPage')) },
         { path: 'prompt-guide', element: lazyPage(() => import('./pages/prompt-guide/PromptGuidePage')) },
         { path: 'manual-list', element: lazyPage(() => import('./pages/manual-list/ManualListPage')) },
+        { path: 'claude-rules', element: lazyPage(() => import('./pages/claude-rules/ClaudeRulesPage')) },
         { path: 'coming/ai-studio', element: comingSoon },
         { path: 'instructor-eval', element: lazyPage(() => import('./pages/instructor-eval/InstructorEvalPage')) },
         { path: 'instructor-flow', element: lazyPage(() => import('./pages/instructor-flow/InstructorFlowPage')) },

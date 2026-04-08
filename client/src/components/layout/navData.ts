@@ -55,6 +55,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'D1-3', to: '/rules-manual',  icon: FileText, label: '규정매뉴얼' },
   { code: 'D1-4', to: '/rules-jungeol', icon: FileEdit, label: '규정관리(준걸)' },
   { code: 'D2',   to: '/eval-criteria', icon: ListChecks, label: '평가기준' },
+  { code: 'D3',   to: '/claude-rules', icon: FileEdit,   label: '규정(임시_혁_claude)' },
 
   // ─── E: 교육/콘텐츠 ───
   { code: 'E1', to: '/instructor-curri', icon: BookOpen,  label: '강사커리' },
