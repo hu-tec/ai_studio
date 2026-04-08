@@ -195,11 +195,11 @@ export default function StoragePanel() {
       </div>
 
       {/* ── S3 용량 정보 ── */}
-      {info && (
+      {info && info.totalCount > 0 && (
         <div style={{ ...cardStyle, marginBottom: 16, display: 'flex', gap: 32, alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 2 }}>총 사용량</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#1e293b' }}>{fmtSize(info.totalSize)}</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#1e293b' }}>{fmtSize(info.totalSize || 0)}</div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 2 }}>파일 수</div>
@@ -213,6 +213,11 @@ export default function StoragePanel() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+      {info && info.totalCount === 0 && !loading && (
+        <div style={{ ...cardStyle, marginBottom: 16, textAlign: 'center', padding: '16px 20px', color: '#f59e0b', fontSize: 13, background: '#fffbeb', border: '1px solid #fde68a' }}>
+          S3에 파일이 없거나 AWS 크레덴셜이 설정되지 않았습니다. (.env에 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY 확인)
         </div>
       )}
 
@@ -245,7 +250,7 @@ export default function StoragePanel() {
           }}
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload size={28} color={dragOver ? '#6366f1' : '#94a3b8'} style={{ marginBottom: 8 }} />
+          <Upload size={28} color={dragOver ? '#6366f1' : '#94a3b8'} style={{ marginBottom: 8, display: 'block', margin: '0 auto 8px' }} />
           <div style={{ color: '#64748b', fontSize: 14 }}>
             {uploading ? '업로드 중...' : '파일을 드래그하거나 클릭하여 업로드'}
           </div>

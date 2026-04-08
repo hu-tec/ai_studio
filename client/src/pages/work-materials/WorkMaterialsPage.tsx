@@ -70,7 +70,6 @@ export default function WorkMaterialsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string|null>(null);
   const [previewRow, setPreviewRow] = useState<MaterialRow|null>(null);
-  const [diskInfo, setDiskInfo] = useState<{total:number;used:number;available:number;uploadsSize:number;dbSize:number}|null>(null);
 
   // filters (빈 배열 = 전체)
   const [filterDept, setFilterDept] = useState<string[]>([]);
@@ -121,7 +120,6 @@ export default function WorkMaterialsPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-  useEffect(() => { fetch('/api/disk-usage').then(r=>r.json()).then(setDiskInfo).catch(()=>{}); }, []);
 
   // gather unique authors from data
   const allAuthors = [...new Set(rows.map(r=>r.data.author).filter(Boolean))];
@@ -220,30 +218,7 @@ export default function WorkMaterialsPage() {
       {/* ── 자료 목록 탭 ── */}
       {activeTab==='materials'&&(<>
 
-      {/* 디스크 용량 */}
-      {diskInfo&&(()=>{
-        const pct = diskInfo.total>0?Math.round(diskInfo.used/diskInfo.total*100):0;
-        const gb = (b:number)=>(b/1073741824).toFixed(1);
-        const mb = (b:number)=>(b/1048576).toFixed(1);
-        const barColor = pct>90?'#EF4444':pct>70?'#F59E0B':'#3B82F6';
-        return (
-          <div style={{display:'flex',alignItems:'center',gap:16,padding:'10px 16px',background:'#f8fafc',borderRadius:10,border:'1px solid #e2e8f0',marginBottom:16,fontSize:12,color:'#64748b',flexWrap:'wrap'}}>
-            <div style={{display:'flex',alignItems:'center',gap:6,flex:1,minWidth:200}}>
-              <HardDrive size={15} color={barColor}/>
-              <span style={{fontWeight:600,color:'#475569'}}>서버 디스크</span>
-              <div style={{flex:1,height:8,background:'#e2e8f0',borderRadius:4,overflow:'hidden',maxWidth:200}}>
-                <div style={{height:'100%',width:`${pct}%`,background:barColor,borderRadius:4,transition:'width 0.3s'}}/>
-              </div>
-              <span>{gb(diskInfo.used)}GB / {gb(diskInfo.total)}GB ({pct}%)</span>
-            </div>
-            <div style={{display:'flex',gap:12}}>
-              <span style={{display:'flex',alignItems:'center',gap:4}}><Upload size={12} color="#F59E0B"/>업로드: {mb(diskInfo.uploadsSize)}MB</span>
-              <span style={{display:'flex',alignItems:'center',gap:4}}><Database size={12} color="#8B5CF6"/>DB: {mb(diskInfo.dbSize)}MB</span>
-              <span>여유: {gb(diskInfo.available)}GB</span>
-            </div>
-          </div>
-        );
-      })()}
+      {/* 디스크 용량 — 서버 저장소 탭으로 이동 */}
 
       {/* 필터 */}
       <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:20}}>
