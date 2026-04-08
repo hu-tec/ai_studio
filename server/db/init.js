@@ -28,4 +28,17 @@ if (require.main === module) {
   console.log('Database created at', DB_PATH);
 }
 
-module.exports = { getDB, initDB };
+function closeDB() {
+  if (db) {
+    try {
+      db.pragma('wal_checkpoint(TRUNCATE)');
+      db.close();
+      db = null;
+      console.log('Database closed (WAL checkpointed)');
+    } catch (e) {
+      console.error('DB close error:', e.message);
+    }
+  }
+}
+
+module.exports = { getDB, initDB, closeDB };

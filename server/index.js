@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const { initDB } = require('./db/init');
+const { initDB, closeDB } = require('./db/init');
 
 const app = express();
 
@@ -83,6 +83,24 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// Graceful shutdown — PM2 reload/stop 시 DB 안전 종료
+function gracefulShutdown(signal) {
+  console.log(`${signal} received — shutting down gracefully...`);
+  server.close(() => {
+    console.log('HTTP server closed');
+    closeDB();
+    process.exit(0);
+  });
+  // 5초 안에 안 끝나면 강제 종료
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    closeDB();
+    process.exit(1);
+  }, 4500);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
