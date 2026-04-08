@@ -74,8 +74,8 @@ function DragCard({ post, status, onDrop, onDetail, onEdit, onDelete, onPin, onS
   );
 }
 
-/* ── Drop Column ── */
-function DropColumn({ status, items, onDrop, ...cardProps }: any) {
+/* ── Drop Column (열별 접기/펼치기) ── */
+function DropColumn({ status, items, onDrop, collapsed, onToggle, ...cardProps }: any) {
   const st = TASK_STATUS_STYLES[status as TaskStatus];
   const [{ isOver }, drop] = useDrop({
     accept: DND_CARD,
@@ -85,15 +85,18 @@ function DropColumn({ status, items, onDrop, ...cardProps }: any) {
 
   return (
     <div ref={drop as any} style={{ background: isOver ? `${st.color}10` : '#f8fafc', borderRadius: 6, border: `1.5px solid ${isOver ? st.color : st.color + '30'}`, display: 'flex', flexDirection: 'column', minHeight: 0, transition: 'all 0.15s' }}>
-      <div style={{ padding: '4px 6px', borderBottom: `1px solid ${st.color}20`, display: 'flex', alignItems: 'center', gap: 3 }}>
+      <div onClick={onToggle} style={{ padding: '4px 6px', borderBottom: collapsed ? 'none' : `1px solid ${st.color}20`, display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
+        {collapsed ? <ChevronRight size={9} color={st.color} /> : <ChevronDown size={9} color={st.color} />}
         <span style={{ width: 5, height: 5, borderRadius: 3, background: st.color }} />
         <span style={{ fontSize: 10, fontWeight: 700, color: st.color }}>{status}</span>
         <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 'auto' }}>{items.length}</span>
       </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: '3px 3px', minHeight: 40 }}>
-        {items.length === 0 ? <div style={{ textAlign: 'center', padding: 10, fontSize: 8, color: '#cbd5e1' }}>드래그하여 이동</div> :
-          items.map((post: HubPost) => <DragCard key={post.post_id} post={post} status={status} {...cardProps} />)}
-      </div>
+      {!collapsed && (
+        <div style={{ flex: 1, overflow: 'auto', padding: '3px 3px', minHeight: 40 }}>
+          {items.length === 0 ? <div style={{ textAlign: 'center', padding: 10, fontSize: 8, color: '#cbd5e1' }}>드래그하여 이동</div> :
+            items.map((post: HubPost) => <DragCard key={post.post_id} post={post} status={status} {...cardProps} />)}
+        </div>
+      )}
     </div>
   );
 }
@@ -104,6 +107,8 @@ export default function TaskBoard(props: Props) {
   const [editingNote, setEditingNote] = useState<{ id: string; val: string } | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [expandAll, setExpandAll] = useState(true);
+  const [collapsedCols, setCollapsedCols] = useState<Set<string>>(new Set());
+  const toggleCol = (s: string) => setCollapsedCols(prev => { const n = new Set(prev); if (n.has(s)) n.delete(s); else n.add(s); return n; });
 
   const byStatus = (status: TaskStatus) => sorted.filter(p => (p.data.status || '할당대기') === status);
   const onDrop = (postId: string, newStatus: string) => {
@@ -125,7 +130,7 @@ export default function TaskBoard(props: Props) {
           {/* 뷰 토글 */}
           <button onClick={() => setViewMode('kanban')} style={{ padding: '2px 4px', borderRadius: 3, border: 'none', background: viewMode === 'kanban' ? '#EFF6FF' : 'transparent', color: viewMode === 'kanban' ? '#3B82F6' : '#94a3b8', cursor: 'pointer' }}><LayoutGrid size={11} /></button>
           <button onClick={() => setViewMode('list')} style={{ padding: '2px 4px', borderRadius: 3, border: 'none', background: viewMode === 'list' ? '#EFF6FF' : 'transparent', color: viewMode === 'list' ? '#3B82F6' : '#94a3b8', cursor: 'pointer' }}><List size={11} /></button>
-          <button onClick={() => setExpandAll(!expandAll)} style={{ padding: '2px 6px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 9, cursor: 'pointer', color: '#475569', background: '#f8fafc' }}>{expandAll ? '접기' : '펼치기'}</button>
+          <button onClick={() => { if (collapsedCols.size === 0 && expandAll) { setCollapsedCols(new Set(TASK_STATUSES)); setExpandAll(false); } else { setCollapsedCols(new Set()); setExpandAll(true); } }} style={{ padding: '2px 6px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 9, cursor: 'pointer', color: '#475569', background: '#f8fafc' }}>{collapsedCols.size === 0 ? '전체접기' : '전체펼치기'}</button>
           <span style={{ fontSize: 9, color: '#94a3b8' }}>{sorted.length}건</span>
           <button onClick={() => { setEditingId(null); setShowForm(true); }} style={{ marginLeft: 'auto', padding: '3px 8px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 4, fontSize: 10, fontWeight: 600, cursor: 'pointer' }}>+새 업무</button>
         </div>
@@ -133,7 +138,7 @@ export default function TaskBoard(props: Props) {
         {/* 콘텐츠 */}
         {viewMode === 'kanban' && expandAll ? (
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 5, padding: '5px 6px', overflow: 'auto' }}>
-            {TASK_STATUSES.map(status => <DropColumn key={status} status={status} items={byStatus(status)} {...cardProps} />)}
+            {TASK_STATUSES.map(status => <DropColumn key={status} status={status} items={byStatus(status)} collapsed={collapsedCols.has(status)} onToggle={() => toggleCol(status)} {...cardProps} />)}
           </div>
         ) : viewMode === 'kanban' && !expandAll ? (
           /* 접힌 칸반 — 열 헤더만 */
