@@ -329,7 +329,7 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
   // 3-B. 프랭클린 과업 (viewMode가 franklin일 때)
   // ═══════════════════════════════════════════
   const franklinChildren: (Paragraph | Table)[] = [];
-  if ((log.viewMode === 'franklin' || log.viewMode === 'eisenhower') && log.franklinTasks && log.franklinTasks.length > 0) {
+  if ((log.viewMode === 'franklin' || log.viewMode === 'eisenhower') && log.tasks && log.tasks.length > 0) {
     const isEisenhower = log.viewMode === 'eisenhower';
 
     franklinChildren.push(
@@ -358,11 +358,11 @@ export async function exportDailyLogToWord(log: DailyLog, date: Date) {
 
     // Eisenhower: Q1→Q2→Q3→Q4 순으로 정렬, Franklin: 기존 순서
     const sortedTasks = isEisenhower
-      ? [...log.franklinTasks].sort((a, b) => {
+      ? [...log.tasks].sort((a, b) => {
           const qOrder = { q1: 0, q2: 1, q3: 2, q4: 3 };
           return qOrder[getQuadrant(a)] - qOrder[getQuadrant(b)];
         })
-      : log.franklinTasks;
+      : log.tasks;
 
     const ftRows = sortedTasks.map((task, idx) => {
       const stCfg = FRANKLIN_STATUS_CONFIG[task.status];

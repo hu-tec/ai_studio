@@ -1,7 +1,7 @@
 import { useState, DragEvent } from 'react';
 import { Plus, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
-import type { FranklinTask, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry, MandalartPeriod } from './data';
+import type { Task, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry, MandalartPeriod } from './data';
 import {
   EISENHOWER_CONFIG, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getQuadrant, setQuadrant, getNextNumber, cycleStatus, syncPriorityToEisenhower,
@@ -10,9 +10,9 @@ import {
 } from './data';
 
 interface EisenhowerViewProps {
-  tasks: FranklinTask[];
+  tasks: Task[];
   timeSlots: TimeSlotEntry[];
-  onTasksChange: (tasks: FranklinTask[]) => void;
+  onTasksChange: (tasks: Task[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
   period?: MandalartPeriod;
 }
@@ -28,16 +28,16 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
 
   // Group tasks by quadrant
-  const grouped: Record<EisenhowerQuadrant, FranklinTask[]> = { q1: [], q2: [], q3: [], q4: [] };
+  const grouped: Record<EisenhowerQuadrant, Task[]> = { q1: [], q2: [], q3: [], q4: [] };
   tasks.forEach(t => grouped[getQuadrant(t)].push(t));
 
   // Add task
   const addTask = () => {
     if (!newText.trim()) return;
-    const flags = setQuadrant({} as FranklinTask, newQuad);
+    const flags = setQuadrant({} as Task, newQuad);
     const priorityMap: Record<EisenhowerQuadrant, FranklinPriority> = { q1: 'A', q2: 'B', q3: 'C', q4: 'D' };
     const priority = priorityMap[newQuad];
-    const task: FranklinTask = {
+    const task: Task = {
       id: `ft-${Date.now()}`,
       priority,
       number: getNextNumber(tasks, priority),
@@ -51,7 +51,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   };
 
   // Update task
-  const updateTask = (id: string, updates: Partial<FranklinTask>) => {
+  const updateTask = (id: string, updates: Partial<Task>) => {
     onTasksChange(tasks.map(t => t.id === id ? { ...t, ...updates } : t));
   };
 
@@ -80,7 +80,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
     if (!dragId) return;
     const task = tasks.find(t => t.id === dragId);
     if (task && getQuadrant(task) === q) { setDragId(null); return; }
-    const flags = setQuadrant({} as FranklinTask, q);
+    const flags = setQuadrant({} as Task, q);
     updateTask(dragId, { ...flags, number: getNextNumber(tasks, flags.priority!) });
     setDragId(null);
   };
@@ -98,7 +98,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   };
 
   // Map slot IDs to linked tasks
-  const slotTaskMap = new Map<string, FranklinTask>();
+  const slotTaskMap = new Map<string, Task>();
   tasks.forEach(t => { if (t.timeSlotId) slotTaskMap.set(t.timeSlotId, t); });
 
   return (

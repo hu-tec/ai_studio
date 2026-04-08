@@ -24,7 +24,8 @@ export interface NavGroup {
 /* ── 전체 페이지 목록 (코드 부여) ── */
 export const ALL_NAV_ITEMS: NavItem[] = [
   // ─── A: 업무 ───
-  { code: 'A0',   to: '/work-hub',           icon: Home,          label: '업무 총괄' },
+  { code: 'A0',   to: '/work-hub-a',         icon: Home,          label: '업무 총괄(A)' },
+  { code: 'A0-1', to: '/work-hub',           icon: Home,          label: '업무 총괄(B)' },
   { code: 'A1',   to: '/work-materials',     icon: FolderOpen,    label: '업무 자료' },
   { code: 'A1-1', to: '/work-log',           icon: ClipboardList, label: '업무일지(직원-new)' },
   { code: 'A1-3', to: '/work-log/admin',     icon: ClipboardList, label: '업무일지(관리)' },

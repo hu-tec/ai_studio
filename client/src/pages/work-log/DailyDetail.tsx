@@ -6,8 +6,8 @@ import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, FranklinTask, MandalartCell, MandalartPeriod } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyFranklinTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -36,7 +36,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [modalOpen, setModalOpen] = useState(false);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
-  const [franklinTasks, setFranklinTasks] = useState<FranklinTask[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [mandalartByPeriod, setMandalartByPeriod] = useState<Record<MandalartPeriod, MandalartCell[]>>({ daily: [], weekly: [], monthly: [] });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
@@ -50,13 +50,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
     setMandalartByPeriod(prev => {
       const newCells = typeof cells === 'function' ? cells(prev[period] || []) : cells;
-      // 역방향 동기화: 만다라트 셀 → FranklinTask 자동 생성/업데이트
-      setFranklinTasks(tasks => {
+      // 역방향 동기화: 만다라트 셀 → Task 자동 생성/업데이트
+      setTasks(tasks => {
         let updated = [...tasks];
         let changed = false;
 
         // 태스크 업데이트 헬퍼
-        const updateFields = (t: FranklinTask, cell: MandalartCell) => {
+        const updateFields = (t: Task, cell: MandalartCell) => {
           const needsUpdate = t.task !== cell.text || t.achievement !== cell.achievement || (cell.status && t.status !== cell.status);
           return needsUpdate ? { ...t, task: cell.text, achievement: cell.achievement, ...(cell.status ? { status: cell.status } : {}) } : null;
         };
@@ -146,7 +146,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   // Auto-save: debounce 2초
   const doSave = useCallback(() => {
     const filledTitles = viewMode !== 'classic'
-      ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
+      ? tasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
       : timeSlots.filter(s => s.title).map(s => s.title);
     const summary = filledTitles.length > 0
       ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
@@ -155,10 +155,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       date: dateStr, summary, position,
       homepageCategories: hpCategories, departmentCategories: deptCategories,
       timeInterval, timeSlots, employeeId,
-      detail, viewMode, franklinTasks, mandalartByPeriod,
+      detail, viewMode, tasks, mandalartByPeriod,
       todayTasks, tomorrowTasks,
     });
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartByPeriod, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartByPeriod, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -184,7 +184,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, franklinTasks, mandalartByPeriod, todayTasks, tomorrowTasks]);
+  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartByPeriod, todayTasks, tomorrowTasks]);
 
   useEffect(() => {
     // When date or log changes from props, suppress next auto-save cycle
@@ -201,7 +201,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTomorrowTasks(log.tomorrowTasks || '');
       setViewMode(log.viewMode || 'classic');
       // 기존 태스크에 period 없으면 'daily' 기본값 설정 (마이그레이션)
-      setFranklinTasks((log.franklinTasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
+      setTasks((log.tasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
       // 기간별 만다라트: 기존 데이터 호환
       if (log.mandalartByPeriod) {
         setMandalartByPeriod(log.mandalartByPeriod);
@@ -219,7 +219,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTodayTasks('');
       setTomorrowTasks('');
       setViewMode('classic');
-      setFranklinTasks([]);
+      setTasks([]);
       setMandalartByPeriod({ daily: [], weekly: [], monthly: [] });
     }
     // Allow auto-save after prop-driven setState batch completes
@@ -262,8 +262,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   }, []);
 
   // Franklin → TimeSlots + MandalartCells 정방향 동기화 핸들러
-  const handleFranklinTasksChange = useCallback((newTasks: FranklinTask[]) => {
-    setFranklinTasks(prev => {
+  const handleTasksChange = useCallback((newTasks: Task[]) => {
+    setTasks(prev => {
       // 동기화: 연결된 과업 변경 → 타임슬롯 자동 반영
       setTimeSlots(slots => syncFranklinToSlots(newTasks, slots, prev));
       // 동기화: 태스크 변경 → 만다라트 셀 achievement/status 반영
@@ -289,7 +289,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     // Classic → Franklin 역방향 동기화: 연결된 과업 자동 업데이트
     const slotId = timeSlots[index]?.id;
     if (slotId) {
-      setFranklinTasks(prev => syncSlotToFranklin(prev, slotId, field, value));
+      setTasks(prev => syncSlotToFranklin(prev, slotId, field, value));
     }
   };
 
@@ -331,11 +331,11 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       todayTasks,
       tomorrowTasks,
       viewMode,
-      franklinTasks,
+      tasks,
       mandalartByPeriod,
     };
     const filledTitles = (viewMode !== 'classic')
-      ? franklinTasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
+      ? tasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
       : timeSlots.filter(s => s.title).map(s => s.title);
     newLog.summary = filledTitles.length > 0
       ? `${emp.name} - ${filledTitles.slice(0, 3).join(', ')}${filledTitles.length > 3 ? ' 외' : ''}`
@@ -444,17 +444,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-blue-700">오늘의 업무</span>
-              <span className="text-[9px] text-blue-400">{franklinTasks.filter(t => t.startTime).length}건 배정</span>
+              <span className="text-[9px] text-blue-400">{tasks.filter(t => t.startTime).length}건 배정</span>
             </div>
             {/* 업무 내역 (펼치기/접기) */}
-            {franklinTasks.filter(t => t.startTime).length > 0 && (
+            {tasks.filter(t => t.startTime).length > 0 && (
               <>
                 <button onClick={() => setTodayListOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-blue-500 font-bold bg-blue-50/80 border-b border-blue-100 text-left hover:bg-blue-100/50">
-                  {todayListOpen ? '▼' : '▶'} 업무 내역 ({franklinTasks.filter(t => t.startTime).length})
+                  {todayListOpen ? '▼' : '▶'} 업무 내역 ({tasks.filter(t => t.startTime).length})
                 </button>
                 {todayListOpen && (
                   <div className="px-2 py-1 border-b border-blue-100 bg-blue-50/50 text-[10px] space-y-0.5">
-                    {franklinTasks.filter(t => t.startTime).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||'')).map(t => (
+                    {tasks.filter(t => t.startTime).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||'')).map(t => (
                       <div key={t.id} className="flex items-center gap-1">
                         <span className="font-mono text-blue-500 shrink-0">{t.startTime}{t.endTime ? '~'+t.endTime : ''}</span>
                         <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
@@ -479,17 +479,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           <div className="rounded-lg border border-amber-200 bg-amber-50/30 overflow-hidden">
             <div className="px-2 py-1 bg-amber-100/50 border-b border-amber-200 flex items-center justify-between">
               <span className="text-[11px] font-bold text-amber-700">다음 날 업무</span>
-              <span className="text-[9px] text-amber-400">{franklinTasks.filter(t => t.status === 'forwarded').length}건 이월</span>
+              <span className="text-[9px] text-amber-400">{tasks.filter(t => t.status === 'forwarded').length}건 이월</span>
             </div>
             {/* 이월 업무 내역 (펼치기/접기) */}
-            {franklinTasks.filter(t => t.status === 'forwarded').length > 0 && (
+            {tasks.filter(t => t.status === 'forwarded').length > 0 && (
               <>
                 <button onClick={() => setTomorrowListOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-amber-500 font-bold bg-amber-50/80 border-b border-amber-100 text-left hover:bg-amber-100/50">
-                  {tomorrowListOpen ? '▼' : '▶'} 이월 업무 ({franklinTasks.filter(t => t.status === 'forwarded').length})
+                  {tomorrowListOpen ? '▼' : '▶'} 이월 업무 ({tasks.filter(t => t.status === 'forwarded').length})
                 </button>
                 {tomorrowListOpen && (
                   <div className="px-2 py-1 border-b border-amber-100 bg-amber-50/50 text-[10px] space-y-0.5">
-                    {franklinTasks.filter(t => t.status === 'forwarded').map(t => (
+                    {tasks.filter(t => t.status === 'forwarded').map(t => (
                       <div key={t.id} className="flex items-center gap-1">
                         <span className="text-amber-500 font-bold">→</span>
                         <span className="font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>{t.priority}{t.number}</span>
@@ -515,8 +515,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           // 통계 계산 (모든 뷰 공통)
           const filledSlots = timeSlots.filter(s => s.title.trim()).length;
           const totalSlots = timeSlots.length;
-          const doneTasks = franklinTasks.filter(t => t.status === 'done').length;
-          const totalTasks = franklinTasks.length;
+          const doneTasks = tasks.filter(t => t.status === 'done').length;
+          const totalTasks = tasks.length;
           const mStats = viewMode === 'mandalart' && mandalartCells.length >= 9
             ? calcGridAchievement(mandalartCells) : null;
           return (
@@ -570,7 +570,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   </>) : (<>
                     <span className="text-blue-600 font-bold">태스크 {totalTasks}</span>
                     <span className="text-emerald-600 font-bold">완료 {doneTasks}/{totalTasks}</span>
-                    <span className="text-amber-500 font-bold">진행 {franklinTasks.filter(t=>t.status==='progress').length}</span>
+                    <span className="text-amber-500 font-bold">진행 {tasks.filter(t=>t.status==='progress').length}</span>
                     <div className="flex-1 h-1 bg-slate-200 rounded overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded" style={{width:`${totalTasks>0?Math.round(doneTasks/totalTasks*100):0}%`}} />
                     </div>
@@ -584,7 +584,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
         {/* ⑤ 대기함 — 타임테이블에서 빼낸 업무만 표시 */}
         {(() => {
-          const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+          const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
           const queued = allFlat.filter(t => t.queued);
           if (queued.length === 0) return (
             <div
@@ -597,13 +597,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 e.currentTarget.style.background = '';
                 const droppedId = e.dataTransfer.getData('text/plain');
                 if (!droppedId) return;
-                const allF = franklinTasks.flatMap(ft => [ft, ...(ft.children || [])]);
+                const allF = tasks.flatMap(ft => [ft, ...(ft.children || [])]);
                 const task = allF.find(ft => ft.id === droppedId);
                 if (task?.timeSlotId) {
                   const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
                   if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
                 }
-                setFranklinTasks(prev => prev.map(t => {
+                setTasks(prev => prev.map(t => {
                   if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
                   if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
                   return t;
@@ -624,13 +624,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 e.currentTarget.style.background = '';
                 const droppedId = e.dataTransfer.getData('text/plain');
                 if (!droppedId) return;
-                const allF = franklinTasks.flatMap(ft => [ft, ...(ft.children || [])]);
+                const allF = tasks.flatMap(ft => [ft, ...(ft.children || [])]);
                 const task = allF.find(ft => ft.id === droppedId);
                 if (task?.timeSlotId) {
                   const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
                   if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
                 }
-                setFranklinTasks(prev => prev.map(t => {
+                setTasks(prev => prev.map(t => {
                   if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
                   if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
                   return t;
@@ -696,7 +696,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
                 const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
                 // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭 (서브태스크 포함)
-                const allTasksFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                const allTasksFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                 const slotTasks = allTasksFlat.filter(t => {
                   if (t.timeSlotId === slot.id) return true;
                   if (!t.startTime) return false;
@@ -721,13 +721,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
                       // top-level + children 모두 검색
-                      const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                      const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
                         // 태스크 시간만 설정 — top-level이든 children이든 업데이트
                         const tid = task.id;
-                        setFranklinTasks(prev => prev.map(t => {
+                        setTasks(prev => prev.map(t => {
                           if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
                           if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
@@ -783,12 +783,12 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
                       // top-level + children 모두 검색
-                      const allFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                      const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
                         const tid = task.id;
-                        setFranklinTasks(prev => prev.map(t => {
+                        setTasks(prev => prev.map(t => {
                           if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
                           if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
@@ -835,32 +835,32 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
               {viewMode === 'mandalart' ? (
                 <MandalartView
                   cells={mandalartCells}
-                  tasks={franklinTasks}
+                  tasks={tasks}
                   onCellsChange={setMandalartCells}
-                  onTasksChange={handleFranklinTasksChange}
+                  onTasksChange={handleTasksChange}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
                   period={period}
                 />
               ) : viewMode === 'eisenhower' ? (
                 <EisenhowerView
-                  tasks={franklinTasks.filter(t => !t.period || t.period === period)}
+                  tasks={tasks.filter(t => !t.period || t.period === period)}
                   timeSlots={timeSlots}
                   onTasksChange={newTasks => {
                     // period 필터링된 태스크만 받으므로 다른 period 태스크는 유지
-                    const otherPeriod = franklinTasks.filter(t => t.period && t.period !== period);
-                    handleFranklinTasksChange([...otherPeriod, ...newTasks]);
+                    const otherPeriod = tasks.filter(t => t.period && t.period !== period);
+                    handleTasksChange([...otherPeriod, ...newTasks]);
                   }}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
                   period={period}
                 />
               ) : (
                 <FranklinView
-                  tasks={franklinTasks.filter(t => !t.period || t.period === period)}
+                  tasks={tasks.filter(t => !t.period || t.period === period)}
                   timeSlots={timeSlots}
                   timeInterval={timeInterval}
                   onTasksChange={newTasks => {
-                    const otherPeriod = franklinTasks.filter(t => t.period && t.period !== period);
-                    handleFranklinTasksChange([...otherPeriod, ...newTasks]);
+                    const otherPeriod = tasks.filter(t => t.period && t.period !== period);
+                    handleTasksChange([...otherPeriod, ...newTasks]);
                   }}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
                   period={period}

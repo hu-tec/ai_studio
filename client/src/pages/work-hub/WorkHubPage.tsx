@@ -11,6 +11,7 @@ import {
 const PipelineDashboard = lazy(() => import('./PipelineDashboard'));
 const StatusTable = lazy(() => import('./StatusTable'));
 import FeedView from './FeedView';
+import { useWorkLogSync } from '../work-hub-a/hooks/useWorkLogSync';
 
 /* ══════════════════════════════════════════════════════════════
    Types
@@ -296,6 +297,8 @@ export default function WorkHubPage() {
 
   const getPostComments = (pid: string) => comments.filter(c => c.data.post_id === pid).sort((a, b) => new Date(a.data.created_at).getTime() - new Date(b.data.created_at).getTime());
 
+  const { getProgress } = useWorkLogSync();
+
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>로딩 중...</div>;
 
   return (
@@ -451,6 +454,7 @@ export default function WorkHubPage() {
             getPostComments={getPostComments} fetchData={fetchData}
             POST_TYPES={POST_TYPES} buildPathLabel={buildPathLabel}
             fmtDate={fmtDate} fmtSize={fmtSize}
+            getProgress={getProgress}
           />
         )}
       </div>

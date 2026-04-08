@@ -36,10 +36,11 @@ interface FeedViewProps {
   buildPathLabel: (d: any) => string;
   fmtDate: (iso: string) => string;
   fmtSize: (b: number) => string;
+  getProgress?: (hubPostId: string) => { totalTasks: number; doneTasks: number; progressTasks: number; avgAchievement: number; assignees: string[]; totalHours: number } | undefined;
 }
 
 export default function FeedView(props: FeedViewProps) {
-  const { sorted, posts, comments, searchText, setSearchText, anyFilterActive, resetFilters, activePath, setActivePath, setShowForm, setEditingId, handleDelete, handleTogglePin, getPostComments, fetchData, POST_TYPES, buildPathLabel, fmtDate, fmtSize } = props;
+  const { sorted, posts, comments, searchText, setSearchText, anyFilterActive, resetFilters, activePath, setActivePath, setShowForm, setEditingId, handleDelete, handleTogglePin, getPostComments, fetchData, POST_TYPES, buildPathLabel, fmtDate, fmtSize, getProgress } = props;
 
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [detailPost, setDetailPost] = useState<any | null>(null);
@@ -125,6 +126,7 @@ export default function FeedView(props: FeedViewProps) {
                 <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left', minWidth: 60 }}>비고</th>
                 <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>첨부</th>
                 <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>작성자</th>
+                <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>진행</th>
                 <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>날짜</th>
                 <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', width: 50 }}>액션</th>
               </tr>
@@ -173,6 +175,12 @@ export default function FeedView(props: FeedViewProps) {
                       {atts.length > 0 ? <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}><Paperclip size={9} />{atts.length}</span> : '—'}
                     </td>
                     <td style={{ padding: '3px 6px', fontSize: 10, color: '#64748b' }}>{post.data.author}</td>
+                    <td style={{ padding: '3px 6px', fontSize: 9 }}>{(() => {
+                      const p = getProgress?.(post.post_id);
+                      if (!p) return <span style={{ color: '#cbd5e1' }}>—</span>;
+                      const pct = p.totalTasks > 0 ? Math.round(p.doneTasks / p.totalTasks * 100) : 0;
+                      return <span style={{ color: pct === 100 ? '#10B981' : pct > 0 ? '#3B82F6' : '#94a3b8', fontWeight: 600 }}>{pct}% <span style={{ fontWeight: 400, fontSize: 8 }}>{p.doneTasks}/{p.totalTasks}</span></span>;
+                    })()}</td>
                     <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{fmtDate(post.data.created_at)}</td>
                     <td style={{ padding: '3px 4px' }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: 2 }}>

@@ -1,0 +1,1 @@
+import{r as t}from"./index-BQKpUHO0.js";const n=t.createContext(void 0);function r(){const e=t.useContext(n);if(!e)throw new Error("useLanguageConfig must be used within LanguageConfigProvider");return e}export{r as u};

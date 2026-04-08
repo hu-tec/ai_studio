@@ -7,7 +7,7 @@ import {
 import { FranklinView } from '../work-log/FranklinView';
 import { EisenhowerView } from '../work-log/EisenhowerView';
 import { MandalartView } from '../work-log/MandalartView';
-import type { FranklinTask, TimeSlotEntry, MandalartCell as WLMandalartCell } from '../work-log/data';
+import type { Task, TimeSlotEntry, MandalartCell as WLMandalartCell } from '../work-log/data';
 import { createEmptyTimeSlots } from '../work-log/data';
 
 /* ══════════════════════════════════════════════════════════════
@@ -507,9 +507,9 @@ function chipStyle(bg: string, color: string, border: string) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Adapter: GuidelineItem[] ↔ FranklinTask[] (업무일지 뷰 재사용)
+   Adapter: GuidelineItem[] ↔ Task[] (업무일지 뷰 재사용)
    ══════════════════════════════════════════════════════════════ */
-function itemsToTasks(items: GuidelineItem[]): FranklinTask[] {
+function itemsToTasks(items: GuidelineItem[]): Task[] {
   return items.map(i => ({
     id: i.id, priority: i.priority, number: i.number, task: i.title,
     status: i.status, note: i.content, urgent: i.urgent, important: i.important,
@@ -517,7 +517,7 @@ function itemsToTasks(items: GuidelineItem[]): FranklinTask[] {
   }));
 }
 
-function tasksToItemUpdates(tasks: FranklinTask[], items: GuidelineItem[]): GuidelineItem[] {
+function tasksToItemUpdates(tasks: Task[], items: GuidelineItem[]): GuidelineItem[] {
   const taskMap = new Map(tasks.map(t => [t.id, t]));
   const updated = items.map(i => {
     const t = taskMap.get(i.id);

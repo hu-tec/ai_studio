@@ -20,10 +20,11 @@ interface Props {
   setShowForm: (v: boolean) => void;
   setEditingId: (v: string | null) => void;
   onDetail: (post: HubPost) => void;
+  getProgress?: (id: string) => { totalTasks: number; doneTasks: number; avgAchievement: number; assignees: string[]; totalHours: number } | undefined;
 }
 
 export default function TaskBoard(props: Props) {
-  const { sorted, posts, allAuthors, filterType, setFilterType, filterPos, setFilterPos, filterAuthor, setFilterAuthor, searchText, setSearchText, anyFilterActive, resetFilters, handleDelete, handleTogglePin, handleSaveField, getPostComments, setShowForm, setEditingId, onDetail } = props;
+  const { sorted, posts, allAuthors, filterType, setFilterType, filterPos, setFilterPos, filterAuthor, setFilterAuthor, searchText, setSearchText, anyFilterActive, resetFilters, handleDelete, handleTogglePin, handleSaveField, getPostComments, setShowForm, setEditingId, onDetail, getProgress } = props;
   const [editingNote, setEditingNote] = useState<{ id: string; val: string } | null>(null);
 
   const byStatus = (status: TaskStatus) => sorted.filter(p => (p.data.status || '할당대기') === status);
@@ -70,9 +71,10 @@ export default function TaskBoard(props: Props) {
                         {post.data.pinned && <Pin size={8} color="#F59E0B" style={{ marginRight: 2 }} />}
                         {post.data.title}
                       </div>
-                      {/* 담당 + 날짜 */}
+                      {/* 담당 + 진행률 + 날짜 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 8, color: '#94a3b8', marginBottom: 2 }}>
                         {post.data.assignee && <span style={{ color: '#475569', fontWeight: 500 }}>{post.data.assignee}</span>}
+                        {(() => { const p = getProgress?.(post.post_id); if (!p || !p.totalTasks) return null; const pct = Math.round(p.doneTasks / p.totalTasks * 100); return <span style={{ color: pct === 100 ? '#10B981' : '#3B82F6', fontWeight: 600 }}>{pct}%</span>; })()}
                         <span>{fmtDate(post.data.created_at)}</span>
                         {atts.length > 0 && <span><Paperclip size={7} />{atts.length}</span>}
                         {cmts.length > 0 && <span><MessageSquare size={7} />{cmts.length}</span>}

@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, GripVertical, FileText } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
-import type { MandalartCell, FranklinTask, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
+import type { MandalartCell, Task, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
 import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
 
 interface MandalartViewProps {
   cells: MandalartCell[];
-  tasks: FranklinTask[];
+  tasks: Task[];
   onCellsChange: (cells: MandalartCell[]) => void;
-  onTasksChange: (tasks: FranklinTask[]) => void;
+  onTasksChange: (tasks: Task[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
   period?: MandalartPeriod;
 }
@@ -135,7 +135,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     if (!cell.text.trim()) return;
     if (cell.taskId && tasks.find(t => t.id === cell.taskId)) return;
     const priority: FranklinPriority = 'B';
-    const task: FranklinTask = {
+    const task: Task = {
       id: `ft-${Date.now()}`, priority, number: getNextNumber(tasks, priority),
       task: cell.text, status: 'pending', important: true, urgent: false,
     };
@@ -149,7 +149,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   };
 
   const isCenter = (idx: number) => idx === 4;
-  const linkedTask = (cell: MandalartCell): FranklinTask | null => {
+  const linkedTask = (cell: MandalartCell): Task | null => {
     if (!cell.taskId) return null;
     // top-level 검색
     const top = tasks.find(t => t.id === cell.taskId);

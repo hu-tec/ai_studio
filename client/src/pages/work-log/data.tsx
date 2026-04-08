@@ -72,7 +72,7 @@ export interface MandalartCell {
   id: string;
   text: string;
   children?: MandalartCell[]; // 하위 3×3 (최대 8개, center 제외)
-  taskId?: string;           // 연결된 FranklinTask ID
+  taskId?: string;           // 연결된 Task ID
   achievement?: number;      // 달성률 1~5 (1·2·3=양, 4·5=질)
   status?: FranklinStatus;   // 진행 상태 (프랭클린과 동기화)
 }
@@ -83,7 +83,7 @@ export type MandalartPeriod = 'daily' | 'weekly' | 'monthly';
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
 
-export interface FranklinTask {
+export interface Task {
   id: string;
   priority: FranklinPriority;
   number: number;           // A1, A2, B1...
@@ -98,10 +98,11 @@ export interface FranklinTask {
   urgent?: boolean;         // 아이젠하워: 긴급
   important?: boolean;      // 아이젠하워: 중요
   achievement?: number;     // 달성률 0-5 (1-3=양, 4-5=질)
-  children?: FranklinTask[]; // 서브태스크
+  children?: Task[]; // 서브태스크
   parentId?: string;        // 부모 태스크 ID
   period?: MandalartPeriod; // 일간/주간/월간
   queued?: boolean;         // 대기함에 명시적으로 넣은 태스크
+  hubPostId?: string;       // 업무 총괄 연결 (work_hub post_id)
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';
@@ -113,14 +114,14 @@ export const EISENHOWER_CONFIG: Record<EisenhowerQuadrant, { label: string; desc
   q4: { label: 'D', desc: '긴급하지도 중요하지도', action: '제거/보류', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
 };
 
-export function getQuadrant(task: FranklinTask): EisenhowerQuadrant {
+export function getQuadrant(task: Task): EisenhowerQuadrant {
   if (task.important && task.urgent) return 'q1';
   if (task.important && !task.urgent) return 'q2';
   if (!task.important && task.urgent) return 'q3';
   return 'q4';
 }
 
-export function setQuadrant(task: FranklinTask, q: EisenhowerQuadrant): Partial<FranklinTask> {
+export function setQuadrant(task: Task, q: EisenhowerQuadrant): Partial<Task> {
   const priorityMap: Record<EisenhowerQuadrant, FranklinPriority> = { q1: 'A', q2: 'B', q3: 'C', q4: 'D' };
   switch (q) {
     case 'q1': return { important: true, urgent: true, priority: priorityMap[q] };
@@ -155,17 +156,17 @@ export const FRANKLIN_PRIORITY_CONFIG: Record<FranklinPriority, { label: string;
   D: { label: 'D', desc: '보류/제거',   color: '#6b7280', bg: '#f9fafb', quadrant: 'q4' },
 };
 
-export function createEmptyFranklinTasks(): FranklinTask[] {
+export function createEmptyTasks(): Task[] {
   return [];
 }
 
 /** Franklin → TimeSlots 정방향 동기화: 연결된 과업의 텍스트/노트를 타임슬롯에 반영 */
 export function syncFranklinToSlots(
-  tasks: FranklinTask[],
+  tasks: Task[],
   slots: TimeSlotEntry[],
-  prevTasks?: FranklinTask[],
+  prevTasks?: Task[],
 ): TimeSlotEntry[] {
-  const taskBySlotId = new Map<string, FranklinTask>();
+  const taskBySlotId = new Map<string, Task>();
   tasks.forEach(t => { if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t); });
 
   // 이전에 연결되었다가 해제된 슬롯 파악
@@ -192,11 +193,11 @@ export function syncFranklinToSlots(
 
 /** TimeSlots → Franklin 역방향 동기화: 타임슬롯 편집 시 연결된 과업 업데이트 */
 export function syncSlotToFranklin(
-  tasks: FranklinTask[],
+  tasks: Task[],
   slotId: string,
   field: string,
   value: string,
-): FranklinTask[] {
+): Task[] {
   const linkedTask = tasks.find(t => t.timeSlotId === slotId);
   if (!linkedTask) return tasks;
   if (field === 'title') {
@@ -208,7 +209,7 @@ export function syncSlotToFranklin(
   return tasks;
 }
 
-export function getNextNumber(tasks: FranklinTask[], priority: FranklinPriority): number {
+export function getNextNumber(tasks: Task[], priority: FranklinPriority): number {
   const nums = tasks.filter(t => t.priority === priority).map(t => t.number);
   return nums.length > 0 ? Math.max(...nums) + 1 : 1;
 }
@@ -244,12 +245,12 @@ export const ACH_COLORS = ['#e2e8f0','#f59e0b','#f59e0b','#f59e0b','#10B981','#1
 export const ACH_LABELS = ['','1(양)','2(양)','3(양)','4(질)','5(질)'];
 
 /** 서브태스크 가져오기 (children 배열 기반) */
-export function getSubTasks(task: FranklinTask): FranklinTask[] {
+export function getSubTasks(task: Task): Task[] {
   return task.children || [];
 }
 
 /** 태스크 달성도 계산 — 자식 있으면 평균, 없으면 자기 값 */
-export function calcTaskAchievement(task: FranklinTask): number {
+export function calcTaskAchievement(task: Task): number {
   const subs = getSubTasks(task);
   if (subs.length === 0) return task.achievement || 0;
   const filled = subs.filter(s => (s.achievement || 0) > 0);
@@ -258,7 +259,7 @@ export function calcTaskAchievement(task: FranklinTask): number {
 }
 
 /** 서브태스크 추가 */
-export function addSubTask(tasks: FranklinTask[], parentId: string, subText: string): FranklinTask[] {
+export function addSubTask(tasks: Task[], parentId: string, subText: string): Task[] {
   return tasks.map(t => {
     if (t.id !== parentId) return t;
     const children = [...(t.children || [])];
@@ -277,7 +278,7 @@ export function addSubTask(tasks: FranklinTask[], parentId: string, subText: str
 }
 
 /** 서브태스크 업데이트 */
-export function updateSubTask(tasks: FranklinTask[], parentId: string, subId: string, updates: Partial<FranklinTask>): FranklinTask[] {
+export function updateSubTask(tasks: Task[], parentId: string, subId: string, updates: Partial<Task>): Task[] {
   return tasks.map(t => {
     if (t.id !== parentId) return t;
     const children = (t.children || []).map(c => c.id === subId ? { ...c, ...updates } : c);
@@ -286,7 +287,7 @@ export function updateSubTask(tasks: FranklinTask[], parentId: string, subId: st
 }
 
 /** 서브태스크 삭제 */
-export function removeSubTask(tasks: FranklinTask[], parentId: string, subId: string): FranklinTask[] {
+export function removeSubTask(tasks: Task[], parentId: string, subId: string): Task[] {
   return tasks.map(t => {
     if (t.id !== parentId) return t;
     const children = (t.children || []).filter(c => c.id !== subId);
@@ -305,7 +306,7 @@ export interface DailyLog {
   timeSlots: TimeSlotEntry[];
   employeeId: string;
   viewMode?: ViewMode;
-  franklinTasks?: FranklinTask[];
+  tasks?: Task[];
   todayTasks?: string;
   tomorrowTasks?: string;
   mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>;

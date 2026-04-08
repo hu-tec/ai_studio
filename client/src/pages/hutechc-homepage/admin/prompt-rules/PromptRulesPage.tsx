@@ -20,7 +20,7 @@ import {
   type OptionalRuleC3,
   type CustomField,
   type RuleStatus,
-} from '../../lib/promptRules";
+} from '../../lib/promptRules';
 
 type RuleSectionType = "A" | "B1" | "B2" | "B3" | "C1" | "C2" | "C3";
 
@@ -2513,7 +2513,7 @@ function AddRuleModal({
     enabled: true,
   });
 
-  const inputCls = "w-full px-2 py-1 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+  const inputCls = "w-full px-2 py-1 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">

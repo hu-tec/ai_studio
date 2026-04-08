@@ -1,0 +1,1 @@
+import{r as t}from"./index-BQKpUHO0.js";const r=t.createContext(void 0);function i(){const e=t.useContext(r);if(!e)throw new Error("usePrice must be used within PriceProvider");return e}export{i as u};

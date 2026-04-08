@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import { useWorkHubData } from './hooks/useWorkHubData';
 import { useGlobalFilter } from './hooks/useGlobalFilter';
+import { useWorkLogSync } from './hooks/useWorkLogSync';
 import NavRail from './nav/NavRail';
 import TaskBoard from './sections/TaskBoard';
 import LinksSection from './sections/LinksSection';
@@ -146,6 +147,7 @@ function DetailPopup({ post, onClose }: { post: HubPost; onClose: () => void }) 
 export default function WorkHubVerA() {
   const { posts, comments, loading, fetchData, handleDelete, handleTogglePin, handleSaveField, getPostComments } = useWorkHubData();
   const filter = useGlobalFilter(posts);
+  const { getProgress } = useWorkLogSync();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [detailPost, setDetailPost] = useState<HubPost | null>(null);
@@ -171,7 +173,7 @@ export default function WorkHubVerA() {
             anyFilterActive={filter.anyFilterActive} resetFilters={filter.resetFilters}
             handleDelete={handleDelete} handleTogglePin={handleTogglePin} handleSaveField={handleSaveField}
             getPostComments={getPostComments} setShowForm={setShowForm} setEditingId={setEditingId}
-            onDetail={setDetailPost}
+            onDetail={setDetailPost} getProgress={getProgress}
           />
         )}
         {filter.activeSection === 'feed' && (

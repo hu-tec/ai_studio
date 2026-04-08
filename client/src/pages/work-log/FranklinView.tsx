@@ -1,7 +1,7 @@
 import { useState, DragEvent } from 'react';
 import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
-import type { FranklinTask, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
+import type { Task, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
 import {
   FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG,
   getNextNumber, cycleStatus, syncPriorityToEisenhower,
@@ -10,10 +10,10 @@ import {
 } from './data';
 
 interface FranklinViewProps {
-  tasks: FranklinTask[];
+  tasks: Task[];
   timeSlots: TimeSlotEntry[];
   timeInterval: '30min' | '1hour' | 'half-day';
-  onTasksChange: (tasks: FranklinTask[]) => void;
+  onTasksChange: (tasks: Task[]) => void;
   onSlotTitleChange: (index: number, title: string) => void;
   period?: MandalartPeriod;
 }
@@ -57,7 +57,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
   const addTask = () => {
     if (!newText.trim()) return;
     const eisFlags = syncPriorityToEisenhower(newPriority);
-    const task: FranklinTask = {
+    const task: Task = {
       id: `ft-${Date.now()}`,
       priority: newPriority,
       number: getNextNumber(tasks, newPriority),
@@ -74,7 +74,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
     setNewEnd('');
   };
 
-  const updateTask = (id: string, updates: Partial<FranklinTask>) => {
+  const updateTask = (id: string, updates: Partial<Task>) => {
     onTasksChange(tasks.map(t => t.id === id ? { ...t, ...updates } : t));
   };
 
