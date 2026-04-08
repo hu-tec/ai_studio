@@ -242,6 +242,13 @@ export const CLAUDE_RULES: ClaudeRule[] = [
     ],
   },
   {
+    id: 'cr-ui-search', category: 'UI', title: '검색 필수', level: '고정',
+    rules: [
+      '모든 페이지에 검색 기능 필수',
+      '키워드 검색 → 실시간 필터링',
+    ],
+  },
+  {
     id: 'cr-ui-compact', category: 'UI', title: '컴팩트 UI', level: '고정',
     rules: [
       '패딩: p-1~p-2, p-4 이상 금지',
