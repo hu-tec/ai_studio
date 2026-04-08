@@ -122,8 +122,8 @@ const C_DEPTHS: { key: string; label: string; desc: string; fields: FI[] }[] = [
     ] },
 ];
 
-const mkH = (): HistRow => ({ id: crypto.randomUUID(), status: "", date: "", time: "", counselor: "", category: "", courseType: "", result: "", nextCall: "", memo: "" });
-const mkP = (): PayRow => ({ id: crypto.randomUUID(), category: "", payDate: "", status: "", realCourse: "", amount: "", discount: "", method: "", installment: "", cardCompany: "", approvalNo: "", refundDate: "", memo: "" });
+const mkH = (): HistRow => ({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, status: "", date: "", time: "", counselor: "", category: "", courseType: "", result: "", nextCall: "", memo: "" });
+const mkP = (): PayRow => ({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, category: "", payDate: "", status: "", realCourse: "", amount: "", discount: "", method: "", installment: "", cardCompany: "", approvalNo: "", refundDate: "", memo: "" });
 
 interface CounselingFormDialogProps {
   open: boolean;

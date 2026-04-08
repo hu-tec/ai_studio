@@ -87,7 +87,7 @@ export default function MarketingPage() {
 
     const now = new Date().toISOString();
     const entry: MarketingEntry = {
-      id: editingId || crypto.randomUUID(),
+      id: editingId || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       homepage,
       category,
       target_persona: {

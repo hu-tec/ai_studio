@@ -230,7 +230,7 @@ export function createEmptyApplicant(): Applicant {
   });
 
   return {
-    id: crypto.randomUUID(),
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     name: "",
     type: "강사",
     date: new Date().toISOString().split("T")[0],

@@ -168,7 +168,7 @@ export default function InstructorCurriPage() {
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const newItem: SavedCurriculum = {
-      id: editingId || crypto.randomUUID(),
+      id: editingId || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       created_at: dateStr,
       category: { large: catLarge, medium: catMedium, small: catSmall },
       instructor_grade: { field: selectedField, mid: selectedMid, level: selectedLevel },
