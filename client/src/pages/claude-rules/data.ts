@@ -186,6 +186,7 @@ export const CLAUDE_RULES: ClaudeRule[] = [
       '빌드결과와 소스 모두 커밋',
       '.gitignore: node_modules/, dist/, .env',
       'git remote: SSH (HTTPS 인증 안 됨)',
+      'git add -A / git add . 금지 — 해당 세션에서 수정한 파일만 개별 지정하여 add',
     ],
   },
   {
