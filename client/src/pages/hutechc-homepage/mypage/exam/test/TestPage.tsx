@@ -305,7 +305,7 @@ function OfflineExamSetup({ onComplete }: { onComplete: () => void }) {
 }
 
 function ExamTestContent() {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const examId = searchParams.get('id');
   const examType = searchParams.get('type');
   const [isSetupComplete, setIsSetupComplete] = useState(false);

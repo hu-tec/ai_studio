@@ -40,38 +40,71 @@ import {
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 
 // --- Assets ---
+// @ts-ignore
 import img1 from "figma:asset/632b32d4c56afea021e8e464ef157a20259d2c2f.png";
+// @ts-ignore
 import img2 from "figma:asset/158f439f38074ec6c636d16327502bc5c50d9b40.png";
+// @ts-ignore
 import img3 from "figma:asset/f924f835a12e1715aedfaf1d9cbd3fe20ceb81c2.png";
+// @ts-ignore
 import img4 from "figma:asset/fa9464a2ba454b5d9454292d03a1db47810a4a40.png";
+// @ts-ignore
 import img5 from "figma:asset/44146a0bced6d0625b6611cb069fb0441598ce11.png";
+// @ts-ignore
 import img6 from "figma:asset/fbbfc907842ec804aa5f08d7d54dee92a3fad1a9.png";
+// @ts-ignore
 import img7 from "figma:asset/077b48673c977569619911b08e0c9c152c4af280.png";
+// @ts-ignore
 import img8 from "figma:asset/a490847678318edb19ea57142835738d43612e43.png";
+// @ts-ignore
 import img9 from "figma:asset/633d5d434ea6e6fca69eca484434aa27ad4f2b5b.png";
+// @ts-ignore
 import img10 from "figma:asset/4850bae1305885afb3e5fe0a89ac6bcf69c655a8.png";
+// @ts-ignore
 import img11 from "figma:asset/514b292089faf966fb87b51e727259259e069b27.png";
+// @ts-ignore
 import img12 from "figma:asset/40955f27c15b920af34ad89dec4860f8d5abb627.png";
+// @ts-ignore
 import img13 from "figma:asset/4cf259b1b2d49b92078fcfec5b8534f2ff1cb066.png";
+// @ts-ignore
 import img14 from "figma:asset/59aa02f184df058439cc714510a656ac21937c0b.png";
+// @ts-ignore
 import img15 from "figma:asset/06c174071f251358c3eaf356c40043dc650416a3.png";
+// @ts-ignore
 import img16 from "figma:asset/5a5e68f97f5382dcb1ed19b8e97aede220d36905.png";
+// @ts-ignore
 import img17 from "figma:asset/15e458a84b9177b7069c25bd588db38f0061a10f.png";
+// @ts-ignore
 import img18 from "figma:asset/a3ae32e5eff5250c2fd0250b0f47843b5ece569e.png";
+// @ts-ignore
 import img19 from "figma:asset/c47fb3ee056c64daa65a7d2e3c0632335a74f5b9.png";
+// @ts-ignore
 import img20 from "figma:asset/f8362560f211f1a8748122720439b6118adbdc23.png";
+// @ts-ignore
 import img21 from "figma:asset/eff7d9f934a0f6b716644f6d085e8ca6b06be206.png";
+// @ts-ignore
 import img22 from "figma:asset/72d44252af9085a57ff0680663eec625d16909b9.png";
+// @ts-ignore
 import img23 from "figma:asset/7bc5531d27acfe90240a0dd42a351e6dadcf614d.png";
+// @ts-ignore
 import img24 from "figma:asset/ef6dd4e63014318b4426dae31a7da7c25671e017.png";
+// @ts-ignore
 import img25 from "figma:asset/b965adf1ce33bf26a6e39e432e2ca5b261900ab6.png";
+// @ts-ignore
 import img26 from "figma:asset/fb17610f9e3ba5cedabe59bb56e2a9932b6f0152.png";
+// @ts-ignore
 import img27 from "figma:asset/a658bb2ed6919f0fdb4c9c7a1a30a6d44aa875c4.png";
+// @ts-ignore
 import img28 from "figma:asset/b1d358d6781a572cb3fc9ee8869d3096b725bdda.png";
+// @ts-ignore
 import img29 from "figma:asset/4a104c798f6e72750fdfca7fd661faa231bab784.png";
+// @ts-ignore
 import img30 from "figma:asset/a1d6d7ad8553917472401c0f23584e571a7b44be.png";
+// @ts-ignore
 import img31 from "figma:asset/1b5ef7fc6f4ae55fbc3633969eb99e68c5d9015b.png";
+// @ts-ignore
 import img32 from "figma:asset/a900f957b7e0ab0fa2d0bc0e5fec1833410c827b.png";
+// @ts-ignore
 import img33 from "figma:asset/0d6b803d565aa1189874bfa7ecd3e76c2e6a6a9d.png";
 
 // --- Types ---

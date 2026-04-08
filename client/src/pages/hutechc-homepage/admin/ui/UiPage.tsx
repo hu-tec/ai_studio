@@ -66,7 +66,7 @@ export default function UiPage() {
             return (
               <Link
                 key={section.id}
-                href={section.href}
+                to={section.href}
                 className={`block px-3 py-2 rounded-md mb-1 ${
                   isActive
                     ? 'bg-indigo-50 text-indigo-700 font-semibold'
@@ -92,7 +92,7 @@ export default function UiPage() {
             {SECTIONS.map((section) => (
               <Link
                 key={section.id}
-                href={section.href}
+                to={section.href}
                 className="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-sm"
               >
                 <div className="font-semibold text-gray-900 mb-1">{section.label}</div>

@@ -11,7 +11,7 @@ export default function LogoutPage() {
       navigate('/hutechc-homepage/');
       window.location.reload();
     })();
-  }, [router]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

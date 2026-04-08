@@ -139,7 +139,7 @@ function DetailContent({ a }: { a: Applicant }) {
               <div key={group.label} className="space-y-1">
                 <div className="text-gray-500 font-medium">{group.label}</div>
                 <div className="flex flex-wrap gap-1">
-                  {group.items.map((item) => (
+                  {group.items.map((item: any) => (
                     <span
                       key={item}
                       className="bg-white border border-gray-200 text-gray-700 rounded px-1.5 py-0.5"

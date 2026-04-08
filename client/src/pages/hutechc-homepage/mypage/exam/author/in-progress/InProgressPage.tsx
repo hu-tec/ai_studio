@@ -5,7 +5,7 @@ import { getDrafts, updateDraft } from '../../../../lib/examDraftStore';
 
 export default function InProgressPage() {
   const navigate = useNavigate();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const initialExamId = searchParams?.get('examId') ?? null;
 
   const [version, setVersion] = useState(0);

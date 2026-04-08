@@ -7,7 +7,7 @@ export default function AuthorPage() {
 
   useEffect(() => {
     navigate('/hutechc-homepage/mypage/exam/author/requests', { replace: true });
-  }, [router]);
+  }, [navigate]);
 
   return null;
 }

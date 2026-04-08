@@ -30,7 +30,9 @@ export function useMemos() {
   const persist = useCallback(
     (newItems: MemoItemData[]) => {
       const data: PageMemoData = { items: newItems };
-      api.pageMemos.save(pageKey, data).catch(console.error);
+      api.pageMemos.save(pageKey, data).then(() => {
+        window.dispatchEvent(new CustomEvent('memo-changed'));
+      }).catch(console.error);
     },
     [pageKey],
   );
@@ -81,18 +83,23 @@ export function useAllMemoCounts() {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    fetch('/api/page-memos')
-      .then((r) => r.json())
-      .then((rows: any[]) => {
-        const map: Record<string, number> = {};
-        for (const row of rows) {
-          const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-          const len = data?.items?.length || 0;
-          if (len > 0) map[row.memo_id] = len;
-        }
-        setCounts(map);
-      })
-      .catch(() => {});
+    const load = () => {
+      fetch('/api/page-memos')
+        .then((r) => r.json())
+        .then((rows: any[]) => {
+          const map: Record<string, number> = {};
+          for (const row of rows) {
+            const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+            const len = data?.items?.length || 0;
+            if (len > 0) map[row.memo_id] = len;
+          }
+          setCounts(map);
+        })
+        .catch(() => {});
+    };
+    load();
+    window.addEventListener('memo-changed', load);
+    return () => window.removeEventListener('memo-changed', load);
   }, []);
 
   return counts;

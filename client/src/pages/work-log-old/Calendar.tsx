@@ -50,6 +50,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
     return {
       date: format(date, 'yyyy-MM-dd'),
       summary: '',
+      detail: '',
       position: '신입',
       homepageCategories: [],
       departmentCategories: [],

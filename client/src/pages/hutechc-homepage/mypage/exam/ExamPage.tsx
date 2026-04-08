@@ -8,7 +8,7 @@ export default function ExamPage() {
 
   useEffect(() => {
     navigate('/hutechc-homepage/exam', { replace: true });
-  }, [router]);
+  }, [navigate]);
 
   return null;
 }

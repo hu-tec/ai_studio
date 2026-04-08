@@ -32,7 +32,9 @@ import {
   RefreshCcw,
   Settings2,
   Activity,
-  History as HistoryIcon
+  History as HistoryIcon,
+  Eye,
+  RotateCcw
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -128,6 +130,10 @@ export function OutboundCallsPage() {
 
   // Sorting
   const [sortConfig, setSortConfig] = useState<{ key: keyof ContactEntry; direction: 'asc' | 'desc' } | null>(null);
+
+  const downloadFile = (type: 'excel' | 'word') => {
+    toast.success(`${type === 'excel' ? '엑셀' : '워드'} 다운로드 (미구현)`);
+  };
 
   // Derived Values
   const categories = useMemo(() => {
@@ -439,7 +445,7 @@ export function OutboundCallsPage() {
             </button>
             <button 
               onClick={() => setViewType('full-list')}
-              className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${viewType === 'full-list' ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${(viewType as string) === 'full-list' ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <FileSpreadsheet className="w-3 h-3" />
               <span>FULL LIST</span>

@@ -135,7 +135,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           // 하위 셀 → 이 셀의 taskId를 부모로 전달
           cell.children?.forEach(c => processCell(c, cell.taskId));
         };
-        newCells.forEach(processCell);
+        for (const cell of newCells) processCell(cell);
         return changed ? updated : tasks;
       });
       return { ...prev, [period]: newCells };

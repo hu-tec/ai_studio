@@ -20,7 +20,7 @@ export default function CompletedPage() {
   const [view, setView] = useState<'completed' | 'grading' | 'graded'>('completed');
 
   // URL 쿼리 (?view=grading|graded)를 통해 초기 뷰 설정
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const v = searchParams.get('view');

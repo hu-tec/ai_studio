@@ -201,9 +201,9 @@ export function AttendancePage() {
 
     if (mode === 'add') {
       const newRecord: AttendanceRecord = {
+        ...formData as AttendanceRecord,
         id: `r${Date.now()}`,
         employeeId: selectedId,
-        ...formData as AttendanceRecord
       };
       const newRecords = [...records, newRecord];
       setRecords(newRecords);
