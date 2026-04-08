@@ -241,7 +241,7 @@ export default function MeetingsPage() {
 
   if (showPreview) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-4 sm:p-8 font-sans">
+      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-2 sm:p-3 font-sans">
 
         <button 
           onClick={() => setShowPreview(false)}

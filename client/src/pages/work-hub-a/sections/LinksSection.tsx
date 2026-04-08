@@ -1,12 +1,23 @@
-import { useState } from 'react';
-import { ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ExternalLink, ChevronDown, ChevronRight, Plus, X, Trash2 } from 'lucide-react';
 import { LIVE_LINKS, SHORTCUT_SECTIONS } from '../data/links-data';
 
+interface CustomLink { name: string; url: string; group: string; }
+
 export default function LinksSection() {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['live']));
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(['live', 'custom']));
   const toggle = (k: string) => setExpanded(prev => { const n = new Set(prev); if (n.has(k)) n.delete(k); else n.add(k); return n; });
-  const allKeys = ['live', ...SHORTCUT_SECTIONS.map(s => s.person)];
+  const allKeys = ['live', 'custom', ...SHORTCUT_SECTIONS.map(s => s.person)];
   const allOpen = allKeys.every(k => expanded.has(k));
+
+  // 커스텀 링크 (localStorage)
+  const [customLinks, setCustomLinks] = useState<CustomLink[]>(() => { try { return JSON.parse(localStorage.getItem('wh-custom-links') || '[]'); } catch { return []; } });
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newUrl, setNewUrl] = useState('');
+  const [newGroup, setNewGroup] = useState('기타');
+  const addLink = () => { if (!newName || !newUrl) return; const next = [...customLinks, { name: newName, url: newUrl.startsWith('http') ? newUrl : 'https://' + newUrl, group: newGroup }]; setCustomLinks(next); localStorage.setItem('wh-custom-links', JSON.stringify(next)); setNewName(''); setNewUrl(''); setAdding(false); };
+  const removeLink = (idx: number) => { if (!confirm('삭제?')) return; const next = customLinks.filter((_, i) => i !== idx); setCustomLinks(next); localStorage.setItem('wh-custom-links', JSON.stringify(next)); };
 
   return (
     <div style={{ padding: '8px 12px', overflow: 'auto' }}>
@@ -34,6 +45,37 @@ export default function LinksSection() {
                 ))}
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* 커스텀 링크 */}
+      <div style={{ marginBottom: 8 }}>
+        <button onClick={() => toggle('custom')} style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 700, color: '#F59E0B', marginBottom: 4 }}>
+          {expanded.has('custom') ? <ChevronDown size={10} /> : <ChevronRight size={10} />} 내 링크 <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 400 }}>{customLinks.length}개</span>
+        </button>
+        {expanded.has('custom') && (
+          <div>
+            {customLinks.map((l, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 6px', fontSize: 9 }}>
+                <a href={l.url} target="_blank" rel="noopener noreferrer" style={{ color: '#475569', textDecoration: 'none', flex: 1, display: 'flex', alignItems: 'center', gap: 3 }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#3B82F6'} onMouseLeave={e => e.currentTarget.style.color = '#475569'}>
+                  <ExternalLink size={7} color="#F59E0B" />{l.name} <span style={{ fontSize: 7, color: '#94a3b8' }}>{l.group}</span>
+                </a>
+                <button onClick={() => removeLink(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1 }}><Trash2 size={8} color="#ef4444" /></button>
+              </div>
+            ))}
+            {adding ? (
+              <div style={{ display: 'flex', gap: 4, padding: '4px 6px' }}>
+                <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="이름" style={{ width: 80, padding: '2px 4px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 9 }} />
+                <input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="URL" style={{ flex: 1, padding: '2px 4px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 9 }} onKeyDown={e => { if (e.key === 'Enter') addLink(); if (e.key === 'Escape') setAdding(false); }} />
+                <input value={newGroup} onChange={e => setNewGroup(e.target.value)} placeholder="그룹" style={{ width: 50, padding: '2px 4px', border: '1px solid #e2e8f0', borderRadius: 4, fontSize: 9 }} />
+                <button onClick={addLink} style={{ padding: '2px 6px', background: '#F59E0B', color: '#fff', border: 'none', borderRadius: 4, fontSize: 9, cursor: 'pointer' }}>추가</button>
+                <button onClick={() => setAdding(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={10} color="#94a3b8" /></button>
+              </div>
+            ) : (
+              <button onClick={() => setAdding(true)} style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 8px', margin: '4px 6px', border: '1px dashed #F59E0B', borderRadius: 4, background: 'none', color: '#F59E0B', fontSize: 9, cursor: 'pointer' }}><Plus size={9} />링크 추가</button>
+            )}
           </div>
         )}
       </div>

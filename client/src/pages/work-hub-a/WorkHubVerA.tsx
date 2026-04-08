@@ -232,7 +232,7 @@ export default function WorkHubVerA() {
             <StatusSection filterType={filter.filterType === '전체' ? undefined : filter.filterType} activePath={filter.activePath} activePipeline={filter.activePipeline} />
           </Suspense>
         )}
-        {filter.activeSection === 'archive' && <ArchiveSection posts={posts} onDetail={setDetailPost} />}
+        {filter.activeSection === 'archive' && <ArchiveSection posts={posts} onDetail={setDetailPost} onNew={() => { setEditingId(null); setShowForm(true); }} onEdit={id => { setEditingId(id); setShowForm(true); }} onDelete={handleDelete} />}
         {filter.activeSection === 'links' && <LinksSection />}
         {filter.activeSection === 'system' && <SystemSection />}
       </div>

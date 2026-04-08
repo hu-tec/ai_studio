@@ -245,7 +245,7 @@ export function AttendancePageB() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-4 font-sans text-[#333] flex flex-col gap-3">
+    <div className="min-h-screen bg-[#F8F9FA] p-2 font-sans text-[#333] flex flex-col gap-3">
       {/* ── Header ── */}
       <header className="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200">
         <div className="flex items-center gap-2">
@@ -331,25 +331,25 @@ export function AttendancePageB() {
 
       {/* ── Summary Bar ── */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><Users size={18} /></div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+          <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><Users size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 총 인원</div>
-            <div className="text-lg font-bold">{visibleEmployees.length}명</div>
+            <div className="text-sm font-bold">{visibleEmployees.length}명</div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3">
-          <div className="p-2 bg-green-100 text-green-600 rounded-lg"><UserCheck size={18} /></div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+          <div className="p-1.5 bg-green-100 text-green-600 rounded-lg"><UserCheck size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 출근 기록</div>
-            <div className="text-lg font-bold text-green-600">{monthRecords.length}건</div>
+            <div className="text-sm font-bold text-green-600">{monthRecords.length}건</div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3">
-          <div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><AlertCircle size={18} /></div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+          <div className="p-1.5 bg-amber-100 text-amber-600 rounded-lg"><AlertCircle size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 지각</div>
-            <div className="text-lg font-bold text-amber-600">{lateCount}건</div>
+            <div className="text-sm font-bold text-amber-600">{lateCount}건</div>
           </div>
         </div>
       </div>

@@ -371,8 +371,8 @@ function SchedulePage() {
   [schedules, selectedDetailId]);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#334155] p-6 font-sans">
-      <header className="max-w-[1600px] mx-auto mb-8 flex items-center justify-between bg-white/50 p-4 rounded-2xl backdrop-blur-sm border border-white/50">
+    <div className="min-h-screen bg-[#f8fafc] text-[#334155] p-2 font-sans">
+      <header className="max-w-[1600px] mx-auto mb-2 flex items-center justify-between bg-white/50 p-2 rounded-2xl backdrop-blur-sm border border-white/50">
         <div className="flex items-center gap-8">
           <h1 className="text-xl font-black flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
             <Calendar className="w-6 h-6 text-blue-600" />

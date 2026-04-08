@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, FolderOpen, ExternalLink, Search } from 'lucide-react';
+import { ChevronDown, ChevronRight, FolderOpen, ExternalLink, Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import type { HubPost } from '../types';
 import { CATEGORY_TREE, DEF_LARGE, SERVICE_URLS, getDeptBg, POST_TYPE_STYLES, buildPathLabel, fmtDate, matchesPath } from '../constants';
 
-interface Props { posts: HubPost[]; onDetail: (p: HubPost) => void; }
+interface Props { posts: HubPost[]; onDetail: (p: HubPost) => void; onNew?: () => void; onEdit?: (id: string) => void; onDelete?: (id: string) => void; }
 
-export default function ArchiveSection({ posts, onDetail }: Props) {
+export default function ArchiveSection({ posts, onDetail, onNew, onEdit, onDelete }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [activePath, setActivePath] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -67,6 +67,7 @@ export default function ArchiveSection({ posts, onDetail }: Props) {
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..." style={{ width: '100%', padding: '3px 6px 3px 22px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 10, outline: 'none' }} />
           </div>
           <span style={{ fontSize: 9, color: '#94a3b8' }}>{filtered.length}건</span>
+          {onNew && <button onClick={onNew} style={{ marginLeft: 'auto', padding: '2px 8px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 4, fontSize: 9, fontWeight: 600, cursor: 'pointer' }}>+새 자료</button>}
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
           {filtered.length === 0 ? <div style={{ padding: 20, textAlign: 'center', fontSize: 10, color: '#94a3b8' }}>자료 없음</div> : (
@@ -79,6 +80,7 @@ export default function ArchiveSection({ posts, onDetail }: Props) {
                 <th style={{ padding: '3px 6px', fontSize: 9, fontWeight: 600, color: '#64748b', textAlign: 'left' }}>첨부</th>
                 <th style={{ padding: '3px 6px', fontSize: 9, fontWeight: 600, color: '#64748b', textAlign: 'left' }}>작성자</th>
                 <th style={{ padding: '3px 6px', fontSize: 9, fontWeight: 600, color: '#64748b', textAlign: 'left' }}>날짜</th>
+                <th style={{ padding: '3px 6px', fontSize: 9, fontWeight: 600, color: '#64748b', width: 40 }}>액션</th>
               </tr></thead>
               <tbody>
                 {filtered.map((p, i) => {
@@ -93,6 +95,12 @@ export default function ArchiveSection({ posts, onDetail }: Props) {
                       <td style={{ padding: '2px 6px', fontSize: 8, color: '#94a3b8' }}>{(p.data.attachments || []).length || '—'}</td>
                       <td style={{ padding: '2px 6px', fontSize: 9, color: '#64748b' }}>{p.data.author}</td>
                       <td style={{ padding: '2px 6px', fontSize: 8, color: '#94a3b8' }}>{fmtDate(p.data.created_at)}</td>
+                      <td style={{ padding: '2px 4px' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: 1 }}>
+                          {onEdit && <button onClick={() => onEdit(p.post_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1 }}><Pencil size={8} color="#94a3b8" /></button>}
+                          {onDelete && <button onClick={() => onDelete(p.post_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1 }}><Trash2 size={8} color="#ef4444" /></button>}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}

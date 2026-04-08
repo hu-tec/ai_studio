@@ -18,6 +18,12 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
   const [sortKey, setSortKey] = useState<'stage'|'type'|'status'|'title'|'date'|'assignee'>('stage');
   const [sortAsc, setSortAsc] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const ALL_COLS = ['파이프','유형','분류1','분류2','항목명','상태','담당','비고','날짜','링크'] as const;
+  const [visibleCols, setVisibleCols] = useState<Set<string>>(new Set(ALL_COLS));
+  const showCol = (c: string) => visibleCols.has(c);
+  const toggleCol = (c: string) => setVisibleCols(prev => { const n = new Set(prev); if (n.has(c)) n.delete(c); else n.add(c); return n; });
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteVal, setEditingNoteVal] = useState('');
 
   const allExpanded = expandedIds.size > 0 && items.every(i => expandedIds.has(i.id));
   const toggleAll = () => setExpandedIds(allExpanded ? new Set() : new Set(items.map(i => i.id)));
@@ -80,6 +86,11 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
           <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 40 }}>상태</span>
           {STATUSES.map(s => { const a = filterStatus.includes(s.key); return <button key={s.key} onClick={() => setFilterStatus(prev => a ? prev.filter(x=>x!==s.key) : [...prev,s.key])} style={{ padding: '2px 6px', borderRadius: 8, border: '1px solid', borderColor: a ? s.color : '#e2e8f0', background: a ? s.bg : '#fff', color: a ? s.color : '#64748b', fontSize: 9, cursor: 'pointer', fontWeight: a ? 600 : 400 }}>{s.key}</button>; })}
         </div>
+        {/* 열 선택 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 40 }}>열</span>
+          {ALL_COLS.map(c => <button key={c} onClick={() => toggleCol(c)} style={{ padding: '2px 5px', borderRadius: 6, border: '1px solid', borderColor: showCol(c) ? '#3B82F6' : '#e2e8f0', background: showCol(c) ? '#EFF6FF' : '#fff', color: showCol(c) ? '#3B82F6' : '#cbd5e1', fontSize: 8, cursor: 'pointer', fontWeight: showCol(c) ? 600 : 400 }}>{c}</button>)}
+        </div>
       </div>
 
       {/* 테이블 */}
@@ -88,15 +99,16 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
           <thead>
             <tr>
               <th style={{ ...th, width: 28 }}>#</th>
-              <th style={th} onClick={() => handleSort('stage')}>파이프 <SortIcon k="stage" /></th>
-              <th style={th} onClick={() => handleSort('type')}>유형 <SortIcon k="type" /></th>
-              <th style={{ ...th, minWidth: 48 }}>분류1</th>
-              <th style={{ ...th, minWidth: 36 }}>분류2</th>
-              <th style={th} onClick={() => handleSort('title')}>항목명 <SortIcon k="title" /></th>
-              <th style={th} onClick={() => handleSort('status')}>상태 <SortIcon k="status" /></th>
-              <th style={th} onClick={() => handleSort('assignee')}>담당 <SortIcon k="assignee" /></th>
-              <th style={th} onClick={() => handleSort('date')}>날짜 <SortIcon k="date" /></th>
-              <th style={{ ...th, width: 24 }}>링크</th>
+              {showCol('파이프') && <th style={th} onClick={() => handleSort('stage')}>파이프 <SortIcon k="stage" /></th>}
+              {showCol('유형') && <th style={th} onClick={() => handleSort('type')}>유형 <SortIcon k="type" /></th>}
+              {showCol('분류1') && <th style={{ ...th, minWidth: 48 }}>분류1</th>}
+              {showCol('분류2') && <th style={{ ...th, minWidth: 36 }}>분류2</th>}
+              {showCol('항목명') && <th style={th} onClick={() => handleSort('title')}>항목명 <SortIcon k="title" /></th>}
+              {showCol('상태') && <th style={th} onClick={() => handleSort('status')}>상태 <SortIcon k="status" /></th>}
+              {showCol('담당') && <th style={th} onClick={() => handleSort('assignee')}>담당 <SortIcon k="assignee" /></th>}
+              {showCol('비고') && <th style={{ ...th, minWidth: 50 }}>비고</th>}
+              {showCol('날짜') && <th style={th} onClick={() => handleSort('date')}>날짜 <SortIcon k="date" /></th>}
+              {showCol('링크') && <th style={{ ...th, width: 24 }}>링크</th>}
             </tr>
           </thead>
           <tbody>
@@ -112,20 +124,27 @@ export default function StatusTable({ filterType, activePath = [] }: Props) {
                   onMouseEnter={e => { if (!isOpen) (e.currentTarget as HTMLElement).style.background = '#fafbfd'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; }}>
                   <td style={{ padding: '3px 6px', color: '#94a3b8', fontSize: 9 }}>{idx + 1}</td>
-                  <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 5px', borderRadius: 6, fontSize: 9, background: stg.bg, color: stg.color, fontWeight: 600, lineHeight: '15px', display: 'inline-block' }}>{stg.name}</span></td>
-                  <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 4px', borderRadius: 4, fontSize: 8, background: pt.bg, color: pt.color, fontWeight: 700, lineHeight: '14px', display: 'inline-block' }}>{item.type}</span></td>
-                  <td style={{ padding: '3px 6px', fontSize: 10, color: '#475569', fontWeight: 500 }}>{item.sub1}</td>
-                  <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{item.sub2 || '—'}</td>
-                  <td style={{ padding: '3px 6px', color: '#1e293b', fontWeight: 500, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {showCol('파이프') && <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 5px', borderRadius: 6, fontSize: 9, background: stg.bg, color: stg.color, fontWeight: 600 }}>{stg.name}</span></td>}
+                  {showCol('유형') && <td style={{ padding: '3px 6px' }}><span style={{ padding: '0px 4px', borderRadius: 4, fontSize: 8, background: pt.bg, color: pt.color, fontWeight: 700 }}>{item.type}</span></td>}
+                  {showCol('분류1') && <td style={{ padding: '3px 6px', fontSize: 10, color: '#475569', fontWeight: 500 }}>{item.sub1}</td>}
+                  {showCol('분류2') && <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{item.sub2 || '—'}</td>}
+                  {showCol('항목명') && <td style={{ padding: '3px 6px', color: '#1e293b', fontWeight: 500, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {item.title}
                     {isOpen && item.note && <div style={{ fontSize: 10, color: '#64748b', fontWeight: 400, marginTop: 1, whiteSpace: 'normal' }}>{item.note}</div>}
-                  </td>
-                  <td style={{ padding: '3px 6px' }}><span style={{ padding: '1px 5px', borderRadius: 6, fontSize: 9, background: st.bg, color: st.color, fontWeight: 600 }}>{item.status}</span></td>
-                  <td style={{ padding: '3px 6px', fontSize: 10, color: '#64748b' }}>{item.assignee || '—'}</td>
-                  <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{item.date || '—'}</td>
-                  <td style={{ padding: '3px 6px' }} onClick={e => e.stopPropagation()}>
+                  </td>}
+                  {showCol('상태') && <td style={{ padding: '3px 6px' }}><span style={{ padding: '1px 5px', borderRadius: 6, fontSize: 9, background: st.bg, color: st.color, fontWeight: 600 }}>{item.status}</span></td>}
+                  {showCol('담당') && <td style={{ padding: '3px 6px', fontSize: 10, color: '#64748b' }}>{item.assignee || '—'}</td>}
+                  {showCol('비고') && <td style={{ padding: '3px 6px' }} onClick={e => { e.stopPropagation(); setEditingNoteId(item.id); setEditingNoteVal(item.note || ''); }}>
+                    {editingNoteId === item.id ? (
+                      <input value={editingNoteVal} onChange={e => setEditingNoteVal(e.target.value)}
+                        onBlur={() => setEditingNoteId(null)} onKeyDown={e => { if (e.key === 'Escape') setEditingNoteId(null); }}
+                        autoFocus onClick={e => e.stopPropagation()} style={{ width: '100%', padding: '1px 3px', border: '1px solid #3B82F6', borderRadius: 3, fontSize: 9, outline: 'none' }} />
+                    ) : <span style={{ fontSize: 9, color: item.note ? '#475569' : '#cbd5e1', cursor: 'text' }}>{item.note || '비고'}</span>}
+                  </td>}
+                  {showCol('날짜') && <td style={{ padding: '3px 6px', fontSize: 9, color: '#94a3b8' }}>{item.date || '—'}</td>}
+                  {showCol('링크') && <td style={{ padding: '3px 6px' }} onClick={e => e.stopPropagation()}>
                     {item.link ? <a href={item.link} style={{ color: '#3B82F6' }}><ExternalLink size={10} /></a> : <span style={{ color: '#e2e8f0' }}>—</span>}
-                  </td>
+                  </td>}
                 </tr>
               );
             })}
