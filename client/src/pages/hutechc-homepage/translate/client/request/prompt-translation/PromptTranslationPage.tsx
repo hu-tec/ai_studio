@@ -7,7 +7,7 @@ import {
   calculateAmountFromStep1,
   type TranslationRequestData,
 } from '../../../../lib/priceCalculator';
-import { loadStored as loadPromptRules, type PromptRule, MAIN_CATEGORY_LABELS, PRESET_LABELS } from '../../../../lib/promptRules";
+import { loadStored as loadPromptRules, type PromptRule, MAIN_CATEGORY_LABELS, PRESET_LABELS } from '../../../../lib/promptRules';
 
 // STEP1과 동일한 카테고리/언어 설정 -----------------
 const MAIN_CATEGORIES = [
@@ -771,7 +771,7 @@ export default function PromptTranslationPage() {
                   onChange={(e) => {
                     const nextMid = e.target.value;
                     setMiddleCategory(nextMid);
-                    const firstDetail = DETAIL_CATEGORIES[nextMid]?.[0]?.id || "';
+                    const firstDetail = DETAIL_CATEGORIES[nextMid]?.[0]?.id || "";
                     setDetailCategory(firstDetail);
                   }}
                 >
