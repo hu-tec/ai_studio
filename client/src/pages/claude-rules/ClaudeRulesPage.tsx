@@ -47,7 +47,11 @@ function FilterChip({ active, color, bg, onClick, children }: {
 /* ── 업무 설계 규정 탭 ── */
 function DesignRulesTab() {
   const [expandedMajor, setExpandedMajor] = useState<Set<string>>(new Set(DESIGN_RULES.map(r => r.id)));
-  const [expandedMid, setExpandedMid] = useState<Set<string>>(new Set());
+  const [expandedMid, setExpandedMid] = useState<Set<string>>(() => {
+    const all = new Set<string>();
+    DESIGN_RULES.forEach(r => r.midCategories.forEach((_, mi) => all.add(`${r.id}-${mi}`)));
+    return all;
+  });
   const [activeMajors, setActiveMajors] = useState<Set<string>>(new Set(DESIGN_RULES.map(r => r.id)));
   const [search, setSearch] = useState('');
 
@@ -209,12 +213,8 @@ function ClaudeRulesTab() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* 요약 */}
+      {/* 등급 필터 + 검색 + 전체 펼치기 */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
-          고정 {CLAUDE_RULES.filter(r => r.level === '고정').length} · 준고정 {CLAUDE_RULES.filter(r => r.level === '준고정').length} · 선택 {CLAUDE_RULES.filter(r => r.level === '선택').length}
-        </span>
-        {/* 등급 필터 (멀티=원형) */}
         {(['고정', '준고정', '선택'] as RuleLevel[]).map(lv => (
           <FilterChip
             key={lv}
