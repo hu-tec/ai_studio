@@ -184,15 +184,16 @@ export default function WorkHubPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [postsRes, commentsRes] = await Promise.all([
-        fetch('/api/work-hub'), fetch('/api/work-hub-comments')
+      const [postsRes, commentsRes, materialsRes] = await Promise.all([
+        fetch('/api/work-hub'), fetch('/api/work-hub-comments'), fetch('/api/work-materials')
       ]);
       const postsRaw = await postsRes.json();
       const commentsRaw = await commentsRes.json();
+      const materialsRaw = await materialsRes.json();
 
-      const parsed: HubPost[] = (Array.isArray(postsRaw) ? postsRaw : []).map((r: any) => {
+      // work_hub posts
+      const hubPosts: HubPost[] = (Array.isArray(postsRaw) ? postsRaw : []).map((r: any) => {
         const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
-        // legacy migration: department/category2/category3 → path
         let path = d.path;
         if (!path && d.department) {
           const dept = Array.isArray(d.department) ? d.department[0] : d.department;
@@ -201,16 +202,31 @@ export default function WorkHubPage() {
           path = [dept, c2, c3].filter(Boolean);
         }
         return {
-          ...r, data: {
-            ...d,
-            type: d.type || '메모',
-            path: path || ['미분류_창고'],
-            position: toArr(d.position),
-            attachments: d.attachments || [], content: d.content || '',
-            author: d.author || '', pinned: !!d.pinned,
+          ...r, post_id: r.post_id, data: {
+            ...d, type: d.type || '메모', path: path || ['미분류_창고'],
+            position: toArr(d.position), attachments: d.attachments || [],
+            content: d.content || '', author: d.author || '', pinned: !!d.pinned,
             created_at: d.created_at || r.updated_at || '',
           }
         };
+      });
+
+      // work_materials → HubPost 변환 (업무 자료 통합)
+      const matPosts: HubPost[] = (Array.isArray(materialsRaw) ? materialsRaw : []).map((r: any) => {
+        const d = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+        const dept = Array.isArray(d.department) ? d.department[0] : (d.department || '');
+        const c2 = Array.isArray(d.category2) ? d.category2[0] : (d.category2 || '');
+        const c3 = Array.isArray(d.category3) ? d.category3[0] : (d.category3 || '');
+        return {
+          id: r.id, post_id: `mat_${r.material_id}`, data: {
+            type: '파일' as PostType,
+            path: [dept, c2, c3].filter(Boolean) as [string, string?, string?],
+            position: toArr(d.position), title: d.title || '',
+            content: d.content || '', attachments: d.attachments || [],
+            author: d.author || '', pinned: false, note: d.note || '',
+            created_at: d.created_at || r.updated_at || '',
+          }, updated_at: r.updated_at,
+        } as HubPost;
       });
 
       const parsedComments: HubComment[] = (Array.isArray(commentsRaw) ? commentsRaw : []).map((r: any) => {
@@ -218,7 +234,7 @@ export default function WorkHubPage() {
         return { ...r, post_id: d.post_id, data: d };
       });
 
-      setPosts(parsed);
+      setPosts([...hubPosts, ...matPosts]);
       setComments(parsedComments);
     } catch { setPosts([]); setComments([]); }
     finally { setLoading(false); }
