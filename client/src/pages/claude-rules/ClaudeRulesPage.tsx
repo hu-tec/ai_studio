@@ -284,7 +284,7 @@ export default function ClaudeRulesPage() {
           <span className="text-[13px] font-bold text-violet-800">규정 (임시_혁_test)</span>
         </div>
         <div className="mt-0.5 flex flex-col gap-0.5 text-[10px] text-violet-600">
-          <span>1. Claude가 어떤 규정들을 메모리로 학습하였는지 <b>한 눈에 보기</b> 위함</span>
+          <span>1. Claude Code가 어떤 규정들을 메모리로 학습하였는지 <b>한 눈에 보기</b> 위함</span>
           <span>2. 규정들을 어떻게 적용해서 페이지를 만드는지 <b>테스트해보는 페이지</b></span>
           <span>3. 적용되지 않은 것 같은 규정이 있다면, 우측 상단의 <b>Memo</b>에 추가해주세요.</span>
         </div>
@@ -293,7 +293,7 @@ export default function ClaudeRulesPage() {
       <div className="flex items-center gap-2">
         <div className="flex gap-1">
           <TabChip active={tab === 'design'} onClick={() => setTab('design')}>업무 설계 규정</TabChip>
-          <TabChip active={tab === 'claude'} onClick={() => setTab('claude')}>Claude 작업 규정</TabChip>
+          <TabChip active={tab === 'claude'} onClick={() => setTab('claude')}>Claude Code 작업 규정</TabChip>
         </div>
       </div>
 
