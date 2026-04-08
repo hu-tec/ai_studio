@@ -5,13 +5,12 @@ import {
   ClipboardCheck, ShieldCheck, Clock, ClipboardList,
   Calendar, FileText, Image, Phone, ChevronLeft, ChevronRight, Home,
   BarChart3, LayoutDashboard, BookOpen, FolderOpen,
-  CalendarClock, Settings, Scale, FileEdit, FileInput, ListChecks, Construction
+  CalendarClock, Settings, Scale, FileEdit, FileInput, ListChecks
 } from 'lucide-react';
 import { StoreProvider } from '../../pages/interview/interviewStore';
 import { MemoPanel } from '../memo/MemoPanel';
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
 
-const C = Construction; // 공사중 아이콘 약어
 
 const NAV_SECTIONS = [
   // 소비자 접수 → work_studio로 이관 완료 (54.116.15.136)
@@ -26,7 +25,7 @@ const NAV_SECTIONS = [
       { to: '/guidelines', icon: FileText, label: '사내업무지침' },
       { to: '/company-guidelines', icon: Scale, label: '사내업무지침(통합-new)' },
       { to: '/lesson-plan', icon: BookOpen, label: '레슨플랜' },
-      { to: '/coming/manual-list', icon: C, label: '매뉴얼 리스트' },
+      { to: '/manual-list', icon: BookOpen, label: '매뉴얼 리스트' },
     ],
   },
   {
@@ -43,23 +42,23 @@ const NAV_SECTIONS = [
       { to: '/rules-editor', icon: FileEdit, label: '규정편집' },
       { to: '/eval-criteria', icon: ListChecks, label: '평가기준' },
       { to: '/admin-system', icon: Settings, label: '관리자통합' },
-      { to: '/coming/overdue', icon: C, label: '미수금관리' },
-      { to: '/coming/shortcuts', icon: C, label: '바로가기' },
-      { to: '/coming/instructor-eval', icon: C, label: '강사채점' },
-      { to: '/coming/instructor-flow', icon: C, label: '면접플로우' },
-      { to: '/coming/meeting-form', icon: C, label: '미팅신폼' },
+      { to: '/overdue', icon: FileText, label: '미수금관리' },
+      { to: '/shortcuts', icon: Home, label: '바로가기' },
+      { to: '/instructor-eval', icon: ClipboardCheck, label: '강사채점' },
+      { to: '/instructor-flow', icon: ClipboardList, label: '면접플로우' },
+      { to: '/meeting-form', icon: Calendar, label: '미팅신폼' },
       // 신청서모음, 전문가관리, 상담관리, 전문가지원서 → work_studio로 이관
     ],
   },
   {
     title: '규정',
     items: [
-      { to: '/coming/rules-layout', icon: C, label: '규정 레이아웃' },
-      { to: '/coming/rules-manual', icon: C, label: '규정매뉴얼' },
-      { to: '/coming/rules-jungeol', icon: C, label: '규정관리(준걸)' },
-      { to: '/coming/instructor-curri', icon: C, label: '강사커리' },
-      { to: '/coming/marketing', icon: C, label: '마케팅' },
-      { to: '/coming/prompt-guide', icon: C, label: '프롬사용법' },
+      { to: '/rules-layout', icon: Scale, label: '규정 레이아웃' },
+      { to: '/rules-manual', icon: FileText, label: '규정매뉴얼' },
+      { to: '/rules-jungeol', icon: FileEdit, label: '규정관리(준걸)' },
+      { to: '/instructor-curri', icon: BookOpen, label: '강사커리' },
+      { to: '/marketing', icon: BarChart3, label: '마케팅' },
+      { to: '/prompt-guide', icon: Settings, label: '프롬사용법' },
       // DB분류, 문제은행, 홈페이지/랜딩 전체 → work_studio로 이관
     ],
   },
