@@ -4,7 +4,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-  Plus, GripVertical,
+  GripVertical,
   BarChart3, LayoutDashboard, FileInput, Home,
 } from 'lucide-react';
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
@@ -95,7 +95,7 @@ function DraggableNavItem({
 /* ── 드래그 가능 그룹 섹션 ── */
 function GroupSection({
   group, index, collapsed, location, memoCounts,
-  onDropItem, onMoveGroup, onRenameGroup, onDeleteGroup,
+  onDropItem, onMoveGroup,
   collapsedGroups, toggleGroupCollapse,
 }: {
   group: NavGroup;
@@ -105,8 +105,6 @@ function GroupSection({
   memoCounts: Record<string, number>;
   onDropItem: (code: string, fromGroupId: string, toGroupId: string) => void;
   onMoveGroup: (fromIdx: number, toIdx: number) => void;
-  onRenameGroup: (groupId: string, newTitle: string) => void;
-  onDeleteGroup: (groupId: string) => void;
   collapsedGroups: Set<string>;
   toggleGroupCollapse: (groupId: string) => void;
 }) {
@@ -241,44 +239,6 @@ export function CategorySidebar() {
     });
   }, []);
 
-  // 그룹 이름 변경
-  const handleRenameGroup = useCallback((groupId: string, newTitle: string) => {
-    setGroups(prev => {
-      const next = prev.map(g => g.id === groupId ? { ...g, title: newTitle } : g);
-      saveLayout(toLayout(next));
-      return next;
-    });
-  }, []);
-
-  // 그룹 삭제 → 아이템을 미분류로
-  const handleDeleteGroup = useCallback((groupId: string) => {
-    setGroups(prev => {
-      const target = prev.find(g => g.id === groupId);
-      if (!target) return prev;
-      let next = prev.filter(g => g.id !== groupId);
-      if (target.items.length > 0) {
-        let uncategorized = next.find(g => g.id === 'grp-uncategorized');
-        if (!uncategorized) {
-          uncategorized = { id: 'grp-uncategorized', title: '미분류', items: [] };
-          next.push(uncategorized);
-        }
-        uncategorized.items.push(...target.items);
-      }
-      saveLayout(toLayout(next));
-      return next;
-    });
-  }, []);
-
-  // 새 그룹 추가
-  const handleAddGroup = useCallback(() => {
-    const id = `grp-${Date.now()}`;
-    setGroups(prev => {
-      const next = [...prev, { id, title: '새 그룹', items: [] }];
-      saveLayout(toLayout(next));
-      return next;
-    });
-  }, []);
-
   // 그룹 접기/펼치기
   const toggleGroupCollapse = useCallback((groupId: string) => {
     setCollapsedGroups(prev => {
@@ -326,31 +286,19 @@ export function CategorySidebar() {
               memoCounts={memoCounts}
               onDropItem={handleDropItem}
               onMoveGroup={handleMoveGroup}
-              onRenameGroup={handleRenameGroup}
-              onDeleteGroup={handleDeleteGroup}
               collapsedGroups={collapsedGroups}
               toggleGroupCollapse={toggleGroupCollapse}
             />
           ))}
 
-          {/* 그룹 추가 + 초기화 */}
+          {/* 초기화 */}
           {!sidebarCollapsed && (
-            <div style={{ display: 'flex', gap: 4, padding: '4px 8px' }}>
-              <button
-                onClick={handleAddGroup}
-                style={{
-                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                  padding: '5px 0', border: '1px dashed #cbd5e1', borderRadius: 6,
-                  background: 'none', cursor: 'pointer', fontSize: 11, color: '#94a3b8',
-                }}
-              >
-                <Plus size={12} /> 그룹 추가
-              </button>
+            <div style={{ padding: '4px 8px' }}>
               <button
                 onClick={handleReset}
                 title="기본 배치로 초기화"
                 style={{
-                  padding: '5px 8px', border: '1px dashed #cbd5e1', borderRadius: 6,
+                  width: '100%', padding: '5px 0', border: '1px dashed #cbd5e1', borderRadius: 6,
                   background: 'none', cursor: 'pointer', fontSize: 10, color: '#94a3b8',
                 }}
               >

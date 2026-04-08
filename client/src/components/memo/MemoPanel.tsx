@@ -29,6 +29,7 @@ export function MemoPanel() {
   const [targetingFor, setTargetingFor] = useState<string>('new');
   const [filterCategory, setFilterCategory] = useState<MemoCategory | 'all'>('all');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [hidden, setHidden] = useState(() => localStorage.getItem('memo-btn-hidden') === '1');
 
   // 필터 + 정렬 적용
   const filteredItems = useMemo(() => {
