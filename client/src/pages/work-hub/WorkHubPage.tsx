@@ -539,6 +539,7 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
   const [title, setTitle] = useState(editData?.data.title || '');
   const [content, setContent] = useState(editData?.data.content || '');
   const [author, setAuthor] = useState(editData?.data.author || localStorage.getItem('wh-author') || '');
+  const [note, setNote] = useState((editData?.data as any).note || '');
   const [attachments, setAttachments] = useState<Attachment[]>(editData?.data.attachments || []);
   const [saving, setSaving] = useState(false);
   const [showLink, setShowLink] = useState(false);
@@ -546,24 +547,22 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
   const [linkName, setLinkName] = useState('');
   const [uploading, setUploading] = useState<{ name: string; progress: number }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  // 분류 섹션: 이미 선택된 상태면 접힘
+  const [showClassify, setShowClassify] = useState(!selLarge);
 
-  // derived mid/small options from tree
   const midOptions = selLarge && CATEGORY_TREE[selLarge] ? Object.keys(CATEGORY_TREE[selLarge]) : [];
   const smallOptions = selLarge && selMid && CATEGORY_TREE[selLarge]?.[selMid] ? CATEGORY_TREE[selLarge][selMid] : [];
+  const pathLabel = [selLarge, selMid, selSmall].filter(Boolean).join(' > ');
 
   const addLink = () => { if (!linkUrl) return; setAttachments([...attachments, { type: 'link', url: linkUrl, name: linkName || linkUrl }]); setLinkUrl(''); setLinkName(''); setShowLink(false); };
-
-  const uploadOne = (f: globalThis.File): Promise<{ success: boolean; s3_url?: string }> => {
-    return new Promise((resolve) => {
-      const fd = new FormData(); fd.append('file', f); fd.append('category', 'work-hub');
-      const xhr = new XMLHttpRequest();
-      xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) { setUploading(prev => prev.map(u => u.name === f.name ? { ...u, progress: Math.round((ev.loaded / ev.total) * 100) } : u)); } };
-      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({ success: false }); } };
-      xhr.onerror = () => resolve({ success: false });
-      xhr.open('POST', '/api/upload'); xhr.send(fd);
-    });
-  };
-
+  const uploadOne = (f: globalThis.File): Promise<{ success: boolean; s3_url?: string }> => new Promise((resolve) => {
+    const fd = new FormData(); fd.append('file', f); fd.append('category', 'work-hub');
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) setUploading(prev => prev.map(u => u.name === f.name ? { ...u, progress: Math.round((ev.loaded / ev.total) * 100) } : u)); };
+    xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({ success: false }); } };
+    xhr.onerror = () => resolve({ success: false });
+    xhr.open('POST', '/api/upload'); xhr.send(fd);
+  });
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files; if (!files) return;
     const fileList = Array.from(files);
@@ -571,7 +570,7 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
     for (const f of fileList) {
       const isImg = f.type.startsWith('image/');
       const j = await uploadOne(f);
-      if (j.success && j.s3_url) { setAttachments(p => [...p, { type: isImg ? 'image' : 'file' as const, url: j.s3_url!, name: f.name, size: f.size }]); toast.success(`${f.name} 업로드`); }
+      if (j.success && j.s3_url) { setAttachments(p => [...p, { type: isImg ? 'image' : 'file' as const, url: j.s3_url!, name: f.name, size: f.size }]); }
       else { toast.error(`${f.name} 실패`); }
       setUploading(prev => prev.filter(u => u.name !== f.name));
     }
@@ -579,123 +578,126 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
   };
 
   const save = async () => {
-    if (!selLarge || !title || !author) { toast.error('경로(대분류), 제목, 작성자를 입력해주세요'); return; }
+    if (!selLarge || !title || !author) { toast.error('경로, 제목, 작성자 필수'); return; }
     setSaving(true);
     localStorage.setItem('wh-author', author);
     const path: [string, string?, string?] = [selLarge];
     if (selMid) path.push(selMid);
     if (selSmall) path.push(selSmall);
-    const payload: HubPostData = { type: postType, path, position: pos, title, content, attachments, author, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
+    const payload: any = { type: postType, path, position: pos, title, content, attachments, author, note, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
     try {
-      if (isEdit && editData) {
-        await fetch(`/api/work-hub/${editData.post_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        toast.success('수정되었습니다');
-      } else {
-        await fetch('/api/work-hub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, post_id: genId() }) });
-        toast.success('등록되었습니다');
-      }
+      if (isEdit && editData) { await fetch(`/api/work-hub/${editData.post_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); }
+      else { await fetch('/api/work-hub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, post_id: genId() }) }); }
+      toast.success(isEdit ? '수정됨' : '등록됨');
       onSaved();
-    } catch { toast.error('저장 실패'); } finally { setSaving(false); }
+    } catch { toast.error('실패'); } finally { setSaving(false); }
   };
 
-  const chip = (label: string, val: string, items: string[], set: (v: string) => void, color: string, bg: string) => (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>{label}</label>
-      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-        {items.map(d => (
-          <button key={d} type="button" onClick={() => set(val === d ? '' : d)}
-            style={{ padding: '5px 12px', borderRadius: 16, border: '1px solid', borderColor: val === d ? color : '#e2e8f0', background: val === d ? bg : '#fff', color: val === d ? color : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: val === d ? 600 : 400 }}>{d}</button>
-        ))}
-        {items.length === 0 && <span style={{ fontSize: 12, color: '#94a3b8', padding: '5px 0' }}>상위 분류를 먼저 선택하세요</span>}
-      </div>
-    </div>
-  );
+  const S = { chip: { padding: '2px 8px', borderRadius: 10, border: '1px solid', fontSize: 10, cursor: 'pointer' } as const };
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: 680, maxHeight: '92vh', overflow: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #f1f5f9' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#1e293b' }}>{isEdit ? '글 수정' : '새 글 작성'}</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} color="#94a3b8" /></button>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 10, width: 620, maxHeight: '90vh', overflow: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+        {/* 헤더 */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f1f5f9' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', flex: 1 }}>{isEdit ? '수정' : '새 글'}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} color="#94a3b8" /></button>
         </div>
-        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* 유형 */}
+
+        <div style={{ padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* 유형 — 한 줄 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>유형</span>
+            {POST_TYPES.map(pt => (
+              <button key={pt.type} type="button" onClick={() => setPostType(pt.type)}
+                style={{ ...S.chip, borderColor: postType === pt.type ? pt.color : '#e2e8f0', background: postType === pt.type ? pt.bg : '#fff', color: postType === pt.type ? pt.color : '#64748b', fontWeight: postType === pt.type ? 600 : 400 }}>
+                {pt.type}
+              </button>
+            ))}
+          </div>
+
+          {/* 분류 — 접힘/펼침 */}
+          <div style={{ background: '#f8fafc', borderRadius: 6, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <button onClick={() => setShowClassify(!showClassify)} type="button"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '5px 10px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600, textAlign: 'left' }}>
+              <FolderOpen size={11} color="#3B82F6" />
+              경로: {pathLabel || '미선택'} {showClassify ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+              {pos.length > 0 && <span style={{ fontSize: 9, color: '#7C3AED' }}>직급:{pos.join(',')}</span>}
+            </button>
+            {showClassify && (
+              <div style={{ padding: '6px 10px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {/* 대분류 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 36 }}>대분류*</span>
+                  {DEF_LARGE.map(d => <button key={d} type="button" onClick={() => { setSelLarge(selLarge === d ? '' : d); setSelMid(''); setSelSmall(''); }}
+                    style={{ ...S.chip, borderColor: selLarge === d ? '#3B82F6' : '#e2e8f0', background: selLarge === d ? '#EFF6FF' : '#fff', color: selLarge === d ? '#3B82F6' : '#64748b', fontWeight: selLarge === d ? 600 : 400 }}>{d}</button>)}
+                </div>
+                {/* 중분류 */}
+                {midOptions.length > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 36 }}>중분류</span>
+                  {midOptions.map(d => <button key={d} type="button" onClick={() => { setSelMid(selMid === d ? '' : d); setSelSmall(''); }}
+                    style={{ ...S.chip, borderColor: selMid === d ? '#22C55E' : '#e2e8f0', background: selMid === d ? '#F0FDF4' : '#fff', color: selMid === d ? '#22C55E' : '#64748b', fontWeight: selMid === d ? 600 : 400 }}>{d}</button>)}
+                </div>}
+                {/* 소분류 */}
+                {smallOptions.length > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 36 }}>소분류</span>
+                  {smallOptions.map(d => <button key={d} type="button" onClick={() => setSelSmall(selSmall === d ? '' : d)}
+                    style={{ ...S.chip, borderColor: selSmall === d ? '#F59E0B' : '#e2e8f0', background: selSmall === d ? '#FFFBEB' : '#fff', color: selSmall === d ? '#F59E0B' : '#64748b', fontWeight: selSmall === d ? 600 : 400 }}>{d}</button>)}
+                </div>}
+                {/* 직급 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, minWidth: 36 }}>직급</span>
+                  {DEF_POS.map(d => <button key={d} type="button" onClick={() => setPos(pos.includes(d) ? pos.filter(x => x !== d) : [...pos, d])}
+                    style={{ ...S.chip, borderColor: pos.includes(d) ? '#7C3AED' : '#e2e8f0', background: pos.includes(d) ? '#F5F3FF' : '#fff', color: pos.includes(d) ? '#7C3AED' : '#64748b', fontWeight: pos.includes(d) ? 600 : 400 }}>{d}</button>)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 작성자 + 제목 — 한 줄 */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="작성자 *" style={{ width: 80, padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목 *" style={{ flex: 1, padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
+          </div>
+
+          {/* 내용 */}
+          <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="내용..." rows={4}
+            style={{ width: '100%', padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none', resize: 'vertical', lineHeight: 1.5, fontFamily: 'inherit' }} />
+
+          {/* 비고 */}
+          <input value={note} onChange={e => setNote(e.target.value)} placeholder="비고" style={{ width: '100%', padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
+
+          {/* 첨부 — 컴팩트 */}
           <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>유형 *</label>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {POST_TYPES.map(pt => (
-                <button key={pt.type} type="button" onClick={() => setPostType(pt.type)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 16, border: '1px solid', borderColor: postType === pt.type ? pt.color : '#e2e8f0', background: postType === pt.type ? pt.bg : '#fff', color: postType === pt.type ? pt.color : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: postType === pt.type ? 600 : 400 }}>
-                  <pt.icon size={13} /> {pt.type}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 경로 선택 — 3축 계단식 */}
-          {chip('경로: 대분류 *', selLarge, DEF_LARGE, v => { setSelLarge(v); setSelMid(''); setSelSmall(''); }, '#3B82F6', '#EFF6FF')}
-          {midOptions.length > 0 && chip('경로: 중분류', selMid, midOptions, v => { setSelMid(v); setSelSmall(''); }, '#22C55E', '#F0FDF4')}
-          {smallOptions.length > 0 && chip('경로: 소분류', selSmall, smallOptions, v => setSelSmall(v), '#F59E0B', '#FFFBEB')}
-
-          {/* 현재 경로 미리보기 */}
-          {selLarge && (
-            <div style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <FolderOpen size={13} color="#3B82F6" />
-              <span style={{ fontWeight: 600 }}>{[selLarge, selMid, selSmall].filter(Boolean).join(' > ')}</span>
-            </div>
-          )}
-
-          {/* 대상 직급 */}
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>대상 직급</label>
-            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-              {DEF_POS.map(d => (
-                <button key={d} type="button" onClick={() => setPos(pos.includes(d) ? pos.filter(x => x !== d) : [...pos, d])}
-                  style={{ padding: '5px 12px', borderRadius: 16, border: '1px solid', borderColor: pos.includes(d) ? '#7C3AED' : '#e2e8f0', background: pos.includes(d) ? '#F5F3FF' : '#fff', color: pos.includes(d) ? '#7C3AED' : '#64748b', fontSize: 12, cursor: 'pointer', fontWeight: pos.includes(d) ? 600 : 400 }}>{d}</button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ flex: 1 }}><label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>작성자 *</label><input value={author} onChange={e => setAuthor(e.target.value)} placeholder="이름" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} /></div>
-            <div style={{ flex: 2 }}><label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>제목 *</label><input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목을 입력하세요" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none' }} /></div>
-          </div>
-
-          <div><label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 6, display: 'block' }}>내용</label>
-            <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="내용을 작성하세요..." rows={6}
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none', resize: 'vertical', lineHeight: 1.6, fontFamily: 'inherit' }} />
-          </div>
-
-          {/* 첨부 */}
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8, display: 'block' }}>첨부</label>
-            {attachments.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>{attachments.map((att, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#f8fafc', borderRadius: 8, fontSize: 13 }}>
-                {att.type === 'image' && <ImageIcon size={14} color="#3B82F6" />}{att.type === 'link' && <ExternalLink size={14} color="#10B981" />}{att.type === 'file' && <File size={14} color="#F59E0B" />}
-                <span style={{ flex: 1, color: '#334155' }}>{att.name}</span>{att.size && <span style={{ fontSize: 11, color: '#94a3b8' }}>{fmtSize(att.size)}</span>}
-                <button onClick={() => setAttachments(attachments.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={14} color="#ef4444" /></button>
+            {attachments.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 6 }}>{attachments.map((att, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', background: '#f8fafc', borderRadius: 6, fontSize: 11 }}>
+                {att.type === 'image' && <ImageIcon size={11} color="#3B82F6" />}{att.type === 'link' && <ExternalLink size={11} color="#10B981" />}{att.type === 'file' && <File size={11} color="#F59E0B" />}
+                <span style={{ flex: 1, color: '#334155' }}>{att.name}</span>
+                <button onClick={() => setAttachments(attachments.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={11} color="#ef4444" /></button>
               </div>
             ))}</div>}
-            {uploading.length > 0 && <div style={{ marginBottom: 10 }}>{uploading.map((u, i) => (
-              <div key={i} style={{ padding: '8px 12px', background: '#EFF6FF', borderRadius: 8, fontSize: 12, border: '1px solid #BFDBFE', marginBottom: 4 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: '#3B82F6' }}>{u.name}</span><span style={{ marginLeft: 'auto', fontWeight: 600, color: '#2563EB' }}>{u.progress}%</span></div>
-                <div style={{ height: 3, background: '#BFDBFE', borderRadius: 2, marginTop: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${u.progress}%`, background: '#3B82F6', borderRadius: 2 }} /></div>
+            {uploading.length > 0 && <div style={{ marginBottom: 6 }}>{uploading.map((u, i) => (
+              <div key={i} style={{ padding: '4px 8px', background: '#EFF6FF', borderRadius: 6, fontSize: 10, border: '1px solid #BFDBFE', marginBottom: 2 }}>
+                <span style={{ color: '#3B82F6' }}>{u.name} {u.progress}%</span>
+                <div style={{ height: 2, background: '#BFDBFE', borderRadius: 1, marginTop: 2, overflow: 'hidden' }}><div style={{ height: '100%', width: `${u.progress}%`, background: '#3B82F6' }} /></div>
               </div>
             ))}</div>}
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
               <input ref={fileRef} type="file" multiple hidden onChange={handleFile} />
               <button onClick={() => fileRef.current?.click()} disabled={uploading.length > 0}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: uploading.length > 0 ? 'not-allowed' : 'pointer', color: '#475569' }}><Upload size={14} />파일/이미지</button>
+                style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 11, cursor: uploading.length > 0 ? 'not-allowed' : 'pointer', color: '#475569' }}><Upload size={11} />파일</button>
               <button onClick={() => setShowLink(!showLink)}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#475569' }}><LinkIcon size={14} />링크</button>
+                style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 11, cursor: 'pointer', color: '#475569' }}><LinkIcon size={11} />링크</button>
             </div>
-            {showLink && <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="URL" style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13 }} /><input value={linkName} onChange={e => setLinkName(e.target.value)} placeholder="이름" style={{ width: 120, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13 }} /><button onClick={addLink} style={{ padding: '6px 12px', background: '#10B981', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>추가</button></div>}
+            {showLink && <div style={{ display: 'flex', gap: 6, marginTop: 6 }}><input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="URL" style={{ flex: 1, padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 11 }} /><input value={linkName} onChange={e => setLinkName(e.target.value)} placeholder="이름" style={{ width: 90, padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 11 }} /><button onClick={addLink} style={{ padding: '4px 10px', background: '#10B981', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, cursor: 'pointer' }}>추가</button></div>}
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '16px 24px', borderTop: '1px solid #f1f5f9' }}>
-          <button onClick={onClose} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: 8, fontSize: 14, cursor: 'pointer', color: '#64748b' }}>취소</button>
+
+        {/* 하단 버튼 */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, padding: '8px 16px', borderTop: '1px solid #f1f5f9' }}>
+          <button onClick={onClose} style={{ padding: '5px 14px', background: '#f1f5f9', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer', color: '#64748b' }}>취소</button>
           <button onClick={save} disabled={saving}
-            style={{ padding: '8px 20px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? '저장 중...' : isEdit ? '수정' : '등록'}</button>
+            style={{ padding: '5px 14px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? '저장...' : isEdit ? '수정' : '등록'}</button>
         </div>
       </div>
     </div>

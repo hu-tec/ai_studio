@@ -109,8 +109,12 @@ export const DEFAULT_GROUPS: NavGroup[] = [
 /* ── localStorage 키 ── */
 export const STORAGE_KEY = 'ai-studio-nav-groups';
 
+/** navData 변경 시 캐시 자동 무효화용 — 코드 목록이 바뀌면 버전이 달라짐 */
+const NAV_VERSION = ALL_NAV_ITEMS.map(i => i.code).sort().join(',');
+
 /* 저장 형태: groupId → code[] 매핑 + 순서 */
 export interface SavedLayout {
+  version?: string;                      // navData 버전
   groupOrder: string[];                  // group id 순서
   groups: Record<string, { title: string; codes: string[] }>;
 }
@@ -118,11 +122,19 @@ export interface SavedLayout {
 export function loadLayout(): SavedLayout | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const layout: SavedLayout = JSON.parse(raw);
+    // 버전 불일치 → 캐시 무효화 (navData가 변경됨)
+    if (layout.version !== NAV_VERSION) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return layout;
   } catch { return null; }
 }
 
 export function saveLayout(layout: SavedLayout) {
+  layout.version = NAV_VERSION;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
 }
 
