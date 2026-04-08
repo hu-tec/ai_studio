@@ -315,6 +315,26 @@ export const CLAUDE_RULES: ClaudeRule[] = [
     rules: ['~/_task_want.md 업데이트 (하고싶은 업무 정리)'],
   },
   {
+    id: 'cr-tlm', category: '단축어', title: '"tlm" 입력', level: '선택',
+    rules: ['tl + tm 동시 실행 — 업무일지 + 페이지 메모 일괄 업데이트'],
+  },
+  {
+    id: 'cr-tl', category: '단축어', title: '"tl" 입력', level: '선택',
+    rules: [
+      '_task_all.md(완료) + _task_todo.md(미완성) → 업무일지 업데이트',
+      '완료→완료 항목, 미완성→진행중/대기 항목',
+      'API: POST /api/work-logs',
+    ],
+  },
+  {
+    id: 'cr-tm', category: '단축어', title: '"tm" 입력', level: '선택',
+    rules: [
+      '_task*.md → 관련 페이지별 메모 자동 추가',
+      '완료=메모, 미완성=요청, 하고싶은=개선 카테고리',
+      'API: POST /api/page-memos',
+    ],
+  },
+  {
     id: 'cr-tsi', category: '단축어', title: '"tsi{N}" 입력', level: '선택',
     rules: ['~/_tmp_screenshots/image copy {N}.png 읽기'],
   },
