@@ -293,13 +293,13 @@ export function CategorySidebar() {
 
           {/* 초기화 */}
           {!sidebarCollapsed && (
-            <div style={{ padding: '4px 8px' }}>
+            <div style={{ padding: '2px 6px' }}>
               <button
                 onClick={handleReset}
                 title="기본 배치로 초기화"
                 style={{
-                  width: '100%', padding: '5px 0', border: '1px dashed #cbd5e1', borderRadius: 6,
-                  background: 'none', cursor: 'pointer', fontSize: 10, color: '#94a3b8',
+                  width: '100%', padding: '3px 0', border: '1px dashed #cbd5e1', borderRadius: 4,
+                  background: 'none', cursor: 'pointer', fontSize: 9, color: '#94a3b8',
                 }}
               >
                 초기화
@@ -309,7 +309,7 @@ export function CategorySidebar() {
         </nav>
 
         {/* 하단 링크 + 접기 */}
-        <div style={{ borderTop: '1px solid #e2e8f0', padding: '6px' }}>
+        <div style={{ borderTop: '1px solid #e2e8f0', padding: '4px' }}>
           {[
             { href: '/admin.html', icon: BarChart3, label: '데이터 관리' },
             { href: '/dashboard.html', icon: LayoutDashboard, label: '프로세스' },
@@ -320,12 +320,12 @@ export function CategorySidebar() {
               key={link.href}
               href={link.href}
               style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 10px', borderRadius: 6,
-                fontSize: 12, color: '#64748b', textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '3px 8px', borderRadius: 4,
+                fontSize: 11, color: '#64748b', textDecoration: 'none',
               }}
             >
-              <link.icon size={14} />
+              <link.icon size={12} />
               {!sidebarCollapsed && link.label}
             </a>
           ))}
@@ -334,11 +334,11 @@ export function CategorySidebar() {
             style={{
               width: '100%', display: 'flex', alignItems: 'center',
               justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-              gap: 8, padding: '6px 10px', border: 'none', background: 'none',
-              borderRadius: 6, cursor: 'pointer', fontSize: 12, color: '#94a3b8',
+              gap: 6, padding: '3px 8px', border: 'none', background: 'none',
+              borderRadius: 4, cursor: 'pointer', fontSize: 11, color: '#94a3b8',
             }}
           >
-            {sidebarCollapsed ? <ChevronRight size={14} /> : <><ChevronLeft size={14} /> 접기</>}
+            {sidebarCollapsed ? <ChevronRight size={12} /> : <><ChevronLeft size={12} /> 접기</>}
           </button>
         </div>
       </aside>
