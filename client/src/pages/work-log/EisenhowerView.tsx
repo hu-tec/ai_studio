@@ -78,6 +78,8 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
     e.preventDefault();
     setDropTarget(null);
     if (!dragId) return;
+    const task = tasks.find(t => t.id === dragId);
+    if (task && getQuadrant(task) === q) { setDragId(null); return; }
     const flags = setQuadrant({} as FranklinTask, q);
     updateTask(dragId, { ...flags, number: getNextNumber(tasks, flags.priority!) });
     setDragId(null);

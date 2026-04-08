@@ -54,32 +54,86 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setFranklinTasks(tasks => {
         let updated = [...tasks];
         let changed = false;
-        const processCell = (cell: MandalartCell) => {
+
+        // 태스크 업데이트 헬퍼
+        const updateFields = (t: FranklinTask, cell: MandalartCell) => {
+          const needsUpdate = t.task !== cell.text || t.achievement !== cell.achievement || (cell.status && t.status !== cell.status);
+          return needsUpdate ? { ...t, task: cell.text, achievement: cell.achievement, ...(cell.status ? { status: cell.status } : {}) } : null;
+        };
+
+        const processCell = (cell: MandalartCell, parentTaskId?: string) => {
           if (!cell.text?.trim()) return;
-          if (cell.taskId) {
-            // 기존 연결 태스크 업데이트
-            const idx = updated.findIndex(t => t.id === cell.taskId);
-            if (idx >= 0) {
-              const t = updated[idx];
-              const needsUpdate = t.task !== cell.text || t.achievement !== cell.achievement || (cell.status && t.status !== cell.status);
-              if (needsUpdate) {
-                updated[idx] = { ...t, task: cell.text, achievement: cell.achievement, ...(cell.status ? { status: cell.status } : {}) };
+
+          if (parentTaskId) {
+            // ── 자식 셀 → 서브태스크로 처리 ──
+            const pIdx = updated.findIndex(t => t.id === parentTaskId);
+            if (pIdx < 0) return;
+            const parent = updated[pIdx];
+            const children = [...(parent.children || [])];
+
+            if (cell.taskId) {
+              // 부모 children에서 검색
+              const cIdx = children.findIndex(c => c.id === cell.taskId);
+              if (cIdx >= 0) {
+                const patched = updateFields(children[cIdx], cell);
+                if (patched) { children[cIdx] = patched; updated[pIdx] = { ...parent, children }; changed = true; }
+              } else {
+                // 마이그레이션: top-level에 있으면 children으로 이동
+                const tIdx = updated.findIndex(t => t.id === cell.taskId);
+                if (tIdx >= 0) {
+                  const task = updated[tIdx];
+                  updated.splice(tIdx, 1);
+                  const adjPIdx = updated.findIndex(t => t.id === parentTaskId);
+                  const adjParent = updated[adjPIdx];
+                  const adjChildren = [...(adjParent.children || []), { ...task, parentId: parentTaskId, number: (adjParent.children || []).length + 1 }];
+                  updated[adjPIdx] = { ...adjParent, children: adjChildren };
+                  changed = true;
+                }
+              }
+            } else {
+              // 새 자식 셀 → 기존 서브태스크 확인 후 없으면 생성
+              const existingChild = children.find(c => c.task === cell.text);
+              if (existingChild) {
+                cell.taskId = existingChild.id;
+              } else {
+                const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+                children.push({
+                  id: newId, priority: parent.priority, number: children.length + 1,
+                  task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
+                  parentId: parentTaskId,
+                });
+                updated[pIdx] = { ...parent, children };
+                cell.taskId = newId;
+              }
+              changed = true;
+            }
+          } else {
+            // ── 상위 셀 → 메인 태스크 ──
+            if (cell.taskId) {
+              const idx = updated.findIndex(t => t.id === cell.taskId);
+              if (idx >= 0) {
+                const patched = updateFields(updated[idx], cell);
+                if (patched) { updated[idx] = patched; changed = true; }
+              }
+            } else {
+              const existing = updated.find(t => t.task === cell.text);
+              if (existing) {
+                cell.taskId = existing.id;
+                changed = true;
+              } else {
+                const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+                updated.push({
+                  id: newId, priority: 'B', number: updated.filter(t => t.priority === 'B').length + 1,
+                  task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
+                  important: true, urgent: false, period,
+                });
+                cell.taskId = newId;
                 changed = true;
               }
             }
-          } else {
-            // 새 셀 → FranklinTask 자동 생성
-            const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
-            updated.push({
-              id: newId, priority: 'B', number: updated.filter(t => t.priority === 'B').length + 1,
-              task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
-              important: true, urgent: false, period,
-            });
-            cell.taskId = newId;
-            changed = true;
           }
-          // 하위 셀도 처리
-          cell.children?.forEach(processCell);
+          // 하위 셀 → 이 셀의 taskId를 부모로 전달
+          cell.children?.forEach(c => processCell(c, cell.taskId));
         };
         newCells.forEach(processCell);
         return changed ? updated : tasks;
@@ -546,7 +600,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                   return (
                     <div key={t.id} draggable
-                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', viewMode === 'mandalart' ? t.task : t.id); }}
+                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
                       className="flex items-center gap-1 px-2 py-1 rounded border border-amber-200 bg-white cursor-grab active:cursor-grabbing hover:shadow-sm text-[10px]"
                       style={{ borderLeftColor: pCfg.color, borderLeftWidth: 3 }}>
                       <span style={{ color: stCfg.color, fontSize: 9 }}>{stCfg.icon}</span>

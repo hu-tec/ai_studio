@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, GripVertical, FileText } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { MandalartCell, FranklinTask, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
-import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
+import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
 
 interface MandalartViewProps {
   cells: MandalartCell[];
@@ -149,7 +149,18 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   };
 
   const isCenter = (idx: number) => idx === 4;
-  const linkedTask = (cell: MandalartCell) => cell.taskId ? tasks.find(t => t.id === cell.taskId) : null;
+  const linkedTask = (cell: MandalartCell): FranklinTask | null => {
+    if (!cell.taskId) return null;
+    // top-level 검색
+    const top = tasks.find(t => t.id === cell.taskId);
+    if (top) return top;
+    // 서브태스크(children) 검색
+    for (const t of tasks) {
+      const sub = t.children?.find(c => c.id === cell.taskId);
+      if (sub) return sub;
+    }
+    return null;
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
