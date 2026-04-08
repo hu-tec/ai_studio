@@ -193,6 +193,13 @@ CREATE TABLE IF NOT EXISTS work_hub_comments (
   created_at TEXT DEFAULT (datetime('now'))
 );
 
+-- 앱 설정 (localStorage → DB 이관)
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
 -- 페이지별 메모
 CREATE TABLE IF NOT EXISTS page_memos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -18,7 +18,10 @@ const StatusSection = lazy(() => import('./sections/StatusSection'));
 
 /* ═══ StaffChips — 직원 칩 (+추가/X삭제) ═══ */
 function StaffChips({ label, value, onChange, color, bg, S }: { label: string; value: string; onChange: (v: string) => void; color: string; bg: string; S: React.CSSProperties }) {
-  const [customStaff, setCustomStaff] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('wh-custom-staff') || '[]'); } catch { return []; } });
+  // DB 연동 (localStorage fallback)
+  const [customStaff, setCustomStaffRaw] = useState<string[]>([]);
+  useEffect(() => { fetch('/api/settings/wh-custom-staff').then(r => r.json()).then(d => { if (Array.isArray(d)) setCustomStaffRaw(d); else { try { const l = JSON.parse(localStorage.getItem('wh-custom-staff') || '[]'); setCustomStaffRaw(l); } catch {} } }).catch(() => {}); }, []);
+  const setCustomStaff = (v: string[]) => { setCustomStaffRaw(v); fetch('/api/settings/wh-custom-staff', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v) }).catch(() => {}); localStorage.setItem('wh-custom-staff', JSON.stringify(v)); };
   const [adding, setAdding] = useState(false);
   const [newVal, setNewVal] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);

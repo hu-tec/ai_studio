@@ -11,7 +11,9 @@ export default function LinksSection() {
   const allOpen = allKeys.every(k => expanded.has(k));
 
   // 커스텀 링크 (localStorage)
-  const [customLinks, setCustomLinks] = useState<CustomLink[]>(() => { try { return JSON.parse(localStorage.getItem('wh-custom-links') || '[]'); } catch { return []; } });
+  const [customLinks, setCustomLinksRaw] = useState<CustomLink[]>([]);
+  useState(() => { fetch('/api/settings/wh-custom-links').then(r => r.json()).then(d => { if (Array.isArray(d)) setCustomLinksRaw(d); else { try { setCustomLinksRaw(JSON.parse(localStorage.getItem('wh-custom-links') || '[]')); } catch {} } }).catch(() => {}); });
+  const setCustomLinks = (v: CustomLink[]) => { setCustomLinksRaw(v); fetch('/api/settings/wh-custom-links', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v) }).catch(() => {}); };
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newUrl, setNewUrl] = useState('');

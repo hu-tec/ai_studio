@@ -87,7 +87,8 @@ function saveAttendanceToServer(key: string, data: any) {
 export function AttendancePageB() {
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
   const [records, setRecords] = useState<AttendanceRecord[]>(INITIAL_RECORDS);
-  const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null); // null = 전체
+  const [selectedEmpIds, setSelectedEmpIds] = useState<Set<string>>(new Set()); // 빈 Set = 전체
+  const toggleEmp = (id: string) => setSelectedEmpIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const [searchTerm, setSearchTerm] = useState('');
 
   // Month navigation
@@ -125,10 +126,11 @@ export function AttendancePageB() {
 
   // Filter employees
   const visibleEmployees = useMemo(() => {
-    if (selectedEmpId) return employees.filter(e => e.id === selectedEmpId);
-    if (searchTerm) return employees.filter(e => e.name.includes(searchTerm) || e.dept.includes(searchTerm));
-    return employees;
-  }, [employees, selectedEmpId, searchTerm]);
+    let result = employees;
+    if (selectedEmpIds.size > 0) result = result.filter(e => selectedEmpIds.has(e.id));
+    if (searchTerm) result = result.filter(e => e.name.includes(searchTerm) || e.dept.includes(searchTerm));
+    return result;
+  }, [employees, selectedEmpIds, searchTerm]);
 
   // Build date rows for each employee
   const buildDateRows = (empId: string) => {
@@ -245,9 +247,9 @@ export function AttendancePageB() {
   }).length;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-2 font-sans text-[#333] flex flex-col gap-3">
+    <div className="min-h-screen bg-[#F8F9FA] p-1 font-sans text-[#333] flex flex-col gap-1">
       {/* ── Header ── */}
-      <header className="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200">
+      <header className="flex items-center justify-between bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-2">
           <div className="bg-indigo-600 p-1.5 rounded-lg">
             <Clock className="text-white w-5 h-5" />
@@ -273,49 +275,52 @@ export function AttendancePageB() {
       </header>
 
       {/* ── Member Filter Bar ── */}
-      <div className="bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 flex-wrap">
+      <div className="bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200 flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
           <Users size={14} /> 멤버:
         </div>
 
         <button
-          onClick={() => setSelectedEmpId(null)}
+          onClick={() => setSelectedEmpIds(new Set())}
           className={cn(
-            "px-3 py-1 rounded-lg text-xs font-bold transition-all border",
-            !selectedEmpId ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+            "px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border",
+            selectedEmpIds.size === 0 ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
           )}
         >
           전체 ({employees.length})
         </button>
 
-        {employees.map(emp => (
-          <button
-            key={emp.id}
-            onClick={() => setSelectedEmpId(selectedEmpId === emp.id ? null : emp.id)}
-            className={cn(
-              "px-3 py-1 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5",
-              selectedEmpId === emp.id ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-            )}
-          >
-            <span className={cn(
-              "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold",
-              selectedEmpId === emp.id ? "bg-white/30 text-white" : "bg-gray-100 text-gray-500"
-            )}>
-              {emp.name[0]}
-            </span>
-            {emp.name}
-            <span className={cn(
-              "text-[10px] px-1 py-0.5 rounded",
-              selectedEmpId === emp.id ? "bg-white/20" :
-              emp.jobType === '직원' ? "bg-blue-50 text-blue-600" :
-              emp.jobType === '알바' ? "bg-orange-50 text-orange-600" :
-              emp.jobType === '프리랜서' ? "bg-purple-50 text-purple-600" :
-              emp.jobType === '재택근무' ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-500"
-            )}>
-              {emp.jobType}
-            </span>
-          </button>
-        ))}
+        {employees.map(emp => {
+          const sel = selectedEmpIds.has(emp.id);
+          return (
+            <button
+              key={emp.id}
+              onClick={() => toggleEmp(emp.id)}
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border flex items-center gap-1",
+                sel ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              )}
+            >
+              <span className={cn(
+                "w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold",
+                sel ? "bg-white/30 text-white" : "bg-gray-100 text-gray-500"
+              )}>
+                {emp.name[0]}
+              </span>
+              {emp.name}
+              <span className={cn(
+                "text-[8px] px-0.5 rounded",
+                sel ? "bg-white/20" :
+                emp.jobType === '직원' ? "bg-blue-50 text-blue-600" :
+                emp.jobType === '알바' ? "bg-orange-50 text-orange-600" :
+                emp.jobType === '프리랜서' ? "bg-purple-50 text-purple-600" :
+                emp.jobType === '재택근무' ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-500"
+              )}>
+                {emp.jobType}
+              </span>
+            </button>
+          );
+        })}
 
         <div className="ml-auto relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
@@ -330,7 +335,7 @@ export function AttendancePageB() {
       </div>
 
       {/* ── Summary Bar ── */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-1">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
           <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><Users size={18} /></div>
           <div>
@@ -354,13 +359,20 @@ export function AttendancePageB() {
         </div>
       </div>
 
-      {/* ── Per-Employee Tables ── */}
+      {/* ── Per-Employee Tables (다중 선택 시 1~4열 그리드) ── */}
+      <div className={cn(
+        "grid gap-2",
+        visibleEmployees.length === 1 ? "grid-cols-1" :
+        visibleEmployees.length === 2 ? "grid-cols-2" :
+        visibleEmployees.length <= 4 ? "grid-cols-2 lg:grid-cols-4" :
+        "grid-cols-2 lg:grid-cols-4"
+      )}>
       {visibleEmployees.map(emp => {
         const dateRows = buildDateRows(emp.id);
         const [startTime, endTime] = emp.plannedTime.split(' - ');
 
         return (
-          <div key={emp.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div key={emp.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Employee Header */}
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -619,6 +631,7 @@ export function AttendancePageB() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

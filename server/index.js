@@ -40,6 +40,32 @@ app.use('/api/page-memos', createGenericRouter('page_memos', 'memo_id'));
 app.use('/api/work-hub', createGenericRouter('work_hub', 'post_id'));
 app.use('/api/work-hub-comments', createGenericRouter('work_hub_comments', 'comment_id'));
 
+// app_settings API (localStorage → DB 이관)
+app.get('/api/settings', (req, res) => {
+  const db = require('./db/init').getDB();
+  const rows = db.prepare('SELECT key, data, updated_at FROM app_settings').all();
+  const result = {};
+  for (const r of rows) { try { result[r.key] = JSON.parse(r.data); } catch { result[r.key] = r.data; } }
+  res.json(result);
+});
+app.get('/api/settings/:key', (req, res) => {
+  const db = require('./db/init').getDB();
+  const row = db.prepare('SELECT data FROM app_settings WHERE key = ?').get(req.params.key);
+  if (!row) return res.json(null);
+  try { res.json(JSON.parse(row.data)); } catch { res.json(row.data); }
+});
+app.put('/api/settings/:key', (req, res) => {
+  const db = require('./db/init').getDB();
+  const data = JSON.stringify(req.body);
+  db.prepare('INSERT OR REPLACE INTO app_settings (key, data, updated_at) VALUES (?, ?, datetime(\'now\'))').run(req.params.key, data);
+  res.json({ success: true });
+});
+app.delete('/api/settings/:key', (req, res) => {
+  const db = require('./db/init').getDB();
+  db.prepare('DELETE FROM app_settings WHERE key = ?').run(req.params.key);
+  res.json({ success: true });
+});
+
 // 서버 디스크 용량 API
 app.get('/api/disk-usage', async (req, res) => {
   const { execSync } = require('child_process');
