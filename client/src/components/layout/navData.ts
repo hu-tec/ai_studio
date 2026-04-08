@@ -3,6 +3,7 @@ import {
   Calendar, FileText, Image, Phone, Home,
   BarChart3, BookOpen, FolderOpen,
   CalendarClock, Settings, Scale, FileEdit, ListChecks,
+  HardDrive,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -51,6 +52,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'C5',   to: '/overdue',         icon: FileText,     label: '미수금관리' },
   { code: 'C6',   to: '/shortcuts',       icon: Home,         label: '바로가기' },
   { code: 'C7',   to: '/admin-system',    icon: Settings,     label: '관리자통합' },
+  { code: 'C8',   to: '/storage',         icon: HardDrive,    label: '서버 저장소' },
 
   // ─── D: 규정 ───
   { code: 'D1',   to: '/rules-mgmt',    icon: Scale,    label: '규정관리' },

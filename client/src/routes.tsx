@@ -65,6 +65,7 @@ export const router = createBrowserRouter(
         { path: 'coming/ai-studio', element: comingSoon },
         { path: 'instructor-eval', element: lazyPage(() => import('./pages/instructor-eval/InstructorEvalPage')) },
         { path: 'instructor-flow', element: lazyPage(() => import('./pages/instructor-flow/InstructorFlowPage')) },
+        { path: 'storage', element: lazyPage(() => import('./pages/storage/StoragePage')) },
         // 아래 항목은 work_studio로 이관됨:
         // tesol-landing, ceo-homepage, arabic-translation, tongdok, translation-all,
         // ceo-v3-deploy, classic-translation, aite, hutechc-homepage, combined-homepage,
