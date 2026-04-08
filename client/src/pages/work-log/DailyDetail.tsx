@@ -651,8 +651,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
               {timeSlots.map((slot, index) => {
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
                 const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭
-                const slotTasks = franklinTasks.filter(t => {
+                // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭 (서브태스크 포함)
+                const allTasksFlat = franklinTasks.flatMap(t => [t, ...(t.children || [])]);
+                const slotTasks = allTasksFlat.filter(t => {
                   if (t.timeSlotId === slot.id) return true;
                   if (!t.startTime) return false;
                   const tStart = t.startTime.replace(':','');
