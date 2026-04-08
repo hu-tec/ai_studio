@@ -20,14 +20,36 @@ export const MEMO_CATEGORIES = [
 
 export type MemoCategory = (typeof MEMO_CATEGORIES)[number]['key'];
 
+/** 분류별 하위 메뉴 */
+export const MEMO_SUB_CATEGORIES: Record<MemoCategory, string[]> = {
+  memo: ['일반', '회의', '아이디어', '일정'],
+  issue: ['버그', '장애', '긴급', '보류'],
+  improve: ['UI', '기능', '성능', '프로세스'],
+  request: ['피드백', '승인', '확인', '자료', '보고'],
+  reference: ['참고', '공유', '학습', '링크'],
+};
+
+/** 직원 목록 (업무일지 연동) */
+export const MEMO_AUTHORS = ['대표님', '수연', '가연', '민혁'] as const;
+
+export interface MemoReply {
+  id: string;
+  author: string;
+  text: string;
+  created_at: string;
+}
+
 export interface MemoItemData {
   id: string;
   author: string;
   category: MemoCategory;
+  subCategory?: string;
+  toName?: string;
   text: string;
   attachments: MemoAttachment[];
   target: MemoTarget | null;
   created_at: string;
+  replies?: MemoReply[];
 }
 
 export interface PageMemoData {
