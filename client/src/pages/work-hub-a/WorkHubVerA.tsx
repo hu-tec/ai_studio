@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import { useWorkHubData } from './hooks/useWorkHubData';
 import { useGlobalFilter } from './hooks/useGlobalFilter';
@@ -15,6 +15,39 @@ import { genId, CATEGORY_TREE, DEF_LARGE, DEF_POS, POST_TYPE_STYLES, TASK_STATUS
 // lazy load heavier sections
 const FeedSection = lazy(() => import('./sections/FeedSection'));
 const StatusSection = lazy(() => import('./sections/StatusSection'));
+
+/* ═══ StaffChips — 직원 칩 (+추가/X삭제) ═══ */
+function StaffChips({ label, value, onChange, color, bg, S }: { label: string; value: string; onChange: (v: string) => void; color: string; bg: string; S: React.CSSProperties }) {
+  const [customStaff, setCustomStaff] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('wh-custom-staff') || '[]'); } catch { return []; } });
+  const [adding, setAdding] = useState(false);
+  const [newVal, setNewVal] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const all = [...STAFF_NAMES, ...customStaff];
+  const handleAdd = () => { const v = newVal.trim(); if (!v || all.includes(v)) { setNewVal(''); setAdding(false); return; } const next = [...customStaff, v]; setCustomStaff(next); localStorage.setItem('wh-custom-staff', JSON.stringify(next)); onChange(v); setNewVal(''); setAdding(false); };
+  const handleRemove = (n: string) => { if (STAFF_NAMES.includes(n)) return; const next = customStaff.filter(x => x !== n); setCustomStaff(next); localStorage.setItem('wh-custom-staff', JSON.stringify(next)); if (value === n) onChange(''); };
+  useEffect(() => { if (adding) inputRef.current?.focus(); }, [adding]);
+  return (
+    <div style={{ flex: 1 }}>
+      <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginTop: 2 }}>
+        {all.map(n => (
+          <span key={n} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+            <button type="button" onClick={() => onChange(n)} style={{ ...S, borderColor: value === n ? color : '#e2e8f0', background: value === n ? bg : '#fff', color: value === n ? color : '#64748b', fontWeight: value === n ? 600 : 400, paddingRight: STAFF_NAMES.includes(n) ? undefined : 16 }}>{n}</button>
+            {!STAFF_NAMES.includes(n) && <button type="button" onClick={e => { e.stopPropagation(); handleRemove(n); }} style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 8, color: '#EF4444', lineHeight: 1 }}>x</button>}
+          </span>
+        ))}
+        {adding ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+            <input ref={inputRef} value={newVal} onChange={e => setNewVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } if (e.key === 'Escape') { setAdding(false); setNewVal(''); } }} placeholder="이름" style={{ padding: '1px 6px', borderRadius: 8, border: '1px solid ' + color, fontSize: 9, outline: 'none', width: 50 }} />
+            <button type="button" onClick={() => { setAdding(false); setNewVal(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 9, color: '#94a3b8' }}>x</button>
+          </span>
+        ) : (
+          <button type="button" onClick={() => setAdding(true)} style={{ ...S, borderStyle: 'dashed', borderColor: '#cbd5e1', color: '#94a3b8', fontSize: 8 }}>+추가</button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /* ═══ PostForm 간소 (ver.B에서 가져와 축소) ═══ */
 import { Plus, X, Upload, Link as LinkIcon, FolderOpen, ChevronDown, ChevronRight, Image as ImageIcon, File, ExternalLink } from 'lucide-react';
@@ -96,20 +129,10 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: { editData?: HubP
             </div>}
           </div>
 
-          {/* 작성자 + 담당자 — 칩 선택 */}
+          {/* 작성자 + 담당자 — 칩 선택 (+추가/삭제) */}
           <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>작성자*</span>
-              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginTop: 2 }}>
-                {STAFF_NAMES.map(n => <button key={n} type="button" onClick={() => { setAuthor(n); localStorage.setItem('wh-author', n); }} style={{ ...S, borderColor: author === n ? '#3B82F6' : '#e2e8f0', background: author === n ? '#EFF6FF' : '#fff', color: author === n ? '#3B82F6' : '#64748b', fontWeight: author === n ? 600 : 400 }}>{n}</button>)}
-              </div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>담당자</span>
-              <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', marginTop: 2 }}>
-                {STAFF_NAMES.map(n => <button key={n} type="button" onClick={() => setAssignee(assignee === n ? '' : n)} style={{ ...S, borderColor: assignee === n ? '#10B981' : '#e2e8f0', background: assignee === n ? '#F0FDF4' : '#fff', color: assignee === n ? '#10B981' : '#64748b', fontWeight: assignee === n ? 600 : 400 }}>{n}</button>)}
-              </div>
-            </div>
+            <StaffChips label="작성자*" value={author} onChange={v => { setAuthor(v); localStorage.setItem('wh-author', v); }} color="#3B82F6" bg="#EFF6FF" S={S} />
+            <StaffChips label="담당자" value={assignee} onChange={v => setAssignee(assignee === v ? '' : v)} color="#10B981" bg="#F0FDF4" S={S} />
           </div>
           {/* 제목 */}
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목*" style={{ width: '100%', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
