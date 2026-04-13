@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ReactElement } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
+import RouteGuard from './components/RouteGuard';
+import type { UserTier } from './contexts/AuthContext';
 
 const Loading = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', fontSize: 14 }}>
@@ -15,6 +17,10 @@ function lazyPage(importFn: () => Promise<any>) {
       <LazyComponent />
     </Suspense>
   );
+}
+
+function guard(tiers: UserTier[], element: ReactElement) {
+  return <RouteGuard tiers={tiers}>{element}</RouteGuard>;
 }
 
 const comingSoon = lazyPage(() => import('./pages/ComingSoon'));
@@ -39,8 +45,8 @@ export const router = createBrowserRouter(
         { path: 'guidelines', element: lazyPage(() => import('./pages/guidelines/GuidelinesPage')) },
         { path: 'company-guidelines', element: lazyPage(() => import('./pages/company-guidelines/CompanyGuidelinesPage')) },
         { path: 'lesson-plan', element: lazyPage(() => import('./pages/lesson-plan/LessonPlanPage')) },
-        // 관리자 도구
-        { path: 'recruitment', element: lazyPage(() => import('./pages/recruitment/RecruitmentPage')) },
+        // 관리자 도구 (admin/manager 전용)
+        { path: 'recruitment', element: guard(['admin', 'manager'], lazyPage(() => import('./pages/recruitment/RecruitmentPage'))) },
         { path: 'interview', element: lazyPage(() => import('./pages/interview/InterviewForm')) },
         { path: 'interview/dashboard', element: lazyPage(() => import('./pages/interview/Dashboard')) },
         { path: 'attendance', element: lazyPage(() => import('./pages/attendance/AttendancePage')) },
@@ -52,7 +58,7 @@ export const router = createBrowserRouter(
         { path: 'rules-mgmt', element: lazyPage(() => import('./pages/rules-mgmt/RulesMgmtPage')) },
         { path: 'rules-editor', element: lazyPage(() => import('./pages/rules-editor/RulesEditorPage')) },
         { path: 'eval-criteria', element: lazyPage(() => import('./pages/eval-criteria/EvalCriteriaPage')) },
-        { path: 'admin-system', element: lazyPage(() => import('./pages/admin-system/AdminSystemPage')) },
+        { path: 'admin-system', element: guard(['admin'], lazyPage(() => import('./pages/admin-system/AdminSystemPage'))) },
 
         // ===== 추가 완료 =====
         { path: 'meeting-form', element: lazyPage(() => import('./pages/meeting-form/MeetingFormPage')) },
@@ -110,12 +116,12 @@ export const router = createBrowserRouter(
         { path: 'hutechc-homepage/exam', element: lazyPage(() => import('./pages/hutechc-homepage/exam/ExamEntryPage')) },
         { path: 'hutechc-homepage/translate', element: lazyPage(() => import('./pages/hutechc-homepage/translate/TranslatePage')) },
         { path: 'hutechc-homepage/exhibition', element: lazyPage(() => import('./pages/hutechc-homepage/exhibition/ExhibitionPage')) },
-        { path: 'hutechc-homepage/admin', element: lazyPage(() => import('./pages/hutechc-homepage/admin/AdminDashboardPage')) },
+        { path: 'hutechc-homepage/admin', element: guard(['admin', 'manager'], lazyPage(() => import('./pages/hutechc-homepage/admin/AdminDashboardPage'))) },
         { path: 'hutechc-homepage/payment-guide', element: lazyPage(() => import('./pages/hutechc-homepage/payment-guide/PaymentGuidePage')) },
         { path: 'hutechc-homepage/expert', element: lazyPage(() => import('./pages/hutechc-homepage/expert/ExpertApplyPage')) },
         { path: 'hutechc-homepage/question-bank', element: lazyPage(() => import('./pages/hutechc-homepage/question-bank/QuestionBankPage')) },
         // --- admin 하위 ---
-        { path: 'hutechc-homepage/admin/admins', element: lazyPage(() => import('./pages/hutechc-homepage/admin/admins/AdminsPage')) },
+        { path: 'hutechc-homepage/admin/admins', element: guard(['admin'], lazyPage(() => import('./pages/hutechc-homepage/admin/admins/AdminsPage'))) },
         { path: 'hutechc-homepage/admin/data', element: lazyPage(() => import('./pages/hutechc-homepage/admin/data/DataPage')) },
         { path: 'hutechc-homepage/admin/exams', element: lazyPage(() => import('./pages/hutechc-homepage/admin/exams/ExamsPage')) },
         { path: 'hutechc-homepage/admin/exams/status', element: lazyPage(() => import('./pages/hutechc-homepage/admin/exams/status/StatusPage')) },
@@ -131,8 +137,8 @@ export const router = createBrowserRouter(
         { path: 'hutechc-homepage/admin/pricing', element: lazyPage(() => import('./pages/hutechc-homepage/admin/pricing/PricingPage')) },
         { path: 'hutechc-homepage/admin/prompt-rules', element: lazyPage(() => import('./pages/hutechc-homepage/admin/prompt-rules/PromptRulesPage')) },
         { path: 'hutechc-homepage/admin/quote', element: lazyPage(() => import('./pages/hutechc-homepage/admin/quote/QuotePage')) },
-        { path: 'hutechc-homepage/admin/roles', element: lazyPage(() => import('./pages/hutechc-homepage/admin/roles/RolesPage')) },
-        { path: 'hutechc-homepage/admin/settings', element: lazyPage(() => import('./pages/hutechc-homepage/admin/settings/SettingsPage')) },
+        { path: 'hutechc-homepage/admin/roles', element: guard(['admin'], lazyPage(() => import('./pages/hutechc-homepage/admin/roles/RolesPage'))) },
+        { path: 'hutechc-homepage/admin/settings', element: guard(['admin'], lazyPage(() => import('./pages/hutechc-homepage/admin/settings/SettingsPage'))) },
         { path: 'hutechc-homepage/admin/sites', element: lazyPage(() => import('./pages/hutechc-homepage/admin/sites/SitesPage')) },
         { path: 'hutechc-homepage/admin/sites/new', element: lazyPage(() => import('./pages/hutechc-homepage/admin/sites/new/NewPage')) },
         { path: 'hutechc-homepage/admin/translators', element: lazyPage(() => import('./pages/hutechc-homepage/admin/translators/TranslatorsPage')) },

@@ -76,3 +76,24 @@ Pages follow a fallback chain: fetch from `/api/*` → fall back to localStorage
 - Drag-and-drop via react-dnd
 - Dark mode support via next-themes + CSS variable theming
 - Korean language UI — most labels and content are in Korean
+
+## 4-tier 인증 (T3-3)
+
+- DB 테이블: `users`, `user_sessions` (server/db/schema.sql)
+- API: `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/users` (CRUD)
+- 미들웨어: `server/middleware/auth.js` → `requireAuth`, `requireTier('admin', ...)`
+- 프론트: `client/src/contexts/AuthContext.tsx`, `client/src/components/RouteGuard.tsx`
+- 해시: `crypto.scrypt` (server/utils/password.js) — 외부 의존성 없음
+- 세션: httpOnly 쿠키 `ws_session` + DB 세션 테이블, 14일 유효
+- 시드 실행: `npm run seed-users` (최초 1회)
+
+### 시드 계정 (개발용 — 배포 전 반드시 변경)
+
+| tier | email | pw | 대상 |
+|------|-------|------|------|
+| admin | admin@hutechc.local | admin123! | 개발자, 수연 |
+| manager | manager@hutechc.local | manager123! | 팀장(가연) |
+| user | user@hutechc.local | user123! | 내부 사용자 |
+| external | guest@hutechc.local | guest123! | 외부인 |
+
+환경변수로 오버라이드: `SEED_ADMIN_PASSWORD`, `SEED_MANAGER_PASSWORD` 등

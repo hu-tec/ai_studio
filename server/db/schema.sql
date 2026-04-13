@@ -207,3 +207,30 @@ CREATE TABLE IF NOT EXISTS page_memos (
   data TEXT NOT NULL,
   updated_at TEXT DEFAULT (datetime('now'))
 );
+
+-- 4-tier 사용자 계정 (T3-3)
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  tier TEXT NOT NULL CHECK(tier IN ('admin','manager','user','external')),
+  status TEXT DEFAULT 'active',
+  last_login_at TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_tier ON users(tier);
+
+-- 로그인 세션 (httpOnly 쿠키 토큰 → DB 조회)
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(token);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_sessions(user_id);

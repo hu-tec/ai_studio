@@ -1,21 +1,21 @@
-/* 원본: hutechc_hompage_real/app/logout/page.tsx */
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LogoutPage() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     (async () => {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      navigate('/hutechc-homepage/');
-      window.location.reload();
+      await logout();
+      navigate('/hutechc-homepage/login', { replace: true });
     })();
-  }, [navigate]);
+  }, [navigate, logout]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-sm text-gray-600">로그아웃 중...</div>
+      <div className="text-xs text-gray-600">로그아웃 중...</div>
     </div>
   );
 }
