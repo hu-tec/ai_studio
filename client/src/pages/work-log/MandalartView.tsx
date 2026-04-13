@@ -25,6 +25,11 @@ function emptyCell(text = ''): MandalartCell {
   return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [], achievement: 0 };
 }
 
+// 안정 id placeholder — 같은 (parentId, idx) 조합은 항상 동일 id 반환 (React key + editingId 유지용)
+function placeholderCell(parentId: string, idx: number): MandalartCell {
+  return { id: `${parentId}-c${idx}`, text: '', children: [], achievement: 0 };
+}
+
 function createInitialRoot(size: MandalartSize): MandalartCell[] {
   return Array.from({length: mandalartCellCount(size)}, () => emptyCell(''));
 }
@@ -65,8 +70,10 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const hasCenter = centerIdx >= 0;
 
   useEffect(() => {
-    if (!cells || cells.length < cellCount) {
-      onCellsChange(createInitialRoot(size));
+    // 길이 불일치(크기 변경 포함) → 기존 셀 앞에서부터 보존하며 길이 맞춤
+    if (!cells || cells.length !== cellCount) {
+      const padded: MandalartCell[] = Array.from({length: cellCount}, (_, i) => cells?.[i] || emptyCell(''));
+      onCellsChange(padded);
     }
   }, [cells?.length, period, size, cellCount]);
 
@@ -80,19 +87,25 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     }
   }, [cells, drillId]);
 
-  if (!cells || cells.length < cellCount) {
+  if (!cells || cells.length !== cellCount) {
     return <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:13}}>만다라트 초기화 중...</div>;
   }
   const root = cells;
 
   const drillCell = drillId ? root.find(c => c.id === drillId) : null;
+  // drill 시 자식 배열을 현재 size 의 childCount 에 맞게 pad/truncate (표시용, 안정 id)
+  const drilledChildren: MandalartCell[] = drillCell
+    ? Array.from({length: childCount}, (_, i) => drillCell.children?.[i] || placeholderCell(drillCell.id, i))
+    : [];
   // drill-down 그리드 구성: 홀수 N → 센터에 부모 삽입; 짝수 N → 그냥 children
-  const currentGrid = drillCell
+  const currentGrid: MandalartCell[] = drillCell
     ? hasCenter
-      ? [...(drillCell.children || []).slice(0, centerIdx), { ...drillCell }, ...(drillCell.children || []).slice(centerIdx, childCount)]
-      : [...(drillCell.children || [])]
+      ? [...drilledChildren.slice(0, centerIdx), { ...drillCell }, ...drilledChildren.slice(centerIdx, childCount)]
+      : drilledChildren
     : root;
+  // 방어: length 가 cellCount 를 초과하면 잘라냄 (크기 축소 직후 transient 상태 대비)
   while (currentGrid.length < cellCount) currentGrid.push(emptyCell());
+  if (currentGrid.length > cellCount) currentGrid.length = cellCount;
 
   const updateCell = (id: string, text: string) => {
     if (drillCell) {
@@ -108,7 +121,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         if (childIdx >= 0 && childIdx < children.length) {
           children[childIdx] = { ...children[childIdx], text };
         } else {
-          while (children.length <= childIdx) children.push(emptyCell());
+          while (children.length <= childIdx) children.push(placeholderCell(c.id, children.length));
           children[childIdx] = { ...children[childIdx], text };
         }
         return { ...c, children };
@@ -149,12 +162,12 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     setDrillId(cell.id);
   };
 
-  // 9×9 전체 뷰용: 특정 parent cell의 childIdx번째 자식 text 변경
+  // 9×9 전체 뷰용: 특정 parent cell의 childIdx번째 자식 text 변경 (현재 size의 childCount 까지 자동 패딩)
   const writeChildCell = (parentIdx: number, childIdx: number, text: string) => {
     onCellsChange(root.map((c, i) => {
       if (i !== parentIdx) return c;
       const children = [...(c.children || [])];
-      while (children.length < 8) children.push(emptyCell());
+      while (children.length < childCount) children.push(placeholderCell(c.id, children.length));
       children[childIdx] = { ...children[childIdx], text };
       return { ...c, children };
     }));
@@ -349,7 +362,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                     const childIdx = hasCenter
                       ? (sIdx < centerIdx ? sIdx : sIdx - 1)
                       : sIdx;
-                    const childCell = children[childIdx] || emptyCell();
+                    const childCell = children[childIdx] || placeholderCell(parentCell.id, childIdx);
                     const linked = linkedTask(childCell);
                     const statusColor = linked
                       ? linked.status === 'done' ? '#10B981' : linked.status === 'progress' ? '#3B82F6' : '#94a3b8'

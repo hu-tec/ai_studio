@@ -110,6 +110,11 @@ export function mandalartChildCount(size: MandalartSize): number {
   return mandalartCellCount(size) - (c >= 0 ? 1 : 0);
 }
 
+// (type, period, size) 조합 → 저장 키 — 크기별 독립 저장으로 전환 시 데이터 유실 방지
+export function mandalartKey(typeId: string, period: MandalartPeriod, size: MandalartSize): string {
+  return `${typeId}|${period}|${size}`;
+}
+
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
 
@@ -358,11 +363,13 @@ export interface DailyLog {
   tasks?: Task[];
   todayTasks?: string;
   tomorrowTasks?: string;
-  mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>; // legacy — worklog 타입으로 마이그레이션됨
-  // 타입별(업무일지/규정/미팅 등) × 기간별 만다라트 저장
+  mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>; // legacy 1 — 초기 단일 타입 구조
+  mandalartByTypeAndPeriod?: Record<string, Record<MandalartPeriod, MandalartCell[]>>; // legacy 2 — 타입별, 크기별 미분리
+  // 현재: 크기별 독립 저장 — key = `${typeId}|${period}|${size}`
   mandalartTypes?: MandalartTypeConfig[];
-  mandalartByTypeAndPeriod?: Record<string, Record<MandalartPeriod, MandalartCell[]>>;
+  mandalartCellsByKey?: Record<string, MandalartCell[]>;
   mandalartActiveType?: string;
+  mandalartActiveSize?: MandalartSize;
 }
 
 export interface Employee {
