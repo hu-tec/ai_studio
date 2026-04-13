@@ -61,6 +61,16 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     }
   }, [cells?.length, period]);
 
+  // drill-down 타겟 셀이 외부에서 비워졌거나(태스크 삭제 등) 사라진 경우 자동 상위 이동
+  useEffect(() => {
+    if (!drillId) return;
+    const target = cells?.find(c => c.id === drillId);
+    if (!target || !target.text?.trim()) {
+      setDrillId(null);
+      setEditingId(null);
+    }
+  }, [cells, drillId]);
+
   if (!cells || cells.length < 9) {
     return <div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:13}}>만다라트 초기화 중...</div>;
   }

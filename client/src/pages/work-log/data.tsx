@@ -167,16 +167,22 @@ export function syncFranklinToSlots(
   prevTasks?: Task[],
 ): TimeSlotEntry[] {
   const taskBySlotId = new Map<string, Task>();
-  tasks.forEach(t => { if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t); });
+  const collectLinked = (t: Task) => {
+    if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t);
+    t.children?.forEach(collectLinked);
+  };
+  tasks.forEach(collectLinked);
 
-  // 이전에 연결되었다가 해제된 슬롯 파악
+  // 이전에 연결되었다가 해제된 슬롯 파악 (top-level + children 모두)
   const unlinkedSlotIds = new Set<string>();
   if (prevTasks) {
-    prevTasks.forEach(t => {
+    const collectUnlinked = (t: Task) => {
       if (t.timeSlotId && !taskBySlotId.has(t.timeSlotId)) {
         unlinkedSlotIds.add(t.timeSlotId);
       }
-    });
+      t.children?.forEach(collectUnlinked);
+    };
+    prevTasks.forEach(collectUnlinked);
   }
 
   return slots.map(slot => {
@@ -191,20 +197,33 @@ export function syncFranklinToSlots(
   });
 }
 
-/** TimeSlots → Franklin 역방향 동기화: 타임슬롯 편집 시 연결된 과업 업데이트 */
+/** TimeSlots → Franklin 역방향 동기화: 타임슬롯 편집 시 연결된 과업 업데이트 (서브태스크 포함) */
 export function syncSlotToFranklin(
   tasks: Task[],
   slotId: string,
   field: string,
   value: string,
 ): Task[] {
-  const linkedTask = tasks.find(t => t.timeSlotId === slotId);
-  if (!linkedTask) return tasks;
-  if (field === 'title') {
-    return tasks.map(t => t.id === linkedTask.id ? { ...t, task: value } : t);
+  const patch: Partial<Task> | null =
+    field === 'title' ? { task: value } :
+    field === 'content' ? { note: value } :
+    null;
+  if (!patch) return tasks;
+
+  // top-level 우선 검색
+  const topIdx = tasks.findIndex(t => t.timeSlotId === slotId);
+  if (topIdx >= 0) {
+    return tasks.map((t, i) => i === topIdx ? { ...t, ...patch } : t);
   }
-  if (field === 'content') {
-    return tasks.map(t => t.id === linkedTask.id ? { ...t, note: value } : t);
+
+  // 서브태스크 검색
+  for (let i = 0; i < tasks.length; i++) {
+    const cIdx = tasks[i].children?.findIndex(c => c.timeSlotId === slotId) ?? -1;
+    if (cIdx >= 0) {
+      return tasks.map((t, ti) => ti === i
+        ? { ...t, children: t.children!.map((c, ci) => ci === cIdx ? { ...c, ...patch } : c) }
+        : t);
+    }
   }
   return tasks;
 }

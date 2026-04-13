@@ -7,7 +7,7 @@ import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -55,7 +55,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
         let updated = [...tasks];
         let changed = false;
 
-        // 태스크 업데이트 헬퍼
+        // 현재 task id 집합 (top-level + children) — stale taskId 감지용
+        const taskIdSet = new Set<string>();
+        updated.forEach(t => { taskIdSet.add(t.id); t.children?.forEach(c => taskIdSet.add(c.id)); });
+
         const updateFields = (t: Task, cell: MandalartCell) => {
           const needsUpdate = t.task !== cell.text || t.achievement !== cell.achievement || (cell.status && t.status !== cell.status);
           return needsUpdate ? { ...t, task: cell.text, achievement: cell.achievement, ...(cell.status ? { status: cell.status } : {}) } : null;
@@ -63,6 +66,11 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
 
         const processCell = (cell: MandalartCell, parentTaskId?: string) => {
           if (!cell.text?.trim()) return;
+
+          // stale taskId (삭제된 태스크를 가리키는 경우) 무효화 → 새 태스크 생성 경로 진입
+          if (cell.taskId && !taskIdSet.has(cell.taskId)) {
+            cell.taskId = undefined;
+          }
 
           if (parentTaskId) {
             // ── 자식 셀 → 서브태스크로 처리 ──
@@ -72,7 +80,6 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
             const children = [...(parent.children || [])];
 
             if (cell.taskId) {
-              // 부모 children에서 검색
               const cIdx = children.findIndex(c => c.id === cell.taskId);
               if (cIdx >= 0) {
                 const patched = updateFields(children[cIdx], cell);
@@ -91,20 +98,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 }
               }
             } else {
-              // 새 자식 셀 → 기존 서브태스크 확인 후 없으면 생성
-              const existingChild = children.find(c => c.task === cell.text);
-              if (existingChild) {
-                cell.taskId = existingChild.id;
-              } else {
-                const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
-                children.push({
-                  id: newId, priority: parent.priority, number: children.length + 1,
-                  task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
-                  parentId: parentTaskId,
-                });
-                updated[pIdx] = { ...parent, children };
-                cell.taskId = newId;
-              }
+              // 새 서브태스크 생성 (텍스트 매칭 제거 — 셀↔태스크 1:1 보장)
+              const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+              const nextSubNum = children.length > 0 ? Math.max(...children.map(c => c.number || 0)) + 1 : 1;
+              children.push({
+                id: newId, priority: parent.priority, number: nextSubNum,
+                task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
+                parentId: parentTaskId, period,
+              });
+              updated[pIdx] = { ...parent, children };
+              taskIdSet.add(newId);
+              cell.taskId = newId;
               changed = true;
             }
           } else {
@@ -116,27 +120,27 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 if (patched) { updated[idx] = patched; changed = true; }
               }
             } else {
-              const existing = updated.find(t => t.task === cell.text);
-              if (existing) {
-                cell.taskId = existing.id;
-                changed = true;
-              } else {
-                const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
-                updated.push({
-                  id: newId, priority: 'B', number: updated.filter(t => t.priority === 'B').length + 1,
-                  task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
-                  important: true, urgent: false, period,
-                });
-                cell.taskId = newId;
-                changed = true;
-              }
+              // 새 메인 태스크 생성 (텍스트 매칭 제거)
+              const newId = `ft-m-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+              updated.push({
+                id: newId, priority: 'B', number: getNextNumber(updated, 'B'),
+                task: cell.text, status: cell.status || 'pending', achievement: cell.achievement || 0,
+                important: true, urgent: false, period,
+              });
+              taskIdSet.add(newId);
+              cell.taskId = newId;
+              changed = true;
             }
           }
-          // 하위 셀 → 이 셀의 taskId를 부모로 전달
+          // 하위 셀 재귀 — 이 셀의 taskId를 부모로 전달
           cell.children?.forEach(c => processCell(c, cell.taskId));
         };
         // 루트 센터(idx 4)는 기간 목표 라벨이므로 태스크로 동기화하지 않음
         newCells.forEach((cell, i) => { if (i !== 4) processCell(cell); });
+        if (changed) {
+          // 태스크 변경 → 연결된 타임슬롯 제목/내용도 동기화
+          setTimeSlots(slots => syncFranklinToSlots(updated, slots, tasks));
+        }
         return changed ? updated : tasks;
       });
       return { ...prev, [period]: newCells };
@@ -267,17 +271,30 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     setTasks(prev => {
       // 동기화: 연결된 과업 변경 → 타임슬롯 자동 반영
       setTimeSlots(slots => syncFranklinToSlots(newTasks, slots, prev));
-      // 동기화: 태스크 변경 → 만다라트 셀 achievement/status 반영
+      // 동기화: 태스크 변경 → 만다라트 셀 반영 (삭제된 태스크는 셀에서 제거)
       setMandalartByPeriod(mp => {
+        // top-level + children 모두 포함한 flat Map (셀은 서브태스크도 가리킬 수 있음)
+        const taskMap = new Map<string, Task>();
+        newTasks.forEach(t => {
+          taskMap.set(t.id, t);
+          t.children?.forEach(c => taskMap.set(c.id, c));
+        });
+        const syncCell = (cell: MandalartCell): MandalartCell => {
+          const newChildren = cell.children?.map(syncCell);
+          if (!cell.taskId) {
+            return newChildren ? { ...cell, children: newChildren } : cell;
+          }
+          const task = taskMap.get(cell.taskId);
+          if (!task) {
+            // 태스크 삭제됨 → 셀 내용 초기화 (연결 해제 + 텍스트/상태 클리어)
+            return { id: cell.id, text: '', children: newChildren };
+          }
+          return { ...cell, text: task.task, achievement: task.achievement, status: task.status, children: newChildren };
+        };
         const updated = { ...mp };
         for (const p of ['daily', 'weekly', 'monthly'] as const) {
           if (!updated[p] || updated[p].length === 0) continue;
-          updated[p] = updated[p].map(cell => {
-            if (!cell.taskId) return cell;
-            const task = newTasks.find(t => t.id === cell.taskId);
-            if (!task) return cell;
-            return { ...cell, text: task.task, achievement: task.achievement, status: task.status };
-          });
+          updated[p] = updated[p].map(syncCell);
         }
         return updated;
       });
@@ -726,16 +743,28 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
-                        // 태스크 시간만 설정 — top-level이든 children이든 업데이트
                         const tid = task.id;
-                        setTasks(prev => prev.map(t => {
+                        const newTasks = tasks.map(t => {
                           if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
                           if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
-                        }));
+                        });
+                        handleTasksChange(newTasks);
+                        updateSlot(index, 'title', task.task);
                       } else {
-                        // 프리텍스트 드롭은 슬롯 제목에 추가
-                        updateSlot(index, 'title', slot.title ? slot.title + ' / ' + droppedText : droppedText);
+                        // 매칭 실패 → 새 태스크 생성 (id 패턴은 무시)
+                        const cleaned = droppedText.trim();
+                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) return;
+                        const newTask: Task = {
+                          id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+                          priority: 'B',
+                          number: getNextNumber(tasks, 'B'),
+                          task: cleaned, status: 'pending',
+                          important: true, urgent: false, period,
+                          startTime: slotStart, endTime: slotEnd || undefined, timeSlotId: slot.id,
+                        };
+                        handleTasksChange([...tasks, newTask]);
+                        updateSlot(index, 'title', cleaned);
                       }
                     }}>
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
@@ -783,20 +812,32 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
                       if (!droppedText) return;
-                      // top-level + children 모두 검색
                       const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
                         const tid = task.id;
-                        setTasks(prev => prev.map(t => {
+                        const newTasks = tasks.map(t => {
                           if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
                           if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
                           return t;
-                        }));
+                        });
+                        handleTasksChange(newTasks);
                         updateSlot(index, 'title', task.task);
                       } else {
-                        updateSlot(index, 'title', droppedText);
+                        // 매칭 실패 → 새 태스크 생성 후 슬롯에 배정 (id 패턴은 무시)
+                        const cleaned = droppedText.trim();
+                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) return;
+                        const newTask: Task = {
+                          id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+                          priority: 'B',
+                          number: getNextNumber(tasks, 'B'),
+                          task: cleaned, status: 'pending',
+                          important: true, urgent: false, period,
+                          startTime: slotStart, endTime: slotEnd || undefined, timeSlotId: slot.id,
+                        };
+                        handleTasksChange([...tasks, newTask]);
+                        updateSlot(index, 'title', cleaned);
                       }
                     }}
                   >
