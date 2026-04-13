@@ -7,7 +7,7 @@ import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -45,6 +45,55 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [todayMemoOpen, setTodayMemoOpen] = useState(true);
   const [tomorrowListOpen, setTomorrowListOpen] = useState(true);
   const [tomorrowMemoOpen, setTomorrowMemoOpen] = useState(true);
+
+  // 타임테이블 드래그 범위 추적 — 여러 슬롯에 걸친 드롭 지원
+  const dragSlotRangeRef = useRef<{ firstIdx: number | null; lastIdx: number | null }>({ firstIdx: null, lastIdx: null });
+  const [dragRangeHint, setDragRangeHint] = useState<{ lo: number; hi: number } | null>(null);
+  useEffect(() => {
+    const resetRange = () => {
+      dragSlotRangeRef.current = { firstIdx: null, lastIdx: null };
+      setDragRangeHint(null);
+    };
+    window.addEventListener('dragstart', resetRange);
+    window.addEventListener('dragend', resetRange);
+    return () => {
+      window.removeEventListener('dragstart', resetRange);
+      window.removeEventListener('dragend', resetRange);
+    };
+  }, []);
+  const trackDragEnter = useCallback((idx: number) => {
+    const cur = dragSlotRangeRef.current;
+    if (cur.firstIdx === null) cur.firstIdx = idx;
+    cur.lastIdx = idx;
+    const lo = Math.min(cur.firstIdx, cur.lastIdx);
+    const hi = Math.max(cur.firstIdx, cur.lastIdx);
+    setDragRangeHint(prev => (prev && prev.lo === lo && prev.hi === hi) ? prev : { lo, hi });
+  }, []);
+  // 드롭 시 startTime/endTime/timeSlotId/loIdx 계산 — 범위 드래그 > duration 보존 > 1-slot 순서
+  const computeDropSpan = useCallback((dropIdx: number, origTask?: Task) => {
+    const cur = dragSlotRangeRef.current;
+    const hasRange = cur.firstIdx !== null && cur.lastIdx !== null && cur.firstIdx !== cur.lastIdx;
+    if (hasRange) {
+      const lo = Math.min(cur.firstIdx!, cur.lastIdx!, dropIdx);
+      const hi = Math.max(cur.firstIdx!, cur.lastIdx!, dropIdx);
+      const a = timeSlots[lo]; const b = timeSlots[hi];
+      return {
+        loIdx: lo,
+        startTime: a.timeSlot.split('~')[0]?.trim() || '',
+        endTime: b.timeSlot.split('~')[1]?.trim() || '',
+        timeSlotId: a.id,
+      };
+    }
+    const s = timeSlots[dropIdx];
+    const startTime = s.timeSlot.split('~')[0]?.trim() || '';
+    const slotEnd = s.timeSlot.split('~')[1]?.trim() || '';
+    let endTime = slotEnd;
+    if (origTask?.startTime && origTask?.endTime) {
+      const dur = timeToMinutes(origTask.endTime) - timeToMinutes(origTask.startTime);
+      if (dur > 0) endTime = minutesToTime(timeToMinutes(startTime) + dur);
+    }
+    return { loIdx: dropIdx, startTime, endTime, timeSlotId: s.id };
+  }, [timeSlots]);
 
   const mandalartCells = mandalartByPeriod[period] || [];
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
@@ -728,44 +777,50 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 const tasks_ = slotTasks.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
                 const hasFill = tasks_.length > 0 || slot.title;
 
+                const inDragRange = dragRangeHint && index >= dragRangeHint.lo && index <= dragRangeHint.hi;
                 return viewMode === 'classic' ? (
                   /* Classic: 확장 — 시간 + 제목 + 내용 + AI + 예정 인라인 편집 */
-                  <div key={slot.id} className="border-b border-border/50 last:border-b-0"
+                  <div key={slot.id} className={`border-b border-border/50 last:border-b-0 ${inDragRange ? 'bg-amber-50/60' : ''}`}
+                    onDragEnter={() => trackDragEnter(index)}
                     onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
-                      if (!droppedText) return;
+                      if (!droppedText) { setDragRangeHint(null); return; }
                       // top-level + children 모두 검색
                       const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
                         const tid = task.id;
+                        const span = computeDropSpan(index, task);
                         const newTasks = tasks.map(t => {
-                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
+                          if (t.id === tid) return { ...t, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined } : c) };
                           return t;
                         });
                         handleTasksChange(newTasks);
-                        updateSlot(index, 'title', task.task);
+                        updateSlot(span.loIdx, 'title', task.task);
                       } else {
                         // 매칭 실패 → 새 태스크 생성 (id 패턴은 무시)
                         const cleaned = droppedText.trim();
-                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) return;
+                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) { setDragRangeHint(null); return; }
+                        const span = computeDropSpan(index);
                         const newTask: Task = {
                           id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
                           priority: 'B',
                           number: getNextNumber(tasks, 'B'),
                           task: cleaned, status: 'pending',
                           important: true, urgent: false, period,
-                          startTime: slotStart, endTime: slotEnd || undefined, timeSlotId: slot.id,
+                          startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId,
                         };
                         handleTasksChange([...tasks, newTask]);
-                        updateSlot(index, 'title', cleaned);
+                        updateSlot(span.loIdx, 'title', cleaned);
                       }
+                      dragSlotRangeRef.current = { firstIdx: null, lastIdx: null };
+                      setDragRangeHint(null);
                     }}>
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
                       <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1 flex-wrap">
@@ -804,41 +859,46 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 ) : (
                   /* Franklin/Eisenhower/Mandalart: 축소 — 시간 + 블록 (DnD drop zone) */
                   <div key={slot.id}
-                    className={`border-b border-border/50 transition-colors ${hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
+                    className={`border-b border-border/50 transition-colors ${inDragRange ? 'bg-amber-100/70' : hasFill ? 'bg-accent/5' : 'hover:bg-blue-50/30'}`}
+                    onDragEnter={() => trackDragEnter(index)}
                     onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.background = '#dbeafe'; }}
                     onDragLeave={e => { e.currentTarget.style.background = ''; }}
                     onDrop={e => {
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
-                      if (!droppedText) return;
+                      if (!droppedText) { setDragRangeHint(null); return; }
                       const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
                       if (task) {
                         const tid = task.id;
+                        const span = computeDropSpan(index, task);
                         const newTasks = tasks.map(t => {
-                          if (t.id === tid) return { ...t, startTime: slotStart, endTime: slotEnd || t.endTime, timeSlotId: slot.id, queued: undefined };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: slotStart, endTime: slotEnd || c.endTime, timeSlotId: slot.id, queued: undefined } : c) };
+                          if (t.id === tid) return { ...t, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined };
+                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined } : c) };
                           return t;
                         });
                         handleTasksChange(newTasks);
-                        updateSlot(index, 'title', task.task);
+                        updateSlot(span.loIdx, 'title', task.task);
                       } else {
                         // 매칭 실패 → 새 태스크 생성 후 슬롯에 배정 (id 패턴은 무시)
                         const cleaned = droppedText.trim();
-                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) return;
+                        if (!cleaned || /^(ft-|mc-)/.test(cleaned)) { setDragRangeHint(null); return; }
+                        const span = computeDropSpan(index);
                         const newTask: Task = {
                           id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
                           priority: 'B',
                           number: getNextNumber(tasks, 'B'),
                           task: cleaned, status: 'pending',
                           important: true, urgent: false, period,
-                          startTime: slotStart, endTime: slotEnd || undefined, timeSlotId: slot.id,
+                          startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId,
                         };
                         handleTasksChange([...tasks, newTask]);
-                        updateSlot(index, 'title', cleaned);
+                        updateSlot(span.loIdx, 'title', cleaned);
                       }
+                      dragSlotRangeRef.current = { firstIdx: null, lastIdx: null };
+                      setDragRangeHint(null);
                     }}
                   >
                     <div className="flex items-center gap-1 px-1.5 py-1">
