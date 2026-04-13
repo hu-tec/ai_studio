@@ -152,6 +152,16 @@ export function CategorySidebar() {
     });
   }, []);
 
+  const noneCollapsed = groups.every(g => !collapsedGroups.has(g.id));
+
+  const toggleAllGroups = useCallback(() => {
+    if (noneCollapsed) {
+      setCollapsedGroups(new Set(groups.map(g => g.id)));
+    } else {
+      setCollapsedGroups(new Set());
+    }
+  }, [noneCollapsed, groups]);
+
   return (
     <aside
       style={{
@@ -169,6 +179,28 @@ export function CategorySidebar() {
         <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
         {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>AI Studio</span>}
       </div>
+
+      {/* 전체 펼치기/접기 토글 */}
+      {!sidebarCollapsed && groups.length > 0 && (
+        <div style={{ padding: '3px 4px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: 2 }}>
+          <button
+            type="button"
+            onClick={toggleAllGroups}
+            title={noneCollapsed ? '전체 그룹 접기' : '전체 그룹 펼치기'}
+            style={{
+              flex: 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
+              padding: '2px 4px', border: '1px solid #e2e8f0', background: '#f8fafc',
+              borderRadius: 3, fontSize: 9, color: '#64748b', cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            {noneCollapsed
+              ? <><ChevronUp size={9} /> 전체 접기</>
+              : <><ChevronDown size={9} /> 전체 펼치기</>}
+          </button>
+        </div>
+      )}
 
       {/* 네비게이션 */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 3px' }}>
