@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, GripVertical, FileText } from 'lucide-react';
-import { MarkdownField } from './MarkdownField';
 import type { MandalartCell, Task, FranklinPriority, FranklinStatus, MandalartPeriod } from './data';
 import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS } from './data';
 
@@ -52,7 +51,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
+  const [expand9x9, setExpand9x9] = useState(false);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -134,6 +133,21 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     setDrillId(cell.id);
   };
 
+  // 9×9 전체 뷰용: 특정 parent cell의 childIdx번째 자식 text 변경
+  const writeChildCell = (parentIdx: number, childIdx: number, text: string) => {
+    onCellsChange(root.map((c, i) => {
+      if (i !== parentIdx) return c;
+      const children = [...(c.children || [])];
+      while (children.length < 8) children.push(emptyCell());
+      children[childIdx] = { ...children[childIdx], text };
+      return { ...c, children };
+    }));
+  };
+  // 9×9 전체 뷰용: 루트 셀 text 변경
+  const writeRootCell = (idx: number, text: string) => {
+    onCellsChange(root.map((c, i) => i === idx ? { ...c, text } : c));
+  };
+
   const onDragStart = (e: DragEvent, cell: MandalartCell) => {
     if (!cell.text.trim()) return;
     setDragCellId(cell.id);
@@ -177,24 +191,134 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {drillId && (
+        {drillId && !expand9x9 && (
           <button onClick={() => setDrillId(null)} style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', background:'#f1f5f9', border:'1px solid #e2e8f0', borderRadius:6, fontSize:12, cursor:'pointer', color:'#475569' }}>
             <ArrowLeft size={14} /> 상위로
           </button>
         )}
         <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
-          {drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
+          {expand9x9 ? '만다라트 — 9×9 전체' : drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
         </span>
-        <button onClick={() => {
-          const filledCells = currentGrid.filter((c,i) => i !== 4 && c.text.trim());
-          const allOpen = filledCells.every(c => c.id === detailId);
-          setDetailId(allOpen || !detailId ? (filledCells.length > 0 ? '__all__' : null) : null);
-        }} style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer', background: detailId ? '#eff6ff' : '#fff', color: detailId ? '#3B82F6' : '#94a3b8' }}>
-          {detailId ? '상세접기' : '상세펼치기'}
+        <button onClick={() => { setExpand9x9(v => !v); setDrillId(null); setEditingId(null); }}
+          style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer',
+                   background: expand9x9 ? '#eff6ff' : '#fff', color: expand9x9 ? '#3B82F6' : '#94a3b8' }}>
+          {expand9x9 ? '상세접기' : '상세펼치기'}
         </button>
-
       </div>
 
+      {/* 9×9 전체 펼치기 뷰: 루트 3×3 × 각 셀의 3×3 children = 9×9 */}
+      {expand9x9 ? (
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
+          background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
+        }}>
+          {root.map((parentCell, pIdx) => {
+            const isRootCenter = pIdx === 4;
+            // 루트 센터 = 전체 목표 — 큰 단일 셀
+            if (isRootCenter) {
+              const isEditing = editingId === parentCell.id;
+              return (
+                <div key={parentCell.id}
+                  onClick={() => setEditingId(parentCell.id)}
+                  style={{
+                    background: '#1e293b', borderRadius: 8, border: '2px solid #1e293b',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    minHeight: 130, padding: 8, cursor: 'text',
+                  }}>
+                  {isEditing ? (
+                    <textarea autoFocus value={parentCell.text}
+                      onChange={e => writeRootCell(pIdx, e.target.value)}
+                      onBlur={() => setEditingId(null)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
+                      style={{ width:'100%', border:'none', outline:'none', background:'transparent',
+                        color:'#fff', fontSize:14, fontWeight:700, textAlign:'center', resize:'none',
+                        fontFamily:'inherit', lineHeight:1.4 }} />
+                  ) : (
+                    <span style={{ color:'#fff', fontSize:14, fontWeight:700, textAlign:'center', wordBreak:'break-word' }}>
+                      {parentCell.text || PERIOD_LABELS[period]}
+                    </span>
+                  )}
+                </div>
+              );
+            }
+            const children = parentCell.children || [];
+            return (
+              <div key={parentCell.id} style={{
+                border: '2px solid #cbd5e1', borderRadius: 6, padding: 3, background: '#fff',
+              }}>
+                <div style={{ display:'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
+                  {Array.from({length:9}, (_, sIdx) => {
+                    // 서브그리드 센터(sIdx===4) = 부모 셀 자체 (레이블)
+                    if (sIdx === 4) {
+                      const isEditing = editingId === parentCell.id;
+                      return (
+                        <div key={`p-${pIdx}-c-${sIdx}`}
+                          onClick={e => { e.stopPropagation(); setEditingId(parentCell.id); }}
+                          style={{
+                            background: '#475569', borderRadius: 3, padding: 2,
+                            minHeight: 34, display:'flex', alignItems:'center', justifyContent:'center',
+                            cursor: 'text', overflow: 'hidden',
+                          }}>
+                          {isEditing ? (
+                            <textarea autoFocus value={parentCell.text}
+                              onChange={e => writeRootCell(pIdx, e.target.value)}
+                              onBlur={() => setEditingId(null)}
+                              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
+                              style={{ width:'100%', border:'none', outline:'none', background:'transparent',
+                                color:'#fff', fontSize:9, fontWeight:700, textAlign:'center', resize:'none',
+                                fontFamily:'inherit', lineHeight:1.2 }} />
+                          ) : (
+                            <span style={{ color:'#fff', fontSize:9, fontWeight:700, textAlign:'center', wordBreak:'break-word', lineHeight:1.2 }}>
+                              {parentCell.text || '+'}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    }
+                    // 서브셀 (children[0..7])
+                    const childIdx = sIdx < 4 ? sIdx : sIdx - 1;
+                    const childCell = children[childIdx] || emptyCell();
+                    const linked = linkedTask(childCell);
+                    const statusColor = linked
+                      ? linked.status === 'done' ? '#10B981' : linked.status === 'progress' ? '#3B82F6' : '#94a3b8'
+                      : undefined;
+                    const isEditing = editingId === childCell.id;
+                    return (
+                      <div key={`p-${pIdx}-c-${sIdx}`}
+                        draggable={!!childCell.text.trim()}
+                        onDragStart={e => onDragStart(e, childCell)}
+                        onDragEnd={() => setDragCellId(null)}
+                        onClick={e => { e.stopPropagation(); setEditingId(childCell.id); }}
+                        style={{
+                          background: dragCellId === childCell.id ? '#dbeafe' : '#fff',
+                          border: `1px solid ${linked ? statusColor : '#e2e8f0'}`,
+                          borderRadius: 3, padding: 2,
+                          minHeight: 34, display:'flex', alignItems:'center', justifyContent:'center',
+                          cursor: childCell.text.trim() ? 'grab' : 'text', overflow: 'hidden',
+                        }}>
+                        {isEditing ? (
+                          <textarea autoFocus value={childCell.text}
+                            onChange={e => writeChildCell(pIdx, childIdx, e.target.value)}
+                            onBlur={() => setEditingId(null)}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
+                            style={{ width:'100%', border:'none', outline:'none', background:'transparent',
+                              color:'#1e293b', fontSize:9, textAlign:'center', resize:'none',
+                              fontFamily:'inherit', lineHeight:1.2 }} />
+                        ) : (
+                          <span style={{ fontSize:9, color: childCell.text ? '#1e293b' : '#cbd5e1', textAlign:'center', wordBreak:'break-word', lineHeight:1.2 }}>
+                            {childCell.text || '+'}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+      <>
       {/* 메인 레이아웃 */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
 
@@ -352,32 +476,6 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         })}
       </div>
 
-      {/* 상세 내용 패널 */}
-      {detailId && (
-        <div style={{ display:'flex', flexDirection:'column', gap:4, padding:'6px 0' }}>
-          {currentGrid.filter((c, i) => i !== 4 && c.text.trim()).filter(c => detailId === '__all__' || detailId === c.id).map(cell => {
-            const linked = linkedTask(cell);
-            return (
-              <div key={cell.id} style={{ padding:'6px 8px', background:'#fff', borderRadius:6, border:'1px solid #e2e8f0', fontSize:11 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
-                  {linked && <span style={{ fontSize:9, fontWeight:700, color: FRANKLIN_PRIORITY_CONFIG[linked.priority].color }}>{linked.priority}{linked.number}</span>}
-                  <span style={{ fontWeight:600, color:'#1e293b' }}>{cell.text}</span>
-                  {linked?.startTime && <span style={{ fontSize:9, color:'#3B82F6', fontFamily:'monospace' }}>{linked.startTime}{linked.endTime ? '~'+linked.endTime : ''}</span>}
-                </div>
-                <div style={{ borderTop:'1px solid #f1f5f9', paddingTop:4 }}>
-                  <MarkdownField
-                    value={linked?.note || ''}
-                    onChange={v => { if (linked) onTasksChange(tasks.map(t => t.id === linked.id ? { ...t, note: v } : t)); }}
-                    placeholder="상세 내용 입력 (마크다운 지원)"
-                    minHeight={30}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       </div>
 
       {/* 안내 */}
@@ -385,6 +483,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
           셀 클릭→편집 | 더블클릭→하위 분해 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
         </div>
+      )}
+      </>
       )}
     </div>
   );

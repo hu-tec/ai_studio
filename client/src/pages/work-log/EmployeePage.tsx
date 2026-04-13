@@ -4,7 +4,8 @@ import { DailyDetail } from './DailyDetail';
 import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
-import { PanelLeftClose, PanelLeftOpen, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
+import { ko } from 'date-fns/locale';
+import { PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
@@ -119,6 +120,7 @@ export function EmployeePage() {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [pageMode, setPageMode] = useState<'today' | 'calendar'>('today');
   const [calendarMode, setCalendarMode] = useState<'monthly' | 'daily'>('monthly');
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const appRef = useRef<HTMLDivElement>(null);
   const [activeEmpId, setActiveEmpId] = useState(getCurrentEmployee().id);
   const [showAddEmployee, setShowAddEmployee] = useState(false);
@@ -152,6 +154,16 @@ export function EmployeePage() {
 
   const activeEmployee = employees.find(e => e.id === activeEmpId) || employees[0];
   const flushRef = useRef<(() => void) | null>(null);
+
+  // 이전/다음 날로 이동 (저장은 flushRef 로 먼저 flush)
+  const goDay = useCallback((delta: number) => {
+    if (flushRef.current) flushRef.current();
+    setSelectedDate(prev => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + delta);
+      return d;
+    });
+  }, []);
 
   const handleSwitchEmployee = (id: string) => {
     // 전환 전에 현재 작성 중인 내용을 저장
@@ -341,13 +353,34 @@ export function EmployeePage() {
               className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >캘린더</button>
           </div>
+          {/* 날짜 이동: 이전/다음 + 현재 날짜 표시 (오늘 복귀) */}
+          <div className="flex items-center gap-0.5 bg-muted/40 rounded border border-border/60">
+            <button onClick={() => goDay(-1)} title="이전 날" className="px-1 py-1 hover:bg-white rounded-l">
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => { if (flushRef.current) flushRef.current(); setSelectedDate(new Date()); }}
+              className="px-2 py-0.5 text-[11px] font-mono text-foreground hover:bg-white/60"
+              title="오늘로 이동">
+              {format(selectedDate, 'M.d(EEE)', { locale: ko })}
+            </button>
+            <button onClick={() => goDay(1)} title="다음 날" className="px-1 py-1 hover:bg-white rounded-r">
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
           {pageMode === 'calendar' && (
-            <div className="flex bg-muted/50 rounded p-0.5">
-              <button onClick={() => setCalendarMode('monthly')}
-                className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'monthly' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>월별</button>
-              <button onClick={() => setCalendarMode('daily')}
-                className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'daily' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>일별</button>
-            </div>
+            <>
+              <div className="flex bg-muted/50 rounded p-0.5">
+                <button onClick={() => setCalendarMode('monthly')}
+                  className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'monthly' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>월별</button>
+                <button onClick={() => setCalendarMode('daily')}
+                  className={`px-2 py-0.5 rounded text-[10px] ${calendarMode === 'daily' ? 'bg-white shadow-sm font-bold' : 'text-muted-foreground'}`}>일별</button>
+              </div>
+              <button onClick={() => setLeftPanelOpen(o => !o)}
+                title={leftPanelOpen ? '왼쪽 패널 숨기기' : '왼쪽 패널 보이기'}
+                className="p-1 rounded border border-border/60 hover:bg-accent">
+                {leftPanelOpen ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
+              </button>
+            </>
           )}
         </div>
         <div className="flex items-center gap-1">
@@ -361,16 +394,18 @@ export function EmployeePage() {
         /* Today mode — full width DailyDetail */
         <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
       ) : (
-        /* Calendar mode — left calendar + right detail */
+        /* Calendar mode — left calendar + right detail (left 숨기기 가능) */
         <div className="flex gap-0 items-start">
-          <div className="shrink-0 sticky top-3 flex flex-col gap-3" style={{ width: '50%' }}>
-            <div className="pr-2">
-              <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} employeeId={activeEmpId} />
+          {leftPanelOpen && (
+            <div className="shrink-0 sticky top-3 flex flex-col gap-3" style={{ width: '50%' }}>
+              <div className="pr-2">
+                <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} employeeId={activeEmpId} />
+              </div>
+              <div className="pr-2">
+                <PromptTemplateManager />
+              </div>
             </div>
-            <div className="pr-2">
-              <PromptTemplateManager />
-            </div>
-          </div>
+          )}
           <div className="flex-1 min-w-0 pl-1">
             <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
           </div>
