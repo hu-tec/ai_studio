@@ -80,6 +80,36 @@ export interface MandalartCell {
 // 만다라트 기간 모드
 export type MandalartPeriod = 'daily' | 'weekly' | 'monthly';
 
+// 만다라트 그리드 크기 (N×N)
+export type MandalartSize = 3 | 4 | 5;
+
+// 만다라트 타입 (업무일지/규정/미팅/...) — 타입별로 독립 저장, 크기 선택 가능
+export interface MandalartTypeConfig {
+  id: string;
+  label: string;
+  size: MandalartSize;
+}
+
+// 고정 타입 id — 이 id 의 만다라트만 Task/타임테이블과 동기화
+export const WORKLOG_MANDALART_ID = 'worklog';
+
+export const DEFAULT_MANDALART_TYPES: MandalartTypeConfig[] = [
+  { id: WORKLOG_MANDALART_ID, label: '업무일지', size: 3 },
+  { id: 'regulation',         label: '규정',     size: 3 },
+  { id: 'meeting',            label: '미팅',     size: 3 },
+];
+
+// N×N 그리드의 셀 개수 / 센터 인덱스 / 자식 개수
+export function mandalartCellCount(size: MandalartSize): number { return size * size; }
+export function mandalartCenterIdx(size: MandalartSize): number {
+  // 홀수 N: 중앙 1칸을 "목표"로 예약; 짝수 N: 중앙 예약 없음 (-1)
+  return size % 2 === 1 ? Math.floor((size * size) / 2) : -1;
+}
+export function mandalartChildCount(size: MandalartSize): number {
+  const c = mandalartCenterIdx(size);
+  return mandalartCellCount(size) - (c >= 0 ? 1 : 0);
+}
+
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
 
@@ -328,7 +358,11 @@ export interface DailyLog {
   tasks?: Task[];
   todayTasks?: string;
   tomorrowTasks?: string;
-  mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>;
+  mandalartByPeriod?: Record<MandalartPeriod, MandalartCell[]>; // legacy — worklog 타입으로 마이그레이션됨
+  // 타입별(업무일지/규정/미팅 등) × 기간별 만다라트 저장
+  mandalartTypes?: MandalartTypeConfig[];
+  mandalartByTypeAndPeriod?: Record<string, Record<MandalartPeriod, MandalartCell[]>>;
+  mandalartActiveType?: string;
 }
 
 export interface Employee {

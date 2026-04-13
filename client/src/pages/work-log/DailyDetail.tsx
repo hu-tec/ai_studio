@@ -6,8 +6,8 @@ import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod, MandalartTypeConfig } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -37,7 +37,15 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [mandalartByPeriod, setMandalartByPeriod] = useState<Record<MandalartPeriod, MandalartCell[]>>({ daily: [], weekly: [], monthly: [] });
+  // 타입별(업무일지/규정/미팅) × 기간별 만다라트 저장 — 업무일지 타입만 Task 동기화
+  const makeEmptyMandalartByType = (types: MandalartTypeConfig[]) => {
+    const init: Record<string, Record<MandalartPeriod, MandalartCell[]>> = {};
+    types.forEach(t => { init[t.id] = { daily: [], weekly: [], monthly: [] }; });
+    return init;
+  };
+  const [mandalartTypes, setMandalartTypes] = useState<MandalartTypeConfig[]>(DEFAULT_MANDALART_TYPES);
+  const [mandalartActiveType, setMandalartActiveType] = useState<string>(WORKLOG_MANDALART_ID);
+  const [mandalartByTypeAndPeriod, setMandalartByTypeAndPeriod] = useState<Record<string, Record<MandalartPeriod, MandalartCell[]>>>(() => makeEmptyMandalartByType(DEFAULT_MANDALART_TYPES));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
   const [showStats, setShowStats] = useState(false);
@@ -95,11 +103,18 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     return { loIdx: dropIdx, startTime, endTime, timeSlotId: s.id };
   }, [timeSlots]);
 
-  const mandalartCells = mandalartByPeriod[period] || [];
+  const activeTypeConfig = mandalartTypes.find(t => t.id === mandalartActiveType) || mandalartTypes[0];
+  const activeSize = activeTypeConfig?.size || 3;
+  const mandalartCells = mandalartByTypeAndPeriod[mandalartActiveType]?.[period] || [];
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
-    setMandalartByPeriod(prev => {
-      const newCells = typeof cells === 'function' ? cells(prev[period] || []) : cells;
-      // 역방향 동기화: 만다라트 셀 → Task 자동 생성/업데이트
+    setMandalartByTypeAndPeriod(prev => {
+      const curType = prev[mandalartActiveType] || { daily: [], weekly: [], monthly: [] };
+      const newCells = typeof cells === 'function' ? cells(curType[period] || []) : cells;
+      // 역방향 동기화: 업무일지 타입만 Task 생성/업데이트
+      if (mandalartActiveType !== WORKLOG_MANDALART_ID) {
+        return { ...prev, [mandalartActiveType]: { ...curType, [period]: newCells } };
+      }
+      const centerIdx = mandalartCenterIdx(activeSize);
       setTasks(tasks => {
         let updated = [...tasks];
         let changed = false;
@@ -184,17 +199,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           // 하위 셀 재귀 — 이 셀의 taskId를 부모로 전달
           cell.children?.forEach(c => processCell(c, cell.taskId));
         };
-        // 루트 센터(idx 4)는 기간 목표 라벨이므로 태스크로 동기화하지 않음
-        newCells.forEach((cell, i) => { if (i !== 4) processCell(cell); });
+        // 센터 셀(홀수 N)은 기간 목표 라벨이므로 태스크로 동기화하지 않음
+        newCells.forEach((cell, i) => { if (centerIdx < 0 || i !== centerIdx) processCell(cell); });
         if (changed) {
           // 태스크 변경 → 연결된 타임슬롯 제목/내용도 동기화
           setTimeSlots(slots => syncFranklinToSlots(updated, slots, tasks));
         }
         return changed ? updated : tasks;
       });
-      return { ...prev, [period]: newCells };
+      return { ...prev, [mandalartActiveType]: { ...curType, [period]: newCells } };
     });
-  }, [period]);
+  }, [period, mandalartActiveType, activeSize]);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
@@ -209,10 +224,11 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       date: dateStr, summary, position,
       homepageCategories: hpCategories, departmentCategories: deptCategories,
       timeInterval, timeSlots, employeeId,
-      detail, viewMode, tasks, mandalartByPeriod,
+      detail, viewMode, tasks,
+      mandalartTypes, mandalartByTypeAndPeriod, mandalartActiveType,
       todayTasks, tomorrowTasks,
     });
-  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartByPeriod, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
+  }, [dateStr, position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartTypes, mandalartByTypeAndPeriod, mandalartActiveType, emp.name, onSave, employeeId, todayTasks, tomorrowTasks]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -238,7 +254,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     if (!userEdited.current) { userEdited.current = true; return; }
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartByPeriod, todayTasks, tomorrowTasks]);
+  }, [position, hpCategories, deptCategories, timeInterval, timeSlots, detail, viewMode, tasks, mandalartByTypeAndPeriod, mandalartTypes, mandalartActiveType, todayTasks, tomorrowTasks]);
 
   useEffect(() => {
     // When date or log changes from props, suppress next auto-save cycle
@@ -256,12 +272,24 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setViewMode(log.viewMode || 'classic');
       // 기존 태스크에 period 없으면 'daily' 기본값 설정 (마이그레이션)
       setTasks((log.tasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
-      // 기간별 만다라트: 기존 데이터 호환
-      if (log.mandalartByPeriod) {
-        setMandalartByPeriod(log.mandalartByPeriod);
+      // 만다라트 타입 목록 로드
+      const loadedTypes = log.mandalartTypes && log.mandalartTypes.length > 0 ? log.mandalartTypes : DEFAULT_MANDALART_TYPES;
+      setMandalartTypes(loadedTypes);
+      setMandalartActiveType(log.mandalartActiveType || WORKLOG_MANDALART_ID);
+      // 만다라트 데이터: 신규 구조 > 레거시 mandalartByPeriod (→ worklog 타입으로) > 빈 값
+      if (log.mandalartByTypeAndPeriod) {
+        // 누락된 타입은 빈 셀로 보강
+        const merged = makeEmptyMandalartByType(loadedTypes);
+        for (const k of Object.keys(log.mandalartByTypeAndPeriod)) {
+          merged[k] = log.mandalartByTypeAndPeriod[k];
+        }
+        setMandalartByTypeAndPeriod(merged);
+      } else if (log.mandalartByPeriod) {
+        const merged = makeEmptyMandalartByType(loadedTypes);
+        merged[WORKLOG_MANDALART_ID] = log.mandalartByPeriod;
+        setMandalartByTypeAndPeriod(merged);
       } else {
-        const oldCells = (log as any).mandalartCells || [];
-        setMandalartByPeriod({ daily: oldCells, weekly: [], monthly: [] });
+        setMandalartByTypeAndPeriod(makeEmptyMandalartByType(loadedTypes));
       }
     } else {
       setPosition(emp.position);
@@ -274,7 +302,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTomorrowTasks('');
       setViewMode('classic');
       setTasks([]);
-      setMandalartByPeriod({ daily: [], weekly: [], monthly: [] });
+      setMandalartTypes(DEFAULT_MANDALART_TYPES);
+      setMandalartActiveType(WORKLOG_MANDALART_ID);
+      setMandalartByTypeAndPeriod(makeEmptyMandalartByType(DEFAULT_MANDALART_TYPES));
     }
     // Allow auto-save after prop-driven setState batch completes
     requestAnimationFrame(() => { suppressAutoSave.current = false; });
@@ -320,9 +350,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     setTasks(prev => {
       // 동기화: 연결된 과업 변경 → 타임슬롯 자동 반영
       setTimeSlots(slots => syncFranklinToSlots(newTasks, slots, prev));
-      // 동기화: 태스크 변경 → 만다라트 셀 반영 (삭제된 태스크는 셀에서 제거)
-      setMandalartByPeriod(mp => {
-        // top-level + children 모두 포함한 flat Map (셀은 서브태스크도 가리킬 수 있음)
+      // 동기화: 태스크 변경 → 업무일지 타입 만다라트 셀만 반영 (다른 타입은 Task 비연결)
+      setMandalartByTypeAndPeriod(mp => {
+        const wl = mp[WORKLOG_MANDALART_ID] || { daily: [], weekly: [], monthly: [] };
         const taskMap = new Map<string, Task>();
         newTasks.forEach(t => {
           taskMap.set(t.id, t);
@@ -340,12 +370,12 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           }
           return { ...cell, text: task.task, achievement: task.achievement, status: task.status, children: newChildren };
         };
-        const updated = { ...mp };
+        const updatedWl: Record<MandalartPeriod, MandalartCell[]> = { ...wl };
         for (const p of ['daily', 'weekly', 'monthly'] as const) {
-          if (!updated[p] || updated[p].length === 0) continue;
-          updated[p] = updated[p].map(syncCell);
+          if (!updatedWl[p] || updatedWl[p].length === 0) continue;
+          updatedWl[p] = updatedWl[p].map(syncCell);
         }
-        return updated;
+        return { ...mp, [WORKLOG_MANDALART_ID]: updatedWl };
       });
       return newTasks;
     });
@@ -399,7 +429,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       tomorrowTasks,
       viewMode,
       tasks,
-      mandalartByPeriod,
+      mandalartTypes,
+      mandalartByTypeAndPeriod,
+      mandalartActiveType,
     };
     const filledTitles = (viewMode !== 'classic')
       ? tasks.filter(t => t.task).map(t => `${t.priority}${t.number} ${t.task}`)
@@ -584,8 +616,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           const totalSlots = timeSlots.length;
           const doneTasks = tasks.filter(t => t.status === 'done').length;
           const totalTasks = tasks.length;
-          const mStats = viewMode === 'mandalart' && mandalartCells.length >= 9
-            ? calcGridAchievement(mandalartCells) : null;
+          const mStats = viewMode === 'mandalart' && mandalartCells.length >= mandalartCellCount(activeSize)
+            ? calcGridAchievement(mandalartCells, mandalartCenterIdx(activeSize)) : null;
           return (
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex gap-0.5">
@@ -620,7 +652,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                 <div className="w-full flex items-center gap-3 px-2 py-1 bg-slate-50 rounded border border-slate-200 text-[10px]">
                   <span className="text-slate-500 font-semibold">{period==='daily'?'오늘':period==='weekly'?'이번 주':'이번 달'}</span>
                   {viewMode === 'mandalart' && mStats ? (<>
-                    <span className="text-blue-600 font-bold">작성 {mStats.filled}/8</span>
+                    <span className="text-blue-600 font-bold">작성 {mStats.filled}/{mandalartChildCount(activeSize)}</span>
                     <span className="text-amber-500 font-bold">양 {mStats.yang}/{mStats.total}</span>
                     <span className="text-emerald-600 font-bold">질 {mStats.jil}/{mStats.total}</span>
                     <div className="flex-1 h-1 bg-slate-200 rounded overflow-hidden relative">
@@ -942,6 +974,14 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   onTasksChange={handleTasksChange}
                   onSlotTitleChange={(idx, title) => updateSlot(idx, 'title', title)}
                   period={period}
+                  size={activeSize}
+                  types={mandalartTypes}
+                  activeTypeId={mandalartActiveType}
+                  onActiveTypeChange={setMandalartActiveType}
+                  onSizeChange={(newSize) => {
+                    setMandalartTypes(prev => prev.map(t => t.id === mandalartActiveType ? { ...t, size: newSize } : t));
+                  }}
+                  syncTasks={mandalartActiveType === WORKLOG_MANDALART_ID}
                 />
               ) : viewMode === 'eisenhower' ? (
                 <EisenhowerView
