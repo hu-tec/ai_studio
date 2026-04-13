@@ -1,3 +1,7 @@
 node_modules/
 .env
 server/db/*.db
+server/db/*.db-wal
+server/db/*.db-shm
+server/db/*.corrupt_backup
+server/db/*.corrupted
