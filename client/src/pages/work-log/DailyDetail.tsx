@@ -135,7 +135,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           // 하위 셀 → 이 셀의 taskId를 부모로 전달
           cell.children?.forEach(c => processCell(c, cell.taskId));
         };
-        for (const cell of newCells) processCell(cell);
+        // 루트 센터(idx 4)는 기간 목표 라벨이므로 태스크로 동기화하지 않음
+        newCells.forEach((cell, i) => { if (i !== 4) processCell(cell); });
         return changed ? updated : tasks;
       });
       return { ...prev, [period]: newCells };

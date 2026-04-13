@@ -20,8 +20,9 @@ function emptyCell(text = ''): MandalartCell {
   return { id: `mc-${++cellCounter}-${Math.random().toString(36).slice(2,6)}`, text, children: [], achievement: 0 };
 }
 
-function createInitialRoot(periodLabel: string): MandalartCell[] {
-  return Array.from({length:9}, (_,i) => emptyCell(i===4 ? periodLabel : ''));
+function createInitialRoot(): MandalartCell[] {
+  // 센터(idx 4)는 text 비움 — 렌더 시 PERIOD_LABELS로 플레이스홀더 표시
+  return Array.from({length:9}, () => emptyCell(''));
 }
 
 // ACH_COLORS, ACH_LABELS는 data.tsx에서 import
@@ -56,7 +57,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
 
   useEffect(() => {
     if (!cells || cells.length < 9) {
-      onCellsChange(createInitialRoot(PERIOD_LABELS[period]));
+      onCellsChange(createInitialRoot());
     }
   }, [cells?.length, period]);
 
