@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router';
-import { DEFAULT_GROUPS, ROLE_COLORS, type NavRole } from './navData';
+import { DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, ROLE_ORDER, canAccessGroup, type NavRole } from './navData';
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
-import { useRole } from './useRole';
+import { useAuth } from '@/contexts/AuthContext';
 
 /* 현재 경로가 속한 그룹 */
 function detectGroup(pathname: string): string | null {
@@ -12,37 +12,24 @@ function detectGroup(pathname: string): string | null {
   return null;
 }
 
-/* 역할 라벨 */
-const ROLE_LABEL: Record<NavRole, string> = { staff: '직원', admin: '관리자', all: '공통' };
-
-/* 뷰 역할 → 표시할 그룹 역할 */
-function filterByViewRole(viewRole: string) {
-  return DEFAULT_GROUPS.filter(g => {
-    if (g.id === 'grp-trash') return false;
-    if (viewRole === 'all') return true;
-    if (viewRole === 'staff') return g.role === 'staff' || g.role === 'all';
-    if (viewRole === 'admin') return g.role === 'admin' || g.role === 'all';
-    if (viewRole === 'guest') return g.role === 'all';
-    return true;
-  });
-}
-
 export function TopNavBar() {
   const [hovered, setHovered] = useState<string | null>(null);
   const loc = useLocation();
   const memo = useAllMemoCounts();
   const timer = useRef(0);
-  const viewRole = useRole();
+  const { user } = useAuth();
 
   const activeId = detectGroup(loc.pathname);
-  const visible = filterByViewRole(viewRole);
+  const visible = DEFAULT_GROUPS.filter(g => {
+    if (g.id === 'grp-trash') return user?.tier === 'admin';
+    return canAccessGroup(g.role, user?.tier);
+  });
   const hovGroup = hovered ? DEFAULT_GROUPS.find(g => g.id === hovered) : null;
 
   const enter = (id: string) => { clearTimeout(timer.current); setHovered(id); };
   const leave = () => { timer.current = window.setTimeout(() => setHovered(null), 200); };
 
-  /* 역할별로 그룹 정렬: staff → admin → all */
-  const roleOrder: NavRole[] = ['staff', 'admin', 'all'];
+  const roleOrder: NavRole[] = ROLE_ORDER;
 
   return (
     <div style={{ position: 'relative', zIndex: 50, flexShrink: 0 }}>

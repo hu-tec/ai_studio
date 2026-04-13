@@ -7,9 +7,9 @@ import {
 import { useAllMemoCounts, toPageKey } from '../memo/useMemos';
 import {
   type NavItem, type NavGroup,
-  DEFAULT_GROUPS, ROLE_COLORS,
+  DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, canAccessGroup,
 } from './navData';
-import { useRole } from './useRole';
+import { useAuth } from '@/contexts/AuthContext';
 
 /* ── 네비 아이템 ── */
 function NavItemRow({
@@ -78,7 +78,7 @@ function GroupSection({
       {/* 그룹 헤더 */}
       {!collapsed && (() => {
         const rc = ROLE_COLORS[group.role];
-        const roleLabel = group.role === 'staff' ? '직원' : group.role === 'admin' ? '관리' : '공통';
+        const roleLabel = ROLE_LABEL[group.role];
         return (
           <div
             onClick={() => toggleGroupCollapse(group.id)}
@@ -136,14 +136,11 @@ export function CategorySidebar() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const location = useLocation();
   const memoCounts = useAllMemoCounts();
-  const viewRole = useRole();
+  const { user } = useAuth();
 
   const groups = DEFAULT_GROUPS.filter(g => {
-    if (viewRole === 'all') return true;
-    if (viewRole === 'staff') return g.role === 'staff' || g.role === 'all';
-    if (viewRole === 'admin') return g.role === 'admin' || g.role === 'all';
-    if (viewRole === 'guest') return g.role === 'all';
-    return true;
+    if (g.id === 'grp-trash') return user?.tier === 'admin';
+    return canAccessGroup(g.role, user?.tier);
   });
 
   const toggleGroupCollapse = useCallback((groupId: string) => {
