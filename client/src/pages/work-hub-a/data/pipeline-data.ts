@@ -112,7 +112,7 @@ export const PIPELINES: Pipeline[] = [
   {
     id: 'dev', name: '개발', color: '#0EA5E9', bg: '#F0F9FF', icon: '💻',
     stages: [
-      { key: '기획', label: '기획', filters: [{ label: '시스템', options: ['AI Studio', 'Work Studio', 'CBT', '홈페이지', '기타'] }] },
+      { key: '기획', label: '기획', filters: [{ label: '시스템', options: ['사내 Studio', 'Work Studio', 'CBT', '홈페이지', '기타'] }] },
       { key: '디자인', label: '디자인', filters: [{ label: '도구', options: ['Figma', 'Tailwind', '기타'] }] },
       { key: '개발', label: '개발', filters: [{ label: '스택', options: ['React', 'Express', 'Next.js', 'SQLite', 'AWS'] }] },
       { key: '테스트', label: '테스트', filters: [{ label: '유형', options: ['기능', 'UI', '성능', '보안'] }] },

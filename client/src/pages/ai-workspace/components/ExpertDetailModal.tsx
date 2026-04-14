@@ -118,7 +118,7 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
                 </h3>
                 <div className="bg-gray-50 rounded-xl p-4">
                   <p className="text-[13px] text-gray-600 leading-relaxed italic">
-                    "해당 분야에서 10년 이상의 실무 경력을 보유하고 있으며, 특히 {expert.fieldMiddle} 관련 법적 분쟁 및 문서 작성에 특화되어 있습니다. AI Studio를 통해 더 많은 클라이언트들에게 정확한 가이드를 제공하고자 신청하게 되었습니다."
+                    "해당 분야에서 10년 이상의 실무 경력을 보유하고 있으며, 특히 {expert.fieldMiddle} 관련 법적 분쟁 및 문서 작성에 특화되어 있습니다. 사내 Studio를 통해 더 많은 클라이언트들에게 정확한 가이드를 제공하고자 신청하게 되었습니다."
                   </p>
                 </div>
               </div>

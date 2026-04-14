@@ -265,7 +265,7 @@ const SHORTCUT_SECTIONS = [
 /* 라이브 서비스 + GitHub */
 const LIVE_LINKS = [
   { title: '핵심시스템', emoji: '🖥️', color: '#3B82F6', bg: '#EFF6FF', links: [
-    { name: 'AI Studio (직원)', url: 'http://54.116.15.136:81/app' },
+    { name: '사내 Studio (직원)', url: 'http://54.116.15.136:81/app' },
     { name: 'Work Studio (관리)', url: 'http://54.116.15.136:80' },
     { name: 'AITe CBT (시험)', url: 'http://54.116.15.136:82' },
   ]},

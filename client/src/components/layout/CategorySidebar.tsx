@@ -177,7 +177,7 @@ export function CategorySidebar() {
       {/* 로고 */}
       <div style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
-        {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>AI Studio</span>}
+        {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>사내 Studio</span>}
       </div>
 
       {/* 전체 펼치기/접기 토글 */}
