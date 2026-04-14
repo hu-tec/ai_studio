@@ -25,10 +25,11 @@ interface Attachment {
 
 interface HubPostData {
   type: PostType;
-  path: [string, string?, string?];  // [대분류, 중분류?, 소분류?]  e.g. ['개발','TESOL','DB']
+  path: [string, string?, string?];  // [대분류, 중분류?, 소분류?]  e.g. ['개발_웹','DB','TESOL']
   position: string[];     // 대상 직급
   title: string;
   content: string;
+  tags: string[];         // 자유 태그
   attachments: Attachment[];
   author: string;
   pinned: boolean;
@@ -62,8 +63,10 @@ type PostType = '공지' | '업무지시' | '메모' | '파일' | '프로세스'
 /* ══════════════════════════════════════════════════════════════
    Constants — 부서별 자료 + 서비스 URL 매핑
    ══════════════════════════════════════════════════════════════ */
-const SITES = ['AI번역_AITe', 'ITT_정통번역', 'TESOL', '고전번역_통독', '대표님페이지', '반도체_조선_방산', '번역_메타트랜스', '윤리', '전문가매칭', '전시회', '프롬프트', '휴텍씨'];
-const DEV_SUB = ['DB', 'UI', '기획', '산출물'];
+const SITES = ['AI_Studio', 'Work_Studio', 'AI번역_AITe', 'ITT_정통번역', 'TESOL', '고전번역_통독', '대표님페이지', '반도체_조선_방산', '번역_메타트랜스', '윤리', '전문가매칭', '전시회', '프롬프트', '휴텍씨'];
+const DEV_SITES = [...SITES, '공통_플러그인'];
+/** 개발_웹 중분류 (작업 유형) — 사이트는 소분류로 배치 (DB > 홈페이지 순서) */
+const DEV_WEB_MID = ['DB', 'UI_디자인', '기획_설계', 'API_서버', '배포_인프라', '테스트_QA', '문서_매뉴얼', '산출물'];
 
 /** 업무 자료 중분류/소분류 (기능 기준) */
 const FUNC_MID = ['규정', '교육', '홍보', '기술', '운영'];
@@ -78,8 +81,8 @@ const funcEntries = () => Object.fromEntries(FUNC_MID.map(m => [m, FUNC_SMALL[m]
 
 /** 부서별 폴더 트리 (데스크톱 구조 + 업무 자료 부서 통합) */
 const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
-  // 데스크톱 폴더 기반
-  '개발':       Object.fromEntries([...SITES, '공통_플러그인_모듈'].map(s => [s, DEV_SUB])),
+  // 개발_웹: 작업 유형(중) > 사이트(소)  — 예: 개발_웹 > DB > TESOL
+  '개발_웹':    Object.fromEntries(DEV_WEB_MID.map(m => [m, DEV_SITES])),
   '회계':       { '거래처원장': [], '부가세': [], '세금계산서': [], '수익': SITES, '연도별_결산': [], '지출': SITES },
   '마케팅':     Object.fromEntries([...SITES, 'SNS_카드뉴스', '공통_브랜딩'].map(s => [s, []])),
   '인사':       { '근로계약_서약서': [], '면접자료': [], '신입교육': [], '인수인계': [] },
@@ -102,6 +105,9 @@ const CATEGORY_TREE: Record<string, Record<string, string[]>> = {
 
 /** 항목명 → 실제 서비스 URL (항목 옆에 링크 아이콘 표시) */
 const SERVICE_URLS: Record<string, string> = {
+  // 내부 스튜디오
+  'AI_Studio':      'http://54.116.15.136:81',
+  'Work_Studio':    'http://54.116.15.136',
   // 핵심 시스템
   'AI번역_AITe':    'http://54.116.15.136:82',
   'TESOL':          'https://hu-tec.github.io/TESOL/',
@@ -126,6 +132,19 @@ const POST_TYPES: { type: PostType; icon: typeof Megaphone; color: string; bg: s
 ];
 
 const toArr = (v: unknown): string[] => Array.isArray(v) ? v : typeof v === 'string' && v ? [v] : [];
+
+/** 개발 → 개발_웹 레거시 경로 변환 (기존 DB 데이터 호환) */
+const DEV_SUB_MAP: Record<string, string> = { 'UI': 'UI_디자인', '기획': '기획_설계' };
+function migrateDevPath(path: any): [string, string?, string?] {
+  if (!Array.isArray(path) || path[0] !== '개발') return path;
+  // 구조: ['개발', site, sub] → ['개발_웹', sub(매핑), site]
+  if (path.length >= 3) {
+    const sub = DEV_SUB_MAP[path[2]] || path[2];
+    return ['개발_웹', sub, path[1]];
+  }
+  if (path.length === 2) return ['개발_웹', undefined, path[1]];
+  return ['개발_웹'];
+}
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -203,10 +222,11 @@ export default function WorkHubPage() {
           const c3 = Array.isArray(d.category3) ? d.category3[0] : d.category3;
           path = [dept, c2, c3].filter(Boolean);
         }
+        path = migrateDevPath(path || ['미분류_창고']);
         return {
           ...r, post_id: r.post_id, data: {
-            ...d, type: d.type || '메모', path: path || ['미분류_창고'],
-            position: toArr(d.position), attachments: d.attachments || [],
+            ...d, type: d.type || '메모', path,
+            position: toArr(d.position), tags: toArr(d.tags), attachments: d.attachments || [],
             content: d.content || '', author: d.author || '', pinned: !!d.pinned,
             created_at: d.created_at || r.updated_at || '',
           }
@@ -222,8 +242,8 @@ export default function WorkHubPage() {
         return {
           id: r.id, post_id: `mat_${r.material_id}`, data: {
             type: '파일' as PostType,
-            path: [dept, c2, c3].filter(Boolean) as [string, string?, string?],
-            position: toArr(d.position), title: d.title || '',
+            path: migrateDevPath([dept, c2, c3].filter(Boolean)),
+            position: toArr(d.position), tags: toArr(d.tags), title: d.title || '',
             content: d.content || '', attachments: d.attachments || [],
             author: d.author || '', pinned: false, note: d.note || '',
             created_at: d.created_at || r.updated_at || '',
@@ -561,6 +581,8 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
   const [content, setContent] = useState(editData?.data.content || '');
   const [author, setAuthor] = useState(editData?.data.author || localStorage.getItem('wh-author') || '');
   const [note, setNote] = useState(editData ? (editData.data as any).note || '' : '');
+  const [tags, setTags] = useState<string[]>(editData?.data.tags || []);
+  const [tagInput, setTagInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>(editData?.data.attachments || []);
   const [saving, setSaving] = useState(false);
   const [showLink, setShowLink] = useState(false);
@@ -605,7 +627,7 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
     const path: [string, string?, string?] = [selLarge];
     if (selMid) path.push(selMid);
     if (selSmall) path.push(selSmall);
-    const payload: any = { type: postType, path, position: pos, title, content, attachments, author, note, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
+    const payload: any = { type: postType, path, position: pos, title, content, tags, attachments, author, note, pinned: editData?.data.pinned || false, created_at: editData?.data.created_at || new Date().toISOString() };
     try {
       if (isEdit && editData) { await fetch(`/api/work-hub/${editData.post_id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); }
       else { await fetch('/api/work-hub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, post_id: genId() }) }); }
@@ -687,6 +709,35 @@ function PostForm({ editData, defaultPath, onClose, onSaved }: {
 
           {/* 비고 */}
           <input value={note} onChange={e => setNote(e.target.value)} placeholder="비고" style={{ width: '100%', padding: '5px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
+
+          {/* 태그 — 인라인 칩 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', padding: '4px 6px', border: '1px solid #e2e8f0', borderRadius: 6, background: '#fff' }}>
+            <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginRight: 2 }}>태그</span>
+            {tags.map(t => (
+              <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 7px', borderRadius: 10, background: '#F0F9FF', color: '#0EA5E9', fontSize: 10, fontWeight: 600, border: '1px solid #BAE6FD' }}>
+                #{t}
+                <button type="button" onClick={() => setTags(tags.filter(x => x !== t))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: '#0EA5E9' }}>
+                  <X size={9} />
+                </button>
+              </span>
+            ))}
+            <input
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const t = tagInput.trim().replace(/^#/, '');
+                  if (t && !tags.includes(t)) setTags([...tags, t]);
+                  setTagInput('');
+                } else if (e.key === 'Backspace' && !tagInput && tags.length) {
+                  setTags(tags.slice(0, -1));
+                }
+              }}
+              placeholder="#태그 Enter"
+              style={{ flex: 1, minWidth: 80, padding: '2px 4px', border: 'none', fontSize: 10, outline: 'none', background: 'transparent' }}
+            />
+          </div>
 
           {/* 첨부 — 컴팩트 */}
           <div>

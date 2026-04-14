@@ -9,7 +9,7 @@ import {
 
 /** 부서별 배경색 (pastel) */
 const DEPT_COLORS: Record<string, string> = {
-  '개발': '#EFF6FF', '회계': '#FEF9C3', '마케팅': '#FCE7F3', '인사': '#F0FDF4',
+  '개발_웹': '#EFF6FF', '개발': '#EFF6FF', '회계': '#FEF9C3', '마케팅': '#FCE7F3', '인사': '#F0FDF4',
   '법무': '#FEF2F2', '기획_사업': '#EEF2FF', '매뉴얼_규정': '#FDF4FF',
   '직원별': '#F0FDFA', '경영': '#FFF7ED', '영업': '#ECFDF5', '강사팀': '#F5F3FF',
   '홈페이지': '#F0F9FF', '상담': '#FFFBEB', '총무': '#F8FAFC', '관리': '#FEF2F2',
@@ -53,7 +53,7 @@ export default function FeedView(props: FeedViewProps) {
   const [expandAll, setExpandAll] = useState(false);
 
   // 열 선택 토글
-  const ALL_COLS = ['유형','부서','제목','내용','비고','첨부','작성자','진행','날짜','액션'] as const;
+  const ALL_COLS = ['유형','부서','제목','내용','태그','비고','첨부','작성자','진행','날짜','액션'] as const;
   const [visibleCols, setVisibleCols] = useState<Set<string>>(new Set(ALL_COLS));
   const toggleCol = (col: string) => setVisibleCols(prev => { const n = new Set(prev); if (n.has(col)) n.delete(col); else n.add(col); return n; });
   const showCol = (col: string) => visibleCols.has(col);
@@ -134,6 +134,7 @@ export default function FeedView(props: FeedViewProps) {
                 {showCol('부서') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>부서</th>}
                 {showCol('제목') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>제목</th>}
                 {showCol('내용') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>내용</th>}
+                {showCol('태그') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left', minWidth: 60 }}>태그</th>}
                 {showCol('비고') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left', minWidth: 60 }}>비고</th>}
                 {showCol('첨부') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>첨부</th>}
                 {showCol('작성자') && <th style={{ padding: '4px 6px', fontSize: 10, fontWeight: 700, color: '#475569', textAlign: 'left' }}>작성자</th>}
@@ -160,6 +161,15 @@ export default function FeedView(props: FeedViewProps) {
                     {showCol('부서') && <td style={{ padding: '3px 6px', fontSize: 10, color: '#475569', fontWeight: 500, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{buildPathLabel(post.data)}</td>}
                     {showCol('제목') && <td style={{ padding: '3px 6px', fontSize: 11, color: '#1e293b', fontWeight: 600, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.data.pinned && <Pin size={9} color="#F59E0B" style={{ marginRight: 3 }} />}{post.data.title}</td>}
                     {showCol('내용') && <td style={{ padding: '3px 6px', fontSize: 10, color: '#64748b', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.data.content?.split('\n')[0] || '—'}</td>}
+                    {showCol('태그') && <td style={{ padding: '3px 6px' }}>
+                      {(post.data.tags || []).length === 0 ? <span style={{ fontSize: 9, color: '#cbd5e1' }}>—</span> : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                          {(post.data.tags as string[]).map((t: string) => (
+                            <span key={t} style={{ padding: '0px 5px', borderRadius: 8, background: '#F0F9FF', color: '#0EA5E9', fontSize: 8, fontWeight: 600, border: '1px solid #BAE6FD' }}>#{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </td>}
                     {showCol('비고') && <td style={{ padding: '3px 6px' }} onClick={e => { e.stopPropagation(); if (editingNoteId !== post.post_id) { setEditingNoteId(post.post_id); setEditingNoteVal((post.data as any).note || ''); } }}>
                       {editingNoteId === post.post_id ? (
                         <input value={editingNoteVal} onChange={e => setEditingNoteVal(e.target.value)} onBlur={() => saveNote(post)} onKeyDown={e => { if (e.key === 'Enter') saveNote(post); if (e.key === 'Escape') setEditingNoteId(null); }} autoFocus style={{ width: '100%', padding: '2px 4px', border: '1px solid #3B82F6', borderRadius: 4, fontSize: 10, outline: 'none' }} onClick={e => e.stopPropagation()} />
@@ -202,6 +212,13 @@ export default function FeedView(props: FeedViewProps) {
                   <div style={{ fontSize: 9, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>
                     {post.data.content?.split('\n')[0] || '—'}
                   </div>
+                  {(post.data.tags || []).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 3 }}>
+                      {(post.data.tags as string[]).map((t: string) => (
+                        <span key={t} style={{ padding: '0px 5px', borderRadius: 8, background: '#F0F9FF', color: '#0EA5E9', fontSize: 8, fontWeight: 600, border: '1px solid #BAE6FD' }}>#{t}</span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 8, color: '#94a3b8' }}>
                     <span>{post.data.author}</span>
                     <span>{fmtDate(post.data.created_at)}</span>
@@ -280,6 +297,14 @@ function DetailPopup({ post, onClose, ptOf, buildPathLabel, fmtDate, fmtSize, ge
               <div><span style={{ color: '#94a3b8', fontSize: 9 }}>작성일</span><div>{fmtDate(d.created_at)}</div></div>
               <div><span style={{ color: '#94a3b8', fontSize: 9 }}>고정</span><div>{d.pinned ? '고정됨' : '—'}</div></div>
               <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#94a3b8', fontSize: 9 }}>비고</span><div style={{ color: d.note ? '#475569' : '#cbd5e1' }}>{d.note || '—'}</div></div>
+              <div style={{ gridColumn: 'span 4' }}>
+                <span style={{ color: '#94a3b8', fontSize: 9 }}>태그</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 2 }}>
+                  {(d.tags || []).length === 0 ? <span style={{ color: '#cbd5e1', fontSize: 11 }}>—</span> : (d.tags as string[]).map((t: string) => (
+                    <span key={t} style={{ padding: '1px 7px', borderRadius: 10, background: '#F0F9FF', color: '#0EA5E9', fontSize: 10, fontWeight: 600, border: '1px solid #BAE6FD' }}>#{t}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
