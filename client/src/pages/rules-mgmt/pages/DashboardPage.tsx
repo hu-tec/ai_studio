@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useRules, ALL_TEAMS, DEPT_EMOJI, RANK_EMOJI } from "../RulesContext";
+import { useRules, ALL_TEAMS, DEPT_EMOJI, RANK_EMOJI, SERVICE_EMOJI } from "../RulesContext";
 import { SummaryCards } from "../SummaryCards";
 import { FeedbackSection } from "../FeedbackSection";
 
@@ -18,6 +18,7 @@ export function DashboardPage() {
   // Department stats
   const deptNames = Object.keys(state.departments);
   const rankNames = Object.keys(state.ranks);
+  const svcNames = Object.keys(state.services);
 
   return (
     <>
@@ -142,6 +143,56 @@ export function DashboardPage() {
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="text-[14px]">{emoji}</span>
                     <span className="text-[12px] text-[#333]" style={{ fontWeight: 600 }}>
+                      {name}
+                    </span>
+                  </div>
+                  <span className="text-[18px] text-[#222] block" style={{ fontWeight: 700 }}>
+                    {total}
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-[#eef0f4] text-[#555]" style={{ fontWeight: 500 }}>📋{ruleCount}</span>
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-[#f0efe8] text-[#555]" style={{ fontWeight: 500 }}>📝{semiCount}</span>
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-[#eef5ee] text-[#555]" style={{ fontWeight: 500 }}>✅{optCount}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Overview Grid */}
+      <section className="border border-[#ddd] rounded-lg bg-white overflow-hidden">
+        <div className="px-5 py-3 border-b border-[#e8e8e8] bg-[#fafafa] flex items-center justify-between">
+          <h2 className="text-[15px] text-[#111]" style={{ fontWeight: 700 }}>
+            🌐 홈페이지 서비스 지침 현황
+          </h2>
+          <button
+            onClick={() => navigateTo("/services")}
+            className="text-[11px] text-[#888] hover:text-[#333] px-2 py-1 rounded hover:bg-[#eee] transition-colors"
+            style={{ fontWeight: 500 }}
+          >
+            자세히 보기 →
+          </button>
+        </div>
+        <div className="p-4">
+          <div className="grid grid-cols-4 gap-2">
+            {svcNames.map((name) => {
+              const rs = state.services[name];
+              const total = countAllFiltered(rs);
+              const ruleCount = countFiltered(rs, "규정");
+              const semiCount = countFiltered(rs, "준규정");
+              const optCount = countFiltered(rs, "선택사항");
+              const emoji = SERVICE_EMOJI[name] || "📄";
+              return (
+                <div
+                  key={name}
+                  className="border border-[#e8e8e8] rounded-lg p-3 hover:shadow-sm hover:border-[#ccc] transition-all cursor-pointer"
+                  onClick={() => navigateTo("/services")}
+                >
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[14px]">{emoji}</span>
+                    <span className="text-[12px] text-[#333] truncate" style={{ fontWeight: 600 }}>
                       {name}
                     </span>
                   </div>

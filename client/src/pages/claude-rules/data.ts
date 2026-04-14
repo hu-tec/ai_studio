@@ -1,5 +1,9 @@
 /* ── 규정(임시_혁_claude) 데이터 ── */
 
+// 인사규정 seed (xlsx 원본) 재export — 임시_혁_test 탭에서 바로 가시화
+export { HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES } from '../rules-mgmt/hrSeed';
+export type { HRRuleSet } from '../rules-mgmt/hrSeed';
+
 export type RuleLevel = '고정' | '준고정' | '선택';
 
 export interface SubItem {

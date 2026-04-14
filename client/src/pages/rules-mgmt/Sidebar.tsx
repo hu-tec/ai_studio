@@ -12,6 +12,7 @@ const navItems: NavItem[] = [
   { emoji: "🏛️", label: "회사 전체 지침", to: "/company" },
   { emoji: "👥", label: "부서별 지침", to: "/departments" },
   { emoji: "🥇", label: "직급별 지침", to: "/ranks" },
+  { emoji: "🌐", label: "홈페이지 서비스 지침", to: "/services" },
 ];
 
 export function Sidebar() {

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, type RuleLevel } from './data';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES, type RuleLevel, type HRRuleSet } from './data';
 
 /* ── 등급 배지 ── */
 const LEVEL_STYLE: Record<RuleLevel, { bg: string; text: string; icon: typeof Shield }> = {

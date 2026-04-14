@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
 import { Paperclip, Trash2 } from "lucide-react";
-import { useRules, ALL_TEAMS, type RuleItem, type RuleType, type RuleSet } from "./RulesContext";
+import { useRules, ALL_TEAMS, type RuleItem, type RuleType, type RuleSet, type SectionName } from "./RulesContext";
 
 interface RuleColumnsProps {
-  section: "company" | "departments" | "ranks";
+  section: SectionName;
   group: string | null;
   ruleSet: RuleSet;
 }
@@ -16,7 +16,7 @@ function RuleCard({
   type,
 }: {
   item: RuleItem;
-  section: "company" | "departments" | "ranks";
+  section: SectionName;
   group: string | null;
   type: RuleType;
 }) {
@@ -145,7 +145,7 @@ function ColumnBlock({
 }: {
   type: RuleType;
   items: RuleItem[];
-  section: "company" | "departments" | "ranks";
+  section: SectionName;
   group: string | null;
 }) {
   const { editMode, addRule, selectedTeam } = useRules();

@@ -13,6 +13,7 @@ export function SummaryCards() {
     let total = countFiltered(state.company, type);
     Object.values(state.departments).forEach((rs) => (total += countFiltered(rs, type)));
     Object.values(state.ranks).forEach((rs) => (total += countFiltered(rs, type)));
+    Object.values(state.services).forEach((rs) => (total += countFiltered(rs, type)));
     return total;
   };
 
@@ -23,11 +24,12 @@ export function SummaryCards() {
 
   const deptCount = Object.keys(state.departments).length;
   const rankCount = Object.keys(state.ranks).length;
+  const svcCount = Object.keys(state.services).length;
 
   const filterLabel = selectedTeam ? ` (${selectedTeam} 필터)` : "";
 
   const cards = [
-    { emoji: "📦", label: "전체 지침", value: grandTotal.toLocaleString(), unit: "건", sub: `${deptCount}개 부서 · ${rankCount}개 직급${filterLabel}`, accent: "border-l-[#666]" },
+    { emoji: "📦", label: "전체 지침", value: grandTotal.toLocaleString(), unit: "건", sub: `${deptCount}부서 · ${rankCount}직급 · ${svcCount}서비스${filterLabel}`, accent: "border-l-[#666]" },
     { emoji: "📋", label: "규정 (고정)", value: totalRules.toLocaleString(), unit: "건", sub: "변경 금지 항목", accent: "border-l-[#7986cb]" },
     { emoji: "📝", label: "준규정 (준고정)", value: totalSemi.toLocaleString(), unit: "건", sub: "조건부 변경 가능", accent: "border-l-[#c9a84c]" },
     { emoji: "✅", label: "선택사항", value: totalOptional.toLocaleString(), unit: "건", sub: "자율 선택 항목", accent: "border-l-[#66bb6a]" },

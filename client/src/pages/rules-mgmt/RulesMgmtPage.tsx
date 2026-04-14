@@ -6,16 +6,18 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { CompanyPage } from "./pages/CompanyPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { RanksPage } from "./pages/RanksPage";
+import { ServicesPage } from "./pages/ServicesPage";
 import { Download } from "lucide-react";
 
 function Layout() {
   const { editMode, toggleEditMode, state, currentPage } = useRules();
 
   const pageTitles: Record<string, { title: string; desc: string }> = {
-    "/": { title: "📊 전체 대시보드", desc: "회사 전체 · 부서별 · 직급별 업무 지침을 한눈에 관리합니다" },
+    "/": { title: "📊 전체 대시보드", desc: "회사 전체 · 부서별 · 직급별 · 홈페이지 서비스 업무 지침을 한눈에 관리합니다" },
     "/company": { title: "🏛️ 회사 전체 지침", desc: "회사 공통으로 적용되는 규정 · 준규정 · 선택사항을 관리합니다" },
-    "/departments": { title: "👥 부서별 지침", desc: "14개 부서별 업무 지침을 관리합니다" },
+    "/departments": { title: "👥 부서별 지침", desc: "13개 부서별 업무 지침을 관리합니다" },
     "/ranks": { title: "🥇 직급별 지침", desc: "직급별 업무 지침을 관리합니다" },
+    "/services": { title: "🌐 홈페이지 서비스 지침", desc: "홈페이지 서비스 카테고리별(교육·번역·통독·시험·전시회·전문가매칭 등) 운영 지침을 관리합니다" },
   };
 
   const current = pageTitles[currentPage] || pageTitles["/"];
@@ -32,6 +34,7 @@ function Layout() {
     pushRuleSet("회사 전체", "-", state.company);
     Object.entries(state.departments).forEach(([name, rs]) => pushRuleSet("부서별", name, rs));
     Object.entries(state.ranks).forEach(([name, rs]) => pushRuleSet("직급별", name, rs));
+    Object.entries(state.services).forEach(([name, rs]) => pushRuleSet("홈페이지 서비스", name, rs));
     const BOM = "\uFEFF";
     const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([BOM + csv], { type: "text/csv;charset=utf-8;" });
@@ -53,6 +56,9 @@ function Layout() {
       break;
     case "/ranks":
       pageContent = <RanksPage />;
+      break;
+    case "/services":
+      pageContent = <ServicesPage />;
       break;
     default:
       pageContent = <DashboardPage />;
