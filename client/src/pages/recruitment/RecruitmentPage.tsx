@@ -1,13 +1,14 @@
 import { useState, lazy, Suspense } from 'react';
 import {
   UserPlus, ClipboardCheck, BarChart3, Users,
-  CalendarClock, BookOpen, ClipboardList,
+  CalendarClock, BookOpen, ClipboardList, Briefcase,
 } from 'lucide-react';
 
 // 기존 페이지 컴포넌트 lazy import
 const InterviewForm = lazy(() => import('../interview/InterviewForm'));
 const InterviewDashboard = lazy(() => import('../interview/Dashboard'));
 const InstructorEvalPage = lazy(() => import('../instructor-eval/InstructorEvalPage'));
+const InterviewAlbaGuide = lazy(() => import('./InterviewAlbaGuide'));
 const PersonalEntryView = lazy(() =>
   import('../instructor-flow/PersonalEntryView').then(m => ({ default: m.PersonalEntryView }))
 );
@@ -30,6 +31,7 @@ const Loading = () => (
 const tabs = [
   { id: 'personal',   label: '지원서 작성',       icon: UserPlus,      group: '채용' },
   { id: 'interview',  label: '면접 입력',         icon: ClipboardCheck, group: '채용' },
+  { id: 'alba',       label: '알바 면접 안내',    icon: Briefcase,     group: '채용' },
   { id: 'dashboard',  label: '면접 대시보드',      icon: BarChart3,     group: '채용' },
   { id: 'eval',       label: '강사 평가(상세)',    icon: ClipboardList,  group: '평가' },
   { id: 'applicants', label: '지원자 리스트',      icon: Users,         group: '관리' },
@@ -49,6 +51,7 @@ export default function RecruitmentPage() {
     switch (activeTab) {
       case 'personal':   return <PersonalEntryView />;
       case 'interview':  return <InterviewForm />;
+      case 'alba':       return <InterviewAlbaGuide />;
       case 'dashboard':  return <InterviewDashboard />;
       case 'eval':       return <InstructorEvalPage />;
       case 'applicants': return <ApplicantListView />;
