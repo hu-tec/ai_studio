@@ -486,6 +486,7 @@ export default function RulesJungeolPage() {
 
   const handleTypeADeleteField = useCallback(
     (fieldId: string) => {
+      if (!window.confirm('정말 삭제하시겠습니까?')) return;
       setRuleSet((prev) => ({
         ...prev,
         typeA: prev.typeA.filter((f) => f.id !== fieldId),
@@ -700,6 +701,11 @@ export default function RulesJungeolPage() {
 
   return (
     <div className="h-full flex flex-col bg-white">
+      {/* T9 SoT 배너 */}
+      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800 shrink-0">
+        <span>⚠</span>
+        <span>대중소 카테고리(분야·중·소) 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성 전용 (카테고리 자체는 read-only).</span>
+      </div>
       {/* ===== Top Bar ===== */}
       <header className="bg-white border-b border-gray-200 px-2.5 py-1.5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">

@@ -110,6 +110,7 @@ export default function RulesManualPage() {
   }, [activeCategory]);
 
   const handleDeleteRegulation = useCallback((regId: string) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
     setDbData(prev => {
       const newData = JSON.parse(JSON.stringify(prev));
       const cats = newData[activeCategory];
@@ -131,8 +132,14 @@ export default function RulesManualPage() {
   }, [activeCategory]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FBFBFC]">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#FBFBFC]">
       <Toaster position="top-right" expand={true} richColors />
+      {/* T9 SoT 배너 */}
+      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
+        <span>⚠</span>
+        <span>대중소 카테고리(분야·급수·홈페이지·부서·직급) 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성 전용 (좌측 카테고리는 read-only 마이그레이션 대상).</span>
+      </div>
+      <div className="flex flex-1 min-h-0">
 
       {/* 1. Left Sidebar (Category Navigation) */}
       <Sidebar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
@@ -177,6 +184,7 @@ export default function RulesManualPage() {
 
       {/* 3. Right Sidebar (History & Favorites) */}
       <RightPanel isOpen={isRightPanelOpen} setIsOpen={setIsRightPanelOpen} history={history} />
+      </div>
 
       {/* Mode Status Indicator */}
       {viewMode !== 'result' && (

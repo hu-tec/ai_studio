@@ -818,6 +818,7 @@ export default function CompanyGuidelinesPage() {
   };
 
   const handleDelete = (id: string) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
     updateItems(prev => prev.filter(i => i.id !== id));
     toast.success('삭제되었습니다');
   };
@@ -875,6 +876,11 @@ export default function CompanyGuidelinesPage() {
 
   return (
     <div style={{ maxWidth: 1800, margin: '0 auto', padding: '24px 32px' }}>
+      {/* T9 SoT 배너 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, marginBottom: 12, fontSize: 11, color: '#92400E' }}>
+        <span>⚠</span>
+        <span>카테고리 축(분류별·교육별·급수별·업무별·부서별·직급별·…)의 정의/추가/삭제는 <a href="/app/work-class-demo" style={{ color: '#1d4ed8', fontWeight: 700 }}>업무 분류(최종DB) — T9</a> 페이지에서만 합니다. 이 페이지는 지침/항목 작성 전용 (축 자체는 read-only).</span>
+      </div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

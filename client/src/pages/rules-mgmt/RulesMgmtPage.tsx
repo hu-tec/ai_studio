@@ -65,53 +65,48 @@ function Layout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f5f5f7]">
+    <div className="flex flex-col min-h-screen bg-[#f5f5f7]">
+      {/* T9 SoT 배너 */}
+      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800">
+        <span>⚠</span>
+        <span>부서·직급·서비스 등 카테고리 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성/편집 전용 (카테고리 자체는 read-only).</span>
+      </div>
+      <div className="flex flex-1 min-h-0">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white border-b border-[#e8e8e8] px-6 py-3 flex items-center justify-between shrink-0">
-          <div>
-            <h1 className="text-[16px] text-[#111]" style={{ fontWeight: 700 }}>
-              {current.title}
-            </h1>
-            <p className="text-[11px] text-[#aaa] mt-0.5" style={{ fontWeight: 400 }}>
-              {current.desc}
-            </p>
+        <header className="bg-white border-b border-[#e8e8e8] px-3 py-1.5 flex items-center justify-between shrink-0">
+          <div className="min-w-0">
+            <h1 className="text-[13px] text-[#111] font-bold truncate">{current.title}</h1>
+            <p className="text-[10px] text-[#aaa] truncate">{current.desc}</p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={handleExcelDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-[#555] border border-[#ddd] rounded-md hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors"
-              style={{ fontWeight: 500 }}
+              className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#555] border border-[#ddd] rounded hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors font-medium"
             >
-              <Download size={14} className="text-[#888]" />
-              엑셀 다운로드
+              <Download size={12} className="text-[#888]" />
+              엑셀
             </button>
             <button
               onClick={toggleEditMode}
-              className={`flex items-center gap-2 px-4 py-1.5 text-[12px] rounded-md transition-all ${
+              className={`flex items-center gap-1 px-2 py-1 text-[11px] rounded transition-all font-semibold ${
                 editMode
-                  ? "bg-[#e53935] text-white shadow-md hover:bg-[#c62828]"
+                  ? "bg-[#e53935] text-white hover:bg-[#c62828]"
                   : "bg-[#333] text-white hover:bg-[#555]"
               }`}
-              style={{ fontWeight: 600 }}
             >
-              <span className="relative flex items-center">
-                <span className={`inline-block w-8 h-4 rounded-full transition-colors ${editMode ? "bg-white/30" : "bg-white/20"}`}>
-                  <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${editMode ? "translate-x-4.5" : "translate-x-0.5"}`} />
-                </span>
-              </span>
-              {editMode ? "✏️ 편집 모드 ON" : "🔒 읽기 모드"}
+              {editMode ? "✏️ 편집 ON" : "🔒 읽기"}
             </button>
           </div>
         </header>
 
         {/* Edit Mode Banner */}
         {editMode && (
-          <div className="bg-[#fff3e0] border-b border-[#ffcc80] px-6 py-2 flex items-center gap-2 shrink-0">
-            <span className="text-[12px] text-[#e65100]" style={{ fontWeight: 500 }}>
-              ⚠️ 편집 모드가 활성화되었습니다 — 모든 항목을 수정/추가/삭제할 수 있습니다.
+          <div className="bg-[#fff3e0] border-b border-[#ffcc80] px-2 py-0.5 flex items-center gap-1 shrink-0">
+            <span className="text-[10px] text-[#e65100] font-medium">
+              ⚠️ 편집 모드 — 모든 항목 수정/추가/삭제 가능
             </span>
           </div>
         )}
@@ -120,9 +115,10 @@ function Layout() {
         <TeamFilterBar />
 
         {/* Page Content */}
-        <main className="flex-1 p-5 space-y-5 overflow-y-auto">
+        <main className="flex-1 p-2 space-y-2 overflow-y-auto">
           {pageContent}
         </main>
+      </div>
       </div>
     </div>
   );
