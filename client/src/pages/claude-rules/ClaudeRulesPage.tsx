@@ -271,9 +271,159 @@ function ClaudeRulesTab() {
   );
 }
 
+/* ── 인사규정 탭 (가연님 xlsx 원본 seed) ── */
+function HRRulesTab() {
+  const [section, setSection] = useState<'company' | 'ranks' | 'depts' | 'services'>('company');
+  const [expandAll, setExpandAll] = useState(true);
+  const [activeGroups, setActiveGroups] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+
+  // 활성 section 에 해당하는 데이터
+  const groups: Record<string, HRRuleSet> =
+    section === 'ranks' ? HR_SEED_RANKS :
+    section === 'depts' ? HR_SEED_DEPTS :
+    section === 'services' ? HR_SEED_SERVICES :
+    { '직급 공통': HR_SEED_COMPANY };
+
+  const groupNames = Object.keys(groups);
+  // 초기: 모든 그룹 펼침
+  const shown = useMemo(() => {
+    if (activeGroups.size === 0) return new Set(groupNames);
+    return activeGroups;
+  }, [activeGroups, section]);
+
+  const toggleGroup = (name: string) => {
+    setActiveGroups(prev => {
+      const base = prev.size === 0 ? new Set(groupNames) : new Set(prev);
+      base.has(name) ? base.delete(name) : base.add(name);
+      return base;
+    });
+  };
+  const toggleAll = () => {
+    if (expandAll) { setActiveGroups(new Set()); setExpandAll(false); }
+    else { setActiveGroups(new Set(groupNames)); setExpandAll(true); }
+  };
+
+  const matchSearch = (s: string) => !search || s.toLowerCase().includes(search.toLowerCase());
+  const countHit = (rs: HRRuleSet) =>
+    [...rs.fixed, ...rs.semi, ...rs.opt].filter(matchSearch).length;
+
+  // section별 요약
+  const totalItems = groupNames.reduce((sum, n) => {
+    const g = groups[n];
+    return sum + g.fixed.length + g.semi.length + g.opt.length;
+  }, 0);
+
+  const SECTION_META: Record<string, { label: string; emoji: string; color: string }> = {
+    company:  { label: '직급 공통',   emoji: '👥', color: '#4f46e5' },
+    ranks:    { label: '직급 (8종)', emoji: '🎖️', color: '#dc2626' },
+    depts:    { label: '부서 (13부서)', emoji: '🏢', color: '#059669' },
+    services: { label: '홈페이지 (8서비스)', emoji: '🌐', color: '#7c3aed' },
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {/* 출처 배너 */}
+      <div className="rounded-md border border-emerald-300 bg-emerald-50 px-2 py-1 flex items-center gap-2">
+        <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+        <span className="text-[10px] font-bold text-emerald-700">출처:</span>
+        <code className="text-[10px] text-emerald-800 bg-white px-1.5 py-0.5 rounded border border-emerald-200">1.인사규정.xlsx</code>
+        <span className="text-[10px] text-emerald-600">(가연님 · v2 시트 최신본 · 7시트 중 3시트 이관)</span>
+        <span className="ml-auto text-[10px] font-bold text-emerald-700">총 {totalItems}개 규정</span>
+      </div>
+
+      {/* 섹션 탭 + 검색 + 전체 토글 */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex gap-1">
+          {(Object.keys(SECTION_META) as Array<keyof typeof SECTION_META>).map(k => {
+            const m = SECTION_META[k];
+            const isActive = section === k;
+            return (
+              <button key={k}
+                onClick={() => { setSection(k as any); setActiveGroups(new Set()); setExpandAll(true); }}
+                className={`rounded-md border px-2 py-1 text-[11px] font-semibold transition-colors`}
+                style={isActive
+                  ? { background: m.color, color: '#fff', borderColor: m.color }
+                  : { background: '#fff', color: '#64748b', borderColor: '#cbd5e1' }}
+              >
+                <span className="mr-0.5">{m.emoji}</span>{m.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex-1" />
+        <div className="relative">
+          <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="규정 검색..."
+            className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none" />
+        </div>
+        <button onClick={toggleAll}
+          className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
+          {expandAll ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
+          {expandAll ? '전체 접기' : '전체 펼치기'}
+        </button>
+      </div>
+
+      {/* 그룹 목록 */}
+      <div className="flex flex-col gap-1">
+        {groupNames.map(name => {
+          const g = groups[name];
+          const hits = countHit(g);
+          if (search && hits === 0) return null;
+          const isOpen = shown.has(name);
+          return (
+            <div key={name} className="rounded-md border border-gray-200 bg-white overflow-hidden">
+              <button onClick={() => toggleGroup(name)}
+                className="flex w-full items-center gap-1.5 px-2 py-1 text-left hover:bg-gray-50 bg-gradient-to-r from-slate-50 to-white">
+                {isOpen ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
+                <span className="text-[12px] font-bold text-gray-800">{name}</span>
+                <span className="ml-1 text-[10px] text-red-500 font-semibold">고정 {g.fixed.length}</span>
+                <span className="text-[10px] text-amber-500 font-semibold">준고정 {g.semi.length}</span>
+                <span className="text-[10px] text-sky-500 font-semibold">선택 {g.opt.length}</span>
+                {search && <span className="ml-auto text-[10px] text-blue-500 font-bold">{hits}개 일치</span>}
+              </button>
+              {isOpen && (
+                <div className="grid grid-cols-3 gap-1 p-1 border-t border-gray-100 bg-gray-50/50">
+                  {/* 고정 */}
+                  <div className="rounded border border-red-200 bg-red-50/50">
+                    <div className="px-1.5 py-0.5 bg-red-100 border-b border-red-200 text-[9px] font-bold text-red-700">고정 ({g.fixed.length})</div>
+                    <ul className="p-1 space-y-0.5">
+                      {g.fixed.map((s, i) => (matchSearch(s) ? (
+                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                      ) : null))}
+                    </ul>
+                  </div>
+                  {/* 준고정 */}
+                  <div className="rounded border border-amber-200 bg-amber-50/50">
+                    <div className="px-1.5 py-0.5 bg-amber-100 border-b border-amber-200 text-[9px] font-bold text-amber-700">준고정 ({g.semi.length})</div>
+                    <ul className="p-1 space-y-0.5">
+                      {g.semi.map((s, i) => (matchSearch(s) ? (
+                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                      ) : null))}
+                    </ul>
+                  </div>
+                  {/* 선택 */}
+                  <div className="rounded border border-sky-200 bg-sky-50/50">
+                    <div className="px-1.5 py-0.5 bg-sky-100 border-b border-sky-200 text-[9px] font-bold text-sky-700">선택 ({g.opt.length})</div>
+                    <ul className="p-1 space-y-0.5">
+                      {g.opt.map((s, i) => (matchSearch(s) ? (
+                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                      ) : null))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── 메인 페이지 ── */
 export default function ClaudeRulesPage() {
-  const [tab, setTab] = useState<'design' | 'claude'>('design');
+  const [tab, setTab] = useState<'design' | 'claude' | 'hr'>('design');
 
   return (
     <div className="flex flex-col gap-1.5 p-2">
@@ -294,10 +444,11 @@ export default function ClaudeRulesPage() {
         <div className="flex gap-1">
           <TabChip active={tab === 'design'} onClick={() => setTab('design')}>업무 설계 규정</TabChip>
           <TabChip active={tab === 'claude'} onClick={() => setTab('claude')}>Claude Code 작업 규정</TabChip>
+          <TabChip active={tab === 'hr'} onClick={() => setTab('hr')}>인사규정 (가연님 xlsx)</TabChip>
         </div>
       </div>
 
-      {tab === 'design' ? <DesignRulesTab /> : <ClaudeRulesTab />}
+      {tab === 'design' ? <DesignRulesTab /> : tab === 'claude' ? <ClaudeRulesTab /> : <HRRulesTab />}
     </div>
   );
 }
