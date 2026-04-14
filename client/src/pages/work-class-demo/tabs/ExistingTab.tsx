@@ -1,131 +1,248 @@
-import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { SectionCard } from '../components/SectionCard';
 import { ChipBar } from '../components/Chip';
 import { RuleBadge } from '../components/RuleBadge';
-import { USER_TIERS } from '../constants';
 import {
-  GRADE_FIELD_OPTIONS, GRADE_MID_OPTIONS, GRADE_LEVELS, CATEGORY_TREE,
-} from '@/pages/instructor-curri/constants';
-import type { SampleItem } from '../types';
+  DOMAINS, TIERS, MODALITIES, INDUSTRIES, GOV_AXES, ACTORS, VERBS,
+} from '../constants';
+import type {
+  SampleItem, DomainCode, TierCode, ModalityCode, IndustryCode,
+  GovernanceMatrix, GovLevel,
+} from '../types';
 
 interface Props { item: SampleItem }
 
-// 기존: instructor-curri의 분야/중/급수 + CATEGORY_TREE + rules-editor 3단계 + users.tier 를 그대로 보여줌
+type PermVerb = 'sell' | 'operate' | 'certify';
+const ORIG_VERBS: { code: PermVerb; label: string }[] = [
+  { code: 'sell',    label: '판매(팔것)' },
+  { code: 'operate', label: '운영' },
+  { code: 'certify', label: '인증' },
+];
+
+// "기존" = 사용자 원안 그대로의 6단 선형 구조
+// 과목 → 급수 → 기능 → 산업/전문영역 → 번역·윤리·보안 레이어(수동 3×3) → 상품·교육·강사·직원 권한(수동 매트릭스)
 export function ExistingTab({ item }: Props) {
-  const [field, setField] = useState<string>('번역');
-  const [mid, setMid] = useState<string>('전문');
-  const [grade, setGrade] = useState<string>('2급');
-  const [largeCat, setLargeCat] = useState<string>('문서');
+  const [subject, setSubject] = useState<DomainCode>(item.facets.domain);
+  const [level, setLevel] = useState<TierCode>(item.facets.tier);
+  const [modality, setModality] = useState<ModalityCode>(item.facets.modality);
+  const [industry, setIndustry] = useState<IndustryCode>(item.facets.industry);
+  const [gov, setGov] = useState<GovernanceMatrix>({
+    translation: 'optional', ethics: 'optional', security: 'optional',
+  });
+  const [perms, setPerms] = useState<Set<string>>(new Set());
 
-  const grades = GRADE_LEVELS[mid] ?? [];
-  const largeCats = CATEGORY_TREE.map((c) => ({ code: c.name, label: c.name }));
-  const subCats = CATEGORY_TREE.find((c) => c.name === largeCat)?.children ?? [];
+  useEffect(() => {
+    setSubject(item.facets.domain);
+    setLevel(item.facets.tier);
+    setModality(item.facets.modality);
+    setIndustry(item.facets.industry);
+    setGov({ translation: 'optional', ethics: 'optional', security: 'optional' });
+    setPerms(new Set());
+  }, [item.id]);
 
-  const gaps = [
-    { text: '과목(TESOL·ITT) 없음 — "분야"에 3개만 존재(프롬/번역/윤리)' },
-    { text: '산업·전문영역 없음 — extends-area 일부 키워드만' },
-    { text: 'actor·verb(상품/운영/강사/직원 × 판매/운영/강의/인증) 없음' },
-    { text: '규정 3축(번역/윤리/보안) 구분 없음 — 단일 rules 테이블' },
-    { text: '거버넌스 자동 추론 없음 — 수동 지정' },
-    { text: '교차축 조회(예: 번역×의료×영상) 불가' },
-  ];
+  const togglePerm = (key: string) => {
+    setPerms((prev) => {
+      const n = new Set(prev);
+      if (n.has(key)) n.delete(key); else n.add(key);
+      return n;
+    });
+  };
+
+  const levelObj = TIERS.find((t) => t.code === level)!;
+  const subjectObj = DOMAINS.find((d) => d.code === subject)!;
+  const modalityObj = MODALITIES.find((m) => m.code === modality)!;
+  const industryObj = INDUSTRIES.find((i) => i.code === industry)!;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-      <SectionCard title="① 분야 → 중 → 급수 (instructor-curri)" subtitle="constants.ts 실제 값">
-        <div className="space-y-1.5">
-          <div>
-            <div className="text-[10px] text-slate-500 mb-0.5">분야</div>
-            <ChipBar
-              options={GRADE_FIELD_OPTIONS.map((f) => ({ code: f, label: f }))}
-              value={field}
-              onChange={(v) => setField(v)}
-            />
-          </div>
-          <div>
-            <div className="text-[10px] text-slate-500 mb-0.5">중분류</div>
-            <ChipBar
-              options={GRADE_MID_OPTIONS.map((m) => ({ code: m, label: m }))}
-              value={mid}
-              onChange={(v) => { setMid(v); setGrade(GRADE_LEVELS[v]?.[0] ?? ''); }}
-            />
-          </div>
-          <div>
-            <div className="text-[10px] text-slate-500 mb-0.5">급수</div>
-            <ChipBar
-              options={grades.map((g) => ({ code: g, label: g }))}
-              value={grade}
-              onChange={(v) => setGrade(v)}
-            />
-          </div>
-        </div>
-      </SectionCard>
+    <div className="space-y-2">
+      <div className="text-[10px] text-slate-500 px-1">
+        원안 그대로의 6단 선형 구조 — 과목 → 급수 → 기능 → 산업 → 규정레이어 → 권한. 각 단계는 이전 단계에 종속됩니다.
+      </div>
 
-      <SectionCard title="② CATEGORY_TREE (대 → 중)" subtitle="8대 분류 하드코딩">
-        <div className="space-y-1.5">
-          <ChipBar options={largeCats} value={largeCat} onChange={(v) => setLargeCat(v)} />
-          <div className="flex flex-wrap gap-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
-            {subCats.slice(0, 20).map((s) => (
-              <span
-                key={s.name}
-                className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600"
-              >
-                {s.name}
-              </span>
+      {/* 6 단계 카드 그리드 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+        {/* Step 1: 과목 */}
+        <SectionCard title="① 과목 (L0)" subtitle="TESOL·프롬·번역·윤리·ITT">
+          <ChipBar
+            options={DOMAINS.map((d) => ({ code: d.code, label: d.label }))}
+            value={subject}
+            onChange={(v) => setSubject(v)}
+          />
+        </SectionCard>
+
+        {/* Step 2: 급수 */}
+        <SectionCard title="② 급수 (L1)" subtitle="일반 / 전문 / 교육">
+          <div className="space-y-1">
+            <ChipBar
+              options={TIERS.map((t) => ({ code: t.code, label: t.label }))}
+              value={level}
+              onChange={(v) => setLevel(v)}
+            />
+            <div className="text-[10px] text-slate-500">세부: {levelObj.grades.join(' · ')}</div>
+          </div>
+        </SectionCard>
+
+        {/* Step 3: 기능 */}
+        <SectionCard title="③ 기능 (L2)" subtitle="문서·영상·음성·이미지·코드·실시간">
+          <ChipBar
+            options={MODALITIES.map((m) => ({ code: m.code, label: m.label }))}
+            value={modality}
+            onChange={(v) => setModality(v)}
+          />
+        </SectionCard>
+
+        {/* Step 4: 산업·전문영역 */}
+        <SectionCard title="④ 산업·전문영역 (L3)" subtitle="의료·법률·금융·정부·교육·IT·미디어·무역·일반">
+          <ChipBar
+            options={INDUSTRIES.map((i) => ({ code: i.code, label: i.label }))}
+            value={industry}
+            onChange={(v) => setIndustry(v)}
+          />
+        </SectionCard>
+
+        {/* Step 5: 규정 레이어 */}
+        <SectionCard title="⑤ 규정 레이어 (L4)" subtitle="번역·윤리·보안 × 규정/준규정/선택 수동" tone="info">
+          <div className="space-y-1">
+            {GOV_AXES.map((ax) => (
+              <div key={ax.code} className="flex items-center gap-1.5 text-[11px]">
+                <span className="w-10 text-slate-600 dark:text-slate-300">{ax.label}</span>
+                <ChipBar
+                  options={[
+                    { code: 'fixed'    as GovLevel, label: '규정' },
+                    { code: 'semi'     as GovLevel, label: '준규정' },
+                    { code: 'optional' as GovLevel, label: '선택' },
+                  ]}
+                  value={gov[ax.code]}
+                  onChange={(v) => setGov({ ...gov, [ax.code]: v })}
+                />
+              </div>
             ))}
-            {subCats.length === 0 && <span className="text-[10px] text-slate-400">(하위 없음)</span>}
+            <div className="text-[10px] text-slate-500 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
+              ※ 원안은 수동 지정 — domain·industry 별 자동 seed·override 개념 없음.
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* Step 6: 권한 */}
+        <SectionCard title="⑥ 권한 설계 (L5)" subtitle="상품/교육/강사/직원 × 판매/운영/인증 (멀티=원형)" tone="info">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[10px] border-collapse">
+              <thead>
+                <tr className="bg-slate-100 dark:bg-slate-800">
+                  <th className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 text-left">actor \ verb</th>
+                  {ORIG_VERBS.map((v) => (
+                    <th key={v.code} className="border border-slate-300 dark:border-slate-600 px-1 py-0.5">{v.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ACTORS.map((a) => (
+                  <tr key={a.code}>
+                    <td className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 font-medium">{a.label}</td>
+                    {ORIG_VERBS.map((v) => {
+                      const key = `${a.code}:${v.code}`;
+                      const active = perms.has(key);
+                      return (
+                        <td key={v.code} className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => togglePerm(key)}
+                            aria-pressed={active}
+                            className={[
+                              'h-3.5 w-3.5 rounded-full border transition',
+                              active
+                                ? 'bg-slate-900 border-slate-900 dark:bg-white dark:border-white'
+                                : 'bg-white border-slate-300 hover:border-slate-500 dark:bg-slate-800 dark:border-slate-600',
+                            ].join(' ')}
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+      </div>
+
+      {/* 원안 플로우 결과 breadcrumb */}
+      <SectionCard title="🧭 원안 플로우 결과 (breadcrumb)" tone="info">
+        <div className="flex items-center gap-1 flex-wrap text-[11px]">
+          <Pill n={1} label={subjectObj.label} />
+          <Arrow />
+          <Pill n={2} label={`${levelObj.label}`} />
+          <Arrow />
+          <Pill n={3} label={modalityObj.label} />
+          <Arrow />
+          <Pill n={4} label={industryObj.label} />
+          <Arrow />
+          <div className="flex gap-0.5">
+            <RuleBadge level={gov.translation} axis="번역" />
+            <RuleBadge level={gov.ethics} axis="윤리" />
+            <RuleBadge level={gov.security} axis="보안" />
+          </div>
+          <Arrow />
+          <div className="flex flex-wrap gap-0.5">
+            {[...perms].length === 0 && (
+              <span className="text-[10px] text-slate-400">(권한 미지정)</span>
+            )}
+            {[...perms].map((k) => {
+              const [a, v] = k.split(':');
+              const aLabel = ACTORS.find((x) => x.code === a)?.label;
+              const vLabel = ORIG_VERBS.find((x) => x.code === v)?.label;
+              return (
+                <span
+                  key={k}
+                  className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                >
+                  {aLabel}·{vLabel}
+                </span>
+              );
+            })}
           </div>
         </div>
       </SectionCard>
 
-      <SectionCard title="③ rules-editor 3단계" subtitle="RegulationType: fixed | semi | optional">
-        <div className="flex flex-wrap gap-1.5">
-          <RuleBadge level="fixed" />
-          <RuleBadge level="semi" />
-          <RuleBadge level="optional" />
+      {/* 원안의 특성 - 중립 서술 */}
+      <SectionCard title="원안(기존)의 특성" subtitle="장점·제약 중립 기술">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+          <div>
+            <div className="font-semibold text-emerald-700 dark:text-emerald-400 mb-0.5">✓ 장점</div>
+            <ul className="space-y-0.5 pl-2">
+              <li>· 6단 단선 플로우 — 학습 곡선 낮고 단계 명확</li>
+              <li>· 각 단계가 이전에 종속 → 의사결정 순서 강제</li>
+              <li>· 요청 원안 그대로 구현 (재해석 불필요)</li>
+              <li>· 문서 표기에 가장 가까움 (도메인 전문가 친화)</li>
+              <li>· 초기 구축 2~3일 (가장 빠름)</li>
+              <li>· 원안 준수도 <b>100%</b></li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-semibold text-amber-700 dark:text-amber-400 mb-0.5">△ 제약</div>
+            <ul className="space-y-0.5 pl-2">
+              <li>· 교차축 조회(예: 번역 × 의료 × 영상) 는 전수 스캔 필요</li>
+              <li>· 규정 레이어가 5단에 있어 자동 상속·seed 불가 → 수동</li>
+              <li>· Work Studio의 actor-first 진입에 6단 뒤집기 재배열 필요</li>
+              <li>· 새 축(예: "언어쌍" 추가) 도입 시 6단 재설계 부담</li>
+              <li>· 권한 매트릭스가 거버넌스와 연동되지 않아 자동 게이팅 없음</li>
+            </ul>
+          </div>
         </div>
-        <div className="mt-1.5 text-[10px] text-slate-500">
-          ※ 이 3단계는 규정 UI 타입 구분만이고, <b>어느 분야·산업·기능에 자동 적용되는지는 없음</b>.
-          바인딩은 관리자가 수동 지정.
-        </div>
-      </SectionCard>
-
-      <SectionCard title="④ users.tier (4-tier auth)" subtitle="admin / manager / user / external">
-        <div className="flex flex-wrap gap-1">
-          {USER_TIERS.map((t) => (
-            <span
-              key={t.code}
-              className="text-[10px] px-1.5 py-0.5 rounded border font-medium"
-              style={{ color: t.color, borderColor: t.color + '80', backgroundColor: t.color + '12' }}
-            >
-              {t.label}
-            </span>
-          ))}
-        </div>
-        <div className="mt-1.5 text-[10px] text-slate-500">
-          RouteGuard로 화면 접근만 제어. 업무 역할(상품/강사/직원)·동사(판매/강의/인증) <b>게이팅 없음</b>.
-        </div>
-      </SectionCard>
-
-      <SectionCard title="⑤ 선택 아이템의 표현 한계" tone="warn" subtitle={item.label}>
-        <div className="text-[11px] space-y-1">
-          <div>· 과목 <span className="text-amber-700 dark:text-amber-400 font-semibold">{item.facets.domain}</span> → "분야" 3값에 <b>매핑 불가</b></div>
-          <div>· 산업 <span className="text-amber-700 dark:text-amber-400 font-semibold">{item.facets.industry}</span> → <b>표현 필드 없음</b></div>
-          <div>· 기능 <span className="text-amber-700 dark:text-amber-400 font-semibold">{item.facets.modality}</span> → CATEGORY_TREE 대분류로만, 교차 불가</div>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="⑥ 기존 구조의 결함 (6건)" tone="warn">
-        <ul className="space-y-0.5">
-          {gaps.map((g, i) => (
-            <li key={i} className="flex items-start gap-1 text-[11px]">
-              <AlertTriangle className="h-3 w-3 text-amber-600 mt-0.5 flex-shrink-0" />
-              <span>{g.text}</span>
-            </li>
-          ))}
-        </ul>
       </SectionCard>
     </div>
   );
+}
+
+function Pill({ n, label }: { n: number; label?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+      <span className="text-slate-400">{n}</span>
+      <span className="font-medium text-slate-700 dark:text-slate-200">{label ?? '—'}</span>
+    </span>
+  );
+}
+
+function Arrow() {
+  return <span className="text-slate-400">›</span>;
 }
