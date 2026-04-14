@@ -110,7 +110,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'E1', to: '/instructor-curri', icon: BookOpen,  label: '강사커리' },
   { code: 'E2', to: '/marketing',        icon: BarChart3, label: '마케팅' },
   { code: 'E3', to: '/prompt-guide',     icon: Settings,  label: '프롬사용법' },
-  { code: 'E4', to: '/work-class-demo',  icon: Layers,    label: '업무 분류(임시)' },
+  { code: 'E4', to: '/work-class-demo',  icon: Layers,    label: '업무 분류(최종DB)' },
 
   // ─── F: 영규 ───
   { code: 'F1', to: '/hutechc-homepage', icon: Home, label: '영규-hutechc' },

@@ -208,6 +208,68 @@ CREATE TABLE IF NOT EXISTS page_memos (
   updated_at TEXT DEFAULT (datetime('now'))
 );
 
+-- ──────────────────────────────────────────────────────────────
+-- 업무 분류 최종 DB (T9) — 모든 회사 분류의 Single Source of Truth
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS work_class_taxonomy (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  taxonomy_id TEXT NOT NULL UNIQUE,
+  scope TEXT NOT NULL,                 -- ai-studio | work-studio | homepage | common
+  gov TEXT NOT NULL,                   -- company-rule | work-guide | homepage | common
+  axis TEXT NOT NULL,                  -- 분야|급수|부서|직급|홈페이지타입|유형|업무별|분류별|교육별|급수별|세부급수|DB별|계약|작성자
+  level TEXT NOT NULL,                 -- large | medium | small | flat
+  parent_id TEXT,                      -- self-ref → 대/중/소 계층
+  label TEXT NOT NULL,
+  emoji TEXT,
+  sort_order INTEGER DEFAULT 0,
+  source TEXT DEFAULT 'user',          -- seed | user | migration
+  locked INTEGER DEFAULT 0,            -- 1 = rename/삭제 금지 (seed 코어 보호)
+  removed INTEGER DEFAULT 0,           -- soft delete
+  revision INTEGER DEFAULT 1,          -- 낙관적 락
+  created_by TEXT,
+  updated_by TEXT,
+  data TEXT,                           -- 규정등급/색상/비고 JSON
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_wct_scope_axis ON work_class_taxonomy(scope, axis, level);
+CREATE INDEX IF NOT EXISTS idx_wct_parent     ON work_class_taxonomy(parent_id);
+CREATE INDEX IF NOT EXISTS idx_wct_gov        ON work_class_taxonomy(scope, gov);
+
+-- 실제 업무 아이템 (facets 조합 + 업무일지/만다라트 연결)
+CREATE TABLE IF NOT EXISTS work_class_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_id TEXT NOT NULL UNIQUE,
+  label TEXT NOT NULL,
+  scope TEXT NOT NULL,
+  facets TEXT NOT NULL,                -- {분야:'wct-...', 부서:'wct-...', ...}
+  gov_matrix TEXT,                     -- {translation,ethics,security}
+  mandalart_cell_id TEXT,
+  worklog_task_id TEXT,
+  note TEXT,
+  source TEXT DEFAULT 'user',
+  locked INTEGER DEFAULT 0,
+  removed INTEGER DEFAULT 0,
+  revision INTEGER DEFAULT 1,
+  created_by TEXT,
+  updated_by TEXT,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_wci_scope ON work_class_items(scope);
+
+-- 분류용 만다라트 (work-log 와 포맷 동일, 저장 분리)
+CREATE TABLE IF NOT EXISTS work_class_mandalart (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mandalart_id TEXT NOT NULL UNIQUE,   -- `${scope}|${gov}|${rows}x${cols}`
+  data TEXT NOT NULL,                  -- {cells, size, importedFromWorklog, ...}
+  source TEXT DEFAULT 'user',
+  locked INTEGER DEFAULT 0,
+  removed INTEGER DEFAULT 0,
+  revision INTEGER DEFAULT 1,
+  created_by TEXT,
+  updated_by TEXT,
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
 -- 4-tier 사용자 계정 (T3-3)
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

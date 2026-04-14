@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "init-db": "node server/db/init.js",
-    "seed-users": "node server/db/seed-users.js"
+    "seed-users": "node server/db/seed-users.js",
+    "seed-taxonomy": "node scripts/seed-taxonomy.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.500.0",

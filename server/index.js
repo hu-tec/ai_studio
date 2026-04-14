@@ -41,6 +41,17 @@ app.use('/api/page-memos', createGenericRouter('page_memos', 'memo_id'));
 app.use('/api/work-hub', createGenericRouter('work_hub', 'post_id'));
 app.use('/api/work-hub-comments', createGenericRouter('work_hub_comments', 'comment_id'));
 
+// 업무 분류 최종 DB (T9) — Single Source of Truth, soft delete + revision lock
+app.use('/api/work-class-taxonomy',
+  createGenericRouter('work_class_taxonomy', 'taxonomy_id',
+    { softDelete: true, listFilter: true, revisionLock: true }));
+app.use('/api/work-class-items',
+  createGenericRouter('work_class_items', 'item_id',
+    { softDelete: true, listFilter: true, revisionLock: true }));
+app.use('/api/work-class-mandalart',
+  createGenericRouter('work_class_mandalart', 'mandalart_id',
+    { softDelete: true, listFilter: true, revisionLock: true }));
+
 // app_settings API (localStorage → DB 이관)
 app.get('/api/settings', (req, res) => {
   const db = require('./db/init').getDB();
