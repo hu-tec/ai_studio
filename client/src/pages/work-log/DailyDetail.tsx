@@ -7,7 +7,7 @@ import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, resizeMandalartCells, sameMandalartSize, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -206,6 +206,31 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       return { ...prev, [key]: newCells };
     });
   }, [period, mandalartActiveType, activeSize]);
+
+  // 크기 변경 — 이전 크기의 셀을 2D 좌표 보존 remap하여 새 크기 key에 seed.
+  // 새 key 에 이미 작성된 셀(텍스트 있음)은 유지(merge), 빈칸만 remap 결과로 채움.
+  const handleMandalartSizeChange = useCallback((newSize: MandalartSize) => {
+    if (sameMandalartSize(newSize, mandalartActiveSize)) return;
+    const oldKey = mandalartKey(mandalartActiveType, period, mandalartActiveSize);
+    const newKey = mandalartKey(mandalartActiveType, period, newSize);
+    if (oldKey !== newKey) {
+      setMandalartCellsByKey(prev => {
+        const oldCells = prev[oldKey] || [];
+        if (oldCells.length === 0) return prev;
+        const existingNewCells = prev[newKey] || [];
+        const remapped = resizeMandalartCells(oldCells, mandalartActiveSize, newSize);
+        const newCount = mandalartCellCount(newSize);
+        const merged: MandalartCell[] = Array.from({ length: newCount }, (_, i) => {
+          const existing = existingNewCells[i];
+          if (existing && existing.text?.trim()) return existing;
+          return remapped[i] || { id: `mc-new-${Date.now()}-${i}`, text: '', children: [], achievement: 0 };
+        });
+        return { ...prev, [newKey]: merged };
+      });
+    }
+    setMandalartActiveSize(newSize);
+  }, [mandalartActiveType, period, mandalartActiveSize]);
+
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save: debounce 2초
@@ -977,7 +1002,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   activeTypeId={mandalartActiveType}
                   onActiveTypeChange={setMandalartActiveType}
                   onTypesChange={setMandalartTypes}
-                  onSizeChange={setMandalartActiveSize}
+                  onSizeChange={handleMandalartSizeChange}
                   syncTasks={mandalartActiveType === WORKLOG_MANDALART_ID}
                 />
               ) : viewMode === 'eisenhower' ? (

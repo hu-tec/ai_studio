@@ -160,6 +160,83 @@ export function mandalartKey(typeId: string, period: MandalartPeriod, size: Mand
   return `${typeId}|${period}|${size.rows}x${size.cols}`;
 }
 
+/** 빈 MandalartCell 생성 (resize 시 빈자리 채움용) */
+function emptyResizedCell(): MandalartCell {
+  return { id: `mc-rs-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, text: '', children: [], achievement: 0 };
+}
+
+/**
+ * 만다라트 루트 그리드 2D 위치 보존 resize.
+ * - 기존 셀의 (row, col) 좌표가 신규 그리드의 같은 좌표로 매핑됨
+ * - 행 확장: 기존 데이터는 그대로, 추가 행은 빈칸
+ * - 열 확장: 기존 데이터는 그대로, 추가 열은 빈칸
+ * - 축소: 범위 밖 셀은 드랍
+ * - 자식 서브그리드도 재귀적으로 resize
+ */
+export function resizeMandalartCells(
+  oldCells: MandalartCell[],
+  oldSize: MandalartSize,
+  newSize: MandalartSize,
+): MandalartCell[] {
+  const newCount = mandalartCellCount(newSize);
+  const result: MandalartCell[] = Array.from({ length: newCount }, emptyResizedCell);
+  const R = Math.min(oldSize.rows, newSize.rows);
+  const C = Math.min(oldSize.cols, newSize.cols);
+  for (let r = 0; r < R; r++) {
+    for (let c = 0; c < C; c++) {
+      const oldIdx = r * oldSize.cols + c;
+      const newIdx = r * newSize.cols + c;
+      const src = oldCells[oldIdx];
+      if (!src) continue;
+      const cloned: MandalartCell = { ...src };
+      if (src.children && src.children.length > 0) {
+        cloned.children = resizeMandalartChildren(src.children, oldSize, newSize);
+      }
+      result[newIdx] = cloned;
+    }
+  }
+  return result;
+}
+
+/**
+ * 자식 그리드(센터 제외 저장) 2D 위치 보존 resize.
+ * - 자식 배열은 visual grid 에서 center 를 건너뛴 flat array
+ * - 이 함수는 (flat idx → visual (r,c)) 변환 후 신규 size 의 visual 좌표로 매핑,
+ *   신규 size 의 center 슬롯에 떨어지는 셀은 드랍
+ */
+export function resizeMandalartChildren(
+  oldChildren: MandalartCell[],
+  oldSize: MandalartSize,
+  newSize: MandalartSize,
+): MandalartCell[] {
+  const oldCenterIdx = mandalartCenterIdx(oldSize);
+  const newCenterIdx = mandalartCenterIdx(newSize);
+  const oldHasCenter = oldCenterIdx >= 0;
+  const newHasCenter = newCenterIdx >= 0;
+  const newChildCount = mandalartChildCount(newSize);
+  const result: MandalartCell[] = Array.from({ length: newChildCount }, emptyResizedCell);
+  const R = Math.min(oldSize.rows, newSize.rows);
+  const C = Math.min(oldSize.cols, newSize.cols);
+  for (let i = 0; i < oldChildren.length; i++) {
+    const src = oldChildren[i];
+    if (!src) continue;
+    // flat idx → visual idx (센터를 skip한 저장이므로 되돌림)
+    const oldVisual = oldHasCenter ? (i < oldCenterIdx ? i : i + 1) : i;
+    const r = Math.floor(oldVisual / oldSize.cols);
+    const c = oldVisual % oldSize.cols;
+    if (r >= R || c >= C) continue; // 축소 범위 밖 → 드랍
+    const newVisual = r * newSize.cols + c;
+    if (newHasCenter && newVisual === newCenterIdx) continue; // 새 센터 슬롯 → 드랍
+    const newChildIdx = newHasCenter && newVisual > newCenterIdx ? newVisual - 1 : newVisual;
+    const cloned: MandalartCell = { ...src };
+    if (src.children && src.children.length > 0) {
+      cloned.children = resizeMandalartChildren(src.children, oldSize, newSize);
+    }
+    result[newChildIdx] = cloned;
+  }
+  return result;
+}
+
 /** 레거시 key(`type|period|N`) → 신규 key(`type|period|NxN`) 마이그레이션 */
 export function migrateMandalartKeys(byKey: Record<string, MandalartCell[]>): Record<string, MandalartCell[]> {
   const out: Record<string, MandalartCell[]> = {};
