@@ -234,6 +234,7 @@ export function OutboundCallsPage() {
   const handleDelete = () => {
     const idsToDelete = Array.from(selectedIds);
     if (idsToDelete.length === 0) return;
+    if (!window.confirm(`선택한 ${idsToDelete.length}건을 정말 삭제하시겠습니까?`)) return;
     setEntries(prev => prev.filter(e => !idsToDelete.includes(e.id)));
     idsToDelete.forEach(id => deleteCallFromServer(id));
     setSelectedIds(new Set());
@@ -836,14 +837,19 @@ function EditableField({ label, value, onChange, type = 'text', options = [], di
         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
       </div>
       {type === 'select' ? (
-        <select 
-          value={value} 
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          className="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:bg-white disabled:bg-transparent disabled:border-transparent transition-all"
-        >
-          {options.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <div className="flex flex-wrap gap-1">
+          {options.map(o => (
+            <button
+              key={o}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(o)}
+              className={`px-2 py-1 text-[11px] font-bold rounded-md border transition-colors ${value === o ? 'bg-slate-800 text-white border-slate-800' : 'bg-gray-50 text-slate-600 border-gray-200 hover:border-slate-800'} disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
       ) : (
         <input 
           type={type} 

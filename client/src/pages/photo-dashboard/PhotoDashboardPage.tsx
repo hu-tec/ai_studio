@@ -267,6 +267,7 @@ export function PhotoDashboardPage() {
   };
 
   const handleDeleteItem = (id: string) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
     setItems(items.filter(item => item.id !== id));
     deletePhotoFromServer(id);
     toast.error('항목이 삭제되었습니다.');
@@ -618,15 +619,18 @@ export function PhotoDashboardPage() {
                           onChange={(e) => handleUpdateItem(item.id, { title: e.target.value })}
                           className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-1 focus:ring-slate-400 focus:outline-hidden font-bold"
                         />
-                        <select 
-                          value={item.category}
-                          onChange={(e) => handleUpdateItem(item.id, { category: e.target.value as Category })}
-                          className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-1 focus:ring-slate-400 focus:outline-hidden"
-                        >
+                        <div className="flex flex-wrap gap-1">
                           {CATEGORIES.map(c => (
-                            <option key={c.label} value={c.label}>{c.emoji} {c.label}</option>
+                            <button
+                              key={c.label}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleUpdateItem(item.id, { category: c.label as Category }); }}
+                              className={`px-1.5 py-0.5 text-[11px] rounded-md border ${item.category === c.label ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}
+                            >
+                              {c.emoji} {c.label}
+                            </button>
                           ))}
-                        </select>
+                        </div>
                         <input 
                           type="date" 
                           value={item.date}

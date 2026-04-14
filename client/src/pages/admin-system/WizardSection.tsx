@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 export const WizardSection: React.FC = () => {
+  const [wizLang, setWizLang] = useState<'ko' | 'en'>('ko');
+  const [wizSiteType, setWizSiteType] = useState<'' | '전시형' | '커머스형'>('');
   return (
     <div className="flex flex-col h-full">
       <div className="bg-zinc-200 py-2 px-4 mb-4">
@@ -34,18 +36,33 @@ export const WizardSection: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">기본 언어 🌍</p>
-                <select className="w-full px-3 py-2 text-xs font-bold border border-zinc-100 rounded bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-all cursor-pointer">
-                  <option>ko</option>
-                  <option>en</option>
-                </select>
+                <div className="flex gap-1">
+                  {(['ko', 'en'] as const).map(l => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setWizLang(l)}
+                      className={`px-3 py-1.5 text-[11px] font-bold rounded-md border ${wizLang === l ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'}`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-1.5">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">사이트 타입 🏛️</p>
-                <select className="w-full px-3 py-2 text-xs font-bold border border-zinc-100 rounded bg-zinc-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-all cursor-pointer text-zinc-400">
-                  <option>선택</option>
-                  <option>전시형</option>
-                  <option>커머스형</option>
-                </select>
+                <div className="flex gap-1">
+                  {(['전시형', '커머스형'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setWizSiteType(wizSiteType === t ? '' : t)}
+                      className={`px-3 py-1.5 text-[11px] font-bold rounded-md border ${wizSiteType === t ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'}`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

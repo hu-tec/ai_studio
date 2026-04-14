@@ -82,7 +82,20 @@ export function DocumentFormDialog({ open, onOpenChange, manual }: DocumentFormD
     const v = formData[fi.id] || "";
     switch (fi.type) {
       case "textarea": return <textarea value={v} onChange={(e) => handleChange(fi.id, e.target.value)} placeholder={fi.placeholder} rows={2} className={`${ic} resize-y`} />;
-      case "select": return <select value={v} onChange={(e) => handleChange(fi.id, e.target.value)} className={`${ic} cursor-pointer`}><option value="">선택</option>{fi.options?.map((o) => <option key={o}>{o}</option>)}</select>;
+      case "select": return (
+        <div className="flex flex-wrap gap-0.5">
+          {fi.options?.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => handleChange(fi.id, v === o ? "" : o)}
+              className={`px-1.5 py-0.5 text-[11px] rounded border ${v === o ? 'bg-primary text-white border-primary' : 'bg-white text-slate-600 border-border hover:border-primary/50'}`}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+      );
       case "date": return <input type="date" value={v} onChange={(e) => handleChange(fi.id, e.target.value)} className={`${ic} cursor-pointer`} />;
       case "number": return <input type="text" inputMode="numeric" value={v} onChange={(e) => handleChange(fi.id, e.target.value.replace(/[^0-9]/g, ""))} placeholder={fi.placeholder} className={ic} />;
       default: return <input type="text" value={v} onChange={(e) => handleChange(fi.id, e.target.value)} placeholder={fi.placeholder} className={ic} />;

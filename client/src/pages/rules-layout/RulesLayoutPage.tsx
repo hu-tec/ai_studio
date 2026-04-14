@@ -17,43 +17,61 @@ import { toast } from "sonner";
 // GlobalFilterBar -- top filter strip
 // ---------------------------------------------------------------------------
 
+const FILTER_DEFS = [
+  { key: "대분류", options: ["문서", "음성", "영상/SNS", "IT/개발", "창의적활동"] },
+  { key: "중분류", options: ["개발/보안", "디자인/기획", "비즈니스", "법률", "의료"] },
+  { key: "소분류", options: ["AI", "에이전트", "DB", "빅데이터", "백엔드", "프론트"] },
+];
+
 const GlobalFilterBar = () => {
+  const [selected, setSelected] = useState<Record<string, string[]>>({});
+  const toggle = (key: string, opt: string) => {
+    setSelected(prev => {
+      const list = prev[key] || [];
+      return {
+        ...prev,
+        [key]: list.includes(opt) ? list.filter(v => v !== opt) : [...list, opt],
+      };
+    });
+  };
   return (
-    <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center gap-4 shrink-0 shadow-xs">
-      <div className="flex items-center gap-2 text-slate-400 mr-2">
-        <Filter className="w-4 h-4" />
-        <span className="text-[11px] font-bold uppercase tracking-wider">Global Filter</span>
+    <div className="bg-white border-b border-slate-200 px-3 py-1.5 flex items-start gap-3 shrink-0 shadow-xs">
+      <div className="flex items-center gap-1 text-slate-400 mt-0.5">
+        <Filter className="w-3.5 h-3.5" />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Filter</span>
       </div>
 
-      <div className="flex items-center gap-6 flex-1">
-        {[
-          { label: "대분류", options: ["문서", "음성", "영상/SNS", "IT/개발", "창의적활동"] },
-          { label: "중분류", options: ["개발/보안", "디자인/기획", "비즈니스", "법률", "의료"] },
-          { label: "소분류", options: ["AI", "에이전트", "DB", "빅데이터", "백엔드", "프론트"] },
-        ].map((filter) => (
-          <div key={filter.label} className="flex items-center gap-2">
-            <label className="text-[11px] font-bold text-slate-400 whitespace-nowrap">
-              {filter.label}
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        {FILTER_DEFS.map((filter) => (
+          <div key={filter.key} className="flex items-center gap-1.5">
+            <label className="text-[10px] font-bold text-slate-500 whitespace-nowrap w-10">
+              {filter.key}
             </label>
-            <div className="relative group min-w-[140px]">
-              <select className="w-full bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-[12px] text-slate-700 appearance-none outline-none focus:border-slate-900 transition-colors cursor-pointer">
-                <option>{filter.label} 선택</option>
-                {filter.options.map((opt) => (
-                  <option key={opt}>{opt}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-2 w-3.5 h-3.5 text-slate-400 pointer-events-none group-hover:text-slate-900 transition-colors" />
+            <div className="flex flex-wrap gap-1">
+              {filter.options.map((opt) => {
+                const on = (selected[filter.key] || []).includes(opt);
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => toggle(filter.key, opt)}
+                    className={`px-2 py-0.5 text-[11px] rounded-full border ${on ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="relative min-w-[240px]">
-        <SearchIcon className="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400" />
+      <div className="relative min-w-[200px] mt-0.5">
+        <SearchIcon className="absolute left-2 top-1.5 w-3.5 h-3.5 text-slate-400" />
         <input
           type="text"
           placeholder="통합 검색 (분야, 급수, 이름 등)"
-          className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-[11px] outline-none focus:border-slate-900 focus:bg-white transition-all"
+          className="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded text-[11px] outline-none focus:border-slate-900 focus:bg-white transition-all"
         />
       </div>
     </div>

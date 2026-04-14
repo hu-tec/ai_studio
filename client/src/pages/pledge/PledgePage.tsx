@@ -342,13 +342,20 @@ export function PledgePage() {
                 <div className="space-y-4">
                   <InputGroup label="이름" value={userName} onChange={setUserName} icon={<User size={14}/>} placeholder="성함 입력" />
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-slate-400 uppercase">직무</label>
-                    <div className="flex items-center gap-2 border-b border-slate-200 py-1">
-                      <Briefcase size={14} className="text-slate-400" />
-                      <select value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} className="flex-grow bg-transparent border-none text-sm p-0 appearance-none outline-none">
-                        <option value="" disabled>직무 선택</option>
-                        {jobRoles.map(r => <option key={r} value={r}>{r}</option>)}
-                      </select>
+                    <label className="text-xs font-semibold text-slate-400 uppercase flex items-center gap-1.5">
+                      <Briefcase size={12} className="text-slate-400" /> 직무
+                    </label>
+                    <div className="flex flex-wrap gap-1">
+                      {jobRoles.map(r => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setJobTitle(r)}
+                          className={`px-2 py-0.5 text-xs rounded-md border transition-colors ${jobTitle === r ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                        >
+                          {r}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <InputGroup label="계약형태" value={contractType} onChange={setContractType} icon={<Building2 size={14}/>} placeholder="정규직 / 계약직 등" />

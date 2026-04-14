@@ -245,6 +245,7 @@ function SchedulePage() {
       setShowTimetable(true);
       alert("📝 강의 시간표가 수정되었습니다.");
     } else if (mode === "delete" && currentId) {
+      if (!window.confirm('정말 삭제하시겠습니까?')) return;
       setSchedules(schedules.filter(s => s.id !== currentId));
       deleteScheduleFromServer(currentId);
       alert("🗑️ 강의 시간표가 삭제되었습니다.");
@@ -478,48 +479,52 @@ function SchedulePage() {
                   <SectionContainer icon={<BookOpen size={18} />} title="강의 정보" className="col-span-2">
                     <div className="grid grid-cols-2 gap-6 h-full">
                       {/* Left side: Classification */}
-                      <div className="space-y-4 pr-3 border-r border-slate-50">
-                        <div className="grid grid-cols-2 gap-3">
-                          <InputWrapper label="🏅 소분류 (급수)">
-                            <select 
-                              className="w-full bg-white border border-slate-200 rounded-md px-2 py-2 text-xs outline-none focus:ring-2 focus:ring-slate-100 font-bold"
-                              value={formData.grade}
-                              onChange={(e) => setFormData({...formData, grade: e.target.value})}
-                            >
-                              {CATEGORY_MAP[formData.middleCategory].map(grade => (
-                                <option key={grade} value={grade}>{grade}</option>
-                              ))}
-                            </select>
-                          </InputWrapper>
-                          <InputWrapper label="👥 중분류 (대상)">
-                            <select 
-                              className="w-full bg-white border border-slate-200 rounded-md px-2 py-2 text-xs outline-none focus:ring-2 focus:ring-slate-100 font-bold"
-                              value={formData.middleCategory}
-                              onChange={(e) => {
-                                const newMiddle = e.target.value as MiddleCategory;
-                                setFormData({
-                                  ...formData, 
-                                  middleCategory: newMiddle,
-                                  grade: CATEGORY_MAP[newMiddle][0]
-                                });
-                              }}
-                            >
-                              {["교육", "일반", "전문"].map(mid => (
-                                <option key={mid} value={mid}>{mid}</option>
-                              ))}
-                            </select>
-                          </InputWrapper>
-                        </div>
+                      <div className="space-y-3 pr-3 border-r border-slate-50">
                         <InputWrapper label="📚 대분류 (강의 과목)">
-                          <select 
-                            className="w-full bg-white border border-slate-200 rounded-md px-2 py-2 text-xs outline-none focus:ring-2 focus:ring-slate-100 font-black text-blue-600"
-                            value={formData.largeCategory}
-                            onChange={(e) => setFormData({...formData, largeCategory: e.target.value as LargeCategory})}
-                          >
-                            {["TESOL", "번역", "AI번역", "프롬프트", "윤리"].map(cat => (
-                              <option key={cat} value={cat}>{cat}</option>
+                          <div className="flex flex-wrap gap-1">
+                            {(["TESOL", "번역", "AI번역", "프롬프트", "윤리"] as const).map(cat => (
+                              <button
+                                key={cat}
+                                type="button"
+                                onClick={() => setFormData({...formData, largeCategory: cat as LargeCategory})}
+                                className={`px-2 py-1 text-[11px] rounded-md border ${formData.largeCategory === cat ? 'bg-blue-600 text-white border-blue-600 font-black' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400'}`}
+                              >
+                                {cat}
+                              </button>
                             ))}
-                          </select>
+                          </div>
+                        </InputWrapper>
+                        <InputWrapper label="👥 중분류 (대상)">
+                          <div className="flex gap-1">
+                            {(["교육", "일반", "전문"] as const).map(mid => (
+                              <button
+                                key={mid}
+                                type="button"
+                                onClick={() => setFormData({
+                                  ...formData,
+                                  middleCategory: mid as MiddleCategory,
+                                  grade: CATEGORY_MAP[mid as MiddleCategory][0],
+                                })}
+                                className={`px-2 py-1 text-[11px] rounded-md border ${formData.middleCategory === mid ? 'bg-slate-800 text-white border-slate-800 font-bold' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-500'}`}
+                              >
+                                {mid}
+                              </button>
+                            ))}
+                          </div>
+                        </InputWrapper>
+                        <InputWrapper label="🏅 소분류 (급수)">
+                          <div className="flex flex-wrap gap-1">
+                            {CATEGORY_MAP[formData.middleCategory].map(grade => (
+                              <button
+                                key={grade}
+                                type="button"
+                                onClick={() => setFormData({...formData, grade})}
+                                className={`px-2 py-1 text-[11px] rounded-md border ${formData.grade === grade ? 'bg-slate-700 text-white border-slate-700 font-bold' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-500'}`}
+                              >
+                                {grade}
+                              </button>
+                            ))}
+                          </div>
                         </InputWrapper>
                       </div>
 
@@ -638,16 +643,17 @@ function SchedulePage() {
                                 />
                                 <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] font-bold text-slate-300">m</span>
                               </div>
-                              <div className="relative">
-                                <select
-                                  className="w-full bg-white border border-slate-200 rounded px-1 py-0.5 text-[10px] outline-none appearance-none"
-                                  value={p.breakAfter}
-                                  onChange={(e) => updatePeriod(idx, "breakAfter", parseInt(e.target.value))}
-                                >
-                                  <option value={0}>없음</option>
-                                  {[5, 10, 15, 20, 30, 40, 50, 60].map(m => <option key={m} value={m}>{m}m</option>)}
-                                </select>
-                                <ChevronDown size={8} className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                              <div className="flex flex-wrap gap-0.5">
+                                {[0, 5, 10, 15, 20, 30, 40, 50, 60].map(m => (
+                                  <button
+                                    key={m}
+                                    type="button"
+                                    onClick={() => updatePeriod(idx, "breakAfter", m)}
+                                    className={`px-1 py-0.5 text-[9px] rounded border ${p.breakAfter === m ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-500 border-slate-200'}`}
+                                  >
+                                    {m === 0 ? '없음' : `${m}m`}
+                                  </button>
+                                ))}
                               </div>
                             </div>
                           </div>
@@ -900,8 +906,8 @@ function SchedulePage() {
               </div>
             </div>
 
-            <div className="p-5 flex-1 overflow-y-auto space-y-6 custom-scrollbar">
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+            <div className="p-2flex-1 overflow-y-auto space-y-6 custom-scrollbar">
+              <div className="bg-slate-50 rounded-xl p-2border border-slate-100">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-2xl relative">
                     <span className="absolute -top-1 -left-1 text-[8px] bg-blue-600 text-white px-1 rounded font-black">{formData.grade}</span>
@@ -1075,7 +1081,7 @@ function ModeTab({ active, onClick, icon, label, desc, activeClass }: {
 
 function SectionContainer({ children, title, icon, className }: { children: React.ReactNode; title: string; icon: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all h-full flex flex-col min-h-[220px]", className)}>
+    <div className={cn("bg-white border border-slate-200 rounded-2xl p-2shadow-sm hover:shadow-md transition-all h-full flex flex-col min-h-[220px]", className)}>
       <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-50">
         <div className="text-slate-500">{icon}</div>
         <h3 className="font-bold text-[11px] tracking-widest text-slate-500 uppercase">{title}</h3>
@@ -1243,7 +1249,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
   const totalLectures = Math.floor(totalDays / 7) * schedule.selectedDays.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2sm:p-6">
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
@@ -1342,7 +1348,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
             </tbody>
           </table>
 
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+          <div className="bg-slate-50 rounded-2xl p-2border border-slate-100">
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-1">
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Calculated Total</p>
@@ -1398,7 +1404,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
         exit={{ opacity: 0, scale: 0.9, rotateY: -20 }}
         className="relative bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-12 max-h-[85vh]"
       >
-        <div className="col-span-8 p-10 overflow-y-auto custom-scrollbar">
+        <div className="col-span-8 p-3overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-100 text-white relative">
@@ -1446,7 +1452,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
           </div>
         </div>
 
-        <div className="col-span-4 bg-slate-900 p-10 flex flex-col justify-between relative overflow-hidden">
+        <div className="col-span-4 bg-slate-900 p-3flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/10 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none" />
 

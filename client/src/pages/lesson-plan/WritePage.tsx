@@ -249,10 +249,18 @@ export function WritePage() {
               </div>
               <div>
                 <label className={lbl}>기수</label>
-                <select value={cohort} onChange={(e) => setCohort(e.target.value)} className={inp}>
-                  <option value="">선택</option>
-                  {cohortOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+                <div className="flex flex-wrap gap-1">
+                  {cohortOptions.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={() => setCohort(cohort === o.value ? '' : o.value)}
+                      className={`px-2 py-0.5 text-xs rounded-md border ${cohort === o.value ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 <div>
@@ -276,10 +284,18 @@ export function WritePage() {
             {/* Level */}
             <div>
               <label className={lbl}>레벨</label>
-              <select value={level} onChange={(e) => setLevel(e.target.value)} className={inp}>
-                <option value="">선택</option>
-                {levelOptions.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
+              <div className="flex flex-wrap gap-1">
+                {levelOptions.map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => setLevel(level === l ? '' : l)}
+                    className={`px-2 py-0.5 text-xs rounded-md border ${level === l ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Dates */}
             <div className="grid grid-cols-2 gap-1.5 mt-1.5">

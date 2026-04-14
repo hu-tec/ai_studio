@@ -169,12 +169,43 @@ export function CounselingFormDialog({ open, onOpenChange, manual }: CounselingF
   const ic = "w-full px-2 py-1 text-[11px] rounded border border-border bg-input-background focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all";
   const tc = "w-full px-1.5 py-0.5 text-[10px] rounded border border-border bg-input-background focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all";
 
+  const CycleBtn = ({ value, options, onChange, className }: { value: string; options: string[]; onChange: (v: string) => void; className?: string }) => {
+    const cycle = (dir: 1 | -1) => {
+      const all = ["", ...options];
+      const idx = all.indexOf(value);
+      const next = all[(idx + dir + all.length) % all.length];
+      onChange(next);
+    };
+    return (
+      <button
+        type="button"
+        onClick={(e) => cycle(e.shiftKey ? -1 : 1)}
+        title="클릭: 다음 · Shift+클릭: 이전"
+        className={`${className || tc} text-left cursor-pointer hover:bg-secondary/30 ${value ? 'text-foreground' : 'text-muted-foreground/40'}`}
+      >
+        {value || '-'}
+      </button>
+    );
+  };
   const ri = (fi: FI, cls?: string) => {
     const v = fd[fi.id] || "";
     const c = cls || ic;
     switch (fi.type) {
       case "textarea": return <textarea value={v} onChange={(e) => ch(fi.id, e.target.value)} placeholder={fi.placeholder} rows={2} className={`${c} resize-y`} />;
-      case "select": return <select value={v} onChange={(e) => ch(fi.id, e.target.value)} className={`${c} cursor-pointer`}><option value="">선택</option>{fi.options?.map((o) => <option key={o}>{o}</option>)}</select>;
+      case "select": return (
+        <div className="flex flex-wrap gap-0.5">
+          {fi.options?.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => ch(fi.id, v === o ? "" : o)}
+              className={`px-1.5 py-0.5 text-[10px] rounded border ${v === o ? 'bg-primary text-primary-foreground border-primary' : 'bg-white text-slate-600 border-border hover:border-primary/50'}`}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+      );
       case "date": return <input type="date" value={v} onChange={(e) => ch(fi.id, e.target.value)} className={`${c} cursor-pointer`} />;
       case "time": return <input type="time" value={v} onChange={(e) => ch(fi.id, e.target.value)} className={`${c} cursor-pointer`} />;
       case "number": return <input type="text" inputMode="numeric" value={v} onChange={(e) => ch(fi.id, e.target.value.replace(/[^0-9]/g,""))} placeholder={fi.placeholder} className={c} />;
@@ -305,12 +336,12 @@ export function CounselingFormDialog({ open, onOpenChange, manual }: CounselingF
                       <tbody className="divide-y divide-border">
                         {hist.map((h) => (
                           <tr key={h.id} className="group">
-                            <td className="px-1 py-0.5"><select className={`${tc} cursor-pointer`} value={h.status} onChange={(e) => uH(h.id,"status",e.target.value)}><option value="">-</option>{H_STATUS.map((o) => <option key={o}>{o}</option>)}</select></td>
+                            <td className="px-1 py-0.5"><CycleBtn value={h.status} options={H_STATUS} onChange={(v) => uH(h.id,"status",v)} /></td>
                             <td className="px-1 py-0.5"><input type="date" className={`${tc} cursor-pointer`} value={h.date} onChange={(e) => uH(h.id,"date",e.target.value)} /></td>
                             <td className="px-1 py-0.5"><input type="time" className={`${tc} cursor-pointer`} value={h.time} onChange={(e) => uH(h.id,"time",e.target.value)} /></td>
                             <td className="px-1 py-0.5"><input className={tc} value={h.counselor} onChange={(e) => uH(h.id,"counselor",e.target.value)} placeholder="이름" /></td>
-                            <td className="px-1 py-0.5"><select className={`${tc} cursor-pointer`} value={h.category} onChange={(e) => uH(h.id,"category",e.target.value)}><option value="">-</option>{C_TYPE_OPT.map((o) => <option key={o}>{o}</option>)}</select></td>
-                            <td className="px-1 py-0.5"><select className={`${tc} cursor-pointer`} value={h.courseType} onChange={(e) => uH(h.id,"courseType",e.target.value)}><option value="">-</option>{COURSE_TYPE.map((o) => <option key={o}>{o}</option>)}</select></td>
+                            <td className="px-1 py-0.5"><CycleBtn value={h.category} options={C_TYPE_OPT} onChange={(v) => uH(h.id,"category",v)} /></td>
+                            <td className="px-1 py-0.5"><CycleBtn value={h.courseType} options={COURSE_TYPE} onChange={(v) => uH(h.id,"courseType",v)} /></td>
                             <td className="px-1 py-0.5"><input className={tc} value={h.result} onChange={(e) => uH(h.id,"result",e.target.value)} placeholder="결과" /></td>
                             <td className="px-1 py-0.5"><input type="date" className={`${tc} cursor-pointer`} value={h.nextCall} onChange={(e) => uH(h.id,"nextCall",e.target.value)} /></td>
                             <td className="px-1 py-0.5"><input className={tc} value={h.memo} onChange={(e) => uH(h.id,"memo",e.target.value)} placeholder="메모" /></td>
@@ -350,13 +381,13 @@ export function CounselingFormDialog({ open, onOpenChange, manual }: CounselingF
                       <tbody className="divide-y divide-border">
                         {pay.map((p) => (
                           <tr key={p.id} className="group">
-                            <td className="px-0.5 py-0.5"><select className={`${tc} cursor-pointer`} value={p.category} onChange={(e) => uP(p.id,"category",e.target.value)}><option value="">-</option>{P_CAT.map((o) => <option key={o}>{o}</option>)}</select></td>
+                            <td className="px-0.5 py-0.5"><CycleBtn value={p.category} options={P_CAT} onChange={(v) => uP(p.id,"category",v)} /></td>
                             <td className="px-0.5 py-0.5"><input type="date" className={`${tc} cursor-pointer`} value={p.payDate} onChange={(e) => uP(p.id,"payDate",e.target.value)} /></td>
-                            <td className="px-0.5 py-0.5"><select className={`${tc} cursor-pointer`} value={p.status} onChange={(e) => uP(p.id,"status",e.target.value)}><option value="">-</option>{P_STATUS.map((o) => <option key={o}>{o}</option>)}</select></td>
+                            <td className="px-0.5 py-0.5"><CycleBtn value={p.status} options={P_STATUS} onChange={(v) => uP(p.id,"status",v)} /></td>
                             <td className="px-0.5 py-0.5"><input className={tc} value={p.realCourse} onChange={(e) => uP(p.id,"realCourse",e.target.value)} placeholder="과정" /></td>
                             <td className="px-0.5 py-0.5"><input className={`${tc} text-right`} inputMode="numeric" value={p.amount} onChange={(e) => uP(p.id,"amount",e.target.value.replace(/[^0-9]/g,""))} placeholder="0" /></td>
                             <td className="px-0.5 py-0.5"><input className={`${tc} text-right`} inputMode="numeric" value={p.discount} onChange={(e) => uP(p.id,"discount",e.target.value.replace(/[^0-9]/g,""))} placeholder="0" /></td>
-                            <td className="px-0.5 py-0.5"><select className={`${tc} cursor-pointer`} value={p.method} onChange={(e) => uP(p.id,"method",e.target.value)}><option value="">-</option>{P_METHOD.map((o) => <option key={o}>{o}</option>)}</select></td>
+                            <td className="px-0.5 py-0.5"><CycleBtn value={p.method} options={P_METHOD} onChange={(v) => uP(p.id,"method",v)} /></td>
                             <td className="px-0.5 py-0.5"><input className={tc} value={p.installment} onChange={(e) => uP(p.id,"installment",e.target.value)} placeholder="개월" /></td>
                             <td className="px-0.5 py-0.5"><input className={tc} value={p.cardCompany} onChange={(e) => uP(p.id,"cardCompany",e.target.value)} placeholder="카드사" /></td>
                             <td className="px-0.5 py-0.5"><input className={tc} value={p.approvalNo} onChange={(e) => uP(p.id,"approvalNo",e.target.value)} placeholder="번호" /></td>
