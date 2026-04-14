@@ -2,25 +2,25 @@ import { useState, useMemo } from 'react';
 import { Database, Table2, Building2, BookOpen, Globe, Grid3x3, Filter } from 'lucide-react';
 import { SectionCard } from '../components/SectionCard';
 import { LensSwitch, GovSwitch } from '../components/LensSwitch';
+import LargeMediumSmallSubTab from './edit/LargeMediumSmallSubTab';
+import CompanyRuleSubTab from './edit/CompanyRuleSubTab';
+import WorkGuideSubTab from './edit/WorkGuideSubTab';
+import HomepageClassSubTab from './edit/HomepageClassSubTab';
+import MandalartSubTab from './edit/MandalartSubTab';
+import ItemViewSubTab from './edit/ItemViewSubTab';
 import { useTaxonomy } from '../api';
 import { allowedAxes } from '../taxonomyTypes';
 import type { TaxonomyScope, TaxonomyGov } from '../taxonomyTypes';
 
-type EditSubTab =
-  | 'lms'     // 🗂 대중소 DB 편집기
-  | 'crule'   // 🏢 사내규정 매트릭스
-  | 'wguide'  // 📘 업무지침 매트릭스
-  | 'hp'      // 🌐 홈페이지 분류 매트릭스
-  | 'manda'   // 📊 만다라트 뷰
-  | 'items';  // 🔀 아이템 뷰
+type EditSubTab = 'lms' | 'crule' | 'wguide' | 'hp' | 'manda' | 'items';
 
 const SUBTABS: { code: EditSubTab; label: string; icon: any }[] = [
-  { code: 'lms',    label: '대중소 DB',    icon: Table2 },
-  { code: 'crule',  label: '사내규정',     icon: Building2 },
-  { code: 'wguide', label: '업무지침',     icon: BookOpen },
-  { code: 'hp',     label: '홈페이지',     icon: Globe },
-  { code: 'manda',  label: '만다라트',     icon: Grid3x3 },
-  { code: 'items',  label: '아이템 뷰',    icon: Filter },
+  { code: 'lms',    label: '대중소 DB',  icon: Table2 },
+  { code: 'crule',  label: '사내규정',   icon: Building2 },
+  { code: 'wguide', label: '업무지침',   icon: BookOpen },
+  { code: 'hp',     label: '홈페이지',   icon: Globe },
+  { code: 'manda',  label: '만다라트',   icon: Grid3x3 },
+  { code: 'items',  label: '아이템 뷰',  icon: Filter },
 ];
 
 // 분류 모듈 편집 — 최종 DB Single Source of Truth.
@@ -52,6 +52,9 @@ export default function EditTab() {
           <GovSwitch  value={gov}   onChange={setGov} />
           <div className="text-[10px] text-slate-500 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
             허용 축: {axes.length ? axes.join(' · ') : <span className="text-rose-600">없음 (해당 조합은 비활성)</span>}
+            {' · '}
+            현재 노드 {nodes.length}개 {loading && '(로딩...)'}
+            {error && <span className="text-rose-600 ml-1">({error})</span>}
           </div>
         </div>
       </SectionCard>
@@ -81,34 +84,17 @@ export default function EditTab() {
         </div>
       </SectionCard>
 
-      {/* 서브탭 본체 — Step 2 에서 각 컴포넌트로 분리 */}
+      {/* 서브탭 본체 */}
       <SectionCard
         title={`③ ${SUBTABS.find((t) => t.code === sub)?.label}`}
-        subtitle={`scope=${scope} · gov=${gov} · 노드 ${nodes.length}개 ${loading ? '(불러오는 중)' : ''}`}
+        subtitle={`scope=${scope} · gov=${gov}`}
       >
-        {error && (
-          <div className="text-[11px] text-rose-600 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded p-1.5 mb-1">
-            DB 연결 실패: {error}
-          </div>
-        )}
-        <div className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
-          <div className="px-2 py-4 text-center border border-dashed border-slate-300 dark:border-slate-600 rounded">
-            <div className="text-[11px] font-semibold mb-1">Step 2 구현 예정</div>
-            <div className="text-[10px] text-slate-500">
-              {sub === 'lms'    && '대중소 3층 spreadsheet 편집기 (rowspan 병합, 인라인 CRUD)'}
-              {sub === 'crule'  && '사내규정 칩 매트릭스 — 유형·업무별·부서별·직급별·계약·작성자'}
-              {sub === 'wguide' && '업무지침 칩 매트릭스 — 분류별·교육별·급수별·세부급수·DB별'}
-              {sub === 'hp'     && '홈페이지 분류 매트릭스 — 홈페이지타입·분야·급수'}
-              {sub === 'manda'  && '만다라트 뷰 — work-log MandalartView 재사용, 셀↔taxonomy 바인딩, 업무일지 one-way import'}
-              {sub === 'items'  && 'facets 필터 + 거버넌스 자동 게이팅 (PlanA 운영판)'}
-            </div>
-          </div>
-          <div className="text-[10px] text-slate-500">
-            현재 허용 축: {axes.map((a) => (
-              <span key={a} className="inline-block px-1 py-0.5 mr-0.5 bg-slate-100 dark:bg-slate-800 rounded">{a}</span>
-            ))}
-          </div>
-        </div>
+        {sub === 'lms'    && <LargeMediumSmallSubTab scope={scope} gov={gov} />}
+        {sub === 'crule'  && <CompanyRuleSubTab scope={scope} />}
+        {sub === 'wguide' && <WorkGuideSubTab scope={scope} />}
+        {sub === 'hp'     && <HomepageClassSubTab scope={scope} />}
+        {sub === 'manda'  && <MandalartSubTab scope={scope} gov={gov} />}
+        {sub === 'items'  && <ItemViewSubTab scope={scope} gov={gov} />}
       </SectionCard>
     </div>
   );
