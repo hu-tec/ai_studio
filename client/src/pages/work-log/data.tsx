@@ -81,8 +81,31 @@ export interface MandalartCell {
 // 만다라트 기간 모드
 export type MandalartPeriod = 'daily' | 'weekly' | 'monthly';
 
-// 만다라트 그리드 크기 (N×N) — 3~9 자유 설정
-export type MandalartSize = 3 | 4 | 5 | 6 | 7 | 8 | 9;
+// 만다라트 한 축 크기 (3~9)
+export type MandalartDim = 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export const MANDALART_DIMS: readonly MandalartDim[] = [3, 4, 5, 6, 7, 8, 9] as const;
+
+// 만다라트 그리드 크기 (R×C 직사각형 허용)
+export interface MandalartSize { rows: MandalartDim; cols: MandalartDim }
+
+/** 레거시 number(N) → {rows:N, cols:N} 변환 (null/undefined/bad input도 안전) */
+export function normalizeMandalartSize(raw: any): MandalartSize {
+  if (raw == null) return { rows: 3, cols: 3 };
+  if (typeof raw === 'number' && raw >= 3 && raw <= 9) {
+    const n = Math.round(raw) as MandalartDim;
+    return { rows: n, cols: n };
+  }
+  if (typeof raw === 'object' && typeof raw.rows === 'number' && typeof raw.cols === 'number') {
+    const r = Math.max(3, Math.min(9, Math.round(raw.rows))) as MandalartDim;
+    const c = Math.max(3, Math.min(9, Math.round(raw.cols))) as MandalartDim;
+    return { rows: r, cols: c };
+  }
+  return { rows: 3, cols: 3 };
+}
+
+export function sameMandalartSize(a: MandalartSize, b: MandalartSize): boolean {
+  return a.rows === b.rows && a.cols === b.cols;
+}
 
 // 만다라트 색상 팔레트 (부모 셀 색 선택용) — 8가지 + 해제
 export const MANDALART_COLOR_PALETTE: { value: string; bg: string; border: string; light: string }[] = [
@@ -111,25 +134,45 @@ export interface MandalartTypeConfig {
 export const WORKLOG_MANDALART_ID = 'worklog';
 
 export const DEFAULT_MANDALART_TYPES: MandalartTypeConfig[] = [
-  { id: WORKLOG_MANDALART_ID, label: '업무일지', size: 3 },
-  { id: 'regulation',         label: '규정',     size: 3 },
-  { id: 'meeting',            label: '미팅',     size: 3 },
+  { id: WORKLOG_MANDALART_ID, label: '업무일지', size: { rows: 3, cols: 3 } },
+  { id: 'regulation',         label: '규정',     size: { rows: 3, cols: 3 } },
+  { id: 'meeting',            label: '미팅',     size: { rows: 3, cols: 3 } },
 ];
 
-// N×N 그리드의 셀 개수 / 센터 인덱스 / 자식 개수
-export function mandalartCellCount(size: MandalartSize): number { return size * size; }
+// R×C 그리드 헬퍼
+export function mandalartCellCount(size: MandalartSize): number { return size.rows * size.cols; }
 export function mandalartCenterIdx(size: MandalartSize): number {
-  // 홀수 N: 중앙 1칸을 "목표"로 예약; 짝수 N: 중앙 예약 없음 (-1)
-  return size % 2 === 1 ? Math.floor((size * size) / 2) : -1;
+  // rows·cols 둘 다 홀수일 때만 중앙 1칸을 "목표"로 예약
+  if (size.rows % 2 === 1 && size.cols % 2 === 1) {
+    const cr = Math.floor(size.rows / 2);
+    const cc = Math.floor(size.cols / 2);
+    return cr * size.cols + cc;
+  }
+  return -1;
 }
 export function mandalartChildCount(size: MandalartSize): number {
   const c = mandalartCenterIdx(size);
   return mandalartCellCount(size) - (c >= 0 ? 1 : 0);
 }
 
-// (type, period, size) 조합 → 저장 키 — 크기별 독립 저장으로 전환 시 데이터 유실 방지
+// (type, period, size) 조합 → 저장 키
 export function mandalartKey(typeId: string, period: MandalartPeriod, size: MandalartSize): string {
-  return `${typeId}|${period}|${size}`;
+  return `${typeId}|${period}|${size.rows}x${size.cols}`;
+}
+
+/** 레거시 key(`type|period|N`) → 신규 key(`type|period|NxN`) 마이그레이션 */
+export function migrateMandalartKeys(byKey: Record<string, MandalartCell[]>): Record<string, MandalartCell[]> {
+  const out: Record<string, MandalartCell[]> = {};
+  for (const [k, v] of Object.entries(byKey)) {
+    const parts = k.split('|');
+    if (parts.length === 3 && /^\d+$/.test(parts[2])) {
+      const n = parts[2];
+      out[`${parts[0]}|${parts[1]}|${n}x${n}`] = v;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
 }
 
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';

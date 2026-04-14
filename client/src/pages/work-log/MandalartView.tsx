@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
 import { ArrowLeft, GripVertical, FileText, Palette, Maximize2, Minimize2 } from 'lucide-react';
 import type { MandalartCell, Task, FranklinPriority, FranklinStatus, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS, mandalartCellCount, mandalartCenterIdx, mandalartChildCount, MANDALART_COLOR_PALETTE, mandalartColor, WORKLOG_MANDALART_ID } from './data';
+import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS, mandalartCellCount, mandalartCenterIdx, mandalartChildCount, MANDALART_COLOR_PALETTE, MANDALART_DIMS, mandalartColor, WORKLOG_MANDALART_ID } from './data';
+
+const DEFAULT_SIZE: MandalartSize = { rows: 3, cols: 3 };
 
 interface MandalartViewProps {
   cells: MandalartCell[];
@@ -58,7 +60,7 @@ export function calcGridAchievement(grid: MandalartCell[], centerIdx = 4): { fil
   return { filled: filled.length, total, yang, jil, avg };
 }
 
-export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange, period = 'daily', size = 3, types, activeTypeId, onActiveTypeChange, onTypesChange, onSizeChange, syncTasks = true }: MandalartViewProps) {
+export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange, period = 'daily', size = DEFAULT_SIZE, types, activeTypeId, onActiveTypeChange, onTypesChange, onSizeChange, syncTasks = true }: MandalartViewProps) {
   const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
   const [editingTypeLabel, setEditingTypeLabel] = useState('');
   const [drillId, setDrillId] = useState<string | null>(null);
@@ -69,10 +71,13 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [fullscreen, setFullscreen] = useState(false);
   const initialized = useRef(false);
 
+  const { rows, cols } = size;
   const cellCount = mandalartCellCount(size);
   const centerIdx = mandalartCenterIdx(size);
   const childCount = mandalartChildCount(size);
   const hasCenter = centerIdx >= 0;
+  // 전체 펼침 허용 (부모×자식 규모 제한)
+  const allowExpand = cellCount <= 25;
 
   useEffect(() => {
     // 길이 불일치(크기 변경 포함) → 기존 셀 앞에서부터 보존하며 길이 맞춤
@@ -80,7 +85,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       const padded: MandalartCell[] = Array.from({length: cellCount}, (_, i) => cells?.[i] || emptyCell(''));
       onCellsChange(padded);
     }
-  }, [cells?.length, period, size, cellCount]);
+  }, [cells?.length, period, size.rows, size.cols, cellCount]);
 
   // drill-down 타겟 셀이 외부에서 비워졌거나(태스크 삭제 등) 사라진 경우 자동 상위 이동
   useEffect(() => {
@@ -250,9 +255,13 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           </button>
         )}
         <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
-          {expand9x9 ? `만다라트 — ${size * size}×${size * size} 전체` : drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
+          {expand9x9
+            ? `만다라트 — ${rows * rows}×${cols * cols} 전체`
+            : drillId
+              ? `만다라트 — ${drillCell?.text}`
+              : `만다라트 ${rows}×${cols}`}
         </span>
-        {size <= 5 && (
+        {allowExpand && (
           <button onClick={() => { setExpand9x9(v => !v); setDrillId(null); setEditingId(null); }}
             style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer',
                      background: expand9x9 ? '#eff6ff' : '#fff', color: expand9x9 ? '#3B82F6' : '#94a3b8' }}>
@@ -343,21 +352,37 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
             )}
           </div>
         )}
-        {/* 크기 선택: 3×3 ~ 9×9 자유 */}
+        {/* 크기 선택: 행·열 독립 3~9 (n×m) */}
         {onSizeChange && (
-          <div style={{ display: 'flex', gap: 2 }}>
-            {([3, 4, 5, 6, 7, 8, 9] as const).map(s => (
-              <button key={s} onClick={() => { onSizeChange(s); setDrillId(null); setExpand9x9(false); }}
-                style={{
-                  padding: '3px 6px', borderRadius: 4, border: '1px solid',
-                  borderColor: size === s ? '#1e293b' : '#e2e8f0',
-                  background: size === s ? '#1e293b' : '#fff',
-                  color: size === s ? '#fff' : '#64748b',
-                  fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                }}>
-                {s}×{s}
-              </button>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 700, width: 16 }}>행</span>
+              {MANDALART_DIMS.map(d => (
+                <button key={`r-${d}`}
+                  onClick={() => { onSizeChange({ rows: d, cols }); setDrillId(null); setExpand9x9(false); }}
+                  style={{
+                    padding: '2px 5px', borderRadius: 3, border: '1px solid',
+                    borderColor: rows === d ? '#1e293b' : '#e2e8f0',
+                    background: rows === d ? '#1e293b' : '#fff',
+                    color: rows === d ? '#fff' : '#64748b',
+                    fontSize: 9, fontWeight: 700, cursor: 'pointer', minWidth: 16,
+                  }}>{d}</button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <span style={{ fontSize: 9, color: '#94a3b8', fontWeight: 700, width: 16 }}>열</span>
+              {MANDALART_DIMS.map(d => (
+                <button key={`c-${d}`}
+                  onClick={() => { onSizeChange({ rows, cols: d }); setDrillId(null); setExpand9x9(false); }}
+                  style={{
+                    padding: '2px 5px', borderRadius: 3, border: '1px solid',
+                    borderColor: cols === d ? '#1e293b' : '#e2e8f0',
+                    background: cols === d ? '#1e293b' : '#fff',
+                    color: cols === d ? '#fff' : '#64748b',
+                    fontSize: 9, fontWeight: 700, cursor: 'pointer', minWidth: 16,
+                  }}>{d}</button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -365,7 +390,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       {/* N²×N² 전체 펼치기 뷰: 루트 N×N × 각 셀의 N×N children */}
       {expand9x9 ? (
         <div style={{
-          display: 'grid', gridTemplateColumns: `repeat(${size}, 1fr)`, gap: 6,
+          display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6,
           background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
         }}>
           {root.map((parentCell, pIdx) => {
@@ -424,7 +449,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                     )}
                   </div>
                 )}
-                <div style={{ display:'grid', gridTemplateColumns: `repeat(${size}, 1fr)`, gap: 2 }}>
+                <div style={{ display:'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 2 }}>
                   {Array.from({length: cellCount}, (_, sIdx) => {
                     // 홀수 N: 서브그리드 센터(sIdx===centerIdx) = 부모 셀 자체 (레이블)
                     if (hasCenter && sIdx === centerIdx) {
@@ -508,7 +533,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         <div style={{ flexShrink: 0, width: 130 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>메인</div>
           <div style={{
-            display: 'grid', gridTemplateColumns: `repeat(${size}, 1fr)`, gap: 3,
+            display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 3,
             background: '#f1f5f9', padding: 4, borderRadius: 8, border: '1px solid #e2e8f0',
           }}>
             {root.map((c, i) => {
@@ -548,7 +573,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
 
       {/* N×N Grid */}
       <div style={{
-        flex: 1, display: 'grid', gridTemplateColumns: `repeat(${size}, 1fr)`, gap: 6,
+        flex: 1, display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6,
         background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
       }}>
         {currentGrid.map((cell, idx) => {

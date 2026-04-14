@@ -10,10 +10,11 @@ interface ListViewProps {
 
 // 업무일지 타입의 daily 3×3 만다라트 미니 프리뷰
 function MandalartMiniPreview({ log }: { log: DailyLog }) {
-  const key = mandalartKey(WORKLOG_MANDALART_ID, 'daily', 3);
+  const size = { rows: 3 as const, cols: 3 as const };
+  const key = mandalartKey(WORKLOG_MANDALART_ID, 'daily', size);
   const cells: MandalartCell[] = log.mandalartCellsByKey?.[key] || [];
   if (cells.length !== 9) return <span className="text-[9px] text-muted-foreground/50">-</span>;
-  const centerIdx = mandalartCenterIdx(3);
+  const centerIdx = mandalartCenterIdx(size);
   return (
     <div className="inline-grid grid-cols-3 gap-[1px] bg-slate-200 p-[1px] rounded" style={{ width: 54 }}>
       {cells.map((c, i) => {

@@ -7,7 +7,7 @@ import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -40,7 +40,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   // 만다라트: 타입 × 기간 × 크기 독립 저장 — key = `${type}|${period}|${size}`
   const [mandalartTypes, setMandalartTypes] = useState<MandalartTypeConfig[]>(DEFAULT_MANDALART_TYPES);
   const [mandalartActiveType, setMandalartActiveType] = useState<string>(WORKLOG_MANDALART_ID);
-  const [mandalartActiveSize, setMandalartActiveSize] = useState<MandalartSize>(3);
+  const [mandalartActiveSize, setMandalartActiveSize] = useState<MandalartSize>({ rows: 3, cols: 3 });
   const [mandalartCellsByKey, setMandalartCellsByKey] = useState<Record<string, MandalartCell[]>>({});
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
@@ -268,15 +268,19 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setViewMode(log.viewMode || 'classic');
       // 기존 태스크에 period 없으면 'daily' 기본값 설정 (마이그레이션)
       setTasks((log.tasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
-      // 만다라트 타입 목록 로드
-      const loadedTypes = log.mandalartTypes && log.mandalartTypes.length > 0 ? log.mandalartTypes : DEFAULT_MANDALART_TYPES;
+      // 만다라트 타입 목록 로드 — 레거시 size(number) → {rows,cols} 정규화
+      const rawTypes = log.mandalartTypes && log.mandalartTypes.length > 0 ? log.mandalartTypes : DEFAULT_MANDALART_TYPES;
+      const loadedTypes: MandalartTypeConfig[] = rawTypes.map(t => ({
+        ...t,
+        size: normalizeMandalartSize((t as any).size),
+      }));
       setMandalartTypes(loadedTypes);
       setMandalartActiveType(log.mandalartActiveType || WORKLOG_MANDALART_ID);
-      setMandalartActiveSize(log.mandalartActiveSize || 3);
+      setMandalartActiveSize(normalizeMandalartSize(log.mandalartActiveSize));
       // 만다라트 데이터 로드 (3-tier 레거시 호환)
       if (log.mandalartCellsByKey) {
-        // 최신 구조
-        setMandalartCellsByKey(log.mandalartCellsByKey);
+        // 최신 구조 — 레거시 key(`typeId|period|N`) → `typeId|period|NxN` 마이그레이션
+        setMandalartCellsByKey(migrateMandalartKeys(log.mandalartCellsByKey));
       } else if (log.mandalartByTypeAndPeriod) {
         // Legacy 2: 타입별×기간별 (크기 미분리) — 길이로 size 추정
         const byKey: Record<string, MandalartCell[]> = {};
@@ -284,7 +288,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           for (const p of ['daily', 'weekly', 'monthly'] as const) {
             const arr = log.mandalartByTypeAndPeriod[typeId]?.[p];
             if (!arr || arr.length === 0) continue;
-            const detectedSize: MandalartSize = arr.length >= 25 ? 5 : arr.length >= 16 ? 4 : 3;
+            const detectedSize: MandalartSize = arr.length >= 25 ? { rows: 5, cols: 5 } : arr.length >= 16 ? { rows: 4, cols: 4 } : { rows: 3, cols: 3 };
             byKey[mandalartKey(typeId, p, detectedSize)] = arr;
           }
         }
@@ -295,7 +299,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
         for (const p of ['daily', 'weekly', 'monthly'] as const) {
           const arr = log.mandalartByPeriod[p];
           if (arr && arr.length > 0) {
-            byKey[mandalartKey(WORKLOG_MANDALART_ID, p, 3)] = arr;
+            byKey[mandalartKey(WORKLOG_MANDALART_ID, p, { rows: 3, cols: 3 })] = arr;
           }
         }
         setMandalartCellsByKey(byKey);
@@ -315,7 +319,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTasks([]);
       setMandalartTypes(DEFAULT_MANDALART_TYPES);
       setMandalartActiveType(WORKLOG_MANDALART_ID);
-      setMandalartActiveSize(3);
+      setMandalartActiveSize({ rows: 3, cols: 3 });
       setMandalartCellsByKey({});
     }
     // Allow auto-save after prop-driven setState batch completes
