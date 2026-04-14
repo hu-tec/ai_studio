@@ -1,5 +1,5 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Maximize2, Minimize2 } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { Task, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
 import {
@@ -28,6 +28,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newSubText, setNewSubText] = useState('');
+  const [fullscreen, setFullscreen] = useState(false);
   const toggleExpand = (id: string) => setExpandedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<FranklinPriority | null>(null);
@@ -98,7 +99,10 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
     : HOURS.map(h => ({ label: `${h}`, pos: getTimelinePosition(`${h}:00`) }));
 
   return (
-    <div className="space-y-3">
+    <div className={fullscreen
+      ? "fixed inset-0 z-50 bg-background p-4 overflow-auto space-y-3"
+      : "space-y-3"
+    }>
       {/* Add bar */}
       <div className="flex items-center gap-1 p-2 border border-border rounded-lg bg-muted/20 flex-wrap">
         <div className="flex gap-0.5">
@@ -130,6 +134,12 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
               className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300">
               {sorted.every(t => expandedIds.has(t.id)) ? '▲접기' : '▼펼치기'}
             </button>
+            <button onClick={() => setFullscreen(f => !f)}
+              title={fullscreen ? '전체화면 종료' : '전체화면'}
+              className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 flex items-center gap-1">
+              {fullscreen ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+              {fullscreen ? '닫기' : '전체화면'}
+            </button>
           </div>
           <div className="flex items-center gap-2 text-[10px]">
             {priorities.map(p => {
@@ -141,7 +151,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
           </div>
         </div>
 
-        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: 'calc(100vh - 450px)' }}>
+        <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: fullscreen ? 'calc(100vh - 180px)' : 'calc(100vh - 450px)' }}>
           {sorted.length === 0 ? (
             <div className="p-6 text-center text-[11px] text-muted-foreground">업무를 추가하세요</div>
           ) : sorted.map(task => {

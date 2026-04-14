@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { ArrowLeft, GripVertical, FileText } from 'lucide-react';
+import { ArrowLeft, GripVertical, FileText, Palette, Maximize2, Minimize2 } from 'lucide-react';
 import type { MandalartCell, Task, FranklinPriority, FranklinStatus, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS, mandalartCellCount, mandalartCenterIdx, mandalartChildCount } from './data';
+import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS, mandalartCellCount, mandalartCenterIdx, mandalartChildCount, MANDALART_COLOR_PALETTE, mandalartColor, WORKLOG_MANDALART_ID } from './data';
 
 interface MandalartViewProps {
   cells: MandalartCell[];
@@ -14,6 +14,7 @@ interface MandalartViewProps {
   types?: MandalartTypeConfig[];
   activeTypeId?: string;
   onActiveTypeChange?: (id: string) => void;
+  onTypesChange?: (types: MandalartTypeConfig[]) => void; // 타입 CRUD (add/rename/delete)
   onSizeChange?: (size: MandalartSize) => void;
   syncTasks?: boolean; // 업무일지 타입만 true
 }
@@ -57,11 +58,15 @@ export function calcGridAchievement(grid: MandalartCell[], centerIdx = 4): { fil
   return { filled: filled.length, total, yang, jil, avg };
 }
 
-export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange, period = 'daily', size = 3, types, activeTypeId, onActiveTypeChange, onSizeChange, syncTasks = true }: MandalartViewProps) {
+export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSlotTitleChange, period = 'daily', size = 3, types, activeTypeId, onActiveTypeChange, onTypesChange, onSizeChange, syncTasks = true }: MandalartViewProps) {
+  const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
+  const [editingTypeLabel, setEditingTypeLabel] = useState('');
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragCellId, setDragCellId] = useState<string | null>(null);
   const [expand9x9, setExpand9x9] = useState(false);
+  const [colorPickerId, setColorPickerId] = useState<string | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
   const initialized = useRef(false);
 
   const cellCount = mandalartCellCount(size);
@@ -152,6 +157,12 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     onCellsChange(root.map(updateSt));
   };
 
+  // 색상 설정: 루트 셀에만 적용 — 자식들은 렌더링 시 부모 color를 상속
+  const setCellColor = (id: string, color: string | undefined) => {
+    onCellsChange(root.map(c => c.id === id ? { ...c, color } : c));
+    setColorPickerId(null);
+  };
+
   const handleDrillDown = (cell: MandalartCell, idx: number) => {
     if (drillId) return;
     if (hasCenter && idx === centerIdx) return;
@@ -203,6 +214,16 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   };
 
   const isCenter = (idx: number) => hasCenter && idx === centerIdx;
+
+  // 셀 배경색 계산: 상속 체인 — drill 시 부모 색, root 시 자기 색
+  const cellBgAndBorder = (cell: MandalartCell, center: boolean, parentColorVal?: string): { bg: string; border: string } => {
+    if (center) return { bg: '#1e293b', border: '#1e293b' };
+    const effectiveColor = cell.color || parentColorVal;
+    const cfg = mandalartColor(effectiveColor);
+    if (cfg) return { bg: cfg.light, border: cfg.border };
+    return { bg: '#fff', border: '#e2e8f0' };
+  };
+
   const linkedTask = (cell: MandalartCell): Task | null => {
     if (!cell.taskId) return null;
     // top-level 검색
@@ -217,7 +238,10 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={fullscreen
+      ? { position: 'fixed', inset: 0, zIndex: 50, background: '#fff', padding: 16, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }
+      : { display: 'flex', flexDirection: 'column', gap: 10 }
+    }>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {drillId && !expand9x9 && (
@@ -228,33 +252,101 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         <span style={{ fontSize: 14, fontWeight: 600, color: '#1e293b' }}>
           {expand9x9 ? `만다라트 — ${size * size}×${size * size} 전체` : drillId ? `만다라트 — ${drillCell?.text}` : '만다라트'}
         </span>
-        <button onClick={() => { setExpand9x9(v => !v); setDrillId(null); setEditingId(null); }}
-          style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer',
-                   background: expand9x9 ? '#eff6ff' : '#fff', color: expand9x9 ? '#3B82F6' : '#94a3b8' }}>
-          {expand9x9 ? '상세접기' : '상세펼치기'}
+        {size <= 5 && (
+          <button onClick={() => { setExpand9x9(v => !v); setDrillId(null); setEditingId(null); }}
+            style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:10, cursor:'pointer',
+                     background: expand9x9 ? '#eff6ff' : '#fff', color: expand9x9 ? '#3B82F6' : '#94a3b8' }}>
+            {expand9x9 ? '상세접기' : '상세펼치기'}
+          </button>
+        )}
+        <button onClick={() => setFullscreen(v => !v)}
+          title={fullscreen ? '전체화면 종료' : '전체화면'}
+          style={{ padding:'3px 8px', borderRadius:6, border:'1px solid #bfdbfe', fontSize:10, cursor:'pointer',
+                   background: fullscreen ? '#3B82F6' : '#eff6ff', color: fullscreen ? '#fff' : '#3B82F6',
+                   display: 'flex', alignItems: 'center', gap: 3 }}>
+          {fullscreen ? <Minimize2 size={10} /> : <Maximize2 size={10} />}
+          {fullscreen ? '닫기' : '전체화면'}
         </button>
-        {/* 타입 탭 (업무일지/규정/미팅 등) — 업무일지만 타임테이블 동기화 */}
+        {/* 타입 탭 (업무일지/규정/미팅 등) — 업무일지만 타임테이블 동기화 + CRUD */}
         {types && activeTypeId && onActiveTypeChange && (
-          <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
-            {types.map(t => (
-              <button key={t.id} onClick={() => onActiveTypeChange(t.id)}
-                title={t.id === 'worklog' ? '업무일지 만다라트만 타임테이블에 배정 가능' : ''}
-                style={{
-                  padding: '3px 8px', borderRadius: 12, border: '1px solid',
-                  borderColor: activeTypeId === t.id ? '#3B82F6' : '#e2e8f0',
-                  background: activeTypeId === t.id ? '#3B82F6' : '#fff',
-                  color: activeTypeId === t.id ? '#fff' : '#64748b',
-                  fontSize: 10, fontWeight: 600, cursor: 'pointer',
-                }}>
-                {t.label}{t.id === 'worklog' ? ' ⏱' : ''}
+          <div style={{ display: 'flex', gap: 2, marginLeft: 'auto', alignItems: 'center', flexWrap: 'wrap' }}>
+            {types.map(t => {
+              const isWorklog = t.id === WORKLOG_MANDALART_ID;
+              const isEditing = editingTypeId === t.id;
+              if (isEditing && onTypesChange) {
+                return (
+                  <input key={t.id} autoFocus value={editingTypeLabel}
+                    onChange={e => setEditingTypeLabel(e.target.value)}
+                    onBlur={() => {
+                      const v = editingTypeLabel.trim();
+                      if (v) onTypesChange(types.map(x => x.id === t.id ? { ...x, label: v } : x));
+                      setEditingTypeId(null);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
+                      if (e.key === 'Escape') setEditingTypeId(null);
+                    }}
+                    style={{ width: 60, padding: '2px 6px', borderRadius: 12, border: '1px solid #3B82F6', fontSize: 10, outline: 'none' }} />
+                );
+              }
+              return (
+                <div key={t.id} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <button onClick={() => onActiveTypeChange(t.id)}
+                    onDoubleClick={() => {
+                      if (!onTypesChange || isWorklog) return;
+                      setEditingTypeId(t.id); setEditingTypeLabel(t.label);
+                    }}
+                    title={isWorklog ? '업무일지 만다라트만 타임테이블에 배정 가능' : '더블클릭하여 이름 변경'}
+                    style={{
+                      padding: '3px 8px', borderRadius: 12, border: '1px solid',
+                      borderColor: activeTypeId === t.id ? '#3B82F6' : '#e2e8f0',
+                      background: activeTypeId === t.id ? '#3B82F6' : '#fff',
+                      color: activeTypeId === t.id ? '#fff' : '#64748b',
+                      fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                    }}>
+                    {t.label}{isWorklog ? ' ⏱' : ''}
+                  </button>
+                  {onTypesChange && !isWorklog && types.length > 1 && (
+                    <button
+                      onClick={() => {
+                        if (!confirm(`'${t.label}' 탭을 삭제하시겠습니까?`)) return;
+                        const next = types.filter(x => x.id !== t.id);
+                        onTypesChange(next);
+                        if (activeTypeId === t.id && next[0]) onActiveTypeChange(next[0].id);
+                      }}
+                      title="삭제"
+                      style={{
+                        position: 'absolute', top: -4, right: -4, width: 12, height: 12,
+                        borderRadius: '50%', background: '#ef4444', color: '#fff',
+                        border: 'none', cursor: 'pointer', fontSize: 8, fontWeight: 700,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        lineHeight: 1,
+                      }}>✕</button>
+                  )}
+                </div>
+              );
+            })}
+            {onTypesChange && (
+              <button onClick={() => {
+                const newId = `mt-${Date.now()}`;
+                const newType = { id: newId, label: '새 탭', size };
+                onTypesChange([...types, newType]);
+                onActiveTypeChange(newId);
+                setEditingTypeId(newId);
+                setEditingTypeLabel('새 탭');
+              }}
+                title="탭 추가"
+                style={{ padding: '3px 6px', borderRadius: 12, border: '1px dashed #cbd5e1',
+                  background: '#fff', color: '#94a3b8', fontSize: 10, fontWeight: 600, cursor: 'pointer' }}>
+                +추가
               </button>
-            ))}
+            )}
           </div>
         )}
-        {/* 크기 선택: 3×3 / 4×4 / 5×5 */}
+        {/* 크기 선택: 3×3 ~ 9×9 자유 */}
         {onSizeChange && (
           <div style={{ display: 'flex', gap: 2 }}>
-            {([3, 4, 5] as const).map(s => (
+            {([3, 4, 5, 6, 7, 8, 9] as const).map(s => (
               <button key={s} onClick={() => { onSizeChange(s); setDrillId(null); setExpand9x9(false); }}
                 style={{
                   padding: '3px 6px', borderRadius: 4, border: '1px solid',
@@ -287,7 +379,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                   style={{
                     background: '#1e293b', borderRadius: 8, border: '2px solid #1e293b',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    minHeight: 130, padding: 8, cursor: 'text',
+                    aspectRatio: '1 / 1', padding: 8, cursor: 'text',
                   }}>
                   {isEditing ? (
                     <textarea autoFocus value={parentCell.text}
@@ -306,9 +398,12 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               );
             }
             const children = parentCell.children || [];
+            const parentColorCfg = mandalartColor(parentCell.color);
             return (
               <div key={parentCell.id} style={{
-                border: '2px solid #cbd5e1', borderRadius: 6, padding: 3, background: '#fff',
+                border: `2px solid ${parentColorCfg?.border || '#cbd5e1'}`,
+                borderRadius: 6, padding: 3,
+                background: parentColorCfg?.light || '#fff',
               }}>
                 {/* 짝수 N: 서브그리드 위에 부모 라벨 바 */}
                 {!hasCenter && (
@@ -338,8 +433,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                         <div key={`p-${pIdx}-c-${sIdx}`}
                           onClick={e => { e.stopPropagation(); setEditingId(parentCell.id); }}
                           style={{
-                            background: '#475569', borderRadius: 3, padding: 2,
-                            minHeight: 34, display:'flex', alignItems:'center', justifyContent:'center',
+                            background: parentColorCfg?.bg || '#475569', borderRadius: 3, padding: 2,
+                            aspectRatio: '1 / 1', display:'flex', alignItems:'center', justifyContent:'center',
                             cursor: 'text', overflow: 'hidden',
                           }}>
                           {isEditing ? (
@@ -376,9 +471,10 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                         onClick={e => { e.stopPropagation(); setEditingId(childCell.id); }}
                         style={{
                           background: dragCellId === childCell.id ? '#dbeafe' : '#fff',
-                          border: `1px solid ${linked ? statusColor : '#e2e8f0'}`,
+                          border: `1px solid ${linked ? statusColor : (parentColorCfg?.border || '#e2e8f0')}`,
                           borderRadius: 3, padding: 2,
-                          minHeight: 34, display:'flex', alignItems:'center', justifyContent:'center',
+                          aspectRatio: '1 / 1',
+                          display:'flex', alignItems:'center', justifyContent:'center',
                           cursor: childCell.text.trim() ? 'grab' : 'text', overflow: 'hidden',
                         }}>
                         {isEditing ? (
@@ -462,6 +558,11 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
             ? linked.status === 'done' ? '#10B981' : linked.status === 'progress' ? '#3B82F6' : '#94a3b8'
             : undefined;
           const ach = cell.achievement || 0;
+          // 색상 상속: drill 시 drillCell.color 를 자식들에게 상속 (center는 부모 자체이므로 제외)
+          const parentColorVal = drillCell && !center ? drillCell.color : undefined;
+          const { bg: cellBg, border: cellBorder } = cellBgAndBorder(cell, center, parentColorVal);
+          // 루트 모드에서만 색상 피커 노출 (drill 안 하고, 센터 아닐 때)
+          const showColorPicker = !drillId && !center;
 
           return (
             <div
@@ -472,10 +573,11 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               onDoubleClick={() => !drillId && cell.text.trim() && handleDrillDown(cell, idx)}
               onClick={() => setEditingId(cell.id)}
               style={{
-                position: 'relative', minHeight: 90,
-                background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : '#fff',
+                position: 'relative',
+                aspectRatio: '1 / 1',
+                background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : cellBg,
                 borderRadius: 8,
-                border: `2px solid ${center ? '#1e293b' : linked ? statusColor : '#e2e8f0'}`,
+                border: `2px solid ${linked ? statusColor : cellBorder}`,
                 display: 'flex', flexDirection: 'column',
                 cursor: center ? 'text' : cell.text.trim() ? (drillId ? 'grab' : 'pointer') : 'text',
                 transition: 'all 0.15s', overflow: 'hidden',
@@ -484,6 +586,35 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               {linked && <div style={{ height: 3, background: statusColor, width: '100%' }} />}
               {!center && cell.text.trim() && (
                 <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3 }}><GripVertical size={12} /></div>
+              )}
+              {/* 색상 피커 버튼 + 팝업 */}
+              {showColorPicker && (
+                <div style={{ position: 'absolute', top: 2, left: 2, zIndex: 2 }} onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => setColorPickerId(colorPickerId === cell.id ? null : cell.id)}
+                    title="색상 선택"
+                    style={{
+                      width: 12, height: 12, borderRadius: '50%',
+                      border: '1px solid #94a3b8',
+                      background: mandalartColor(cell.color)?.bg || '#fff',
+                      cursor: 'pointer', padding: 0,
+                    }}
+                  />
+                  {colorPickerId === cell.id && (
+                    <div style={{
+                      position: 'absolute', top: 14, left: 0, zIndex: 10,
+                      display: 'flex', gap: 2, padding: 3, background: '#fff',
+                      border: '1px solid #cbd5e1', borderRadius: 4, boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                    }}>
+                      <button onClick={() => setCellColor(cell.id, undefined)} title="해제"
+                        style={{ width: 12, height: 12, borderRadius: '50%', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', padding: 0, fontSize: 7, lineHeight: 1 }}>×</button>
+                      {MANDALART_COLOR_PALETTE.map(c => (
+                        <button key={c.value} onClick={() => setCellColor(cell.id, c.value)} title={c.value}
+                          style={{ width: 12, height: 12, borderRadius: '50%', border: cell.color === c.value ? '2px solid #1e293b' : '1px solid #cbd5e1', background: c.bg, cursor: 'pointer', padding: 0 }} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* 텍스트 */}

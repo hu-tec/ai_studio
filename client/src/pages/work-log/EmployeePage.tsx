@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
-import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI } from './data';
+import { ListView } from './ListView';
+import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI, rolloverPendingTasks, prevDateStr, createEmptyTimeSlots } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -118,7 +119,7 @@ function PromptTemplateManager() {
 export function EmployeePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [pageMode, setPageMode] = useState<'today' | 'calendar'>('today');
+  const [pageMode, setPageMode] = useState<'today' | 'calendar' | 'list'>('today');
   const [calendarMode, setCalendarMode] = useState<'monthly' | 'daily'>('monthly');
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const appRef = useRef<HTMLDivElement>(null);
@@ -219,6 +220,27 @@ export function EmployeePage() {
       toast.error('서버 저장 실패 — 로컬에만 저장되었습니다.');
     }
   }, []);
+
+  // 자동 이월: 이전 날 forwarded(→) 태스크를 오늘로 복제 (중복 방지)
+  useEffect(() => {
+    if (logs.length === 0) return;
+    const prev = prevDateStr(dateStr);
+    const prevLog = logs.find(l => l.employeeId === activeEmpId && l.date === prev);
+    if (!prevLog || !prevLog.tasks || prevLog.tasks.length === 0) return;
+    const currTasks = currentLog?.tasks || [];
+    const rolled = rolloverPendingTasks(currTasks, prevLog.tasks, prev);
+    if (rolled === currTasks) return;
+    const newLog: DailyLog = currentLog
+      ? { ...currentLog, tasks: rolled }
+      : {
+          date: dateStr, summary: '', detail: '', position: activeEmployee.position,
+          homepageCategories: [], departmentCategories: [],
+          timeInterval: '1hour', timeSlots: createEmptyTimeSlots('1hour'),
+          employeeId: activeEmpId, tasks: rolled,
+        };
+    handleSaveLog(newLog);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateStr, activeEmpId, logs.length]);
 
   const downloadExcel = () => {
     const data = myLogs.flatMap(log => 
@@ -352,6 +374,10 @@ export function EmployeePage() {
               onClick={() => setPageMode('calendar')}
               className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >캘린더</button>
+            <button
+              onClick={() => setPageMode('list')}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
+            >리스트</button>
           </div>
           {/* 날짜 이동: 이전/다음 + 현재 날짜 표시 (오늘 복귀) */}
           <div className="flex items-center gap-0.5 bg-muted/40 rounded border border-border/60">
@@ -393,6 +419,9 @@ export function EmployeePage() {
       {pageMode === 'today' ? (
         /* Today mode — full width DailyDetail */
         <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
+      ) : pageMode === 'list' ? (
+        /* List mode — 전체 날짜 테이블 */
+        <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }} />
       ) : (
         /* Calendar mode — left calendar + right detail (left 숨기기 가능) */
         <div className="flex gap-0 items-start">

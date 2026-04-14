@@ -699,29 +699,26 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
         {(() => {
           const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
           const queued = allFlat.filter(t => t.queued);
+          // 공통 드롭 핸들러 — handleTasksChange 사용으로 slot title 동기 삭제 + task.task 보존
+          const handleQueueDrop = (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.currentTarget.style.borderColor = '';
+            e.currentTarget.style.background = '';
+            const droppedId = e.dataTransfer.getData('text/plain');
+            if (!droppedId) return;
+            const newTasks = tasks.map(t => {
+              if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
+              if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
+              return t;
+            });
+            handleTasksChange(newTasks);
+          };
           if (queued.length === 0) return (
             <div
               className="border border-dashed border-slate-200 rounded-lg p-1.5 bg-slate-50/20 transition-colors"
               onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
               onDragLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = ''; }}
-              onDrop={e => {
-                e.preventDefault();
-                e.currentTarget.style.borderColor = '';
-                e.currentTarget.style.background = '';
-                const droppedId = e.dataTransfer.getData('text/plain');
-                if (!droppedId) return;
-                const allF = tasks.flatMap(ft => [ft, ...(ft.children || [])]);
-                const task = allF.find(ft => ft.id === droppedId);
-                if (task?.timeSlotId) {
-                  const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
-                  if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
-                }
-                setTasks(prev => prev.map(t => {
-                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
-                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
-                  return t;
-                }));
-              }}
+              onDrop={handleQueueDrop}
             >
               <div className="text-[9px] text-slate-400 italic text-center py-0.5">대기함 — 타임테이블에서 여기로 드래그하여 해제</div>
             </div>
@@ -731,24 +728,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
               className="border border-dashed border-amber-300 rounded-lg p-2 bg-amber-50/30 transition-colors"
               onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
               onDragLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = ''; }}
-              onDrop={e => {
-                e.preventDefault();
-                e.currentTarget.style.borderColor = '';
-                e.currentTarget.style.background = '';
-                const droppedId = e.dataTransfer.getData('text/plain');
-                if (!droppedId) return;
-                const allF = tasks.flatMap(ft => [ft, ...(ft.children || [])]);
-                const task = allF.find(ft => ft.id === droppedId);
-                if (task?.timeSlotId) {
-                  const slotIdx = timeSlots.findIndex(s => s.id === task.timeSlotId);
-                  if (slotIdx >= 0) updateSlot(slotIdx, 'title', '');
-                }
-                setTasks(prev => prev.map(t => {
-                  if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
-                  if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
-                  return t;
-                }));
-              }}
+              onDrop={handleQueueDrop}
             >
               <div className="text-[10px] font-bold text-amber-700 mb-1">대기함 ({queued.length}개)</div>
               <div className="grid grid-cols-4 gap-1">
@@ -992,6 +972,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   types={mandalartTypes}
                   activeTypeId={mandalartActiveType}
                   onActiveTypeChange={setMandalartActiveType}
+                  onTypesChange={setMandalartTypes}
                   onSizeChange={setMandalartActiveSize}
                   syncTasks={mandalartActiveType === WORKLOG_MANDALART_ID}
                 />
