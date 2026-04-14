@@ -88,6 +88,9 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   // 폰트 크기 — 열 수 기반 스케일
   const CENTER_FONT = cols >= 7 ? 12 : cols >= 5 ? 13 : 15;
   const CELL_FONT = cols >= 7 ? 10 : cols >= 5 ? 11 : 13;
+  // Expand 모드 — 부모 블록 최대폭 (내부 서브그리드 cell = (EXPAND_PARENT-inset) / cols)
+  const EXPAND_PARENT_MAX_PX = cols >= 5 ? 160 : cols >= 4 ? 170 : 180;
+  const expandOuterMaxWidth = cols * EXPAND_PARENT_MAX_PX + (cols - 1) * GRID_GAP + GRID_PAD * 2;
 
   useEffect(() => {
     // 길이 불일치(크기 변경 포함) → 기존 셀 앞에서부터 보존하며 길이 맞춤
@@ -397,11 +400,14 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         )}
       </div>
 
-      {/* N²×N² 전체 펼치기 뷰: 루트 N×N × 각 셀의 N×N children */}
+      {/* N²×N² 전체 펼치기 뷰: 루트 N×N × 각 셀의 N×N children — 부모 블록 max width로 가로 팽창 방지 */}
       {expand9x9 ? (
         <div style={{
-          display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6,
-          background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${cols}, minmax(0, ${EXPAND_PARENT_MAX_PX}px))`,
+          gap: GRID_GAP,
+          background: '#f1f5f9', padding: GRID_PAD, borderRadius: 12, border: '1px solid #e2e8f0',
+          maxWidth: expandOuterMaxWidth,
         }}>
           {root.map((parentCell, pIdx) => {
             const isRootCenter = hasCenter && pIdx === centerIdx;

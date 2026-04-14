@@ -1,1 +1,0 @@
-import{j as i}from"./index-CdP8ua8I.js";import o from"./StatusTable-Dr7bmSaO.js";import"./pipeline-data-9rjQ5MJL.js";function n({filterType:t,activePath:e,activePipeline:r}){return i.jsx(o,{filterType:t,activePath:e})}export{n as default};
