@@ -79,17 +79,25 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   // 전체 펼침 허용 (부모×자식 규모 제한)
   const allowExpand = cellCount <= 25;
   // 셀당 최대 픽셀 크기 (정사각형 유지 + 가로 제한)
-  // 열 수가 많을수록 셀 축소 → 텍스트 가독성 유지
-  const MAX_CELL_PX = cols >= 7 ? 78 : cols >= 5 ? 92 : 110;
-  const GRID_GAP = 6;
-  const GRID_PAD = 6;
+  // 전체화면 여부 × 열 수 기반 스케일
+  const MAX_CELL_PX = fullscreen
+    ? (cols >= 7 ? 130 : cols >= 5 ? 170 : 220)
+    : (cols >= 7 ? 78 : cols >= 5 ? 92 : 110);
+  const GRID_GAP = fullscreen ? 10 : 6;
+  const GRID_PAD = fullscreen ? 12 : 6;
   // 그리드 총 너비 상한 = cols * cell + gap * (cols-1) + padding * 2
   const mainGridMaxWidth = cols * MAX_CELL_PX + (cols - 1) * GRID_GAP + GRID_PAD * 2;
-  // 폰트 크기 — 열 수 기반 스케일
-  const CENTER_FONT = cols >= 7 ? 12 : cols >= 5 ? 13 : 15;
-  const CELL_FONT = cols >= 7 ? 10 : cols >= 5 ? 11 : 13;
+  // 폰트 크기 — 전체화면은 훨씬 크게
+  const CENTER_FONT = fullscreen
+    ? (cols >= 7 ? 18 : cols >= 5 ? 22 : 28)
+    : (cols >= 7 ? 12 : cols >= 5 ? 13 : 15);
+  const CELL_FONT = fullscreen
+    ? (cols >= 7 ? 14 : cols >= 5 ? 17 : 22)
+    : (cols >= 7 ? 10 : cols >= 5 ? 11 : 13);
   // Expand 모드 — 부모 블록 최대폭 (내부 서브그리드 cell = (EXPAND_PARENT-inset) / cols)
-  const EXPAND_PARENT_MAX_PX = cols >= 5 ? 160 : cols >= 4 ? 170 : 180;
+  const EXPAND_PARENT_MAX_PX = fullscreen
+    ? (cols >= 5 ? 280 : cols >= 4 ? 320 : 380)
+    : (cols >= 5 ? 160 : cols >= 4 ? 170 : 180);
   const expandOuterMaxWidth = cols * EXPAND_PARENT_MAX_PX + (cols - 1) * GRID_GAP + GRID_PAD * 2;
 
   useEffect(() => {
@@ -408,6 +416,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           gap: GRID_GAP,
           background: '#f1f5f9', padding: GRID_PAD, borderRadius: 12, border: '1px solid #e2e8f0',
           maxWidth: expandOuterMaxWidth,
+          alignSelf: fullscreen ? 'center' : 'flex-start',
         }}>
           {root.map((parentCell, pIdx) => {
             const isRootCenter = hasCenter && pIdx === centerIdx;
@@ -595,6 +604,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         gap: GRID_GAP,
         background: '#f1f5f9', padding: GRID_PAD, borderRadius: 12, border: '1px solid #e2e8f0',
         maxWidth: mainGridMaxWidth,
+        margin: fullscreen ? '0 auto' : undefined,
       }}>
         {currentGrid.map((cell, idx) => {
           const center = isCenter(idx);
