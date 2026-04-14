@@ -78,6 +78,16 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const hasCenter = centerIdx >= 0;
   // 전체 펼침 허용 (부모×자식 규모 제한)
   const allowExpand = cellCount <= 25;
+  // 셀당 최대 픽셀 크기 (정사각형 유지 + 가로 제한)
+  // 열 수가 많을수록 셀 축소 → 텍스트 가독성 유지
+  const MAX_CELL_PX = cols >= 7 ? 78 : cols >= 5 ? 92 : 110;
+  const GRID_GAP = 6;
+  const GRID_PAD = 6;
+  // 그리드 총 너비 상한 = cols * cell + gap * (cols-1) + padding * 2
+  const mainGridMaxWidth = cols * MAX_CELL_PX + (cols - 1) * GRID_GAP + GRID_PAD * 2;
+  // 폰트 크기 — 열 수 기반 스케일
+  const CENTER_FONT = cols >= 7 ? 12 : cols >= 5 ? 13 : 15;
+  const CELL_FONT = cols >= 7 ? 10 : cols >= 5 ? 11 : 13;
 
   useEffect(() => {
     // 길이 불일치(크기 변경 포함) → 기존 셀 앞에서부터 보존하며 길이 맞춤
@@ -571,10 +581,14 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
         </div>
       )}
 
-      {/* N×N Grid */}
+      {/* N×N Grid — 셀당 MAX_CELL_PX 상한으로 가로폭 제한 */}
       <div style={{
-        flex: 1, display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6,
-        background: '#f1f5f9', padding: 6, borderRadius: 12, border: '1px solid #e2e8f0',
+        flex: '0 1 auto',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, minmax(0, ${MAX_CELL_PX}px))`,
+        gap: GRID_GAP,
+        background: '#f1f5f9', padding: GRID_PAD, borderRadius: 12, border: '1px solid #e2e8f0',
+        maxWidth: mainGridMaxWidth,
       }}>
         {currentGrid.map((cell, idx) => {
           const center = isCenter(idx);
@@ -649,13 +663,13 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                   onBlur={() => setEditingId(null)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
                   style={{ flex: 1, width: '100%', padding: '6px 8px', border: 'none', outline: 'none',
-                    fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400,
+                    fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
                     color: center ? '#fff' : '#1e293b', background: 'transparent',
                     resize: 'none', fontFamily: 'inherit', lineHeight: 1.4 }}
                 />
               ) : (
                 <div style={{ flex: 1, padding: '6px 8px',
-                  fontSize: center ? 13 : 11, fontWeight: center ? 700 : 400,
+                  fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
                   color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
                   lineHeight: 1.4, wordBreak: 'break-word',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
