@@ -31,7 +31,7 @@ export function ApplicationList({ applications, onSelectItem }: ApplicationListP
     <div className="space-y-1">
       {/* View Toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-slate-800">
+        <h3 className="text-sm font-semibold text-slate-800">
           신청 목록 <span className="text-slate-400 font-normal ml-2">({applications.length})</span>
         </h3>
         <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">

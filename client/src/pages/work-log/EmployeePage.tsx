@@ -315,7 +315,7 @@ export function EmployeePage() {
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-1 px-2">
         <div className="flex items-center gap-1.5">
-          <h1 className="text-xs font-black text-primary tracking-tight">업무일지</h1>
+          <h1 className="text-base font-black text-primary tracking-tight">업무일지</h1>
           {/* 작성자 선택 */}
           <div className="flex items-center gap-1">
             {employees.map(emp => (

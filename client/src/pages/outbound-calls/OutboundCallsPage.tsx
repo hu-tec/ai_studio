@@ -273,7 +273,7 @@ export function OutboundCallsPage() {
             <div className="w-9 h-9 bg-slate-800 rounded-md flex items-center justify-center text-white">
               <Phone className="w-5 h-5" />
             </div>
-            <h1 className="text-xs font-black tracking-tight text-slate-800 uppercase">Full Contact List 📑</h1>
+            <h1 className="text-base font-black tracking-tight text-slate-800 uppercase">Full Contact List 📑</h1>
           </div>
           <button 
             onClick={() => setViewType('dashboard')}
@@ -429,7 +429,7 @@ export function OutboundCallsPage() {
             <Phone className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xs font-black tracking-tight leading-none text-slate-800">CALL CENTER DASHBOARD 📞</h1>
+            <h1 className="text-base font-black tracking-tight leading-none text-slate-800">CALL CENTER DASHBOARD 📞</h1>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Marketing Outbound System</p>
           </div>
         </div>

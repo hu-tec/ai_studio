@@ -238,7 +238,7 @@ function RuleCard({ rule, color }: { rule: Regulation, color: string }) {
   return (
     <div className={`p-2 rounded-md border ${borderMap[color]} transition-all cursor-default group space-y-1`}>
       <div className="space-y-1">
-        <h3 className="text-xs font-black text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors">
+        <h3 className="text-sm font-black text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors">
           {rule.title}
         </h3>
         <p className="text-[10px] text-gray-500 font-medium leading-relaxed">

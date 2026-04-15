@@ -273,7 +273,7 @@ export function Dashboard() {
       {/* Header with View Switcher */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm">
         <div>
-          <h2 className="text-xs font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2">
             📊 면접 평가 대시보드
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">실시간 면접 데이터 요약 및 상세 관리</p>

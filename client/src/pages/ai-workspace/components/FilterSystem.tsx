@@ -75,7 +75,7 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {/* Field A Filter */}
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">A. 분야 필터</h4>
+            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider">A. 분야 필터</h4>
             <div className="grid grid-cols-3 gap-1">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-slate-400 ml-1">대분류</label>
@@ -134,7 +134,7 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
 
           {/* Dept D Filter */}
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">D. 부서 필터</h4>
+            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider">D. 부서 필터</h4>
             <div className="grid grid-cols-2 gap-1">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-slate-400 ml-1">대분류 (부서)</label>

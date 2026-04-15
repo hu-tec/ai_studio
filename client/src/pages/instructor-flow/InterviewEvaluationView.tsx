@@ -206,7 +206,7 @@ export function InterviewEvaluationView() {
         <div className="space-y-2">
           {/* Skill Checklist */}
           <section className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-2">
-            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
               <Zap className="text-blue-600" size={20} />
               역량 체크리스트
             </h3>
@@ -267,7 +267,7 @@ export function InterviewEvaluationView() {
 
           {/* Final Result Select */}
           <section className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-2 sticky top-8">
-            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
               <Award className="text-blue-600" size={20} />
               최종 판정
             </h3>

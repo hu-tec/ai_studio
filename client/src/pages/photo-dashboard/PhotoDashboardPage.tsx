@@ -327,7 +327,7 @@ export function PhotoDashboardPage() {
       {/* Header Section */}
       <header className="max-w-[1800px] mx-auto mb-1 flex flex-col md:flex-row md:items-end justify-between gap-2">
         <div>
-          <h1 className="text-xs font-bold flex items-center gap-2 mb-2">
+          <h1 className="text-base font-bold flex items-center gap-2 mb-2">
             🖼️ 사진모음방 대시보드
           </h1>
           <p className="text-slate-500">이미지 보관 현황 및 카테고리별 분류 (총 {items.length}개)</p>
@@ -796,7 +796,7 @@ export function PhotoDashboardPage() {
                       </span>
                       <span className="text-xs text-slate-400 font-medium tracking-tight">#{previewItem.id}</span>
                     </div>
-                    <h2 className="text-xs font-bold text-slate-900 mb-2 leading-tight">{previewItem.title}</h2>
+                    <h2 className="text-sm font-bold text-slate-900 mb-2 leading-tight">{previewItem.title}</h2>
                     <p className="text-slate-400 text-sm mb-2 flex items-center gap-2">
                       <FileText size={14} /> 등록일: {previewItem.date}
                     </p>

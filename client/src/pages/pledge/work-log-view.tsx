@@ -173,7 +173,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
         </div>
 
         <div className="bg-white rounded-md border border-slate-200 shadow-sm p-2">
-          <h3 className="text-xs font-bold text-slate-400 uppercase mb-1.5">현재 현황 요약</h3>
+          <h3 className="text-sm font-bold text-slate-400 uppercase mb-1.5">현재 현황 요약</h3>
           <div className="grid grid-cols-2 gap-1">
             <div className="p-1 bg-slate-50 rounded-md">
               <span className="block text-[10px] text-slate-500 mb-1">완료 항목</span>
@@ -304,7 +304,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
         </div>
 
         <div className="bg-white rounded-md border border-slate-200 shadow-sm p-2 space-y-1">
-          <h3 className="text-xs font-bold text-slate-400 uppercase">내보내기 옵션</h3>
+          <h3 className="text-sm font-bold text-slate-400 uppercase">내보내기 옵션</h3>
           <div className="grid grid-cols-2 gap-1">
             <button onClick={() => handleDownload('excel')} className="flex items-center justify-center gap-2 py-1 bg-emerald-50 text-emerald-700 rounded-md text-xs font-bold hover:bg-emerald-100 transition-colors">
               <FileSpreadsheet size={14} />
@@ -360,7 +360,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
         <div className="p-2 rounded-md bg-slate-900 text-white space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 size={16} className="text-emerald-400" />
-            <h3 className="text-xs font-bold">작성 가이드</h3>
+            <h3 className="text-sm font-bold">작성 가이드</h3>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
             업무 일지는 투명한 성과 관리를 위해 정직하게 작성되어야 합니다. 누락된 시간대는 사유를 비고란에 적어주세요.

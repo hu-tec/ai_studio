@@ -191,7 +191,7 @@ function StatCard({ title, value, icon, color, border }: { title: string, value:
     <div className={clsx("p-1 rounded-lg border shadow-sm shadow-gray-200/20 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-gray-300/50 bg-white", border)}>
       <div className="space-y-1">
         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{title}</p>
-        <h4 className="text-xs font-black text-gray-900">{value.toLocaleString()}</h4>
+        <h4 className="text-sm font-black text-gray-900">{value.toLocaleString()}</h4>
       </div>
       <div className={clsx("w-16 h-16 rounded-[1.25rem] flex items-center justify-center", color)}>
         {icon}

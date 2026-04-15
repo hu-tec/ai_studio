@@ -126,14 +126,14 @@ const formatCurrency = (amount: number) => {
 // --- Sub-Components ---
 
 const StatCard = ({ title, value, emoji, subtitle }: { title: string; value: string; emoji: string; subtitle?: string }) => (
-  <div className="bg-white p-2 rounded-md border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+  <div className="bg-white p-2 rounded-md border border-slate-100 shadow-sm flex flex-col justify-between">
     <div className="flex justify-between items-start">
-      <span className="text-slate-500 text-sm font-medium">{title}</span>
+      <span className="text-slate-500 text-[11px] font-medium">{title}</span>
       <span className="text-sm">{emoji}</span>
     </div>
-    <div className="mt-2">
-      <div className="text-xs font-bold text-slate-800">{value}</div>
-      {subtitle && <div className="text-xs text-slate-400 mt-1">{subtitle}</div>}
+    <div className="mt-1">
+      <div className="text-base font-bold text-slate-800 leading-none">{value}</div>
+      {subtitle && <div className="text-[10px] text-slate-400 mt-0.5">{subtitle}</div>}
     </div>
   </div>
 );
@@ -317,7 +317,7 @@ export default function OverduePage() {
               <LayoutDashboard className="w-6 h-6 text-slate-600" />
             </div>
             <div>
-              <h1 className="text-xs font-bold tracking-tight">미수금 관리 대시보드</h1>
+              <h1 className="text-base font-bold tracking-tight">미수금 관리 대시보드</h1>
               <p className="text-slate-500 text-sm">실시간 채권 회수 및 미수 현황을 관리합니다.</p>
             </div>
           </div>
@@ -532,7 +532,7 @@ export default function OverduePage() {
                 ) : (
                   <div className="space-y-1">
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
                         <span className="w-4 h-px bg-slate-200"></span> 계약내용
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -547,7 +547,7 @@ export default function OverduePage() {
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
                         <span className="w-4 h-px bg-slate-200"></span> 진행사항
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -676,7 +676,7 @@ export default function OverduePage() {
         {/* Manager Statistics Table */}
         <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mb-1">
           <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-white">
-            <h2 className="text-xs font-bold flex items-center gap-2">
+            <h2 className="text-sm font-bold flex items-center gap-2">
               <Settings className="w-4 h-4 text-slate-400" />
               전체 및 현황 통계
             </h2>

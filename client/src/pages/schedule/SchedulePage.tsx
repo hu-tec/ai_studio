@@ -883,7 +883,7 @@ function SchedulePage() {
         <div className="col-span-3 sticky top-6">
           <div className="bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden flex flex-col h-[calc(100vh-120px)]">
             <div className="p-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="font-bold text-xs flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
+              <h2 className="font-bold text-sm flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
                 <Clock size={14} /> LIVE PREVIEW
               </h2>
               <div className="flex gap-2">
@@ -1413,7 +1413,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
               </div>
               <div>
                 <div className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1">{schedule.middleCategory} / {schedule.largeCategory}</div>
-                <h2 className="text-xs font-black text-slate-900 tracking-tight">{schedule.lecturer || "미지정 강사"}</h2>
+                <h2 className="text-sm font-black text-slate-900 tracking-tight">{schedule.lecturer || "미지정 강사"}</h2>
               </div>
             </div>
             <div className="text-right">

@@ -595,7 +595,7 @@ export default function InterviewAlbaGuide() {
           const startQ = blockIdx * 10 + 1;
           return (
             <div key={dim.key} className="bg-white border border-slate-200 rounded-lg p-1.5">
-              <h3 className="text-xs font-bold text-blue-600 text-center border-b border-slate-200 pb-1 mb-1">
+              <h3 className="text-sm font-bold text-blue-600 text-center border-b border-slate-200 pb-1 mb-1">
                 {dim.a} / {dim.b}
               </h3>
               <div className="space-y-1">
@@ -689,7 +689,7 @@ export default function InterviewAlbaGuide() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
         {[0, 1, 2].map(i => (
           <div key={i} className="bg-white border border-slate-200 rounded-lg p-1.5">
-            <h3 className="text-xs font-semibold mb-1">영상 {i + 1}</h3>
+            <h3 className="text-sm font-semibold mb-1">영상 {i + 1}</h3>
             <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-video bg-black rounded overflow-hidden mb-1">
               <img src={videoThumb} alt={`영상 ${i + 1}`} className="w-full h-full object-cover" />
               <span className="absolute inset-0 flex items-center justify-center">
@@ -743,7 +743,7 @@ export default function InterviewAlbaGuide() {
       </p>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제1조【근로계약기간】</h4>
+        <h4 className="text-sm font-semibold mb-1">제1조【근로계약기간】</h4>
         <p className="text-[11px] text-slate-600 leading-relaxed">
           ① 계약기간은 <input className={tinput} value={contract.year} onChange={e => setContract({ ...contract, year: e.target.value })} /> 년{' '}
           <input className={tinput} value={contract.startMonth} onChange={e => setContract({ ...contract, startMonth: e.target.value })} /> 월{' '}
@@ -764,13 +764,13 @@ export default function InterviewAlbaGuide() {
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제2조【근무장소 및 업무내용】</h4>
+        <h4 className="text-sm font-semibold mb-1">제2조【근무장소 및 업무내용】</h4>
         <p className="text-[11px] text-slate-600">① 근무장소 : ㈜휴텍씨 강남 사무실</p>
         <p className="text-[11px] text-slate-600">② 업무내용 : 사무 보조 업무 및 프로그램 기획</p>
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제3조【근로일·근로시간·휴게시간】</h4>
+        <h4 className="text-sm font-semibold mb-1">제3조【근로일·근로시간·휴게시간】</h4>
         <div className="grid grid-cols-2 gap-1 text-[11px]">
           <p>
             ① 근무 시간 : <input className={cinput} value={contract.workTime1} onChange={e => setContract({ ...contract, workTime1: e.target.value })} placeholder="09:00-18:00" />{' '}
@@ -797,7 +797,7 @@ export default function InterviewAlbaGuide() {
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제4조【급여】</h4>
+        <h4 className="text-sm font-semibold mb-1">제4조【급여】</h4>
         <p className="text-[11px] text-slate-600">① 시간당 급여는 <input className={cinput} value={contract.hourlyWage} onChange={e => setContract({ ...contract, hourlyWage: e.target.value })} placeholder="원" /> 원(주휴수당 포함)으로 한다.</p>
         <p className="text-[11px] text-slate-600">② 월 급여 계산기간은 매월 1일부터 말일까지로 하여 익월 15일에 근로자 계좌로 입금한다.</p>
         <p className="text-[11px] text-slate-600 leading-relaxed">⑤ 입사 후 <input className={tinput} value={contract.resignMonths} onChange={e => setContract({ ...contract, resignMonths: e.target.value })} /> 개월 안에 인수인계 없이 퇴사 시 최저시급으로 지급한다. 동의자 :{' '}
@@ -808,13 +808,13 @@ export default function InterviewAlbaGuide() {
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제5조【시간외근무·근태관리】</h4>
+        <h4 className="text-sm font-semibold mb-1">제5조【시간외근무·근태관리】</h4>
         <p className="text-[11px] text-slate-600">① 시간외근무는 팀장의 승인 사인이 있을 경우에 한하여 인정한다.</p>
         <p className="text-[11px] text-slate-600">② 자발적으로 실시한 시간외근로는 인정하지 않는다.</p>
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제6조【손해배상】</h4>
+        <h4 className="text-sm font-semibold mb-1">제6조【손해배상】</h4>
         <ol className="list-decimal list-inside text-[11px] text-slate-600 space-y-0.5">
           <li>퇴사통보 30일 이전, 인수인계가 원활하지 않은 경우</li>
           <li>무단 퇴사하는 경우</li>
@@ -826,7 +826,7 @@ export default function InterviewAlbaGuide() {
       </div>
 
       <div className="mb-2">
-        <h4 className="text-xs font-semibold mb-1">제7조【비밀유지 준수사항】</h4>
+        <h4 className="text-sm font-semibold mb-1">제7조【비밀유지 준수사항】</h4>
         <p className="text-[11px] text-slate-600 leading-relaxed">본 계약내용 및 금액을 타인에게 누설하지 않는다. 동의자 :{' '}
           <input className={cinput} value={contract.agrees[4]} onChange={e => {
             const next = [...contract.agrees]; next[4] = e.target.value; setContract({ ...contract, agrees: next });
@@ -909,7 +909,7 @@ export default function InterviewAlbaGuide() {
       </div>
 
       <div className="mt-2 p-1.5 bg-slate-50 border border-slate-200 rounded">
-        <h3 className="text-xs font-semibold mb-1">교육 피드백 작성</h3>
+        <h3 className="text-sm font-semibold mb-1">교육 피드백 작성</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5 mb-1.5">
           <Field label="대분류">
             <InlineRadio value={eduLarge} options={LARGE_CATS} onChange={setEduLarge} />

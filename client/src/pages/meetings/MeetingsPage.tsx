@@ -255,7 +255,7 @@ export default function MeetingsPage() {
           <div className="flex-1 p-2 border-r border-slate-100 overflow-y-auto">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h1 className="text-xs font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
+                <h1 className="text-base font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
                 <p className="text-slate-400 font-bold mt-1 uppercase tracking-widest text-xs">CEO Secretary Schedule Service</p>
               </div>
               <div className="text-right">

@@ -232,7 +232,7 @@ export function AttendancePage() {
   // Reusable card header buttons
   const CardActions = ({ title, onAdd, onEdit, onDelete }: { title: string, onAdd: () => void, onEdit: () => void, onDelete: () => void }) => (
     <div className="flex items-center justify-between mb-2">
-      <h2 className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
+      <h2 className="text-sm font-bold text-gray-500 flex items-center gap-1.5">
         {title.includes('직원') ? <Users size={14} /> :
          title.includes('규정') ? <Calendar size={14} /> :
          title.includes('기록') ? <Clock size={14} /> : <TrendingUp size={14} />}
@@ -254,7 +254,7 @@ export function AttendancePage() {
           <div className="bg-blue-600 p-1.5 rounded-lg">
             <Clock className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-xs font-bold tracking-tight">출퇴근 통합 관리</h1>
+          <h1 className="text-base font-bold tracking-tight">출퇴근 통합 관리</h1>
         </div>
 
         <div className="flex items-center gap-1">
@@ -459,7 +459,7 @@ export function AttendancePage() {
         <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col overflow-hidden">
           <div className="bg-blue-600 px-2 py-1 text-white">
             <div className="flex items-center justify-between mb-1.5">
-              <h2 className="text-xs font-bold flex items-center gap-1.5"><TrendingUp size={14} /> 대시보드 요약</h2>
+              <h2 className="text-sm font-bold flex items-center gap-1.5"><TrendingUp size={14} /> 대시보드 요약</h2>
               <div className="flex gap-0.5">
                 <button onClick={() => alert('요약 추가')} className="p-0.5 hover:bg-white/20 rounded"><Plus size={11} /></button>
                 <button onClick={() => alert('요약 수정')} className="p-0.5 hover:bg-white/20 rounded"><Edit3 size={11} /></button>
@@ -534,7 +534,7 @@ export function AttendancePage() {
       >
         <div className="px-2 py-1 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <h2 className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+            <h2 className="text-sm font-bold text-gray-600 flex items-center gap-1.5">
               <History size={14} className="text-blue-500" /> 최근 근무 기록
             </h2>
             <div className="h-3.5 w-[1px] bg-gray-300" />

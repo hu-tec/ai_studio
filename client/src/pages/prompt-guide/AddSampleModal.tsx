@@ -72,7 +72,7 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                   <PlusCircle size={24} />
                 </div>
                 <div>
-                  <h2 className="text-xs font-bold text-neutral-900 tracking-tight">새 샘플 추가</h2>
+                  <h2 className="text-sm font-bold text-neutral-900 tracking-tight">새 샘플 추가</h2>
                   <p className="text-sm text-neutral-400 font-medium">프롬프트 워크플로우와 결과물을 등록하세요.</p>
                 </div>
               </div>

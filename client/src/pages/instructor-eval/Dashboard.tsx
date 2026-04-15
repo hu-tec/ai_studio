@@ -381,7 +381,7 @@ export function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <div className="bg-white rounded-md border border-gray-200 p-2 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                     등급별 분포 현황
                   </h3>
                   <div className="flex gap-2">
@@ -431,7 +431,7 @@ export function Dashboard() {
 
               <div className="bg-white rounded-md border border-gray-200 p-2 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-gray-800 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                     분류 및 합격 여부
                   </h3>
                 </div>

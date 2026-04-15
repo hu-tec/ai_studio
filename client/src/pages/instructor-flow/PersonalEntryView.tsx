@@ -283,7 +283,7 @@ export function PersonalEntryView() {
         {/* Right Column: Additional Info & Submit */}
         <div className="space-y-2">
           <section className="bg-white p-2 rounded-md shadow-sm border border-gray-100">
-            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
               <Languages className="text-blue-600" size={20} />
               어학 및 자격증
             </h3>
@@ -314,7 +314,7 @@ export function PersonalEntryView() {
           </section>
 
           <section className="bg-white p-2 rounded-md shadow-sm border border-gray-100">
-            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
               <Briefcase className="text-blue-600" size={20} />
               지원 경로
             </h3>

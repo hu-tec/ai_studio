@@ -126,7 +126,7 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
                 </div>
                 <div className="bg-neutral-50/50 border border-neutral-200 border-dashed rounded-md p-2 hover:bg-white transition-all group">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">보완 {idx + 1}</h3>
+                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest">보완 {idx + 1}</h3>
                     <button onClick={() => handleCopy(prompt)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 rounded-lg transition-colors">
                       <Copy size={14} />
                     </button>

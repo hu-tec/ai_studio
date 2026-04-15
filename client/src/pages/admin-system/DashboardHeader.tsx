@@ -4,7 +4,7 @@ export const DashboardHeader: React.FC = () => {
   return (
     <header className="mb-1 flex justify-between items-end pb-2 border-b border-zinc-200">
       <div>
-        <h1 className="text-xs font-black text-zinc-900 flex items-center gap-1 tracking-tighter uppercase leading-none">
+        <h1 className="text-base font-black text-zinc-900 flex items-center gap-1 tracking-tighter uppercase leading-none">
           <span className="text-xs transform -rotate-12 hover:rotate-0 transition-transform cursor-pointer">🛸</span>
           관리자 통합 시스템
         </h1>

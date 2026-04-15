@@ -13,7 +13,7 @@ export function StatSummary() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
       <div className="col-span-1 md:col-span-2 bg-white rounded-md shadow-sm border border-slate-200 p-2">
-        <h3 className="text-xs font-semibold text-slate-800 mb-2">분야별 신청 현황</h3>
+        <h3 className="text-sm font-semibold text-slate-800 mb-2">분야별 신청 현황</h3>
         <div className="h-[240px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -30,7 +30,7 @@ export function StatSummary() {
       </div>
 
       <div className="bg-white rounded-md shadow-sm border border-slate-200 p-2 flex flex-col items-center justify-center relative">
-        <h3 className="text-xs font-semibold text-slate-800 self-start mb-2">상태별 요약</h3>
+        <h3 className="text-sm font-semibold text-slate-800 self-start mb-2">상태별 요약</h3>
         <div className="h-[240px] w-full flex items-center justify-center relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

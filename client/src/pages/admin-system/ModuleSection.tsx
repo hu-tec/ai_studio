@@ -22,7 +22,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ id, title, description, icon, s
           </span>
         )}
       </div>
-      <h3 className="text-xs font-bold text-zinc-900 mb-1 group-hover:text-black truncate">{title}</h3>
+      <h3 className="text-sm font-bold text-zinc-900 mb-1 group-hover:text-black truncate">{title}</h3>
       <p className="text-[10px] text-zinc-500 leading-normal line-clamp-1">{description}</p>
     </div>
   );

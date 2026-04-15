@@ -172,7 +172,7 @@ function SampleCard({
         </div>
       </div>
       <div className="p-2 flex flex-col flex-1 space-y-2">
-        <h3 className="font-bold text-xs text-neutral-900 uppercase tracking-tight group-hover:text-neutral-600 transition-colors">
+        <h3 className="font-bold text-sm text-neutral-900 uppercase tracking-tight group-hover:text-neutral-600 transition-colors">
           {sample.category}
         </h3>
         <div className="space-y-1">

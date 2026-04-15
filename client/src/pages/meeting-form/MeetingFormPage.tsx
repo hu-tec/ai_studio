@@ -444,7 +444,7 @@ export default function MeetingFormPage() {
               <div className="w-16 h-16 bg-white/10 rounded-md flex items-center justify-center">
                 <AlertCircle size={32} />
               </div>
-              <h2 className="text-xs font-black leading-tight">신청 전 확인하세요</h2>
+              <h2 className="text-sm font-black leading-tight">신청 전 확인하세요</h2>
               <ul className="space-y-1 opacity-70 text-sm font-bold">
                 <li className="flex gap-2"><span>•</span> 미팅은 관리자 승인 후 캘린더에 노출됩니다.</li>
                 <li className="flex gap-2"><span>•</span> 신청 시 기재하신 분야와 부서는 데이터 분류에 활용됩니다.</li>
@@ -597,7 +597,7 @@ export default function MeetingFormPage() {
                 {periodType === 'day' && (
                   <div className="flex flex-col gap-2 h-full">
                     <div className="flex items-center justify-between mb-1.5">
-                      <h3 className="text-xs font-black text-slate-800">{format(currentMonth, 'EEEE, MMM dd')}</h3>
+                      <h3 className="text-sm font-black text-slate-800">{format(currentMonth, 'EEEE, MMM dd')}</h3>
                       <button onClick={() => setPeriodType('month')} className="px-2 py-1 bg-slate-100 rounded-md text-xs font-black text-slate-600 hover:bg-slate-200 transition-all">월별 보기로 전환</button>
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-1 pr-2">
@@ -652,7 +652,7 @@ export default function MeetingFormPage() {
                             />
                           </div>
                           <div>
-                            <h4 className="text-xs font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{format(month, 'MMM')}</h4>
+                            <h4 className="text-sm font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{format(month, 'MMM')}</h4>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{format(month, 'yyyy')}</p>
                           </div>
                           <div className="px-2 py-1.5 bg-slate-50 rounded-full text-[10px] font-black text-slate-500">
