@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Plus, X, Pencil, Check } from 'lucide-react';
+import { Plus, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { fetchTaxonomy, saveTaxonomyNode, updateTaxonomyNode, softDeleteTaxonomyNode } from '../api';
+import { fetchAllTaxonomy, saveTaxonomyNode, updateTaxonomyNode, softDeleteTaxonomyNode } from '../api';
 import type { TaxonomyNode, TaxonomyScope, TaxonomyGov, TaxonomyLevel } from '../taxonomyTypes';
+import { allowedAxes } from '../taxonomyTypes';
 
 interface Props {
   scope: TaxonomyScope;
@@ -10,12 +11,16 @@ interface Props {
   axes: string[];
 }
 
-// 3-column picker (대/중/소) — 분류표_영규_선택 screenshots 기준.
-// 각 열 하단 inline `+ 추가` / 호버 시 rename·delete 가능.
-// 대 클릭 → 중 필터 / 중 클릭 → 소 필터.
+// 공통 축(분야·급수·홈페이지·부서·등급)은 항상 (common, common) 에서 읽고 쓴다.
+// 현재 Lens/Gov 는 로컬 축에만 적용 — 공통 축은 모든 Lens 에서 동일 SoT 를 공유.
+const COMMON_AXES = allowedAxes('common', 'common');
+const isCommonAxis = (a: string) => COMMON_AXES.includes(a);
+
+// 3-column picker — 대 클릭 → 중 필터 → 소 필터.
+// 인터랙션: 단일 클릭 = 선택(필터), 더블 클릭 = 이름 수정, 우측 × = 삭제.
 export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
   const [axis, setAxis] = useState(axes[0] || '');
-  const [nodes, setNodes] = useState<TaxonomyNode[]>([]);
+  const [allNodes, setAllNodes] = useState<TaxonomyNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selLargeId, setSelLargeId] = useState<string | null>(null);
@@ -24,35 +29,54 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
   useEffect(() => { if (axes.length && !axes.includes(axis)) setAxis(axes[0]); /* eslint-disable-next-line */ }, [axes]);
 
   const reload = async () => {
-    if (!axis) return;
     setLoading(true);
     try {
-      const data = await fetchTaxonomy({ scope, gov, axis });
-      setNodes(data);
+      const data = await fetchAllTaxonomy();
+      setAllNodes(data);
       setError(null);
     } catch (e: any) {
       setError(String(e.message || e));
-      setNodes([]);
+      setAllNodes([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { reload(); setSelLargeId(null); setSelMediumId(null); /* eslint-disable-next-line */ }, [scope, gov, axis]);
+  useEffect(() => { reload(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { setSelLargeId(null); setSelMediumId(null); }, [axis, scope, gov]);
   useEffect(() => { setSelMediumId(null); }, [selLargeId]);
 
+  const effScope: TaxonomyScope = isCommonAxis(axis) ? 'common' : scope;
+  const effGov: TaxonomyGov = isCommonAxis(axis) ? 'common' : gov;
+
   const byOrder = (a: TaxonomyNode, b: TaxonomyNode) => a.sort_order - b.sort_order || a.label.localeCompare(b.label);
+
+  const nodes = useMemo(
+    () => allNodes.filter((n) => n.axis === axis && n.scope === effScope && n.gov === effGov),
+    [allNodes, axis, effScope, effGov],
+  );
 
   const larges  = useMemo(() => nodes.filter((n) => n.level === 'large').sort(byOrder), [nodes]);
   const mediums = useMemo(() => nodes.filter((n) => n.level === 'medium' && n.parent_id === selLargeId).sort(byOrder), [nodes, selLargeId]);
   const smalls  = useMemo(() => nodes.filter((n) => n.level === 'small'  && n.parent_id === selMediumId).sort(byOrder), [nodes, selMediumId]);
+
+  // 각 축의 노드 수 — 탭 버튼 옆 표시
+  const axisCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of axes) {
+      const es = isCommonAxis(a) ? 'common' : scope;
+      const eg = isCommonAxis(a) ? 'common' : gov;
+      counts[a] = allNodes.filter((n) => n.axis === a && n.scope === es && n.gov === eg).length;
+    }
+    return counts;
+  }, [allNodes, axes, scope, gov]);
 
   const addNode = async (level: TaxonomyLevel, parentId: string | null, label: string) => {
     const list = level === 'large' ? larges : level === 'medium' ? mediums : smalls;
     const max = list.reduce((m, n) => Math.max(m, n.sort_order), -1);
     try {
       await saveTaxonomyNode({
-        scope, gov, axis, level, parent_id: parentId,
+        scope: effScope, gov: effGov, axis, level, parent_id: parentId,
         label, sort_order: max + 1, source: 'user', locked: 0,
       } as any);
       toast.success(`추가: ${label}`);
@@ -95,24 +119,41 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
 
   return (
     <div className="space-y-1">
-      {/* 축 tab 바 */}
+      {/* 축 tab 바 — 각 축 옆에 노드 수 + 공통 축 표시 */}
       <div className="flex items-center gap-1 flex-wrap border-b border-slate-200 dark:border-slate-700 pb-1">
         <span className="text-[10px] font-bold text-slate-500 mr-1">축</span>
-        {axes.map((a) => (
-          <button
-            key={a}
-            onClick={() => setAxis(a)}
-            className={[
-              'text-[10px] px-1.5 py-0.5 rounded border',
-              axis === a
-                ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
-            ].join(' ')}
-          >
-            {a}
-          </button>
-        ))}
-        <span className="ml-auto text-[10px] text-slate-500">총 {nodes.length} 노드</span>
+        {axes.map((a) => {
+          const active = axis === a;
+          const count = axisCounts[a] ?? 0;
+          const common = isCommonAxis(a);
+          return (
+            <button
+              key={a}
+              onClick={() => setAxis(a)}
+              title={common ? '공통 축 · scope=common gov=common' : `${scope} · ${gov}`}
+              className={[
+                'inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border',
+                active
+                  ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
+              ].join(' ')}
+            >
+              {common && <span className="text-[8px] opacity-70">🌐</span>}
+              <span>{a}</span>
+              <span className={[
+                'text-[9px] tabular-nums px-1 rounded',
+                active
+                  ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900'
+                  : count > 0
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                    : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500',
+              ].join(' ')}>{count}</span>
+            </button>
+          );
+        })}
+        <span className="ml-auto text-[10px] text-slate-500">
+          현재: <b>{axis}</b> · {isCommonAxis(axis) ? 'common|common' : `${scope}|${gov}`} · {nodes.length} 노드
+        </span>
       </div>
 
       {error && (
@@ -162,7 +203,7 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
       </div>
 
       <div className="text-[10px] text-slate-500 px-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
-        축=<b>{axis}</b> · 대 {larges.length} · 중(선택) {selLargeId ? mediums.length : '—'} · 소(선택) {selMediumId ? smalls.length : '—'}
+        단일 클릭=선택(필터) · <b>더블 클릭=이름 수정</b> · X=삭제 · 각 열 하단 [+ 추가]
       </div>
     </div>
   );
@@ -208,7 +249,7 @@ function Column(p: ColumnProps) {
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
       <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 px-1.5 py-1 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-        {p.title}
+        {p.title} <span className="text-slate-400 tabular-nums">({p.items.length})</span>
       </div>
       <ul className="p-1 space-y-0.5 min-h-[60px] max-h-[400px] overflow-y-auto">
         {p.placeholder ? (
@@ -240,22 +281,21 @@ function Column(p: ColumnProps) {
               <li
                 key={n.taxonomy_id}
                 className={[
-                  'group flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border cursor-pointer',
+                  'group flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border cursor-pointer select-none',
                   isSelected
                     ? bgSel
                     : 'bg-white dark:bg-slate-800 border-transparent hover:bg-slate-100 dark:hover:bg-slate-700',
                 ].join(' ')}
                 onClick={() => p.onSelect(n.taxonomy_id)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  setEditingId(n.taxonomy_id);
+                  setEditText(n.label);
+                }}
+                title="더블 클릭하여 이름 수정"
               >
                 <span className="flex-1 truncate">{n.label}</span>
                 {n.locked === 1 && <span className="text-[8px] text-slate-400 mr-0.5" title="seed">🔒</span>}
-                <button
-                  onClick={(e) => { e.stopPropagation(); setEditingId(n.taxonomy_id); setEditText(n.label); }}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-slate-200 dark:hover:bg-slate-600 rounded"
-                  title="이름 수정"
-                >
-                  <Pencil className="h-2.5 w-2.5" />
-                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); p.onDelete(n); }}
                   className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-500 rounded"
