@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Plus, X, Pencil } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { Plus, X, Pencil, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchTaxonomy, saveTaxonomyNode, updateTaxonomyNode, softDeleteTaxonomyNode } from '../api';
 import type { TaxonomyNode, TaxonomyScope, TaxonomyGov, TaxonomyLevel } from '../taxonomyTypes';
@@ -10,22 +10,16 @@ interface Props {
   axes: string[];
 }
 
-interface Row {
-  large: TaxonomyNode | null;
-  medium: TaxonomyNode | null;
-  small: TaxonomyNode | null;
-  largeSpan: number;
-  mediumSpan: number;
-}
-
-// 대중소 spreadsheet — rowspan 병합 + 인라인 CRUD
+// 3-column picker (대/중/소) — 분류표_영규_선택 screenshots 기준.
+// 각 열 하단 inline `+ 추가` / 호버 시 rename·delete 가능.
+// 대 클릭 → 중 필터 / 중 클릭 → 소 필터.
 export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
   const [axis, setAxis] = useState(axes[0] || '');
   const [nodes, setNodes] = useState<TaxonomyNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{ id: string; level: TaxonomyLevel } | null>(null);
-  const [editText, setEditText] = useState('');
+  const [selLargeId, setSelLargeId] = useState<string | null>(null);
+  const [selMediumId, setSelMediumId] = useState<string | null>(null);
 
   useEffect(() => { if (axes.length && !axes.includes(axis)) setAxis(axes[0]); /* eslint-disable-next-line */ }, [axes]);
 
@@ -44,89 +38,55 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
     }
   };
 
-  useEffect(() => { reload(); /* eslint-disable-next-line */ }, [scope, gov, axis]);
+  useEffect(() => { reload(); setSelLargeId(null); setSelMediumId(null); /* eslint-disable-next-line */ }, [scope, gov, axis]);
+  useEffect(() => { setSelMediumId(null); }, [selLargeId]);
 
-  // 트리 → 평탄 행렬 (rowspan 계산)
-  const rows = useMemo<Row[]>(() => {
-    const larges = nodes.filter((n) => n.level === 'large').sort((a, b) => a.sort_order - b.sort_order);
-    const out: Row[] = [];
-    larges.forEach((L) => {
-      const meds = nodes.filter((n) => n.level === 'medium' && n.parent_id === L.taxonomy_id).sort((a, b) => a.sort_order - b.sort_order);
-      if (meds.length === 0) {
-        out.push({ large: L, medium: null, small: null, largeSpan: 1, mediumSpan: 1 });
-        return;
-      }
-      let largeFirst = true;
-      let largeSpan = 0;
-      meds.forEach((M) => {
-        const smalls = nodes.filter((n) => n.level === 'small' && n.parent_id === M.taxonomy_id).sort((a, b) => a.sort_order - b.sort_order);
-        if (smalls.length === 0) {
-          out.push({ large: largeFirst ? L : null, medium: M, small: null, largeSpan: 0, mediumSpan: 1 });
-          largeFirst = false;
-          largeSpan += 1;
-        } else {
-          let medFirst = true;
-          smalls.forEach((S) => {
-            out.push({ large: largeFirst ? L : null, medium: medFirst ? M : null, small: S, largeSpan: 0, mediumSpan: medFirst ? smalls.length : 0 });
-            largeFirst = false;
-            medFirst = false;
-            largeSpan += 1;
-          });
-        }
-      });
-      // 첫 large 행에 large rowspan 기록
-      const firstIdxFromBack = out.length - largeSpan;
-      if (out[firstIdxFromBack]) out[firstIdxFromBack].largeSpan = largeSpan;
-    });
-    return out;
-  }, [nodes]);
+  const byOrder = (a: TaxonomyNode, b: TaxonomyNode) => a.sort_order - b.sort_order || a.label.localeCompare(b.label);
 
-  const beginEdit = (n: TaxonomyNode | null) => {
-    if (!n) return;
-    setEditing({ id: n.taxonomy_id, level: n.level });
-    setEditText(n.label);
-  };
+  const larges  = useMemo(() => nodes.filter((n) => n.level === 'large').sort(byOrder), [nodes]);
+  const mediums = useMemo(() => nodes.filter((n) => n.level === 'medium' && n.parent_id === selLargeId).sort(byOrder), [nodes, selLargeId]);
+  const smalls  = useMemo(() => nodes.filter((n) => n.level === 'small'  && n.parent_id === selMediumId).sort(byOrder), [nodes, selMediumId]);
 
-  const commitEdit = async (n: TaxonomyNode) => {
-    const label = editText.trim();
-    if (!label || label === n.label) { setEditing(null); return; }
+  const addNode = async (level: TaxonomyLevel, parentId: string | null, label: string) => {
+    const list = level === 'large' ? larges : level === 'medium' ? mediums : smalls;
+    const max = list.reduce((m, n) => Math.max(m, n.sort_order), -1);
     try {
-      await updateTaxonomyNode(n.taxonomy_id, { ...n, label, source: 'user', locked: 0, revision: n.revision } as any);
-      toast.success(`수정: ${label}`);
-      setEditing(null);
-      reload();
+      await saveTaxonomyNode({
+        scope, gov, axis, level, parent_id: parentId,
+        label, sort_order: max + 1, source: 'user', locked: 0,
+      } as any);
+      toast.success(`추가: ${label}`);
+      await reload();
     } catch (e: any) {
-      toast.error(`수정 실패: ${e.message || e}`);
+      toast.error(`추가 실패: ${e.message || e}`);
     }
   };
 
-  const addLarge = async () => {
-    const label = prompt('새 대카테고리 이름?');
-    if (!label) return;
-    const max = nodes.filter((n) => n.level === 'large').reduce((m, n) => Math.max(m, n.sort_order), -1);
+  const renameNode = async (n: TaxonomyNode, label: string) => {
+    if (!label || label === n.label) return;
     try {
-      await saveTaxonomyNode({ scope, gov, axis, level: 'large', parent_id: null, label, sort_order: max + 1, source: 'user', locked: 0 } as any);
-      toast.success(`대 추가: ${label}`);
-      reload();
-    } catch (e: any) { toast.error(`실패: ${e.message || e}`); }
+      await updateTaxonomyNode(n.taxonomy_id, {
+        ...n, label, source: 'user', locked: 0, revision: n.revision,
+      } as any);
+      toast.success(`수정: ${n.label} → ${label}`);
+      await reload();
+    } catch (e: any) {
+      if (String(e.message).includes('409')) toast.error('다른 세션이 먼저 수정함, 새로고침 필요');
+      else toast.error(`수정 실패: ${e.message || e}`);
+    }
   };
 
-  const addChild = async (parent: TaxonomyNode) => {
-    const childLevel: TaxonomyLevel = parent.level === 'large' ? 'medium' : 'small';
-    const label = prompt(`새 ${childLevel === 'medium' ? '중' : '소'} 카테고리 이름?`);
-    if (!label) return;
-    const max = nodes.filter((n) => n.parent_id === parent.taxonomy_id).reduce((m, n) => Math.max(m, n.sort_order), -1);
+  const deleteNode = async (n: TaxonomyNode) => {
+    if (!confirm(`삭제: "${n.label}" ${n.level !== 'small' ? '(하위 항목은 남음)' : ''} ?`)) return;
     try {
-      await saveTaxonomyNode({ scope, gov, axis, level: childLevel, parent_id: parent.taxonomy_id, label, sort_order: max + 1, source: 'user', locked: 0 } as any);
-      toast.success(`${childLevel === 'medium' ? '중' : '소'} 추가: ${label}`);
-      reload();
-    } catch (e: any) { toast.error(`실패: ${e.message || e}`); }
-  };
-
-  const remove = async (n: TaxonomyNode) => {
-    if (!confirm(`삭제: "${n.label}" (하위 항목 포함 안 됨) ?`)) return;
-    try { await softDeleteTaxonomyNode(n.taxonomy_id); toast.success('삭제됨'); reload(); }
-    catch (e: any) { toast.error(`실패: ${e.message || e}`); }
+      await softDeleteTaxonomyNode(n.taxonomy_id);
+      toast.success(`삭제: ${n.label}`);
+      if (n.taxonomy_id === selLargeId) setSelLargeId(null);
+      if (n.taxonomy_id === selMediumId) setSelMediumId(null);
+      await reload();
+    } catch (e: any) {
+      toast.error(`삭제 실패: ${e.message || e}`);
+    }
   };
 
   if (axes.length === 0) {
@@ -135,7 +95,7 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
 
   return (
     <div className="space-y-1">
-      {/* 좌측 축 사이드바 */}
+      {/* 축 tab 바 */}
       <div className="flex items-center gap-1 flex-wrap border-b border-slate-200 dark:border-slate-700 pb-1">
         <span className="text-[10px] font-bold text-slate-500 mr-1">축</span>
         {axes.map((a) => (
@@ -152,14 +112,7 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
             {a}
           </button>
         ))}
-        <div className="ml-auto">
-          <button
-            onClick={addLarge}
-            className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border border-emerald-400 text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-          >
-            <Plus className="h-2.5 w-2.5" /> 대 추가
-          </button>
-        </div>
+        <span className="ml-auto text-[10px] text-slate-500">총 {nodes.length} 노드</span>
       </div>
 
       {error && (
@@ -169,91 +122,183 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
       )}
       {loading && <div className="text-[10px] text-slate-500 px-1">불러오는 중...</div>}
 
-      {/* 우측 spreadsheet */}
-      <div className="overflow-auto border border-slate-200 dark:border-slate-700 rounded">
-        <table className="w-full text-[10px] border-collapse">
-          <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0">
-            <tr>
-              <th className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 w-32 text-left">대카테고리</th>
-              <th className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 w-32 text-left">중카테고리</th>
-              <th className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 w-32 text-left">소카테고리</th>
-              <th className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 w-16 text-left">관리</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && !loading && (
-              <tr><td colSpan={4} className="text-center text-slate-400 py-1.5">데이터 없음 — 우측 상단 [대 추가]</td></tr>
-            )}
-            {rows.map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                {row.largeSpan > 0 && (
-                  <td rowSpan={row.largeSpan} className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 align-top bg-emerald-50/50 dark:bg-emerald-950/20">
-                    {renderCell(row.large, 'large')}
-                  </td>
-                )}
-                {row.mediumSpan > 0 && (
-                  <td rowSpan={row.mediumSpan} className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 align-top bg-sky-50/50 dark:bg-sky-950/20">
-                    {renderCell(row.medium, 'medium')}
-                  </td>
-                )}
-                <td className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 align-top">
-                  {renderCell(row.small, 'small')}
-                </td>
-                <td className="border border-slate-300 dark:border-slate-600 px-1 py-0.5 align-top">
-                  {row.large && row.large.large /* never */}
-                  <div className="flex flex-col gap-0.5">
-                    {row.medium && !row.small && (
-                      <button onClick={() => addChild(row.medium!)} className="text-[9px] text-emerald-600 hover:underline">+소</button>
-                    )}
-                    {row.large && row.largeSpan > 0 && (
-                      <button onClick={() => addChild(row.large!)} className="text-[9px] text-emerald-600 hover:underline">+중</button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* 3-column picker */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+        <Column
+          title="📁 대 카테고리"
+          items={larges}
+          selectedId={selLargeId}
+          onSelect={(id) => setSelLargeId(id)}
+          onRename={renameNode}
+          onDelete={deleteNode}
+          onAdd={(label) => addNode('large', null, label)}
+          color="emerald"
+        />
+        <Column
+          title="📂 중 카테고리"
+          items={mediums}
+          selectedId={selMediumId}
+          onSelect={(id) => setSelMediumId(id)}
+          onRename={renameNode}
+          onDelete={deleteNode}
+          onAdd={async (label) => { if (selLargeId) await addNode('medium', selLargeId, label); }}
+          color="sky"
+          placeholder={selLargeId ? null : '← 대 카테고리 선택'}
+        />
+        <Column
+          title="📄 소 카테고리"
+          items={smalls}
+          selectedId={null}
+          onSelect={() => undefined}
+          onRename={renameNode}
+          onDelete={deleteNode}
+          onAdd={async (label) => { if (selMediumId) await addNode('small', selMediumId, label); }}
+          color="violet"
+          placeholder={
+            !selLargeId ? '← 대 카테고리 선택' :
+            !selMediumId ? '← 중 카테고리 선택' : null
+          }
+        />
       </div>
 
-      <div className="text-[10px] text-slate-500 px-1">
-        축=<b>{axis}</b> · 노드 {nodes.length}개 · 셀 클릭→수정, 우측 [관리] 열에서 자식 추가
+      <div className="text-[10px] text-slate-500 px-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
+        축=<b>{axis}</b> · 대 {larges.length} · 중(선택) {selLargeId ? mediums.length : '—'} · 소(선택) {selMediumId ? smalls.length : '—'}
       </div>
     </div>
   );
+}
 
-  function renderCell(n: TaxonomyNode | null, level: TaxonomyLevel) {
-    if (!n) return <span className="text-slate-300">—</span>;
-    const isEditing = editing?.id === n.taxonomy_id;
-    if (isEditing) {
-      return (
-        <input
-          autoFocus
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
-          onBlur={() => commitEdit(n)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') commitEdit(n);
-            if (e.key === 'Escape') setEditing(null);
-          }}
-          className="text-[10px] bg-white dark:bg-slate-900 border border-emerald-400 rounded px-1 w-full"
-        />
-      );
-    }
-    return (
-      <div className="flex items-center gap-0.5 group">
-        {n.emoji && <span>{n.emoji}</span>}
-        <button onClick={() => beginEdit(n)} className="hover:underline truncate flex-1 text-left">
-          {n.label}
-        </button>
-        <button onClick={() => beginEdit(n)} className="opacity-0 group-hover:opacity-100">
-          <Pencil className="h-2 w-2" />
-        </button>
-        <button onClick={() => remove(n)} className="opacity-0 group-hover:opacity-100 text-rose-500">
-          <X className="h-2.5 w-2.5" />
-        </button>
-        {n.locked === 1 && <span className="text-[8px] text-slate-400">🔒</span>}
+interface ColumnProps {
+  title: string;
+  items: TaxonomyNode[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onRename: (n: TaxonomyNode, label: string) => Promise<void> | void;
+  onDelete: (n: TaxonomyNode) => Promise<void> | void;
+  onAdd: (label: string) => Promise<void> | void;
+  color: 'emerald' | 'sky' | 'violet';
+  placeholder?: string | null;
+}
+
+function Column(p: ColumnProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addText, setAddText] = useState('');
+
+  const bgSel = { emerald: 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-400',
+                  sky:     'bg-sky-100 dark:bg-sky-900/40 border-sky-400',
+                  violet:  'bg-violet-100 dark:bg-violet-900/40 border-violet-400' }[p.color];
+  const btnColor = { emerald: 'text-emerald-600 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30',
+                     sky:     'text-sky-600 border-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30',
+                     violet:  'text-violet-600 border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/30' }[p.color];
+
+  const commitRename = (n: TaxonomyNode) => {
+    const label = editText.trim();
+    if (label && label !== n.label) p.onRename(n, label);
+    setEditingId(null);
+  };
+  const commitAdd = () => {
+    const label = addText.trim();
+    if (label) p.onAdd(label);
+    setAddText('');
+    setAdding(false);
+  };
+
+  return (
+    <div className="border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-900">
+      <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 px-1.5 py-1 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        {p.title}
       </div>
-    );
-  }
+      <ul className="p-1 space-y-0.5 min-h-[60px] max-h-[400px] overflow-y-auto">
+        {p.placeholder ? (
+          <li className="text-[10px] text-slate-400 text-center py-4">{p.placeholder}</li>
+        ) : p.items.length === 0 ? (
+          <li className="text-[10px] text-slate-400 text-center py-2">항목 없음</li>
+        ) : (
+          p.items.map((n) => {
+            const isEditing = editingId === n.taxonomy_id;
+            const isSelected = p.selectedId === n.taxonomy_id;
+            if (isEditing) {
+              return (
+                <li key={n.taxonomy_id}>
+                  <input
+                    autoFocus
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onBlur={() => commitRename(n)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitRename(n);
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="text-[10px] w-full px-1 py-0.5 rounded border border-emerald-400 bg-white dark:bg-slate-800"
+                  />
+                </li>
+              );
+            }
+            return (
+              <li
+                key={n.taxonomy_id}
+                className={[
+                  'group flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border cursor-pointer',
+                  isSelected
+                    ? bgSel
+                    : 'bg-white dark:bg-slate-800 border-transparent hover:bg-slate-100 dark:hover:bg-slate-700',
+                ].join(' ')}
+                onClick={() => p.onSelect(n.taxonomy_id)}
+              >
+                <span className="flex-1 truncate">{n.label}</span>
+                {n.locked === 1 && <span className="text-[8px] text-slate-400 mr-0.5" title="seed">🔒</span>}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setEditingId(n.taxonomy_id); setEditText(n.label); }}
+                  className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-slate-200 dark:hover:bg-slate-600 rounded"
+                  title="이름 수정"
+                >
+                  <Pencil className="h-2.5 w-2.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); p.onDelete(n); }}
+                  className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-500 rounded"
+                  title="삭제"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </li>
+            );
+          })
+        )}
+
+        {!p.placeholder && (
+          adding ? (
+            <li>
+              <div className="flex items-center gap-0.5">
+                <input
+                  autoFocus
+                  value={addText}
+                  onChange={(e) => setAddText(e.target.value)}
+                  onBlur={commitAdd}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitAdd();
+                    if (e.key === 'Escape') { setAdding(false); setAddText(''); }
+                  }}
+                  placeholder="새 항목"
+                  className={`flex-1 text-[10px] px-1 py-0.5 rounded border ${btnColor}`}
+                />
+                <Check className="h-2.5 w-2.5 text-emerald-600" />
+              </div>
+            </li>
+          ) : (
+            <li>
+              <button
+                onClick={() => { setAdding(true); setAddText(''); }}
+                className={`w-full inline-flex items-center justify-center gap-0.5 text-[10px] py-0.5 rounded border border-dashed ${btnColor}`}
+              >
+                <Plus className="h-2.5 w-2.5" /> 추가
+              </button>
+            </li>
+          )
+        )}
+      </ul>
+    </div>
+  );
 }

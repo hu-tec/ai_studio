@@ -21,8 +21,8 @@ export const ALLOWED_AXES: Record<string, string[]> = {
 
   'homepage|homepage':        ['홈페이지타입', '분야', '급수'],
 
-  // common — 대중소 5축 핵심 (어디서든 참조 가능)
-  'common|common':            ['분야', '급수', '부서', '직급', '홈페이지타입'],
+  // common — 원본 분류표 (scripts/seed-data/분류표_260402.txt) 5 축
+  'common|common':            ['분야', '급수', '홈페이지', '부서', '등급'],
   'common|company-rule':      ['유형', '업무별', '부서별', '직급별', '계약', '작성자'],
   'common|work-guide':        ['분류별', '교육별', '급수별', '세부급수', 'DB별'],
   'common|homepage':          ['홈페이지타입', '분야', '급수'],

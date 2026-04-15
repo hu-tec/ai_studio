@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Beaker } from 'lucide-react';
+import { Beaker, Database } from 'lucide-react';
 import { SectionCard } from '../components/SectionCard';
 import { ChipBar } from '../components/Chip';
 import { SAMPLE_ITEMS } from '../data';
@@ -8,6 +8,7 @@ import { PlanATab } from './PlanATab';
 import { PlanBTab } from './PlanBTab';
 import { PlanCTab } from './PlanCTab';
 import type { PlanKind } from '../types';
+import { useTaxonomy } from '../api';
 
 const PLANS: { code: PlanKind; label: string }[] = [
   { code: 'existing', label: '기존' },
@@ -16,12 +17,18 @@ const PLANS: { code: PlanKind; label: string }[] = [
   { code: 'C',        label: 'C안 surface 분리' },
 ];
 
-// 분류 모듈 체험 — 기존 work-class-demo 의 4 안 샌드박스 전체.
-// 런타임 데이터는 SAMPLE_ITEMS 만 사용. DB/API 접근 금지 (편집 탭과 완전 격리).
+// 분류 모듈 체험 — 4안(기존/A/B/C) 비교 샌드박스 + 편집 탭 라이브 DB 요약.
+// 상단: 편집 탭 DB 의 현재 상태 (라이브, 탭 전환 시 재fetch).
+// 하단: 샘플 아이템 기반 4안 비교 (개념 설계 도구 — 샘플 고정).
 export default function SandboxTab() {
   const [plan, setPlan] = useState<PlanKind>('A');
   const [itemId, setItemId] = useState(SAMPLE_ITEMS[2].id);
   const item = SAMPLE_ITEMS.find((i) => i.id === itemId)!;
+  const { nodes: commonNodes, loading: commonLoading } = useTaxonomy({ scope: 'common', gov: 'common' });
+  const axisCounts = commonNodes.reduce<Record<string, number>>((acc, n) => {
+    acc[n.axis] = (acc[n.axis] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-2">
@@ -31,16 +38,38 @@ export default function SandboxTab() {
           분류 모듈 체험
         </span>
         <span className="text-[10px] text-slate-500">
-          — 샘플 데이터 기반 4안(기존/A/B/C) 비교 샌드박스, DB 저장 없음
+          — 상단 라이브 DB 요약 + 하단 4안(기존/A/B/C) 비교 샌드박스
         </span>
       </div>
 
+      {/* 라이브 DB 요약 — 편집 탭에서 저장하면 여기에 즉시 반영 */}
+      <SectionCard
+        title="① 편집 탭 라이브 DB (scope=common · gov=common)"
+        subtitle={commonLoading ? '로딩...' : `총 ${commonNodes.length} 노드 · 원본 분류표_260402.txt 기반`}
+      >
+        <div className="flex flex-wrap gap-1">
+          {Object.entries(axisCounts).length === 0 && !commonLoading && (
+            <span className="text-[10px] text-slate-400">DB 비어있음 — seed 실행 필요</span>
+          )}
+          {Object.entries(axisCounts).map(([axis, count]) => (
+            <span
+              key={axis}
+              className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30"
+            >
+              <Database className="h-2.5 w-2.5 text-emerald-600" />
+              <b>{axis}</b>
+              <span className="text-emerald-700 dark:text-emerald-300">{count}</span>
+            </span>
+          ))}
+        </div>
+      </SectionCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
-        <SectionCard title="① 안 선택 (싱글 = 네모칩)" subtitle="클릭하여 체험">
+        <SectionCard title="② 안 선택 (싱글 = 네모칩)" subtitle="클릭하여 체험">
           <ChipBar options={PLANS} value={plan} onChange={(v) => setPlan(v)} />
         </SectionCard>
         <div className="lg:col-span-4">
-          <SectionCard title="② 샘플 아이템 (CRUD 데모)" subtitle={`총 ${SAMPLE_ITEMS.length}개`}>
+          <SectionCard title="③ 샘플 아이템 (CRUD 데모)" subtitle={`총 ${SAMPLE_ITEMS.length}개 · 4안 비교 고정 샘플`}>
             <div className="flex flex-wrap gap-1">
               {SAMPLE_ITEMS.map((s) => {
                 const active = s.id === itemId;

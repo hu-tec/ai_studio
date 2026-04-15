@@ -1,88 +1,42 @@
 /* eslint-disable no-console */
-// 업무 분류 최종 DB 시드 (T9)
-// - 대표님 만다라트 분류표 (xlsx) 4 영역 → work_class_mandalart 시드
-// - rules-manual/mockData.ts 의 대/중/소 트리 (보조)
-// - company-guidelines 의 flat 칩 상수 (보조)
+// 업무 분류 최종 DB 시드 (T9) — 진짜 원본 DB 기반 (분류표_260402.txt)
+// source of truth: scripts/seed-data/분류표_260402.txt (5 축 × 대/중/소 트리)
+//                  scripts/seed-data/taxonomy_common.json (파싱 결과, 이 스크립트가 직접 로드)
+// - 대표님 만다라트 분류표 4 영역 → work_class_mandalart 시드
+// - 사내규정/업무지침/홈페이지 flat 칩 → work_class_taxonomy (기존 유지)
 // - 결정론적 taxonomy_id (sha1) + INSERT OR IGNORE 로 idempotent.
 // - source='seed', locked=1 로 저장. 사용자가 편집하면 런타임에서 source='user' 로 승격.
 
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
 
 const DB_PATH = path.join(__dirname, '..', 'server', 'db', 'hutechc.db');
+const SEED_DATA_DIR = path.join(__dirname, 'seed-data');
 
 function sha1(s) { return crypto.createHash('sha1').update(s).digest('hex').slice(0, 16); }
 function tid(parts) { return 'wct-' + sha1(parts.join('|')); }
 
 /* ─────────────────────────────────────────────────────────
-   1) 대중소 트리 (rules-manual/mockData.ts 기반, common scope)
+   1) 원본 분류표 (분류표_260402.txt) — scope=common, gov=common
+      axis: 분야 / 급수 / 홈페이지 / 부서 / 등급
+      5 축 × 대/중/소 tree. 총 177 노드.
    ───────────────────────────────────────────────────────── */
-const LMS_TREES = [
-  {
-    axis: '분야', scope: 'common', gov: 'common',
-    items: [
-      { label: '문서', emoji: '📄', children: [
-        { label: '비즈니스', emoji: '💼', children: [
-          { label: '사업계획서', emoji: '📝' }, { label: '회사소개', emoji: '🏢' }, { label: 'PPT/기획서', emoji: '📊' },
-        ] },
-        { label: '법률', emoji: '⚖️', children: [
-          { label: '소송장', emoji: '📂' }, { label: '형사/민사', emoji: '📁' },
-        ] },
-      ] },
-      { label: '영상/SNS', emoji: '🎬', children: [
-        { label: '미디어/장르', emoji: '🎥', children: [
-          { label: '유튜브', emoji: '🔴' }, { label: '다큐멘터리', emoji: '🌍' },
-        ] },
-      ] },
-      { label: 'IT/개발', emoji: '💻', children: [
-        { label: '개발/보안', emoji: '🛡️', children: [
-          { label: 'AI/에이전트', emoji: '🤖' }, { label: '프론트/백엔드', emoji: '⛓️' },
-        ] },
-      ] },
-    ],
-  },
-  {
-    axis: '급수', scope: 'common', gov: 'common',
-    items: [
-      { label: '교육', emoji: '🎓', children: [
-        { label: '일반교육', emoji: '📚', children: [{ label: '1급~3급', emoji: '🥇' }] },
-      ] },
-    ],
-  },
-  {
-    axis: '홈페이지타입', scope: 'common', gov: 'common',
-    items: [
-      { label: '교육 홈페이지', emoji: '🎓', children: [
-        { label: '메인 영역', emoji: '🖥️', children: [{ label: '헤더 디자인', emoji: '🎨' }] },
-      ] },
-      { label: 'AI 홈페이지', emoji: '🤖', children: [] },
-      { label: '회사 홈페이지', emoji: '🏢', children: [] },
-    ],
-  },
-  {
-    axis: '부서', scope: 'common', gov: 'common',
-    items: [
-      { label: '기획부서', emoji: '📝', children: [
-        { label: '운영팀', emoji: '⚙️', children: [{ label: '강사팀', emoji: '👨‍🏫' }] },
-      ] },
-      { label: '영업부서', emoji: '💰', children: [
-        { label: '국내영업', emoji: '🇰🇷', children: [{ label: 'B2B 영업', emoji: '🤝' }] },
-      ] },
-    ],
-  },
-  {
-    axis: '직급', scope: 'common', gov: 'common',
-    items: [
-      { label: '임원/대표', emoji: '👑', children: [
-        { label: '의사결정', emoji: '📢', children: [{ label: '결재 라인', emoji: '✍️' }] },
-      ] },
-    ],
-  },
-];
+const TAXONOMY_COMMON = JSON.parse(
+  fs.readFileSync(path.join(SEED_DATA_DIR, 'taxonomy_common.json'), 'utf8'),
+);
+
+const COMMON_AXIS_META = {
+  '분야':     { levels: ['large', 'medium', 'small'] },
+  '급수':     { levels: ['large', 'medium', 'small'] },
+  '홈페이지': { levels: ['large', 'medium'] },
+  '부서':     { levels: ['large', 'medium'] },
+  '등급':     { levels: ['flat'] },
+};
 
 /* ─────────────────────────────────────────────────────────
-   2) flat 칩 (CompanyGuidelinesPage 상수 + 대표님 분류표 보강)
+   2) 사내규정/업무지침/홈페이지 flat 칩 (CompanyGuidelinesPage 기반)
    ───────────────────────────────────────────────────────── */
 const FLAT_CHIPS = [
   // 업무지침
@@ -92,31 +46,20 @@ const FLAT_CHIPS = [
   { scope: 'ai-studio', gov: 'work-guide', axis: '세부급수', labels: ['1급','2급','3급','4급','5급','6급','7급','8급'] },
   { scope: 'ai-studio', gov: 'work-guide', axis: 'DB별',     labels: ['커리큘럼','문제은행','교재','마케팅'] },
 
-  // 사내규정 (대표님 분류표의 인물·계약·거래처 영역 반영)
+  // 사내규정 — 유형(거버넌스 3단계) + 5축
   { scope: 'ai-studio', gov: 'company-rule', axis: '유형',   labels: ['규정','준규정','선택규정'] },
   { scope: 'ai-studio', gov: 'company-rule', axis: '업무별', labels: ['문서','영상','음성','교육','마케팅','상담','기획','개발','거래처','면접','신청서','매뉴얼','시험','워크','전문가매칭','컨탠츠','커리','기타'] },
-  { scope: 'ai-studio', gov: 'company-rule', axis: '부서별', labels: ['경영','개발','마케팅','인사','영업','강사팀','기획','홈페이지','상담','총무','관리','회계','교육','TF비서팀','관리상담회계총무'] },
+  { scope: 'ai-studio', gov: 'company-rule', axis: '부서별', labels: ['경영','개발','마케팅','인사','영업','강사팀','기획','홈페이지','상담','총무','관리','회계','교육','TF비서팀'] },
   { scope: 'ai-studio', gov: 'company-rule', axis: '직급별', labels: ['대표','임원','이사','고문','위원','팀장','사원','과장','강사','신입','알바','외부','수습'] },
   { scope: 'ai-studio', gov: 'company-rule', axis: '계약',   labels: ['정규직','계약형','프리랜서','수습','파트타임','외주','패밀리-타임스','관공서','제휴업무처','기타'] },
   { scope: 'ai-studio', gov: 'company-rule', axis: '작성자', labels: ['회사','경영','영업','홈페이지','마케팅','개발','인사','관리','상담','강사팀','신입','팀장','임원','대표'] },
 
-  // 홈페이지 분류
+  // 홈페이지 분류 (consumer 용 컬럼 세트)
   { scope: 'ai-studio', gov: 'homepage', axis: '홈페이지타입', labels: ['교육 홈페이지','AI 홈페이지','회사 홈페이지','전문가 매칭','원페이지','전시 홈페이지'] },
-  { scope: 'ai-studio', gov: 'homepage', axis: '분야',         labels: ['프롬프트','번역','윤리','전문가','컨탠츠','커리','시험','면접','상담'] },
-  { scope: 'ai-studio', gov: 'homepage', axis: '급수',         labels: ['일반','전문','교육'] },
-
-  // 대표님 분류표의 산업/콘텐츠 / 언어 / AI 도구 (common 으로 분류)
-  { scope: 'common', gov: 'common', axis: '산업',     labels: ['반도체','자율주행','우주','웹툰','K드라마','영화','고전','조선','방산','기술','피지컬','로봇','산업별','이슈별'] },
-  { scope: 'common', gov: 'common', axis: '문화',     labels: ['K문화','K음식','K교육','음악','드라마','시나리오','그림','노래','소설','시 문학','창의적컨탠츠','예술','문화'] },
-  { scope: 'common', gov: 'common', axis: '생활',     labels: ['교육','자녀','부모','생활','운동','건강','직업','정치','경제','사회','음식','주식','비즈니스','문화','국적','연령'] },
-  { scope: 'common', gov: 'common', axis: '전문영역', labels: ['의료','법률','노무','회계','특허','전문가','과학자','개발자','창의적활동'] },
-  { scope: 'common', gov: 'common', axis: '언어그룹', labels: ['영어','일본어','중국어','히브리어','마우리어','제주어','스페인어','아랍어','독일어','유럽어','이슈언어','전문가 언어','예술적 창의적 언어','언어별 109개'] },
-  { scope: 'common', gov: 'common', axis: '기능',     labels: ['영상','음성','동시통역','이미지','컨탠츠','기능별','프롬프트','개발','문화/국적/연령','전문가별','영역별'] },
-  { scope: 'common', gov: 'common', axis: 'AI도구',   labels: ['구글','GPT','제미나이','MS','나노바나나','컨탠츠 T-T','영상 S-T','음성 TTS','동시통역 S-S','이미지 T-T'] },
 ];
 
 /* ─────────────────────────────────────────────────────────
-   3) 만다라트 시드 — 대표님 xlsx 의 4 영역
+   3) 만다라트 시드 — 대표님 xlsx 의 4 영역 (유지)
    ───────────────────────────────────────────────────────── */
 const MANDALARTS = [
   {
@@ -200,25 +143,25 @@ function insertNode(db, row) {
   stmt.run(row);
 }
 
-function seedTree(db, { axis, scope, gov, items }) {
+// 재귀: node.children 있으면 medium→small 로 내려감
+function seedTreeRec(db, { axis, scope, gov, levels }, nodes, parentPath, parentId, depth) {
   let order = 0;
-  const walk = (node, parentPath, parentId, level) => {
-    const path = [...parentPath, node.label];
-    const id = tid([scope, gov, axis, ...path]);
+  for (const n of nodes) {
+    const level = levels[depth] || 'flat';
+    const pathArr = [...parentPath, n.label];
+    const id = tid([scope, gov, axis, ...pathArr]);
     insertNode(db, {
       taxonomy_id: id,
       scope, gov, axis, level,
       parent_id: parentId,
-      label: node.label,
-      emoji: node.emoji || null,
+      label: n.label,
+      emoji: null,
       sort_order: order++,
     });
-    if (node.children) {
-      const childLevel = level === 'large' ? 'medium' : 'small';
-      node.children.forEach((c) => walk(c, path, id, childLevel));
+    if (n.children && n.children.length && depth + 1 < levels.length) {
+      seedTreeRec(db, { axis, scope, gov, levels }, n.children, pathArr, id, depth + 1);
     }
-  };
-  items.forEach((n) => walk(n, [], null, 'large'));
+  }
 }
 
 function seedFlat(db, { scope, gov, axis, labels }) {
@@ -240,17 +183,11 @@ function seedMandalart(db, m) {
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const text = (m.cells[r] && m.cells[r][c]) || '';
-      cells.push({
-        id: `seed-mc-${m.id}-${r}-${c}`,
-        text,
-      });
+      cells.push({ id: `seed-mc-${m.id}-${r}-${c}`, text });
     }
   }
   const data = JSON.stringify({
-    label: m.label,
-    size: { rows: 9, cols: 9 },
-    cells,
-    seed: true,
+    label: m.label, size: { rows: 9, cols: 9 }, cells, seed: true,
   });
   db.prepare(`
     INSERT OR IGNORE INTO work_class_mandalart
@@ -262,7 +199,11 @@ function seedMandalart(db, m) {
 function ensureSeedFlag(db) {
   db.prepare(`INSERT OR REPLACE INTO app_settings (key, data, updated_at)
               VALUES ('work_class_seed_done', ?, datetime('now'))`)
-    .run(JSON.stringify({ at: new Date().toISOString(), source: 'xlsx-대표님' }));
+    .run(JSON.stringify({
+      at: new Date().toISOString(),
+      source: '분류표_260402.txt + 대표님 만다라트 xlsx',
+      version: 2,
+    }));
 }
 
 function main() {
@@ -271,9 +212,32 @@ function main() {
   const beforeM = db.prepare('SELECT COUNT(*) c FROM work_class_mandalart').get().c;
 
   const tx = db.transaction(() => {
-    LMS_TREES.forEach((t) => seedTree(db, t));
+    // 0) cleanup: 이전 버전의 seed 노드 제거 (user 편집은 보존)
+    // 원본 분류표_260402.txt 기반 새 seed 를 깨끗하게 올리기 위함.
+    const cleanupCommon = db.prepare(
+      `DELETE FROM work_class_taxonomy WHERE scope='common' AND source='seed'`
+    ).run();
+    if (cleanupCommon.changes) {
+      console.log(`[cleanup] removed ${cleanupCommon.changes} old seed rows from common scope`);
+    }
+
+    // 1) 원본 분류표 — 5 축 common|common tree
+    for (const [axis, tree] of Object.entries(TAXONOMY_COMMON)) {
+      const meta = COMMON_AXIS_META[axis];
+      if (!meta) { console.warn('unknown axis', axis); continue; }
+      seedTreeRec(
+        db,
+        { axis, scope: 'common', gov: 'common', levels: meta.levels },
+        tree, [], null, 0,
+      );
+    }
+
+    // 2) 사내규정/업무지침 flat 칩
     FLAT_CHIPS.forEach((f) => seedFlat(db, f));
+
+    // 3) 만다라트
     MANDALARTS.forEach((m) => seedMandalart(db, m));
+
     ensureSeedFlag(db);
   });
   tx();

@@ -33,7 +33,9 @@ function createGenericRouter(tableName, idColumn, opts = {}) {
     'id', idColumn, 'revision', 'removed', 'updated_at', 'created_at',
   ]);
 
-  // 본문을 flat 컬럼 / data blob 으로 분리
+  // 본문을 flat 컬럼 / data blob 으로 분리.
+  // 클라이언트가 구버전 읽기에서 얻어온 `data` 를 그대로 되돌려주더라도
+  // 그 안의 flat 컬럼 이름/시스템 필드는 blob 에 남기지 않는다 (stale leakage 차단).
   function splitBody(body) {
     const flat = {};
     const blob = {};
@@ -42,7 +44,13 @@ function createGenericRouter(tableName, idColumn, opts = {}) {
       if (flatSet.has(k)) {
         flat[k] = jsonFlatColumns.has(k) ? (v == null ? null : JSON.stringify(v)) : v;
       } else if (k === 'data' && hasDataBlob) {
-        if (v && typeof v === 'object') Object.assign(blob, v);
+        if (v && typeof v === 'object') {
+          for (const [k2, v2] of Object.entries(v)) {
+            if (SYSTEM_FIELDS.has(k2)) continue;
+            if (flatSet.has(k2)) continue;
+            blob[k2] = v2;
+          }
+        }
       } else if (hasDataBlob) {
         blob[k] = v;
       }

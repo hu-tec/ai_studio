@@ -1,0 +1,754 @@
+{
+  "분야": [
+    {
+      "label": "문서",
+      "children": [
+        {
+          "label": "비즈니스",
+          "children": [
+            {
+              "label": "사업계획서",
+              "children": []
+            },
+            {
+              "label": "회사소개",
+              "children": []
+            },
+            {
+              "label": "PPT",
+              "children": []
+            },
+            {
+              "label": "엑셀",
+              "children": []
+            },
+            {
+              "label": "기획서",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "법률",
+          "children": [
+            {
+              "label": "소송장",
+              "children": []
+            },
+            {
+              "label": "준비서면",
+              "children": []
+            },
+            {
+              "label": "형사",
+              "children": []
+            },
+            {
+              "label": "민사",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "의료",
+          "children": []
+        },
+        {
+          "label": "특허",
+          "children": []
+        },
+        {
+          "label": "노무",
+          "children": []
+        },
+        {
+          "label": "교재",
+          "children": []
+        },
+        {
+          "label": "논문",
+          "children": []
+        },
+        {
+          "label": "기사",
+          "children": []
+        },
+        {
+          "label": "고전",
+          "children": []
+        },
+        {
+          "label": "그외",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "음성",
+      "children": [
+        {
+          "label": "아나운서",
+          "children": []
+        },
+        {
+          "label": "관광가이드",
+          "children": []
+        },
+        {
+          "label": "큐레이터",
+          "children": []
+        },
+        {
+          "label": "안내 방송",
+          "children": []
+        },
+        {
+          "label": "교육 강의",
+          "children": []
+        },
+        {
+          "label": "실시간",
+          "children": []
+        },
+        {
+          "label": "화상수업",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "영상/SNS",
+      "children": [
+        {
+          "label": "미디어/장르",
+          "children": [
+            {
+              "label": "유튜브",
+              "children": []
+            },
+            {
+              "label": "다큐멘터리",
+              "children": []
+            },
+            {
+              "label": "영화",
+              "children": []
+            },
+            {
+              "label": "드라마",
+              "children": []
+            },
+            {
+              "label": "예능",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "IT/개발",
+      "children": [
+        {
+          "label": "개발/보안",
+          "children": [
+            {
+              "label": "AI",
+              "children": []
+            },
+            {
+              "label": "에이전트",
+              "children": []
+            },
+            {
+              "label": "디비(DB)",
+              "children": []
+            },
+            {
+              "label": "빅데이터",
+              "children": []
+            },
+            {
+              "label": "백엔드",
+              "children": []
+            },
+            {
+              "label": "프론트",
+              "children": []
+            },
+            {
+              "label": "프로그램",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "디자인/기획",
+          "children": [
+            {
+              "label": "웹모바일 디자인",
+              "children": []
+            },
+            {
+              "label": "웹기획",
+              "children": []
+            },
+            {
+              "label": "홈페이지 UIUX",
+              "children": []
+            },
+            {
+              "label": "컨텐츠",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "창의적활동",
+      "children": [
+        {
+          "label": "콘텐츠",
+          "children": [
+            {
+              "label": "드라마",
+              "children": []
+            },
+            {
+              "label": "웹툰소설",
+              "children": []
+            },
+            {
+              "label": "소설",
+              "children": []
+            },
+            {
+              "label": "시",
+              "children": []
+            },
+            {
+              "label": "음악",
+              "children": []
+            },
+            {
+              "label": "미술",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "번역",
+      "children": [
+        {
+          "label": "통번역 방식",
+          "children": [
+            {
+              "label": "순차통역",
+              "children": []
+            },
+            {
+              "label": "동시통역",
+              "children": []
+            },
+            {
+              "label": "음성번역",
+              "children": []
+            },
+            {
+              "label": "자가선택",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "프롬프트",
+      "children": []
+    },
+    {
+      "label": "확장영역",
+      "children": [
+        {
+          "label": "라이프/전문",
+          "children": [
+            {
+              "label": "암",
+              "children": []
+            },
+            {
+              "label": "요리",
+              "children": []
+            },
+            {
+              "label": "재무",
+              "children": []
+            },
+            {
+              "label": "주식",
+              "children": []
+            },
+            {
+              "label": "부동산",
+              "children": []
+            },
+            {
+              "label": "자녀",
+              "children": []
+            },
+            {
+              "label": "연애",
+              "children": []
+            },
+            {
+              "label": "입시",
+              "children": []
+            },
+            {
+              "label": "사주",
+              "children": []
+            },
+            {
+              "label": "결혼",
+              "children": []
+            },
+            {
+              "label": "영어",
+              "children": []
+            },
+            {
+              "label": "직장찾기",
+              "children": []
+            },
+            {
+              "label": "운동",
+              "children": []
+            },
+            {
+              "label": "사업",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "급수": [
+    {
+      "label": "프롬",
+      "children": [
+        {
+          "label": "교육",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            },
+            {
+              "label": "4급",
+              "children": []
+            },
+            {
+              "label": "5급",
+              "children": []
+            },
+            {
+              "label": "6급",
+              "children": []
+            },
+            {
+              "label": "7급",
+              "children": []
+            },
+            {
+              "label": "8급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "일반",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "전문",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "번역",
+      "children": [
+        {
+          "label": "교육",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            },
+            {
+              "label": "4급",
+              "children": []
+            },
+            {
+              "label": "5급",
+              "children": []
+            },
+            {
+              "label": "6급",
+              "children": []
+            },
+            {
+              "label": "7급",
+              "children": []
+            },
+            {
+              "label": "8급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "일반",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "전문",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "윤리",
+      "children": [
+        {
+          "label": "교육",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            },
+            {
+              "label": "4급",
+              "children": []
+            },
+            {
+              "label": "5급",
+              "children": []
+            },
+            {
+              "label": "6급",
+              "children": []
+            },
+            {
+              "label": "7급",
+              "children": []
+            },
+            {
+              "label": "8급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "일반",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            },
+            {
+              "label": "3급",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "전문",
+          "children": [
+            {
+              "label": "1급",
+              "children": []
+            },
+            {
+              "label": "2급",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "홈페이지": [
+    {
+      "label": "교육",
+      "children": []
+    },
+    {
+      "label": "번역",
+      "children": [
+        {
+          "label": "109개 언어",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "통독 문서",
+      "children": [
+        {
+          "label": "A분야 나눔",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "전시회",
+      "children": [
+        {
+          "label": "박물관",
+          "children": []
+        },
+        {
+          "label": "전시회",
+          "children": []
+        },
+        {
+          "label": "관광지",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "전문가 매칭",
+      "children": [
+        {
+          "label": "영업전문",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "시험",
+      "children": []
+    },
+    {
+      "label": "그외",
+      "children": []
+    }
+  ],
+  "부서": [
+    {
+      "label": "기획",
+      "children": []
+    },
+    {
+      "label": "홈페이지",
+      "children": []
+    },
+    {
+      "label": "영업",
+      "children": []
+    },
+    {
+      "label": "마케팅",
+      "children": []
+    },
+    {
+      "label": "회계",
+      "children": []
+    },
+    {
+      "label": "인사",
+      "children": []
+    },
+    {
+      "label": "관리",
+      "children": []
+    },
+    {
+      "label": "상담",
+      "children": []
+    },
+    {
+      "label": "총무",
+      "children": []
+    },
+    {
+      "label": "개발",
+      "children": []
+    },
+    {
+      "label": "그외",
+      "children": []
+    },
+    {
+      "label": "강사 팀",
+      "children": [
+        {
+          "label": "테솔",
+          "children": []
+        },
+        {
+          "label": "프롬프트",
+          "children": []
+        },
+        {
+          "label": "AI번역",
+          "children": []
+        },
+        {
+          "label": "윤리",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "커리교제 팀",
+      "children": [
+        {
+          "label": "테솔",
+          "children": []
+        },
+        {
+          "label": "프롬프트",
+          "children": []
+        },
+        {
+          "label": "AI번역",
+          "children": []
+        },
+        {
+          "label": "윤리",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "문제은행 팀",
+      "children": [
+        {
+          "label": "프롬프트",
+          "children": []
+        },
+        {
+          "label": "AI번역",
+          "children": []
+        },
+        {
+          "label": "윤리",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "등급": [
+    {
+      "label": "알바",
+      "children": []
+    },
+    {
+      "label": "신입",
+      "children": []
+    },
+    {
+      "label": "강사",
+      "children": []
+    },
+    {
+      "label": "팀장",
+      "children": []
+    },
+    {
+      "label": "개발",
+      "children": []
+    },
+    {
+      "label": "외부",
+      "children": []
+    },
+    {
+      "label": "임원",
+      "children": []
+    },
+    {
+      "label": "대표",
+      "children": []
+    }
+  ]
+}
