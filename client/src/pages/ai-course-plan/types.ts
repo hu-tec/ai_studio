@@ -1,30 +1,20 @@
 export type CoursePlanId = 'A' | 'B' | 'C';
-export type HoursMode = '40h' | '10h';
+export type HoursMode = '10h' | '40h';
 export type TabKey = CoursePlanId | 'compare';
 
-export interface CourseModule {
+export interface CourseSection {
   num: number;
   title: string;
-  subtitle?: string;
+  A: string[];
+  B: string[];
+  C: string[];
 }
 
-export interface CoursePlan {
-  id: CoursePlanId;
-  name: string;
-  axis: string;
-  audience: string[];
-  concept: string;
-  strengths: string[];
-  modules40h: CourseModule[];
-  modules10h: CourseModule[];
-}
-
-export interface ComparisonRow {
+export interface PlanMeta {
+  hours: HoursMode;
   label: string;
-  A: string;
-  B: string;
-  C: string;
-  highlight?: CoursePlanId;
+  duration: string;
+  unitLabel: string;
 }
 
 export interface AxisChip {
