@@ -76,6 +76,9 @@ export interface MandalartCell {
   achievement?: number;      // 달성률 1~5 (1·2·3=양, 4·5=질)
   status?: FranklinStatus;   // 진행 상태 (프랭클린과 동기화)
   color?: string;            // 셀 색깔 (부모→자식 전부 상속)
+  link?: string;             // 대표 링크 URL (우상단 ↗ 클릭 시 새 탭 이동)
+  subLinks?: { url: string; label?: string }[]; // 서브 링크 목록
+  files?: { url: string; name: string }[];      // 파일 첨부 (S3 업로드)
 }
 
 // 만다라트 기간 모드

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { ArrowLeft, GripVertical, FileText, Palette, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowLeft, GripVertical, FileText, Palette, Maximize2, Minimize2, ExternalLink, LayoutGrid, X, Plus, Upload, Paperclip } from 'lucide-react';
 import type { MandalartCell, Task, FranklinPriority, FranklinStatus, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
 import { getNextNumber, cycleStatus, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, ACH_COLORS, ACH_LABELS, mandalartCellCount, mandalartCenterIdx, mandalartChildCount, MANDALART_COLOR_PALETTE, MANDALART_DIMS, mandalartColor, WORKLOG_MANDALART_ID } from './data';
 
@@ -69,7 +69,17 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [expand9x9, setExpand9x9] = useState(false);
   const [colorPickerId, setColorPickerId] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const [popupCellId, setPopupCellId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const initialized = useRef(false);
+
+  // ESC로 팝업 닫기
+  useEffect(() => {
+    if (!popupCellId) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPopupCellId(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [popupCellId]);
 
   const { rows, cols } = size;
   const cellCount = mandalartCellCount(size);
@@ -249,6 +259,31 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
     if (cfg) return { bg: cfg.light, border: cfg.border };
     return { bg: '#fff', border: '#e2e8f0' };
   };
+
+  // 재귀 패치: root + children 어디에 있든 id로 찾아서 patch 적용
+  const applyCellPatch = (arr: MandalartCell[], id: string, patch: Partial<MandalartCell>): MandalartCell[] => {
+    return arr.map(c => {
+      if (c.id === id) return { ...c, ...patch };
+      if (c.children && c.children.length > 0) {
+        return { ...c, children: applyCellPatch(c.children, id, patch) };
+      }
+      return c;
+    });
+  };
+  const updateCellFields = (id: string, patch: Partial<MandalartCell>) => {
+    onCellsChange(applyCellPatch(root, id, patch));
+  };
+  const findCellById = (arr: MandalartCell[], id: string): MandalartCell | null => {
+    for (const c of arr) {
+      if (c.id === id) return c;
+      if (c.children) {
+        const f = findCellById(c.children, id);
+        if (f) return f;
+      }
+    }
+    return null;
+  };
+  const popupCell = popupCellId ? findCellById(root, popupCellId) : null;
 
   const linkedTask = (cell: MandalartCell): Task | null => {
     if (!cell.taskId) return null;
@@ -625,8 +660,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
               draggable={!center && !!cell.text.trim()}
               onDragStart={e => onDragStart(e, cell)}
               onDragEnd={() => setDragCellId(null)}
-              onDoubleClick={() => !drillId && cell.text.trim() && handleDrillDown(cell, idx)}
-              onClick={() => setEditingId(cell.id)}
+              onClick={() => setPopupCellId(cell.id)}
               style={{
                 position: 'relative',
                 aspectRatio: '1 / 1',
@@ -634,13 +668,29 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                 borderRadius: 8,
                 border: `2px solid ${linked ? statusColor : cellBorder}`,
                 display: 'flex', flexDirection: 'column',
-                cursor: center ? 'text' : cell.text.trim() ? (drillId ? 'grab' : 'pointer') : 'text',
+                cursor: cell.text.trim() && !center ? (drillId ? 'grab' : 'pointer') : 'pointer',
                 transition: 'all 0.15s', overflow: 'hidden',
               }}
             >
               {linked && <div style={{ height: 3, background: statusColor, width: '100%' }} />}
+              {/* 우상단 — 링크 있으면 ↗ 아이콘(새 탭), 없으면 드래그 표식 */}
               {!center && cell.text.trim() && (
-                <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3 }}><GripVertical size={12} /></div>
+                cell.link ? (
+                  <button
+                    onClick={e => { e.stopPropagation(); window.open(cell.link, '_blank', 'noopener,noreferrer'); }}
+                    title={cell.link}
+                    style={{
+                      position: 'absolute', top: 4, right: 4, zIndex: 3,
+                      width: 18, height: 18, padding: 0, borderRadius: 4,
+                      background: '#fff', border: '1px solid #bfdbfe',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer',
+                    }}>
+                    <ExternalLink size={11} color="#3B82F6" />
+                  </button>
+                ) : (
+                  <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3, pointerEvents: 'none' }}><GripVertical size={12} /></div>
+                )
               )}
               {/* 색상 피커 버튼 + 팝업 */}
               {showColorPicker && (
@@ -672,26 +722,14 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                 </div>
               )}
 
-              {/* 텍스트 */}
-              {editingId === cell.id ? (
-                <textarea autoFocus value={cell.text}
-                  onChange={e => updateCell(cell.id, e.target.value)}
-                  onBlur={() => setEditingId(null)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } }}
-                  style={{ flex: 1, width: '100%', padding: '6px 8px', border: 'none', outline: 'none',
-                    fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
-                    color: center ? '#fff' : '#1e293b', background: 'transparent',
-                    resize: 'none', fontFamily: 'inherit', lineHeight: 1.4 }}
-                />
-              ) : (
-                <div style={{ flex: 1, padding: '6px 8px',
-                  fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
-                  color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
-                  lineHeight: 1.4, wordBreak: 'break-word',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  {cell.text || (center ? PERIOD_LABELS[period] : '+')}
-                </div>
-              )}
+              {/* 텍스트 (편집은 팝업에서) */}
+              <div style={{ flex: 1, padding: '6px 8px',
+                fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
+                color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
+                lineHeight: 1.4, wordBreak: 'break-word',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                {cell.text || (center ? PERIOD_LABELS[period] : '+')}
+              </div>
 
               {/* 상태 + 달성률 (center 제외, 텍스트 있을 때) */}
               {!center && cell.text.trim() && (
@@ -723,6 +761,19 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                         }}
                       />
                     ))}
+                    {/* 하위 분해 아이콘 — root 모드 only */}
+                    {!drillId && (
+                      <button onClick={() => handleDrillDown(cell, idx)}
+                        title="하위 분해"
+                        style={{
+                          width: 14, height: 14, marginLeft: 3,
+                          borderRadius: 3, border: '1px solid #e2e8f0', background: '#f8fafc',
+                          cursor: 'pointer', padding: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                        <LayoutGrid size={9} color="#64748b" />
+                      </button>
+                    )}
                   </div>
                   {/* 하위 진행 현황 */}
                   {!drillId && cell.children && cell.children.length > 0 && (() => {
@@ -752,10 +803,245 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       {/* 안내 */}
       {!drillId && (
         <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
-          셀 클릭→편집 | 더블클릭→하위 분해 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
+          셀 클릭→편집창 | ⊞→하위 분해 | ↗→링크 이동 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
         </div>
       )}
       </>
+      )}
+
+      {/* 셀 편집 팝업 */}
+      {popupCell && (
+        <div
+          onClick={() => setPopupCellId(null)}
+          style={{ position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(15,23,42,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#fff', borderRadius: 10, padding: 18,
+              width: '100%', maxWidth: 540, maxHeight: '88vh', overflow: 'auto',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}
+          >
+            {/* 헤더 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#1e293b' }}>셀 편집</span>
+              <button onClick={() => setPopupCellId(null)}
+                title="닫기 (Esc)"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#94a3b8' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* 제목 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>제목</label>
+            <textarea autoFocus value={popupCell.text}
+              onChange={e => updateCellFields(popupCell.id, { text: e.target.value })}
+              rows={2}
+              placeholder="셀 제목 입력"
+              style={{ width: '100%', padding: 8, border: '1px solid #e2e8f0', borderRadius: 6,
+                fontSize: 13, fontFamily: 'inherit', resize: 'vertical', outline: 'none', marginBottom: 14 }}
+            />
+
+            {/* 대표 링크 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>
+              대표 링크 <span style={{ color: '#94a3b8', fontWeight: 400 }}>— 우상단 ↗ 클릭 시 이 URL로 바로 이동</span>
+            </label>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+              <input type="url" value={popupCell.link || ''} placeholder="https://notion.so/..."
+                onChange={e => updateCellFields(popupCell.id, { link: e.target.value || undefined })}
+                style={{ flex: 1, padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 12, outline: 'none' }} />
+              {popupCell.link && (
+                <button onClick={() => window.open(popupCell.link, '_blank', 'noopener,noreferrer')}
+                  style={{ padding: '6px 12px', background: '#3B82F6', color: '#fff', border: 'none',
+                    borderRadius: 6, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <ExternalLink size={11} /> 열기
+                </button>
+              )}
+            </div>
+
+            {/* 서브 링크 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>서브 링크</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 6 }}>
+              {(popupCell.subLinks || []).map((lk, i) => (
+                <div key={i} style={{ display: 'flex', gap: 4 }}>
+                  <input placeholder="라벨(선택)" value={lk.label || ''}
+                    onChange={e => {
+                      const next = [...(popupCell.subLinks || [])];
+                      next[i] = { ...next[i], label: e.target.value };
+                      updateCellFields(popupCell.id, { subLinks: next });
+                    }}
+                    style={{ width: 110, padding: '5px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
+                  <input placeholder="https://..." value={lk.url}
+                    onChange={e => {
+                      const next = [...(popupCell.subLinks || [])];
+                      next[i] = { ...next[i], url: e.target.value };
+                      updateCellFields(popupCell.id, { subLinks: next });
+                    }}
+                    style={{ flex: 1, padding: '5px 6px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 11, outline: 'none' }} />
+                  {lk.url && (
+                    <button onClick={() => window.open(lk.url, '_blank', 'noopener,noreferrer')}
+                      title="열기"
+                      style={{ padding: '5px 7px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 5, cursor: 'pointer' }}>
+                      <ExternalLink size={11} color="#3B82F6" />
+                    </button>
+                  )}
+                  <button onClick={() => {
+                      const next = (popupCell.subLinks || []).filter((_, j) => j !== i);
+                      updateCellFields(popupCell.id, { subLinks: next.length ? next : undefined });
+                    }}
+                    title="삭제"
+                    style={{ padding: '5px 7px', background: '#fff', border: '1px solid #fecaca', borderRadius: 5, cursor: 'pointer', color: '#dc2626' }}>
+                    <X size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => {
+                const next = [...(popupCell.subLinks || []), { url: '', label: '' }];
+                updateCellFields(popupCell.id, { subLinks: next });
+              }}
+              style={{ padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 5,
+                fontSize: 11, cursor: 'pointer', color: '#475569', marginBottom: 14,
+                display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <Plus size={10} /> 서브 링크 추가
+            </button>
+
+            {/* 파일 첨부 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>파일 첨부</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 6 }}>
+              {(popupCell.files || []).map((f, i) => (
+                <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center',
+                  padding: '5px 8px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 5 }}>
+                  <Paperclip size={11} color="#64748b" />
+                  <a href={f.url} target="_blank" rel="noopener noreferrer"
+                    style={{ flex: 1, fontSize: 11, color: '#3B82F6', textDecoration: 'none',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {f.name}
+                  </a>
+                  <button onClick={() => {
+                      const next = (popupCell.files || []).filter((_, j) => j !== i);
+                      updateCellFields(popupCell.id, { files: next.length ? next : undefined });
+                    }}
+                    title="삭제"
+                    style={{ padding: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}>
+                    <X size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 5,
+              fontSize: 11, cursor: uploading ? 'wait' : 'pointer', color: '#475569', marginBottom: 14 }}>
+              {uploading ? '업로드 중...' : (<><Upload size={10} /> 파일 업로드</>)}
+              <input type="file" style={{ display: 'none' }} disabled={uploading}
+                onChange={async e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploading(true);
+                  try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('category', 'mandalart');
+                    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.success && data.s3_url) {
+                      const next = [...(popupCell.files || []), { url: data.s3_url, name: data.original_name || file.name }];
+                      updateCellFields(popupCell.id, { files: next });
+                    }
+                  } catch (err) {
+                    console.error('upload failed', err);
+                  } finally {
+                    setUploading(false);
+                    (e.target as HTMLInputElement).value = '';
+                  }
+                }} />
+            </label>
+
+            {/* 색상 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>색상</label>
+            <div style={{ display: 'flex', gap: 5, marginBottom: 14, flexWrap: 'wrap' }}>
+              <button onClick={() => updateCellFields(popupCell.id, { color: undefined })}
+                title="해제"
+                style={{ width: 22, height: 22, borderRadius: '50%',
+                  border: !popupCell.color ? '2px solid #1e293b' : '1px solid #cbd5e1',
+                  background: '#fff', cursor: 'pointer', fontSize: 10, padding: 0 }}>×</button>
+              {MANDALART_COLOR_PALETTE.map(c => (
+                <button key={c.value} onClick={() => updateCellFields(popupCell.id, { color: c.value })}
+                  title={c.value}
+                  style={{ width: 22, height: 22, borderRadius: '50%',
+                    border: popupCell.color === c.value ? '2px solid #1e293b' : '1px solid #cbd5e1',
+                    background: c.bg, cursor: 'pointer', padding: 0 }} />
+              ))}
+            </div>
+
+            {/* 상태 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>상태</label>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 14, flexWrap: 'wrap' }}>
+              {(['pending','progress','done','forwarded','cancelled'] as FranklinStatus[]).map(s => {
+                const cfg = FRANKLIN_STATUS_CONFIG[s];
+                const active = (popupCell.status || 'pending') === s;
+                return (
+                  <button key={s} onClick={() => updateCellFields(popupCell.id, { status: s })}
+                    title={cfg.label}
+                    style={{ padding: '4px 9px',
+                      background: active ? cfg.bg : '#fff',
+                      border: `1px solid ${active ? cfg.color : '#e2e8f0'}`,
+                      borderRadius: 5, cursor: 'pointer', fontSize: 11,
+                      color: active ? cfg.color : '#64748b', fontWeight: active ? 700 : 400,
+                      display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <span>{cfg.icon}</span>{cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 달성률 */}
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>달성률</label>
+            <div style={{ display: 'flex', gap: 5, marginBottom: 14, alignItems: 'center' }}>
+              {[1,2,3,4,5].map(v => {
+                const active = (popupCell.achievement || 0) >= v;
+                return (
+                  <button key={v}
+                    onClick={() => updateCellFields(popupCell.id, { achievement: popupCell.achievement === v ? 0 : v })}
+                    title={ACH_LABELS[v]}
+                    style={{ width: 24, height: 24, borderRadius: '50%',
+                      border: 'none', cursor: 'pointer', padding: 0,
+                      background: active ? ACH_COLORS[v] : '#e2e8f0',
+                      opacity: active ? 1 : 0.5 }} />
+                );
+              })}
+              <span style={{ fontSize: 11, color: '#64748b', marginLeft: 8 }}>
+                {popupCell.achievement ? ACH_LABELS[popupCell.achievement] : '미설정'}
+              </span>
+            </div>
+
+            {/* 액션 */}
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end',
+              marginTop: 18, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
+              {!drillId && popupCell.text.trim() && (() => {
+                const rootIdx = root.findIndex(c => c.id === popupCell.id);
+                if (rootIdx < 0) return null;
+                return (
+                  <button onClick={() => {
+                      handleDrillDown(popupCell, rootIdx);
+                      setPopupCellId(null);
+                    }}
+                    style={{ padding: '6px 12px', background: '#fff', border: '1px solid #e2e8f0',
+                      borderRadius: 6, fontSize: 12, cursor: 'pointer', color: '#475569',
+                      display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <LayoutGrid size={12} /> 하위 분해
+                  </button>
+                );
+              })()}
+              <button onClick={() => setPopupCellId(null)}
+                style={{ padding: '6px 16px', background: '#1e293b', color: '#fff',
+                  border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
