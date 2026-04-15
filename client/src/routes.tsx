@@ -67,6 +67,7 @@ export const router = createBrowserRouter(
         { path: 'rules-jungeol', element: lazyPage(() => import('./pages/rules-jungeol/RulesJungeolPage')) },
         { path: 'instructor-curri', element: lazyPage(() => import('./pages/instructor-curri/InstructorCurriPage')) },
         { path: 'work-class-demo', element: lazyPage(() => import('./pages/work-class-demo/WorkClassDemoPage')) },
+        { path: 'ai-course-plan', element: lazyPage(() => import('./pages/ai-course-plan/AiCoursePlanPage')) },
         { path: 'marketing', element: lazyPage(() => import('./pages/marketing/MarketingPage')) },
         { path: 'rules-layout', element: lazyPage(() => import('./pages/rules-layout/RulesLayoutPage')) },
         { path: 'rules-manual', element: lazyPage(() => import('./pages/rules-manual/RulesManualPage')) },

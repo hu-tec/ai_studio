@@ -111,6 +111,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'E2', to: '/marketing',        icon: BarChart3, label: '마케팅' },
   { code: 'E3', to: '/prompt-guide',     icon: Settings,  label: '프롬사용법' },
   { code: 'E4', to: '/work-class-demo',  icon: Layers,    label: '업무 분류(최종DB)' },
+  { code: 'E5', to: '/ai-course-plan',   icon: GraduationCap, label: 'AI 강의안(T1)' },
 
   // ─── F: 영규 ───
   { code: 'F1', to: '/hutechc-homepage', icon: Home, label: '영규-hutechc' },
