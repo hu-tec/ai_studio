@@ -245,22 +245,22 @@ export default function MeetingsPage() {
 
         <button 
           onClick={() => setShowPreview(false)}
-          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-sm font-bold transition-all border border-white/10 backdrop-blur-md"
+          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-2 py-2 rounded-full text-sm font-bold transition-all border border-white/10 backdrop-blur-md"
         >
           <ChevronLeft size={16} /> 대시보드로 돌아가기
         </button>
         
         <main className="w-full max-w-6xl bg-white text-slate-900 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px]">
           {/* Left: Calendar Preview */}
-          <div className="flex-1 p-8 md:p-12 border-r border-slate-100 overflow-y-auto">
-            <div className="mb-10 flex items-center justify-between">
+          <div className="flex-1 p-2 border-r border-slate-100 overflow-y-auto">
+            <div className="mb-3 flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
+                <h1 className="text-base font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
                 <p className="text-slate-400 font-bold mt-1 uppercase tracking-widest text-xs">CEO Secretary Schedule Service</p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-black text-slate-400 uppercase">Current Month</p>
-                <p className="text-lg font-bold text-slate-800">{format(new Date(), 'yyyy년 MM월')}</p>
+                <p className="text-sm font-bold text-slate-800">{format(new Date(), 'yyyy년 MM월')}</p>
               </div>
             </div>
 
@@ -317,16 +317,16 @@ export default function MeetingsPage() {
           </div>
 
           {/* Right: Request Form */}
-          <div className="w-full md:w-[400px] bg-slate-50/50 p-8 flex flex-col overflow-y-auto">
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-slate-800 mb-1">신청 폼</h2>
+          <div className="w-full md:w-[400px] bg-slate-50/50 p-2 flex flex-col overflow-y-auto">
+            <div className="mb-3">
+              <h2 className="text-sm font-bold text-slate-800 mb-1">신청 폼</h2>
               <p className="text-sm text-slate-500 font-medium">{format(selectedDate, 'yyyy년 MM월 dd일')} 미팅 요청</p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-2">
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">미팅 제목</label>
-                <input type="text" placeholder="예: 사업 제안 및 협력 논의" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
+                <input type="text" placeholder="예: 사업 제안 및 협력 논의" className="w-full bg-white border border-slate-200 rounded-xl px-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
               </div>
 
               <div>
@@ -355,13 +355,13 @@ export default function MeetingsPage() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">미팅 장소 요청</label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" placeholder="예: 판교 사옥 3층 미팅실" className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
+                  <input type="text" placeholder="예: 판교 사옥 3층 미팅실" className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">코멘트 / 추가 요청사항</label>
-                <textarea rows={4} placeholder="비서에게 전달할 메모를 입력해주세요." className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all resize-none shadow-sm" />
+                <textarea rows={4} placeholder="비서에게 전달할 메모를 입력해주세요." className="w-full bg-white border border-slate-200 rounded-xl px-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all resize-none shadow-sm" />
               </div>
 
               <button 
@@ -369,7 +369,7 @@ export default function MeetingsPage() {
                   toast.success('미팅 요청이 완료되었습니다!', { description: '비서 확인 후 일정이 확정됩니다.' });
                   setShowPreview(false);
                 }}
-                className="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold text-md shadow-xl shadow-slate-200 hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-slate-800 text-white py-2 rounded-2xl font-bold text-md shadow-xl shadow-slate-200 hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <CheckCircle2 size={20} /> 미팅 요청하기
               </button>
@@ -383,7 +383,7 @@ export default function MeetingsPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col">
 
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-1.5 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-2 py-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-slate-800 rounded-lg text-white">
             <Settings2 size={18} />
@@ -631,11 +631,11 @@ export default function MeetingsPage() {
                       onClick={() => setSelectedSchedule(s)}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="group bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-lg transition-all cursor-pointer flex items-center gap-4"
+                      className="group bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
                     >
                       <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 rounded-xl border border-slate-100 text-slate-400 group-hover:bg-slate-800 group-hover:text-white transition-all">
                         <span className="text-[9px] font-black uppercase tracking-wider">{format(sDate, 'MMM')}</span>
-                        <span className="text-lg font-black leading-none">{format(sDate, 'd')}</span>
+                        <span className="text-sm font-black leading-none">{format(sDate, 'd')}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -648,7 +648,7 @@ export default function MeetingsPage() {
                             {cat?.name}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-slate-500 text-xs font-bold opacity-70">
+                        <div className="flex items-center gap-2 text-slate-500 text-xs font-bold opacity-70">
                           <div className="flex items-center gap-1.5"><Clock size={13} /> <span>{s.time} ({s.duration}분)</span></div>
                           <div className="flex items-center gap-1.5"><MapPin size={13} /> <span className="truncate">{s.location}</span></div>
                         </div>
@@ -731,7 +731,7 @@ export default function MeetingsPage() {
       {/* Regulation 3: Details Preview Modal */}
       <AnimatePresence>
         {selectedSchedule && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -759,7 +759,7 @@ export default function MeetingsPage() {
                 </div>
               </div>
 
-              <div className="p-4 space-y-3">
+              <div className="p-2 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className={cn(
                     "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm",
@@ -776,7 +776,7 @@ export default function MeetingsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="text-lg font-black text-slate-800 leading-tight">
+                  <h3 className="text-sm font-black text-slate-800 leading-tight">
                     {categories.find(c => c.id === selectedSchedule.categoryId)?.emoji} {selectedSchedule.title}
                   </h3>
                   <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">

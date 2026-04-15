@@ -38,19 +38,19 @@ function Header({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   return (
-    <header className="flex-shrink-0 z-20 bg-white/80 backdrop-blur-md border-b border-neutral-200 px-8 py-3 flex items-center justify-between">
-      <div className="flex items-center gap-6">
+    <header className="flex-shrink-0 z-20 bg-white/80 backdrop-blur-md border-b border-neutral-200 px-3 py-3 flex items-center justify-between">
+      <div className="flex items-center gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center flex-shrink-0">
             <Plus className="text-white w-5 h-5" />
           </div>
-          <span className="font-black text-xl tracking-tighter uppercase italic">
+          <span className="font-black text-sm tracking-tighter uppercase italic">
             Prompt Archive
           </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
         <div className="relative">
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -171,7 +171,7 @@ function SampleCard({
           </span>
         </div>
       </div>
-      <div className="p-4 flex flex-col flex-1 space-y-2">
+      <div className="p-2 flex flex-col flex-1 space-y-2">
         <h3 className="font-bold text-base text-neutral-900 uppercase tracking-tight group-hover:text-neutral-600 transition-colors">
           {sample.category}
         </h3>
@@ -247,14 +247,14 @@ function DashboardView({
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden p-8 space-y-6">
+    <div className="flex flex-col h-full overflow-hidden p-2 space-y-2">
       {/* 보기 전환 및 액션 바 */}
       <section className="flex items-center justify-between">
         <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-neutral-200 shadow-sm">
           <button
             onClick={() => setViewMode('grid')}
             className={clsx(
-              "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all",
+              "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
               viewMode === 'grid' ? "bg-neutral-900 text-white shadow-lg" : "text-neutral-400 hover:text-neutral-900"
             )}
           >
@@ -263,7 +263,7 @@ function DashboardView({
           <button
             onClick={() => setViewMode('list')}
             className={clsx(
-              "flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all",
+              "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
               viewMode === 'list' ? "bg-neutral-900 text-white shadow-lg" : "text-neutral-400 hover:text-neutral-900"
             )}
           >
@@ -279,12 +279,12 @@ function DashboardView({
               placeholder="검색..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-neutral-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-neutral-200 outline-none shadow-sm"
+              className="w-full bg-white border border-neutral-200 rounded-xl pl-3 pr-2 py-2.5 text-sm focus:ring-2 focus:ring-neutral-200 outline-none shadow-sm"
             />
           </div>
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 px-3 py-2.5 bg-neutral-900 text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95"
           >
             <Plus size={16} /> 샘플 추가
           </button>
@@ -292,8 +292,8 @@ function DashboardView({
       </section>
 
       {/* 최상단 현황 기록 */}
-      <section className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-12 px-4 overflow-x-auto">
+      <section className="bg-white border border-neutral-200 rounded-2xl p-2 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-3 px-2 overflow-x-auto">
           {categories.map(cat => (
             <button
               key={cat}
@@ -305,24 +305,24 @@ function DashboardView({
             >
               <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{cat}</span>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black text-neutral-900">{categoryStats[cat] || 0}</span>
+                <span className="text-base font-black text-neutral-900">{categoryStats[cat] || 0}</span>
                 <span className="text-[10px] text-neutral-400 font-bold">개</span>
               </div>
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 pr-4">
-          <button className="flex items-center gap-2 px-4 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
+        <div className="flex items-center gap-2 pr-2">
+          <button className="flex items-center gap-2 px-2 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
             <Download size={14} /> 엑셀 다운로드
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
+          <button className="flex items-center gap-2 px-2 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
             <FileText size={14} /> 워드 다운로드
           </button>
         </div>
       </section>
 
       {/* 메인 레이아웃: 전환 모드에 따라 다르게 렌더링 */}
-      <div className="flex-1 flex gap-6 min-h-0">
+      <div className="flex-1 flex gap-2 min-h-0">
         <AnimatePresence mode="wait">
           {viewMode === 'grid' ? (
             <motion.div
@@ -330,11 +330,11 @@ function DashboardView({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex-1 flex gap-6 min-h-0"
+              className="flex-1 flex gap-2 min-h-0"
             >
               {/* 카드 그리드 영역 */}
               <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar">
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                   {filteredSamples.map((sample) => (
                     <SampleCard
                       key={sample.id}
@@ -360,19 +360,19 @@ function DashboardView({
                       transition={{ duration: 0.2 }}
                       className="flex flex-col h-full"
                     >
-                      <div className="p-6 border-b border-neutral-100 bg-neutral-50/50">
+                      <div className="p-2 border-b border-neutral-100 bg-neutral-50/50">
                         <div className="flex items-center justify-between mb-2">
                           <span className="px-2 py-0.5 bg-neutral-800 text-white text-[9px] font-bold rounded-full uppercase italic">
                             {hoveredSample.category}
                           </span>
                           <span className="text-[10px] text-neutral-400 font-bold">{hoveredSample.date}</span>
                         </div>
-                        <h2 className="text-xl font-bold text-neutral-900 leading-tight">
+                        <h2 className="text-sm font-bold text-neutral-900 leading-tight">
                           {hoveredSample.title}
                         </h2>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                      <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
                         {/* 프롬프트 워크플로우 */}
                         <div className="space-y-4">
                           <div className="flex items-center gap-2 text-neutral-900">
@@ -380,16 +380,16 @@ function DashboardView({
                             <h3 className="text-sm font-bold uppercase tracking-wider">프롬프트 워크플로우</h3>
                           </div>
                           <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-neutral-100">
-                            <div className="relative pl-8">
+                            <div className="relative pl-3">
                               <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[10px] font-bold shadow-md">1</div>
-                              <div className="p-4 bg-white rounded-2xl border border-neutral-100 text-xs text-neutral-700 leading-relaxed shadow-sm">
+                              <div className="p-2 bg-white rounded-2xl border border-neutral-100 text-xs text-neutral-700 leading-relaxed shadow-sm">
                                 {hoveredSample.primaryPrompt}
                               </div>
                             </div>
                             {hoveredSample.supplementaryPrompts.map((p, i) => (
-                              <div key={i} className="relative pl-8">
+                              <div key={i} className="relative pl-3">
                                 <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 text-[10px] font-bold border border-neutral-200">{i + 2}</div>
-                                <div className="p-4 bg-neutral-50/50 rounded-2xl border border-neutral-100 text-xs text-neutral-500 italic leading-relaxed">
+                                <div className="p-2 bg-neutral-50/50 rounded-2xl border border-neutral-100 text-xs text-neutral-500 italic leading-relaxed">
                                   {p}
                                 </div>
                               </div>
@@ -418,7 +418,7 @@ function DashboardView({
                         )}
 
                         {/* 최종 결과물 캡처 */}
-                        <div className="space-y-4 pb-4">
+                        <div className="space-y-4 pb-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-neutral-900">
                               <ImageIcon size={16} className="text-neutral-400" />
@@ -439,7 +439,7 @@ function DashboardView({
                         </div>
                       </div>
 
-                      <div className="p-4 bg-neutral-50 border-t border-neutral-100">
+                      <div className="p-2 bg-neutral-50 border-t border-neutral-100">
                         <button
                           onClick={() => onSelectSample(hoveredSample)}
                           className="w-full py-3.5 bg-neutral-900 text-white rounded-2xl text-xs font-bold hover:bg-neutral-800 transition-all shadow-xl active:scale-95"
@@ -449,7 +449,7 @@ function DashboardView({
                       </div>
                     </motion.div>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-neutral-300 p-8 text-center space-y-4">
+                    <div className="flex-1 flex flex-col items-center justify-center text-neutral-300 p-3 text-center space-y-4">
                       <LayoutGrid size={48} strokeWidth={1} />
                       <p className="text-sm font-medium">카드를 마우스오버하여<br />상세 내용을 미리 확인하세요.</p>
                     </div>
@@ -469,7 +469,7 @@ function DashboardView({
                 <table className="w-full text-left border-collapse table-fixed min-w-[1200px]">
                   <thead>
                     <tr className="bg-neutral-50/80 border-b border-neutral-100 sticky top-0 z-10">
-                      <th className="px-6 py-4 w-12 text-center">
+                      <th className="px-3 py-2 w-12 text-center">
                         <input
                           type="checkbox"
                           checked={selectedIds.length === filteredSamples.length && filteredSamples.length > 0}
@@ -477,13 +477,13 @@ function DashboardView({
                           className="w-4 h-4 rounded border-neutral-300 focus:ring-neutral-200"
                         />
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">분류</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[180px]">업무명</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">프롬프트 요약</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">1차 프롬프트</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[200px]">중요포인트</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">등록일</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[60px] text-right pr-8">이동</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">분류</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[180px]">업무명</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">프롬프트 요약</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">1차 프롬프트</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[200px]">중요포인트</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">등록일</th>
+                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[60px] text-right pr-3">이동</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-50">
@@ -495,7 +495,7 @@ function DashboardView({
                           selectedIds.includes(sample.id) ? "bg-neutral-50/50" : ""
                         )}
                       >
-                        <td className="px-6 py-4 text-center align-top">
+                        <td className="px-3 py-2 text-center align-top">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(sample.id)}
@@ -507,35 +507,35 @@ function DashboardView({
                             className="w-4 h-4 rounded border-neutral-300 focus:ring-neutral-200"
                           />
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <span className="px-2 py-0.5 bg-neutral-100 text-neutral-800 text-[9px] font-black rounded uppercase italic">
                             {sample.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <span className="font-bold text-sm text-neutral-900 group-hover:text-neutral-600 transition-colors">
                             {sample.title}
                           </span>
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">
                             {sample.summary}
                           </p>
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2 italic">
                             {sample.primaryPrompt}
                           </p>
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <p className="text-[11px] text-neutral-700 font-semibold leading-relaxed line-clamp-2">
                             {sample.keyPoint}
                           </p>
                         </td>
-                        <td className="px-6 py-4 align-top">
+                        <td className="px-3 py-2 align-top">
                           <span className="text-[11px] text-neutral-400 font-bold">{sample.date}</span>
                         </td>
-                        <td className="px-6 py-4 text-right align-top pr-8">
+                        <td className="px-3 py-2 text-right align-top pr-3">
                           <button
                             onClick={() => onSelectSample(sample)}
                             className="p-2 inline-block text-neutral-300 hover:text-neutral-900 transition-colors"
@@ -553,7 +553,7 @@ function DashboardView({
                       <Search size={32} className="text-neutral-200" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold">검색 결과가 없습니다</h3>
+                      <h3 className="text-sm font-bold">검색 결과가 없습니다</h3>
                       <p className="text-sm text-neutral-500 max-w-xs mx-auto">다른 검색어나 필터를 선택해 보세요.</p>
                     </div>
                   </div>

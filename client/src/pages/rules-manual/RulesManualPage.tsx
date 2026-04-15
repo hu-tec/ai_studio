@@ -190,7 +190,7 @@ export default function RulesManualPage() {
       {viewMode !== 'result' && (
         <div className="fixed bottom-6 right-8 z-[60]">
           <div className={`
-            flex items-center gap-2 px-4 py-2 rounded-full shadow-xl border transition-all duration-500 transform scale-100 backdrop-blur-md
+            flex items-center gap-2 px-3 py-1.5 rounded-full shadow-xl border transition-all duration-500 transform scale-100 backdrop-blur-md
             ${actionMode === 'view' ? 'bg-white text-gray-800 border-gray-200' :
               actionMode === 'edit' ? 'bg-amber-500 text-white border-amber-400' :
               actionMode === 'add' ? 'bg-blue-600 text-white border-blue-500' :

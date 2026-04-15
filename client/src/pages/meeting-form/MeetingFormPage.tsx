@@ -253,10 +253,10 @@ export default function MeetingFormPage() {
   // Applicant Preview View
   if (showPreview) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-2">
         <button
           onClick={() => setShowPreview(false)}
-          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white text-sm font-bold border border-white/10 backdrop-blur-md transition-all"
+          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-2 py-2 rounded-full text-white text-sm font-bold border border-white/10 backdrop-blur-md transition-all"
         >
           <ChevronLeft size={16} /> 대시보드 복귀
         </button>
@@ -267,8 +267,8 @@ export default function MeetingFormPage() {
           className="w-full max-w-5xl bg-white rounded-lg overflow-hidden flex flex-col md:flex-row shadow-2xl min-h-[700px]"
         >
           <div className="flex-1 p-3border-r border-slate-100 bg-slate-50/30">
-            <div className="mb-12">
-              <h1 className="text-lg font-black text-slate-800 mb-2">전문가 미팅 신청</h1>
+            <div className="mb-3">
+              <h1 className="text-sm font-black text-slate-800 mb-2">전문가 미팅 신청</h1>
               <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Expert Application Portal</p>
             </div>
 
@@ -317,7 +317,7 @@ export default function MeetingFormPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">신청 일자</label>
-                  <input type="date" className="w-full bg-white border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none" />
+                  <input type="date" className="w-full bg-white border border-slate-200 rounded-md px-2 py-3 text-sm font-bold outline-none" />
                 </div>
               </div>
 
@@ -325,7 +325,7 @@ export default function MeetingFormPage() {
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">미팅 장소 (Location)</label>
                 <div
                   onClick={() => setShowAddressModal(true)}
-                  className="w-full bg-white border border-slate-200 rounded-md px-4 py-3 text-sm font-bold cursor-pointer hover:border-slate-800 transition-all min-h-[48px] flex items-center text-slate-400"
+                  className="w-full bg-white border border-slate-200 rounded-md px-2 py-3 text-sm font-bold cursor-pointer hover:border-slate-800 transition-all min-h-[48px] flex items-center text-slate-400"
                 >
                   {isZoomMeeting ? "Zoom 온라인 미팅 (주소 불필요)" : (locationValue || "예: 본사 3층 대회의실 또는 주소 검색")}
                 </div>
@@ -339,13 +339,13 @@ export default function MeetingFormPage() {
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
                       className="absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 shadow-2xl rounded-lg p-3space-y-2"
                     >
-                      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2">
-                          <span className="text-rose-500 font-black text-lg">*</span>
-                          <h3 className="text-lg font-black text-slate-800">주소</h3>
+                          <span className="text-rose-500 font-black text-sm">*</span>
+                          <h3 className="text-sm font-black text-slate-800">주소</h3>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                           <label className="flex items-center gap-2 cursor-pointer group">
                             <input
                               type="checkbox"
@@ -365,28 +365,28 @@ export default function MeetingFormPage() {
                       </div>
 
                       <div className={cn("space-y-4 transition-all duration-300", isZoomMeeting && "opacity-30 pointer-events-none")}>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                           <label className="w-24 text-xs font-black text-slate-500">지번주소</label>
                           <input
                             type="text"
                             value={jibeonAddress}
                             onChange={(e) => setJibeonAddress(e.target.value)}
                             placeholder="주소를 입력하세요"
-                            className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none transition-all"
+                            className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none transition-all"
                           />
-                          <button className="px-6 py-2.5 bg-white border border-slate-800 text-slate-800 rounded-xl text-xs font-black hover:bg-slate-800 hover:text-white transition-all">검색</button>
+                          <button className="px-3 py-2.5 bg-white border border-slate-800 text-slate-800 rounded-xl text-xs font-black hover:bg-slate-800 hover:text-white transition-all">검색</button>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                           <label className="w-24 text-xs font-black text-slate-500">도로명주소</label>
                           <input
                             type="text"
                             value={roadAddress}
                             onChange={(e) => setRoadAddress(e.target.value)}
                             placeholder="주소를 입력하세요"
-                            className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none transition-all"
+                            className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none transition-all"
                           />
-                          <button className="px-6 py-2.5 bg-white border border-slate-800 text-slate-800 rounded-xl text-xs font-black hover:bg-slate-800 hover:text-white transition-all">검색</button>
+                          <button className="px-3 py-2.5 bg-white border border-slate-800 text-slate-800 rounded-xl text-xs font-black hover:bg-slate-800 hover:text-white transition-all">검색</button>
                         </div>
 
                         <div className="pt-2 border-t border-slate-50 mt-4">
@@ -394,7 +394,7 @@ export default function MeetingFormPage() {
                           <textarea
                             rows={2}
                             placeholder="비고 또는 상세 장소 안내를 입력해주세요 (예: 101호 앞)"
-                            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none resize-none transition-all"
+                            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-2 py-3 text-xs font-bold focus:bg-white focus:border-slate-800 outline-none resize-none transition-all"
                           />
                           <p className="text-[9px] text-slate-400 font-bold mt-2 flex items-center gap-1 italic">• 상세 장소 정보를 정확히 입력해 주세요.</p>
                         </div>
@@ -409,7 +409,7 @@ export default function MeetingFormPage() {
                           }
                           setShowAddressModal(false);
                         }}
-                        className="w-full py-4 bg-slate-800 text-white rounded-md text-sm font-black shadow-lg hover:bg-slate-700 active:scale-[0.98] transition-all"
+                        className="w-full py-2 bg-slate-800 text-white rounded-md text-sm font-black shadow-lg hover:bg-slate-700 active:scale-[0.98] transition-all"
                       >
                         선택 완료
                       </button>
@@ -420,12 +420,12 @@ export default function MeetingFormPage() {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">신청 제목</label>
-                <input type="text" placeholder="예: [IT/보안] 시스템 취약점 점검 미팅 신청" className="w-full bg-white border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none" />
+                <input type="text" placeholder="예: [IT/보안] 시스템 취약점 점검 미팅 신청" className="w-full bg-white border border-slate-200 rounded-md px-2 py-3 text-sm font-bold outline-none" />
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">신청 사유 및 상세 내용</label>
-                <textarea rows={4} className="w-full bg-white border border-slate-200 rounded-md px-4 py-3 text-sm font-bold outline-none resize-none" placeholder="내용을 입력하세요." />
+                <textarea rows={4} className="w-full bg-white border border-slate-200 rounded-md px-2 py-3 text-sm font-bold outline-none resize-none" placeholder="내용을 입력하세요." />
               </div>
 
               <button
@@ -433,7 +433,7 @@ export default function MeetingFormPage() {
                   toast.success('미팅 신청이 완료되었습니다!', { description: '관리자가 검토 후 확정 여부를 안내해 드립니다.' });
                   setShowPreview(false);
                 }}
-                className="w-full bg-slate-800 text-white py-4 rounded-md font-black text-md shadow-xl hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                className="w-full bg-slate-800 text-white py-2 rounded-md font-black text-md shadow-xl hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
               >
                 <CheckCircle2 size={20} /> 신청서 제출하기
               </button>
@@ -460,8 +460,8 @@ export default function MeetingFormPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-slate-200 flex flex-col overflow-hidden">
       {/* Top Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-3 py-2 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-2">
           <div className="p-2.5 bg-slate-800 text-white rounded-[1rem] shadow-lg shadow-slate-200">
             <Settings2 size={24} />
           </div>
@@ -472,7 +472,7 @@ export default function MeetingFormPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-md border border-slate-200/50">
+          <div className="flex items-center gap-2 px-2 py-2 bg-slate-100 rounded-md border border-slate-200/50">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-black text-slate-600 tracking-tight">SYSTEM ACTIVE</span>
           </div>
@@ -488,29 +488,29 @@ export default function MeetingFormPage() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex gap-3 p-8">
+      <main className="flex-1 overflow-hidden flex gap-2 p-2">
         {/* Main Section (Regulation 1, 2) */}
         <section className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           {/* Dashboard Summary & View Toggle */}
-          <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col gap-3">
+          <div className="p-2border-b border-slate-100 bg-slate-50/30 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex items-center bg-slate-200/50 p-1.5 rounded-[1.25rem] border border-slate-200/50">
-                  <button onClick={() => setViewType('calendar')} className={cn("px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2", viewType === 'calendar' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600")}><LayoutGrid size={18} /> 캘린더형</button>
-                  <button onClick={() => setViewType('list')} className={cn("px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2", viewType === 'list' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600")}><List size={18} /> 리스트형</button>
+                  <button onClick={() => setViewType('calendar')} className={cn("px-3 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2", viewType === 'calendar' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600")}><LayoutGrid size={18} /> 캘린더형</button>
+                  <button onClick={() => setViewType('list')} className={cn("px-3 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2", viewType === 'list' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600")}><List size={18} /> 리스트형</button>
                 </div>
 
                 {/* Year/Month/Day Summary Toggle */}
                 <div className="flex items-center bg-slate-200/50 p-1.5 rounded-[1.25rem] border border-slate-200/50">
-                  <button onClick={() => setPeriodType('year')} className={cn("px-4 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'year' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>년</button>
-                  <button onClick={() => setPeriodType('month')} className={cn("px-4 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'month' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>월</button>
-                  <button onClick={() => setPeriodType('day')} className={cn("px-4 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'day' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>일</button>
+                  <button onClick={() => setPeriodType('year')} className={cn("px-2 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'year' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>년</button>
+                  <button onClick={() => setPeriodType('month')} className={cn("px-2 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'month' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>월</button>
+                  <button onClick={() => setPeriodType('day')} className={cn("px-2 py-2 rounded-xl text-[11px] font-black transition-all", periodType === 'day' ? "bg-slate-800 text-white shadow-md" : "text-slate-400")}>일</button>
                 </div>
               </div>
 
               <div className="flex items-center bg-white border border-slate-200 rounded-[1.25rem] p-1.5 shadow-sm">
                 <button onClick={handlePrev} className="p-2 hover:bg-slate-50 rounded-xl transition-colors"><ChevronLeft size={20} className="text-slate-400" /></button>
-                <span className="text-sm font-black px-8 min-w-[150px] text-center text-slate-800">{navTitle}</span>
+                <span className="text-sm font-black px-3 min-w-[150px] text-center text-slate-800">{navTitle}</span>
                 <button onClick={handleNext} className="p-2 hover:bg-slate-50 rounded-xl transition-colors"><ChevronRight size={20} className="text-slate-400" /></button>
               </div>
             </div>
@@ -523,7 +523,7 @@ export default function MeetingFormPage() {
                 { label: '평균 소요', value: '35분', icon: Clock, color: 'amber', trend: '보통' },
                 { label: '예약 점유율', value: `${stats.rate}%`, icon: TrendingUp, color: 'indigo', trend: '+5.2%' }
               ].map((stat, i) => (
-                <div key={i} className="bg-white p-2rounded-lg border border-slate-100 shadow-sm hover:shadow-lg transition-all flex items-center gap-4 group">
+                <div key={i} className="bg-white p-2rounded-lg border border-slate-100 shadow-sm hover:shadow-lg transition-all flex items-center gap-2 group">
                   <div className={cn(
                     "p-3.5 rounded-md transition-transform group-hover:scale-110",
                     stat.color === 'slate' ? "bg-slate-100 text-slate-600" :
@@ -545,12 +545,12 @@ export default function MeetingFormPage() {
           </div>
 
           {/* Main Grid View */}
-          <div className="flex-1 overflow-y-auto p-8">
+          <div className="flex-1 overflow-y-auto p-3">
             {viewType === 'calendar' ? (
               <div className="flex flex-col h-full">
                 {periodType === 'month' && (
                   <>
-                    <div className="grid grid-cols-7 border-b border-slate-100 pb-4">
+                    <div className="grid grid-cols-7 border-b border-slate-100 pb-2">
                       {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d, i) => (
                         <div key={i} className={cn("text-center text-[10px] font-black uppercase tracking-[0.2em]", i === 0 ? "text-rose-400" : i === 6 ? "text-indigo-400" : "text-slate-400")}>{d}</div>
                       ))}
@@ -598,9 +598,9 @@ export default function MeetingFormPage() {
                   <div className="flex flex-col gap-2 h-full">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-base font-black text-slate-800">{format(currentMonth, 'EEEE, MMM dd')}</h3>
-                      <button onClick={() => setPeriodType('month')} className="px-4 py-2 bg-slate-100 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-200 transition-all">월별 보기로 전환</button>
+                      <button onClick={() => setPeriodType('month')} className="px-2 py-2 bg-slate-100 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-200 transition-all">월별 보기로 전환</button>
                     </div>
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-4">
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                       {requests.filter(r => r.status === 'confirmed' && isSameDay(parseISO(r.date), currentMonth)).length > 0 ? (
                         requests.filter(r => r.status === 'confirmed' && isSameDay(parseISO(r.date), currentMonth)).sort((a, b) => a.time.localeCompare(b.time)).map(r => (
                           <motion.div
@@ -615,13 +615,13 @@ export default function MeetingFormPage() {
                               <span className="text-sm">{r.time}</span>
                             </div>
                             <div className="flex-1">
-                              <h4 className="text-lg font-black text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">{r.title}</h4>
-                              <p className="text-xs font-bold text-slate-400 flex items-center gap-4">
+                              <h4 className="text-sm font-black text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">{r.title}</h4>
+                              <p className="text-xs font-bold text-slate-400 flex items-center gap-2">
                                 <span>장소: {r.location}</span>
                                 <span>신청자: {r.applicant} ({r.grade})</span>
                               </p>
                             </div>
-                            <div className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase">Confirmed</div>
+                            <div className="px-2 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase">Confirmed</div>
                           </motion.div>
                         ))
                       ) : (
@@ -642,7 +642,7 @@ export default function MeetingFormPage() {
                         <div
                           key={month.toISOString()}
                           onClick={() => { setCurrentMonth(month); setPeriodType('month'); }}
-                          className="bg-white p-2rounded-lg border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col items-center text-center gap-4"
+                          className="bg-white p-2rounded-lg border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col items-center text-center gap-2"
                         >
                           <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                             <motion.div
@@ -655,7 +655,7 @@ export default function MeetingFormPage() {
                             <h4 className="text-base font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{format(month, 'MMM')}</h4>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{format(month, 'yyyy')}</p>
                           </div>
-                          <div className="px-4 py-1.5 bg-slate-50 rounded-full text-[10px] font-black text-slate-500">
+                          <div className="px-2 py-1.5 bg-slate-50 rounded-full text-[10px] font-black text-slate-500">
                             {monthRequests.length}개의 일정
                           </div>
                         </div>
@@ -695,7 +695,7 @@ export default function MeetingFormPage() {
         <aside className="w-[380px] flex flex-col gap-3">
           {/* Analysis Section */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3flex flex-col h-[350px] shrink-0">
-            <h2 className="text-lg font-black text-slate-800 flex items-center gap-3 mb-4">
+            <h2 className="text-sm font-black text-slate-800 flex items-center gap-3 mb-4">
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><PieChart size={20} /></div>
               신청 분포 분석
             </h2>
@@ -729,7 +729,7 @@ export default function MeetingFormPage() {
               </div>
             </div>
             <div className="flex flex-col gap-3 mt-4">
-              <button onClick={handleCopyLink} className="w-full bg-slate-800 text-white py-4 rounded-md font-black text-sm flex items-center justify-between px-6 hover:bg-slate-700 transition-all shadow-xl shadow-slate-200 group">
+              <button onClick={handleCopyLink} className="w-full bg-slate-800 text-white py-2 rounded-md font-black text-sm flex items-center justify-between px-3 hover:bg-slate-700 transition-all shadow-xl shadow-slate-200 group">
                 <div className="flex items-center gap-3">
                   <Share2 size={18} className="group-hover:rotate-12 transition-transform" />
                   <span>신청 링크 복사</span>
@@ -737,7 +737,7 @@ export default function MeetingFormPage() {
                 <ChevronRight size={16} className="opacity-40" />
               </button>
 
-              <button onClick={() => setShowPreview(true)} className="w-full bg-white text-slate-800 py-4 rounded-md font-black text-sm flex items-center justify-between px-6 hover:bg-slate-50 border border-slate-200 transition-all group">
+              <button onClick={() => setShowPreview(true)} className="w-full bg-white text-slate-800 py-2 rounded-md font-black text-sm flex items-center justify-between px-3 hover:bg-slate-50 border border-slate-200 transition-all group">
                 <div className="flex items-center gap-3">
                   <Eye size={18} className="text-slate-400 group-hover:text-slate-800 transition-colors" />
                   <span>신청화면 미리보기</span>
@@ -749,10 +749,10 @@ export default function MeetingFormPage() {
 
           {/* Application Status Area */}
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3flex flex-col flex-1 overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-8">
+            <div className="absolute top-0 right-0 p-3">
               <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
             </div>
-            <h2 className="text-lg font-black text-slate-800 flex items-center gap-3 mb-6">
+            <h2 className="text-sm font-black text-slate-800 flex items-center gap-3 mb-2">
               <div className="p-2 bg-rose-50 text-rose-600 rounded-xl"><AlertCircle size={20} /></div>
               신청 접수 현황
             </h2>
@@ -760,7 +760,7 @@ export default function MeetingFormPage() {
             <div className="flex-1 overflow-y-auto space-y-4 pr-2">
               {requests.filter(r => r.status === 'pending').length > 0 ? (
                 requests.filter(r => r.status === 'pending').map((r, i) => (
-                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} key={r.id} className="p-5 bg-slate-50 border border-slate-100 rounded-lg space-y-4 hover:shadow-md transition-all">
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} key={r.id} className="p-2bg-slate-50 border border-slate-100 rounded-lg space-y-4 hover:shadow-md transition-all">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -781,7 +781,7 @@ export default function MeetingFormPage() {
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center p-3opacity-40">
-                  <div className="p-6 bg-slate-50 rounded-lg mb-4">
+                  <div className="p-2bg-slate-50 rounded-lg mb-4">
                     <CheckCircle2 size={32} className="text-slate-300" />
                   </div>
                   <p className="text-sm font-bold text-slate-400">새로운 신청이 없습니다.</p>
@@ -790,7 +790,7 @@ export default function MeetingFormPage() {
             </div>
 
             {/* Export Section */}
-            <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
+            <div className="mt-2 pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
               <button className="flex flex-col items-center gap-2 p-2bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100 hover:bg-emerald-100 transition-all"><FileSpreadsheet size={20} /><span className="text-[10px] font-black uppercase">Excel</span></button>
               <button className="flex flex-col items-center gap-2 p-2bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 transition-all"><FileText size={20} /><span className="text-[10px] font-black uppercase">Word</span></button>
             </div>
@@ -801,14 +801,14 @@ export default function MeetingFormPage() {
       {/* Details Modal */}
       <AnimatePresence>
         {selectedRequest && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedRequest(null)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} className="relative w-full max-w-[450px] bg-white rounded-lg overflow-hidden shadow-2xl border border-slate-200">
               <div className="h-60 relative overflow-hidden bg-slate-100">
                 <ImageWithFallback src="https://images.unsplash.com/photo-1722082839841-45473f5a15cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYXAlMjBzYXRlbGxpdGUlMjB2aWV3JTIwY2l0eXxlbnwxfHx8fDE3NzMxMTA1Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="map" className="w-full h-full object-cover transition-all" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <button onClick={() => setSelectedRequest(null)} className="absolute top-8 right-8 bg-white/90 backdrop-blur-md p-2.5 rounded-md shadow-lg hover:bg-slate-800 hover:text-white transition-all"><X size={20} /></button>
-                <div className="absolute bottom-8 left-8 flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-2 rounded-md shadow-lg">
+                <div className="absolute bottom-8 left-8 flex items-center gap-3 bg-white/90 backdrop-blur-md px-2 py-2 rounded-md shadow-lg">
                   <MapPin size={18} className="text-slate-800" />
                   <span className="text-xs font-black text-slate-800">{selectedRequest.location}</span>
                 </div>
@@ -816,18 +816,18 @@ export default function MeetingFormPage() {
 
               <div className="p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-4 py-1.5 bg-slate-800 text-white rounded-md text-[10px] font-black uppercase tracking-widest">{selectedRequest.status}</span>
+                  <span className="px-2 py-1.5 bg-slate-800 text-white rounded-md text-[10px] font-black uppercase tracking-widest">{selectedRequest.status}</span>
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500" /> ID: {selectedRequest.id}</span>
                 </div>
                 <div className="space-y-3">
-                  <h3 className="text-lg font-black text-slate-800 tracking-tight leading-tight">{selectedRequest.title}</h3>
+                  <h3 className="text-sm font-black text-slate-800 tracking-tight leading-tight">{selectedRequest.title}</h3>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-black border border-slate-100">분야: {selectedRequest.field}</span>
                     <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-black border border-slate-100">부서: {selectedRequest.dept}</span>
                     <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-black border border-slate-100">직급: {selectedRequest.grade}</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 border-t border-b border-slate-100 py-8">
+                <div className="grid grid-cols-2 gap-3 border-t border-b border-slate-100 py-2">
                   <div className="space-y-1">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">일시</p>
                     <p className="text-sm font-black text-slate-800">{selectedRequest.date} • {selectedRequest.time}</p>
@@ -838,14 +838,14 @@ export default function MeetingFormPage() {
                   </div>
                 </div>
                 {selectedRequest.note && (
-                  <div className="p-6 bg-slate-50 rounded-md border border-slate-100">
+                  <div className="p-2bg-slate-50 rounded-md border border-slate-100">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">상세 메모</p>
                     <p className="text-sm text-slate-600 leading-relaxed font-bold italic">"{selectedRequest.note}"</p>
                   </div>
                 )}
-                <div className="flex gap-4">
-                  <button className="flex-1 bg-slate-800 text-white py-4 rounded-md font-black text-md flex items-center justify-center gap-3 shadow-xl hover:bg-slate-700 transition-all"><Edit size={18} /> 수정하기</button>
-                  <button className="p-4 bg-white border border-slate-200 rounded-md text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={20} /></button>
+                <div className="flex gap-2">
+                  <button className="flex-1 bg-slate-800 text-white py-2 rounded-md font-black text-md flex items-center justify-center gap-3 shadow-xl hover:bg-slate-700 transition-all"><Edit size={18} /> 수정하기</button>
+                  <button className="p-2bg-white border border-slate-200 rounded-md text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={20} /></button>
                 </div>
               </div>
             </motion.div>

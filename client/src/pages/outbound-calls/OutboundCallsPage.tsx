@@ -268,7 +268,7 @@ export function OutboundCallsPage() {
   if (viewType === 'full-list') {
     return (
       <div className="flex flex-col h-screen bg-[#f1f3f6] text-slate-900 overflow-hidden font-sans">
-        <header className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between shrink-0 shadow-sm z-50">
+        <header className="h-14 bg-white border-b border-gray-200 px-3 flex items-center justify-between shrink-0 shadow-sm z-50">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-white">
               <Phone className="w-5 h-5" />
@@ -277,16 +277,16 @@ export function OutboundCallsPage() {
           </div>
           <button 
             onClick={() => setViewType('dashboard')}
-            className="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-black transition-all"
+            className="flex items-center space-x-2 px-2 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-black transition-all"
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
             <span>대시보드로 돌아가기</span>
           </button>
         </header>
 
-        <main className="flex-grow p-6 overflow-hidden flex flex-col">
+        <main className="flex-grow p-2 overflow-hidden flex flex-col">
           <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden flex flex-col flex-grow">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-2 py-1 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <h2 className="text-sm font-black text-slate-800">전체 고객 데이터베이스</h2>
                 <div className="relative">
@@ -296,22 +296,22 @@ export function OutboundCallsPage() {
                     placeholder="검색..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs w-80 focus:ring-2 focus:ring-slate-800 focus:bg-white outline-none transition-all"
+                    className="pl-3 pr-2 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs w-80 focus:ring-2 focus:ring-slate-800 focus:bg-white outline-none transition-all"
                   />
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <button onClick={() => downloadFile('excel')} className="flex items-center space-x-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold border border-green-100">
+                <button onClick={() => downloadFile('excel')} className="flex items-center space-x-2 px-2 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold border border-green-100">
                   <FileSpreadsheet className="w-4 h-4" />
                   <span>엑셀</span>
                 </button>
-                <button onClick={() => downloadFile('word')} className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold border border-blue-100">
+                <button onClick={() => downloadFile('word')} className="flex items-center space-x-2 px-2 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold border border-blue-100">
                   <FileText className="w-4 h-4" />
                   <span>워드</span>
                 </button>
               </div>
             </div>
-            <div className="flex-grow overflow-auto p-4">
+            <div className="flex-grow overflow-auto p-2">
               <table className="w-full text-left border-collapse table-fixed">
                 <thead className="sticky top-0 bg-white shadow-sm z-10 border-b-2 border-slate-100">
                   <tr>
@@ -320,20 +320,20 @@ export function OutboundCallsPage() {
                     <SortableHeader label="연락처" sortKey="phone" config={sortConfig} setConfig={setSortConfig} className="w-48" />
                     <SortableHeader label="상태" sortKey="status" config={sortConfig} setConfig={setSortConfig} className="w-32" />
                     <SortableHeader label="분류" sortKey="catLarge" config={sortConfig} setConfig={setSortConfig} className="w-32" />
-                    <th className="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-24">미리보기</th>
+                    <th className="px-2 py-1 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-24">미리보기</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {filteredEntries.map(entry => (
                     <tr key={entry.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-4 py-4 text-sm font-bold text-slate-800">{entry.agency}</td>
-                      <td className="px-4 py-4 text-sm text-slate-600">{entry.name}</td>
-                      <td className="px-4 py-4 text-sm text-slate-500 font-mono">{entry.phone}</td>
-                      <td className="px-4 py-4 text-xs font-bold">
+                      <td className="px-2 py-1 text-sm font-bold text-slate-800">{entry.agency}</td>
+                      <td className="px-2 py-1 text-sm text-slate-600">{entry.name}</td>
+                      <td className="px-2 py-1 text-sm text-slate-500 font-mono">{entry.phone}</td>
+                      <td className="px-2 py-1 text-xs font-bold">
                         <span className={`px-2 py-1 rounded-full border ${getStatusStyles(entry.status)}`}>{entry.status}</span>
                       </td>
-                      <td className="px-4 py-4 text-xs text-gray-400 font-bold">{entry.catLarge}</td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-2 py-1 text-xs text-gray-400 font-bold">{entry.catLarge}</td>
+                      <td className="px-2 py-1 text-center">
                         <button 
                           onClick={(e) => handleOpenDetailModal(e, entry)}
                           className="p-2 hover:bg-slate-800 hover:text-white rounded-full transition-all text-slate-300"
@@ -357,9 +357,9 @@ export function OutboundCallsPage() {
       
       {/* Detail Preview Modal */}
       {showDetailModal && activeId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-2 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 bg-slate-800 text-white flex items-center justify-between">
+            <div className="px-2 py-1 bg-slate-800 text-white flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
                   <Eye className="w-4 h-4" />
@@ -374,8 +374,8 @@ export function OutboundCallsPage() {
               </button>
             </div>
             
-            <div className="flex-grow overflow-y-auto p-8 space-y-8">
-              <div className="grid grid-cols-2 gap-8">
+            <div className="flex-grow overflow-y-auto p-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-4">
                   <ModalInfoItem label="거래처명" value={formData.agency} icon={<Building2 className="w-4 h-4" />} />
                   <ModalInfoItem label="담당자명" value={formData.name} icon={<User className="w-4 h-4" />} />
@@ -390,31 +390,31 @@ export function OutboundCallsPage() {
                 </div>
               </div>
               
-              <div className="border-t border-gray-100 pt-6 space-y-4">
+              <div className="border-t border-gray-100 pt-2 space-y-4">
                 <div className="space-y-2">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">상담 히스토리 요약</h4>
-                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-xs text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-2 text-xs text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">
                     {formData.history || '기존 기록이 없습니다.'}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">최근 작성 메모</h4>
-                  <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-5 text-xs text-amber-900 font-medium leading-relaxed">
+                  <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-2 text-xs text-amber-900 font-medium leading-relaxed">
                     {formData.notes || '작성된 메모가 없습니다.'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
+            <div className="p-2 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
               <button 
                 onClick={() => { setShowDetailModal(false); setMode('edit'); }}
-                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition-all flex items-center space-x-2"
+                className="px-3 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-700 transition-all flex items-center space-x-2"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>이 정보 수정하기</span>
               </button>
-              <button onClick={() => setShowDetailModal(false)} className="px-6 py-2.5 bg-white border border-gray-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all">
+              <button onClick={() => setShowDetailModal(false)} className="px-3 py-2.5 bg-white border border-gray-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all">
                 닫기
               </button>
             </div>
@@ -423,7 +423,7 @@ export function OutboundCallsPage() {
       )}
       
       {/* Top Header */}
-      <header className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between shrink-0 shadow-sm z-50">
+      <header className="h-14 bg-white border-b border-gray-200 px-3 flex items-center justify-between shrink-0 shadow-sm z-50">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-md shadow-slate-200">
             <Phone className="w-5 h-5" />
@@ -480,9 +480,9 @@ export function OutboundCallsPage() {
       </header>
 
       {/* Summary Stats Bar (Moved from right to top) */}
-      <section className="px-4 pt-4 shrink-0">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 flex items-center justify-between gap-6 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-4 border-r border-gray-100 pr-6 shrink-0">
+      <section className="px-2 pt-2 shrink-0">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 border-r border-gray-100 pr-2 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                 <Activity className="w-4 h-4" />
@@ -497,14 +497,14 @@ export function OutboundCallsPage() {
             </div>
           </div>
 
-          <div className="flex-grow flex items-center justify-center gap-10 shrink-0">
+          <div className="flex-grow flex items-center justify-center gap-3 shrink-0">
             <StatBarItem label="전체 건수" value={stats.total} icon={<LayoutDashboard className="w-3.5 h-3.5" />} />
             <StatBarItem label="완료 건수" value={stats.completed} icon={<CheckCircle2 className="w-3.5 h-3.5" />} color="text-emerald-600" />
             <StatBarItem label="미처리 건수" value={stats.pending} icon={<Clock className="w-3.5 h-3.5" />} color="text-amber-600" />
             <StatBarItem label="나의 처리율" value={`${stats.total ? Math.round((stats.completed/stats.total)*100) : 0}%`} icon={<User className="w-3.5 h-3.5" />} color="text-slate-800" />
           </div>
 
-          <div className="flex items-center gap-6 border-l border-gray-100 pl-6 shrink-0">
+          <div className="flex items-center gap-2 border-l border-gray-100 pl-2 shrink-0">
             {/* Compact Pie Chart */}
             <div className="h-12 w-24">
               <ResponsiveContainer width="100%" height="100%">
@@ -536,17 +536,17 @@ export function OutboundCallsPage() {
       </section>
 
       {/* Main Layout - 3 Remaining Columns */}
-      <main className="flex-grow flex p-4 gap-4 overflow-hidden">
+      <main className="flex-grow flex p-2 gap-2 overflow-hidden">
         
         {/* COL 1: SELECTED CUSTOMER INFO & STATUS */}
-        <section className="w-[320px] flex flex-col gap-4 shrink-0">
+        <section className="w-[320px] flex flex-col gap-2 shrink-0">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-1/2 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="px-2 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
                 <Building2 className="w-3.5 h-3.5 mr-1.5" /> 거래처 상세 정보 🏢
               </h2>
             </div>
-            <div className="flex-grow overflow-y-auto p-4 space-y-4">
+            <div className="flex-grow overflow-y-auto p-2 space-y-4">
               {activeId || mode === 'add' ? (
                 <>
                   <EditableField label="거래처명" value={formData.agency} onChange={(v) => setFormData({...formData, agency: v})} disabled={mode === 'view'} icon={<Building2 className="w-3 h-3" />} />
@@ -565,12 +565,12 @@ export function OutboundCallsPage() {
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-1/2 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center bg-gray-50/50">
+            <div className="px-2 py-3 border-b border-gray-100 flex items-center bg-gray-50/50">
               <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> 처리 결과 선택 ✅
               </h2>
             </div>
-            <div className="flex-grow p-5 flex flex-col justify-center space-y-3">
+            <div className="flex-grow p-2 flex flex-col justify-center space-y-3">
               {STATUS_OPTIONS.map(status => (
                 <button
                   key={status}
@@ -591,11 +591,11 @@ export function OutboundCallsPage() {
         </section>
 
         {/* COL 2: WORK LIST & CONSULTATION ENTRY (REORGANIZED) */}
-        <section className="flex-grow flex flex-col gap-4 min-w-[500px] overflow-hidden">
+        <section className="flex-grow flex flex-col gap-2 min-w-[500px] overflow-hidden">
           
           {/* Top: Work List Table */}
           <div className="flex-grow bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col min-h-[300px]">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-20">
+            <div className="px-2 py-3 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-20">
               <div className="flex items-center space-x-3">
                 <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
                   <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" /> 업무 할당 목록 📋
@@ -607,7 +607,7 @@ export function OutboundCallsPage() {
                     placeholder="실시간 검색..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[11px] w-48 focus:outline-none focus:ring-2 focus:ring-slate-800 transition-all"
+                    className="pl-3 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[11px] w-48 focus:outline-none focus:ring-2 focus:ring-slate-800 transition-all"
                   />
                 </div>
               </div>
@@ -626,18 +626,18 @@ export function OutboundCallsPage() {
 
             <div className="flex-grow overflow-auto relative">
               {showFilterOverlay && (
-                <div className="absolute inset-0 z-30 bg-white/95 backdrop-blur-sm p-6 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="absolute inset-0 z-30 bg-white/95 backdrop-blur-sm p-2 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-black text-slate-800">상세 필터 설정 🔍</h3>
                     <button onClick={() => setShowFilterOverlay(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="grid grid-cols-3 gap-8">
+                  <div className="grid grid-cols-3 gap-3">
                     <FilterSection title="대분류 (복수선택)" items={categories.large} selected={filterLarge} onToggle={(v) => toggleFilter(filterLarge, setFilterLarge, v)} />
                     <FilterSection title="중분류 (복수선택)" items={categories.mid} selected={filterMid} onToggle={(v) => toggleFilter(filterMid, setFilterMid, v)} />
                     <FilterSection title="소분류 (복수선택)" items={categories.small} selected={filterSmall} onToggle={(v) => toggleFilter(filterSmall, setFilterSmall, v)} />
                   </div>
-                  <div className="mt-auto pt-6 border-t border-gray-100 flex justify-end">
-                    <button onClick={() => setShowFilterOverlay(false)} className="bg-slate-800 text-white px-6 py-2 rounded-xl text-xs font-bold">필터 적용하기</button>
+                  <div className="mt-auto pt-2 border-t border-gray-100 flex justify-end">
+                    <button onClick={() => setShowFilterOverlay(false)} className="bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold">필터 적용하기</button>
                   </div>
                 </div>
               )}
@@ -645,7 +645,7 @@ export function OutboundCallsPage() {
               <table className="w-full text-left border-collapse table-fixed">
                 <thead className="sticky top-0 bg-white shadow-xs z-10 border-b border-gray-50">
                   <tr>
-                    <th className="w-12 px-4 py-3">
+                    <th className="w-12 px-2 py-3">
                       {mode === 'delete' && (
                         <button onClick={() => {
                           if (selectedIds.size === filteredEntries.length) setSelectedIds(new Set());
@@ -668,21 +668,21 @@ export function OutboundCallsPage() {
                       onClick={() => handleEntryClick(entry)}
                       className={`group cursor-pointer hover:bg-slate-50 transition-colors ${activeId === entry.id ? 'bg-slate-50' : ''}`}
                     >
-                      <td className="px-4 py-3" onClick={(e) => { e.stopPropagation(); handleSelectOne(entry.id); }}>
+                      <td className="px-2 py-3" onClick={(e) => { e.stopPropagation(); handleSelectOne(entry.id); }}>
                         {mode === 'delete' ? (
                           selectedIds.has(entry.id) ? <CheckSquare className="w-4 h-4 text-slate-800" /> : <Square className="w-4 h-4 text-gray-300 group-hover:text-gray-400" />
                         ) : (
                           <div className={`w-1.5 h-1.5 rounded-full transition-all ${activeId === entry.id ? 'bg-slate-800 scale-125' : 'bg-transparent group-hover:bg-gray-200'}`} />
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs font-bold text-slate-800 truncate">{entry.agency}</td>
-                      <td className="px-4 py-3 text-xs text-slate-500">{entry.name}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-3 text-xs font-bold text-slate-800 truncate">{entry.agency}</td>
+                      <td className="px-2 py-3 text-xs text-slate-500">{entry.name}</td>
+                      <td className="px-2 py-3">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusStyles(entry.status)}`}>
                           {entry.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-center text-gray-400 font-mono">{entry.callCount}</td>
+                      <td className="px-2 py-3 text-xs text-center text-gray-400 font-mono">{entry.callCount}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -692,7 +692,7 @@ export function OutboundCallsPage() {
 
           {/* Bottom: Consultation Entry Area (NEW) */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-[350px] shrink-0 overflow-hidden relative">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-slate-800 text-white">
+            <div className="px-2 py-3 border-b border-gray-100 flex items-center justify-between bg-slate-800 text-white">
               <h2 className="text-[11px] font-black uppercase tracking-widest flex items-center">
                 <MessageSquare className="w-3.5 h-3.5 mr-1.5" /> 금일 상담 내용 기재창 📝
               </h2>
@@ -710,7 +710,7 @@ export function OutboundCallsPage() {
                 <button 
                   onClick={handleSave} 
                   disabled={mode === 'view' || !activeId}
-                  className="flex items-center space-x-1.5 px-4 py-1.5 bg-white text-slate-800 rounded-lg text-[11px] font-black hover:bg-gray-100 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-1.5 px-2 py-1.5 bg-white text-slate-800 rounded-lg text-[11px] font-black hover:bg-gray-100 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>내용 저장하기</span>
@@ -718,7 +718,7 @@ export function OutboundCallsPage() {
               </div>
             </div>
             
-            <div className="flex-grow p-5 relative">
+            <div className="flex-grow p-2 relative">
               {activeId || mode === 'add' ? (
                 <div className="h-full flex flex-col">
                   <div className="flex items-center justify-between mb-2">
@@ -729,12 +729,12 @@ export function OutboundCallsPage() {
                     value={formData.notes}
                     onChange={(e) => setFormData({...formData, notes: e.target.value})}
                     disabled={mode === 'view'}
-                    className="flex-grow w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] text-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-800/5 focus:bg-white disabled:bg-gray-50/50 disabled:text-slate-400 transition-all resize-none leading-relaxed font-medium"
+                    className="flex-grow w-full p-2 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] text-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-800/5 focus:bg-white disabled:bg-gray-50/50 disabled:text-slate-400 transition-all resize-none leading-relaxed font-medium"
                     placeholder="고객과의 상담 내용을 여기에 상세히 기록하세요. 상담 종료 후 상태값 변경과 함께 저장해주세요."
                   />
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-gray-50/30 rounded-2xl border-2 border-dashed border-gray-100">
+                <div className="h-full flex flex-col items-center justify-center text-center p-3 bg-gray-50/30 rounded-2xl border-2 border-dashed border-gray-100">
                   <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
                     <Edit2 className="w-8 h-8 text-gray-200" />
                   </div>
@@ -747,23 +747,23 @@ export function OutboundCallsPage() {
         </section>
 
         {/* COL 3: CALL LOG HISTORY & CHARTS */}
-        <section className="w-[380px] flex flex-col gap-4 shrink-0 overflow-hidden">
+        <section className="w-[380px] flex flex-col gap-2 shrink-0 overflow-hidden">
           <div className="flex-grow bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="px-2 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
                 <HistoryIcon className="w-3.5 h-3.5 mr-1.5" /> 상담 히스토리 아카이브 📂
               </h2>
             </div>
-            <div className="flex-grow p-5 overflow-y-auto">
+            <div className="flex-grow p-2 overflow-y-auto">
               {activeId ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                  <div className="p-2 bg-slate-50 border border-slate-100 rounded-2xl">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">누적 기록</p>
                     <div className="text-[11px] text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">
                       {formData.history || '이전 상담 기록이 없습니다.'}
                     </div>
                   </div>
-                  <div className="p-4 border border-dashed border-gray-200 rounded-2xl bg-gray-50/30">
+                  <div className="p-2 border border-dashed border-gray-200 rounded-2xl bg-gray-50/30">
                     <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-2">기록 요약</p>
                     <p className="text-[11px] text-gray-400 italic leading-relaxed">
                       과거 상담 이력은 수정이 불가능하며,<br/>조회용으로만 제공됩니다.
@@ -777,7 +777,7 @@ export function OutboundCallsPage() {
           </div>
 
           {/* Moved Bar Chart here for compact display */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col h-48 shrink-0">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-2 flex flex-col h-48 shrink-0">
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">상담 빈도 TOP 📊</h2>
             <div className="flex-grow w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -803,7 +803,7 @@ function ModeButton({ active, onClick, icon, label }: { active: boolean, onClick
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+      className={`flex items-center space-x-2 px-2 py-2 rounded-xl text-xs font-black transition-all ${
         active 
         ? 'bg-white text-slate-800 shadow-sm border border-gray-200' 
         : 'text-gray-400 hover:text-gray-600'
@@ -871,7 +871,7 @@ function SortableHeader({ label, sortKey, config, setConfig, className = "" }: {
     setConfig({ key: sortKey, direction });
   };
   return (
-    <th onClick={toggle} className={`px-4 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:bg-gray-100 transition-colors group ${className}`}>
+    <th onClick={toggle} className={`px-2 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:bg-gray-100 transition-colors group ${className}`}>
       <div className="flex items-center space-x-1">
         <span>{label}</span>
         <div className={`transition-opacity ${isActive ? 'opacity-100 text-slate-800' : 'opacity-0 group-hover:opacity-40'}`}>
@@ -904,8 +904,8 @@ function FilterSection({ title, items, selected, onToggle }: { title: string, it
 
 function EmptyState({ icon, text }: { icon: React.ReactNode, text: string }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-30 space-y-4">
-      <div className="p-4 bg-gray-50 rounded-full">{icon}</div>
+    <div className="h-full flex flex-col items-center justify-center text-center p-3 opacity-30 space-y-4">
+      <div className="p-2 bg-gray-50 rounded-full">{icon}</div>
       <p className="text-xs font-black text-slate-800 leading-relaxed">{text}</p>
     </div>
   );

@@ -61,7 +61,7 @@ export const PolicyItem: React.FC<PolicyItemProps> = ({
             {isChecked && <Check size={14} strokeWidth={3} />}
           </button>
         ) : (
-          <span className="text-lg">{emoji}</span>
+          <span className="text-sm">{emoji}</span>
         )}
       </div>
 

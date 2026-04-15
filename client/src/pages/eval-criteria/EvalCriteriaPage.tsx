@@ -117,9 +117,9 @@ const ColumnHeader = ({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50 sticky top-0 z-10 h-[68px]">
+    <div className="flex items-center justify-between p-2 border-b border-slate-200 bg-slate-50 sticky top-0 z-10 h-[68px]">
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-lg">{emoji}</span>
+        <span className="text-sm">{emoji}</span>
         <h3 className="font-bold text-slate-800 text-sm whitespace-nowrap">{title}</h3>
       </div>
       <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 focus-within:ring-2 focus-within:ring-slate-900/10 focus-within:border-slate-400 transition-all ml-2 w-[90px] shadow-sm">
@@ -355,13 +355,13 @@ function EvalCriteriaPage() {
   return (
     <div className="h-screen bg-slate-50 flex flex-col font-sans text-slate-900 overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-20 shadow-sm shrink-0">
+      <header className="bg-white border-b border-slate-200 px-3 py-2 flex items-center justify-between z-20 shadow-sm shrink-0">
         <div className="flex items-center gap-3">
           <div className="bg-slate-900 text-white p-2 rounded-lg">
             <LayoutDashboard size={20} />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-bold leading-tight">평가 지표 통합 마스터</h1>
+            <h1 className="text-sm font-bold leading-tight">평가 지표 통합 마스터</h1>
             <p className="text-[11px] text-slate-500 font-medium">데이터의 수정/추가/삭제를 실시간으로 관리합니다.</p>
           </div>
         </div>
@@ -377,7 +377,7 @@ function EvalCriteriaPage() {
             <button
               key={m.id}
               onClick={() => setAppMode(m.id as DashboardMode)}
-              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center gap-2 px-2 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                 appMode === m.id 
                   ? "bg-white text-slate-900 shadow-md scale-105 ring-1 ring-slate-200/50" 
                   : "text-slate-500 hover:text-slate-800 hover:bg-white/40"
@@ -389,7 +389,7 @@ function EvalCriteriaPage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
             <CheckCircle2 size={14} className="text-slate-900" />
             <span className="text-xs font-bold">{totalSelectedCount}</span>
@@ -397,7 +397,7 @@ function EvalCriteriaPage() {
           <button onClick={resetAll} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
             <RotateCcw size={18} />
           </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-all shadow-sm">
+          <button className="flex items-center gap-2 px-2 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-all shadow-sm">
             <Save size={16} /> 저장
           </button>
         </div>
@@ -492,14 +492,14 @@ function EvalCriteriaPage() {
 
         {/* Col 4 */}
         <div className="w-1/4 min-w-[280px] bg-white overflow-y-auto">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 h-[68px] flex items-center shrink-0">
+          <div className="p-2 border-b border-slate-200 bg-slate-50 h-[68px] flex items-center shrink-0">
             <div className="flex items-center gap-2">
               <Zap size={18} className="text-slate-900" />
               <h3 className="font-bold text-slate-800 text-sm">마스터 요약</h3>
             </div>
           </div>
-          <div className="p-5 space-y-6">
-            <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-4 shadow-xl">
+          <div className="p-2 space-y-2">
+            <div className="p-2 rounded-2xl bg-slate-900 text-white space-y-4 shadow-xl">
               <div className="flex justify-between items-center border-b border-white/10 pb-3">
                 <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">현재 모드</span>
                 <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded uppercase">{appMode}</span>
@@ -519,7 +519,7 @@ function EvalCriteriaPage() {
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck size={12} /> 관리 기능 안내
               </label>
-              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3 text-[11px] text-slate-600 font-medium leading-relaxed">
+              <div className="p-2 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3 text-[11px] text-slate-600 font-medium leading-relaxed">
                 <p>🔍 <b>조회:</b> 항목 선택 및 요약 확인</p>
                 <p>➕ <b>추가:</b> 하단 버튼으로 새 항목 생성</p>
                 <p>✏️ <b>수정:</b> 아이콘 클릭 후 이름 직접 변경</p>
@@ -528,13 +528,13 @@ function EvalCriteriaPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+              <div className="p-2 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
                 <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">총 분류</p>
-                <p className="text-xl font-black">{data.length}</p>
+                <p className="text-sm font-black">{data.length}</p>
               </div>
-              <div className="p-4 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+              <div className="p-2 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
                 <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">총 지표</p>
-                <p className="text-xl font-black">{data.reduce((a, m) => a + m.subs.reduce((s, d) => s + d.details.length, 0), 0)}</p>
+                <p className="text-sm font-black">{data.reduce((a, m) => a + m.subs.reduce((s, d) => s + d.details.length, 0), 0)}</p>
               </div>
             </div>
           </div>
@@ -542,8 +542,8 @@ function EvalCriteriaPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-1.5 px-6 flex justify-between items-center text-[10px] font-bold text-slate-400 shrink-0">
-        <div className="flex gap-4">
+      <footer className="bg-white border-t border-slate-100 py-1.5 px-3 flex justify-between items-center text-[10px] font-bold text-slate-400 shrink-0">
+        <div className="flex gap-2">
           <span>DASHBOARD v3.5</span>
           <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE SYNC</span>
         </div>

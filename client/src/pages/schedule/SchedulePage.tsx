@@ -374,8 +374,8 @@ function SchedulePage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#334155] p-2 font-sans">
       <header className="max-w-[1600px] mx-auto mb-2 flex items-center justify-between bg-white/50 p-2 rounded-2xl backdrop-blur-sm border border-white/50">
-        <div className="flex items-center gap-8">
-          <h1 className="text-xl font-black flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-black flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
             <Calendar className="w-6 h-6 text-blue-600" />
             Academy Scheduler
           </h1>
@@ -383,7 +383,7 @@ function SchedulePage() {
           <div className="h-8 w-px bg-slate-200" />
 
           {/* Stat Summary Widget */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
             <StatSmall icon={<BookOpen size={14}/>} label="Total Lectures" value={stats.totalLectures} />
             <StatSmall icon={<Users size={14}/>} label="Active Lecturers" value={stats.uniqueLecturers} />
             <StatSmall icon={<BarChart3 size={14}/>} label="Avg. Weekly Hrs" value={`${stats.avgWeeklyHours}h`} />
@@ -393,14 +393,14 @@ function SchedulePage() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => handleOpenPreview("excel")}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-emerald-700 bg-white border border-emerald-100 rounded-xl hover:shadow-md transition-all active:scale-95"
+            className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-emerald-700 bg-white border border-emerald-100 rounded-xl hover:shadow-md transition-all active:scale-95"
           >
             <FileSpreadsheet size={16} />
             전체 Excel
           </button>
           <button 
             onClick={() => handleOpenPreview("word")}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-white border border-blue-100 rounded-xl hover:shadow-md transition-all active:scale-95"
+            className="flex items-center gap-2 px-2 py-2 text-xs font-bold text-blue-700 bg-white border border-blue-100 rounded-xl hover:shadow-md transition-all active:scale-95"
           >
             <FileText size={16} />
             전체 Word
@@ -408,8 +408,8 @@ function SchedulePage() {
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 items-start">
-        <div className="col-span-9 space-y-6">
+      <main className="max-w-[1600px] mx-auto grid grid-cols-12 gap-2 items-start">
+        <div className="col-span-9 space-y-2">
           
           {/* Top Control Bar */}
           <div className="flex items-center justify-between bg-white border border-slate-200 p-2 rounded-2xl shadow-sm">
@@ -444,7 +444,7 @@ function SchedulePage() {
               <button 
                 onClick={() => setViewMode("dashboard")}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                  "flex items-center gap-2 px-2 py-2 rounded-lg text-xs font-bold transition-all",
                   viewMode === "dashboard" ? "bg-white text-slate-900 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
                 )}
               >
@@ -454,7 +454,7 @@ function SchedulePage() {
               <button 
                 onClick={() => setViewMode("list")}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                  "flex items-center gap-2 px-2 py-2 rounded-lg text-xs font-bold transition-all",
                   viewMode === "list" ? "bg-white text-slate-900 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
                 )}
               >
@@ -471,13 +471,13 @@ function SchedulePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="space-y-6"
+                className="space-y-2"
               >
                 {/* 4-Column (Responsive) Inputs */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-2">
                   {/* Expanded Lecture Info - Col Span 2 */}
                   <SectionContainer icon={<BookOpen size={18} />} title="강의 정보" className="col-span-2">
-                    <div className="grid grid-cols-2 gap-6 h-full">
+                    <div className="grid grid-cols-2 gap-2 h-full">
                       {/* Left side: Classification */}
                       <div className="space-y-3 pr-3 border-r border-slate-50">
                         <InputWrapper label="📚 대분류 (강의 과목)">
@@ -637,7 +637,7 @@ function SchedulePage() {
                               <div className="relative">
                                 <input 
                                   type="number"
-                                  className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[10px] outline-none pr-4"
+                                  className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[10px] outline-none pr-2"
                                   value={p.duration}
                                   onChange={(e) => updatePeriod(idx, "duration", parseInt(e.target.value) || 0)}
                                 />
@@ -663,7 +663,7 @@ function SchedulePage() {
                   </SectionContainer>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-3">
                     {showTimetable && (
                       <motion.div 
@@ -671,8 +671,8 @@ function SchedulePage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm"
                       >
-                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                          <div className="flex items-center gap-4">
+                        <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                          <div className="flex items-center gap-2">
                             <h3 className="font-bold text-sm flex items-center gap-2 text-slate-700">
                               <Calendar className="w-4 h-4 text-slate-400" />
                               주간 강의 스케줄 뷰어
@@ -696,7 +696,7 @@ function SchedulePage() {
                             </button>
                           </div>
                         </div>
-                        <div className="p-6">
+                        <div className="p-2">
                           <TimetableGrid 
                             schedule={formData} 
                             calculations={currentCalculations} 
@@ -712,7 +712,7 @@ function SchedulePage() {
                     <div className="space-y-3 h-full flex flex-col">
                       {mode === "add" ? (
                         <div className="flex-1 flex flex-col justify-center">
-                          <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center mb-4">
+                          <div className="p-2bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center mb-4">
                             <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Status</p>
                             <p className="text-xs text-slate-600 font-medium">새로운 정보를 입력 중입니다</p>
                           </div>
@@ -769,10 +769,10 @@ function SchedulePage() {
                 exit={{ opacity: 0, y: -10 }}
                 className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm"
               >
-                <div className="p-6 border-b border-slate-100 bg-slate-50/30">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="p-2border-b border-slate-100 bg-slate-50/30">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h3 className="font-black text-slate-800 text-lg tracking-tight">전체 강의 시간표 리스트</h3>
+                      <h3 className="font-black text-slate-800 text-sm tracking-tight">전체 강의 시간표 리스트</h3>
                       <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Total {filteredAndSortedSchedules.length} schedules registered</p>
                     </div>
                     {/* Search Bar on Top Right */}
@@ -783,7 +783,7 @@ function SchedulePage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="강사명 또는 분류 검색..." 
-                        className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-100 w-72 shadow-sm"
+                        className="pl-9 pr-2 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-100 w-72 shadow-sm"
                       />
                     </div>
                   </div>
@@ -804,12 +804,12 @@ function SchedulePage() {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                        <th className="px-6 py-4 text-left">급수/분류</th>
-                        <th className="px-6 py-4 text-left">강사명</th>
-                        <th className="px-6 py-4 text-left">수강 기간</th>
-                        <th className="px-6 py-4 text-left">수업 요일</th>
-                        <th className="px-6 py-4 text-left">총 수업량</th>
-                        <th className="px-6 py-4 text-right">관리</th>
+                        <th className="px-3 py-2 text-left">급수/분류</th>
+                        <th className="px-3 py-2 text-left">강사명</th>
+                        <th className="px-3 py-2 text-left">수강 기간</th>
+                        <th className="px-3 py-2 text-left">수업 요일</th>
+                        <th className="px-3 py-2 text-left">총 수업량</th>
+                        <th className="px-3 py-2 text-right">관리</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -817,7 +817,7 @@ function SchedulePage() {
                         const calcs = calculateScheduleTimes(s);
                         return (
                           <tr key={s.id} className="hover:bg-slate-50/50 transition-colors group">
-                            <td className="px-6 py-4">
+                            <td className="px-3 py-2">
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-600 text-white uppercase">{s.grade}</span>
@@ -826,11 +826,11 @@ function SchedulePage() {
                                 <span className="text-xs font-black text-slate-700">{s.largeCategory}</span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 font-bold text-slate-700 text-sm">{s.lecturer || "미지정"}</td>
-                            <td className="px-6 py-4 text-[11px] text-slate-400 font-medium">
+                            <td className="px-3 py-2 font-bold text-slate-700 text-sm">{s.lecturer || "미지정"}</td>
+                            <td className="px-3 py-2 text-[11px] text-slate-400 font-medium">
                               {s.startDate} ~ {s.endDate}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-3 py-2">
                               <div className="flex gap-1">
                                 {s.selectedDays.map(d => (
                                   <span key={d} className="w-5 h-5 flex items-center justify-center bg-slate-100 rounded text-[9px] font-black text-slate-500">
@@ -839,10 +839,10 @@ function SchedulePage() {
                                 ))}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-xs font-bold text-slate-900">
+                            <td className="px-3 py-2 text-xs font-bold text-slate-900">
                               {calcs.totalDur}분 <span className="text-[10px] text-slate-400 font-medium">/ 1일</span>
                             </td>
-                            <td className="px-6 py-4 text-right">
+                            <td className="px-3 py-2 text-right">
                               <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button 
                                   onClick={() => setSelectedDetailId(s.id)}
@@ -865,7 +865,7 @@ function SchedulePage() {
                       })}
                       {filteredAndSortedSchedules.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="px-6 py-20 text-center">
+                          <td colSpan={6} className="px-3 py-2 text-center">
                             <div className="text-slate-300 mb-2 flex justify-center"><Search size={40} /></div>
                             <p className="text-sm font-bold text-slate-400">검색 결과가 없습니다.</p>
                           </td>
@@ -882,7 +882,7 @@ function SchedulePage() {
         {/* Right Preview Area */}
         <div className="col-span-3 sticky top-6">
           <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden flex flex-col h-[calc(100vh-120px)]">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div className="p-2bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <h2 className="font-bold text-xs flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
                 <Clock size={14} /> LIVE PREVIEW
               </h2>
@@ -906,10 +906,10 @@ function SchedulePage() {
               </div>
             </div>
 
-            <div className="p-2flex-1 overflow-y-auto space-y-6 custom-scrollbar">
+            <div className="p-2flex-1 overflow-y-auto space-y-2 custom-scrollbar">
               <div className="bg-slate-50 rounded-xl p-2border border-slate-100">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-2xl relative">
+                  <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-base relative">
                     <span className="absolute -top-1 -left-1 text-[8px] bg-blue-600 text-white px-1 rounded font-black">{formData.grade}</span>
                     {formData.largeCategory === "TESOL" ? "🎓" : 
                      formData.largeCategory === "번역" ? "📖" :
@@ -973,14 +973,14 @@ function SchedulePage() {
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 px-4 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                  <div className="text-3xl mb-2 opacity-30">📅</div>
+                <div className="flex flex-col items-center justify-center py-3 px-2 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                  <div className="text-base mb-2 opacity-30">📅</div>
                   <p className="text-xs font-bold text-slate-400 text-center">해당 일자({selectedDayInfo.day})에는<br/>강의가 예정되어 있지 않습니다.</p>
                 </div>
               )}
 
               {selectedDayInfo.hasClass && (
-                <div className="pt-4 border-t border-dashed border-slate-200 grid grid-cols-2 gap-4">
+                <div className="pt-2 border-t border-dashed border-slate-200 grid grid-cols-2 gap-2">
                   <div className="bg-slate-50 p-3 rounded-lg text-center border border-slate-100">
                     <div className="text-[9px] text-slate-400 font-bold uppercase">총 수업</div>
                     <div className="text-sm font-bold text-slate-800 uppercase">{currentCalculations.totalDur}M</div>
@@ -993,7 +993,7 @@ function SchedulePage() {
               )}
             </div>
             
-            <div className="p-4 bg-slate-900 text-white mt-auto">
+            <div className="p-2bg-slate-900 text-white mt-auto">
               <div className="text-[9px] opacity-50 mb-1 flex items-center gap-1 uppercase font-bold tracking-widest"><Download size={10} /> Final Report</div>
               <div className="text-base font-bold tracking-tight">2026년 04월 15일 (수)</div>
             </div>
@@ -1059,7 +1059,7 @@ function ModeTab({ active, onClick, icon, label, desc, activeClass }: {
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all flex-1 text-left active:scale-[0.98]",
+        "flex items-center gap-3 px-2 py-2.5 rounded-xl transition-all flex-1 text-left active:scale-[0.98]",
         active 
           ? activeClass 
           : "bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 border border-slate-100"
@@ -1249,7 +1249,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
   const totalLectures = Math.floor(totalDays / 7) * schedule.selectedDays.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2">
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
@@ -1262,7 +1262,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-2border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
@@ -1283,8 +1283,8 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
           </button>
         </div>
 
-        <div className="p-8 overflow-y-auto custom-scrollbar bg-white">
-          <div className="mb-6 flex justify-between items-end border-b-2 border-slate-900 pb-2">
+        <div className="p-3overflow-y-auto custom-scrollbar bg-white">
+          <div className="mb-2 flex justify-between items-end border-b-2 border-slate-900 pb-2">
             <h4 className="text-sm font-black text-slate-900">
               {totalDays > 30 ? Math.floor(totalDays/7) : 1} Weeks {schedule.selectedDays.length > 5 ? "Weekends" : "Weekdays"} ({schedule.selectedDays.join(", ")})
             </h4>
@@ -1349,7 +1349,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
           </table>
 
           <div className="bg-slate-50 rounded-2xl p-2border border-slate-100">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Calculated Total</p>
                 <div className="text-sm font-black text-slate-900 leading-tight">
@@ -1357,9 +1357,9 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
                   <span className="text-slate-400 text-xs ml-2 font-bold">({Math.floor((calculations.totalDur * totalLectures) / 60)}Hrs)</span>
                 </div>
               </div>
-              <div className="space-y-1 text-right border-l border-slate-200 pl-8">
+              <div className="space-y-1 text-right border-l border-slate-200 pl-3">
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Weekly Load</p>
-                <div className="text-lg font-black text-slate-900">
+                <div className="text-sm font-black text-slate-900">
                   Weekly {Math.floor(weeklyHrs)}Hrs {weeklyHrs % 1 !== 0 ? Math.round((weeklyHrs % 1) * 60) + "m" : ""}
                 </div>
               </div>
@@ -1367,12 +1367,12 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
           </div>
         </div>
 
-        <div className="p-6 border-t border-slate-100 flex gap-3 bg-slate-50/30">
-          <button onClick={onClose} className="flex-1 px-6 py-3 rounded-xl text-xs font-bold text-slate-500 bg-white border border-slate-200">취소</button>
+        <div className="p-2border-t border-slate-100 flex gap-3 bg-slate-50/30">
+          <button onClick={onClose} className="flex-1 px-3 py-3 rounded-xl text-xs font-bold text-slate-500 bg-white border border-slate-200">취소</button>
           <button 
             onClick={() => { alert("다운로드 시작"); onClose(); }}
             className={cn(
-              "flex-[2] px-6 py-3 rounded-xl text-xs font-bold text-white shadow-lg flex items-center justify-center gap-2",
+              "flex-[2] px-3 py-3 rounded-xl text-xs font-bold text-white shadow-lg flex items-center justify-center gap-2",
               type === "excel" ? "bg-emerald-600 shadow-emerald-100" : "bg-blue-600 shadow-blue-100"
             )}
           >
@@ -1390,7 +1390,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
   calculations: any;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2">
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
@@ -1405,46 +1405,46 @@ function DetailViewModal({ schedule, onClose, calculations }: {
         className="relative bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-12 max-h-[85vh]"
       >
         <div className="col-span-8 p-3overflow-y-auto custom-scrollbar">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
               <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-100 text-white relative">
                 <span className="absolute -top-2 -left-2 bg-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full">{schedule.grade}</span>
                 <BookOpen size={28} />
               </div>
               <div>
                 <div className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1">{schedule.middleCategory} / {schedule.largeCategory}</div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">{schedule.lecturer || "미지정 강사"}</h2>
+                <h2 className="text-base font-black text-slate-900 tracking-tight">{schedule.lecturer || "미지정 강사"}</h2>
               </div>
             </div>
             <div className="text-right">
               <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Status</div>
-              <div className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-black text-slate-600 inline-block">Active</div>
+              <div className="px-2 py-1.5 bg-slate-100 rounded-full text-xs font-black text-slate-600 inline-block">Active</div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 mb-10">
-            <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="space-y-2">
               <DetailField label="수강 기간" value={`${schedule.startDate} ~ ${schedule.endDate}`} icon={<Calendar size={14}/>} />
               <DetailField label="수업 요일" value={schedule.selectedDays.join(", ") + " (주 " + schedule.selectedDays.length + "회)"} icon={<Clock size={14}/>} />
               <DetailField label="시작 시각" value={schedule.startTime} icon={<Timer size={14}/>} />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-2">
               <DetailField label="휴일 수업" value={schedule.includeHolidays ? "포함 (진행)" : "제외 (휴강)"} icon={<AlertCircle size={14}/>} />
               <DetailField label="일일 총 수업" value={`${calculations.totalDur}분`} icon={<BarChart3 size={14}/>} />
               <DetailField label="종료 시각" value={calculations.totalEnd} icon={<ArrowRight size={14}/>} />
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-8">
+          <div className="border-t border-slate-100 pt-3">
             <h4 className="text-sm font-black text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
               <LayoutList size={16} className="text-blue-600" />
               세부 교시 구성
             </h4>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               {schedule.periods.map((p, i) => (
-                <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                <div key={i} className="bg-slate-50 border border-slate-100 rounded-md p-2">
                   <div className="text-[10px] font-black text-slate-400 uppercase mb-2">{i+1}교시</div>
-                  <div className="text-xl font-black text-slate-900 mb-1">{p.duration}m</div>
+                  <div className="text-sm font-black text-slate-900 mb-1">{p.duration}m</div>
                   <div className="text-[10px] text-slate-500 font-bold">쉬는시간: {p.breakAfter}분</div>
                 </div>
               ))}
@@ -1457,9 +1457,9 @@ function DetailViewModal({ schedule, onClose, calculations }: {
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/10 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
-            <div className="mb-10">
+            <div className="mb-3">
               <div className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-4">Quick Summary</div>
-              <div className="space-y-6">
+              <div className="space-y-2">
                 <SummaryItem label="Weekly Total" value={`${((calculations.totalDur * schedule.selectedDays.length)/60).toFixed(1)}h`} />
                 <SummaryItem label="Sessions/Week" value={`${schedule.selectedDays.length} Times`} />
                 <SummaryItem label="Grade Class" value={schedule.grade} color="text-emerald-400" />
@@ -1468,13 +1468,13 @@ function DetailViewModal({ schedule, onClose, calculations }: {
           </div>
 
           <div className="relative z-10 space-y-3">
-            <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-900/40 hover:bg-blue-500 transition-all flex items-center justify-center gap-2">
+            <button className="w-full py-2 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-900/40 hover:bg-blue-500 transition-all flex items-center justify-center gap-2">
               <Printer size={18} />
               강사 배포용 출력
             </button>
             <button 
               onClick={onClose}
-              className="w-full py-4 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-sm hover:bg-white/20 transition-all"
+              className="w-full py-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-sm hover:bg-white/20 transition-all"
             >
               닫기
             </button>
@@ -1501,9 +1501,9 @@ function DetailField({ label, value, icon }: { label: string, value: string, ico
 
 function SummaryItem({ label, value, color = "text-white" }: { label: string, value: string, color?: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-white/5 pb-4">
+    <div className="flex items-center justify-between border-b border-white/5 pb-2">
       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-      <span className={cn("text-lg font-black tracking-tight", color)}>{value}</span>
+      <span className={cn("text-sm font-black tracking-tight", color)}>{value}</span>
     </div>
   );
 }

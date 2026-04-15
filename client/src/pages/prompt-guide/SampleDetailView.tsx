@@ -28,7 +28,7 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-20 p-8">
+    <div className="max-w-6xl mx-auto space-y-3 pb-20 p-3">
       {/* Navigation */}
       <motion.nav
         initial={{ opacity: 0, x: -20 }}
@@ -79,16 +79,16 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
       </section>
 
       {/* Main Content: Workflow Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
 
         {/* Left Column: Prompts Workflow */}
-        <section className="space-y-8">
-          <div className="flex items-center gap-3 border-b border-neutral-100 pb-4">
+        <section className="space-y-3">
+          <div className="flex items-center gap-3 border-b border-neutral-100 pb-2">
             <Code2 size={20} className="text-neutral-600" />
-            <h2 className="text-xl font-bold tracking-tight">프롬프트 워크플로우</h2>
+            <h2 className="text-sm font-bold tracking-tight">프롬프트 워크플로우</h2>
           </div>
 
-          <div className="relative space-y-10 before:absolute before:left-5 before:top-2 before:bottom-2 before:w-[2px] before:bg-neutral-100">
+          <div className="relative space-y-3 before:absolute before:left-5 before:top-2 before:bottom-2 before:w-[2px] before:bg-neutral-100">
             {/* 1st Prompt */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -99,7 +99,7 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
               <div className="absolute left-0 top-0 w-10 h-10 bg-neutral-900 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-neutral-200 z-10">
                 1차
               </div>
-              <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group">
+              <div className="bg-white border border-neutral-200 rounded-2xl p-2 shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-widest opacity-40">주요 프롬프트</h3>
                   <button onClick={() => handleCopy(sample.primaryPrompt)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 rounded-lg transition-colors">
@@ -124,7 +124,7 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
                 <div className="absolute left-2.5 top-0 w-5 h-5 bg-neutral-100 border-2 border-white rounded-full flex items-center justify-center text-neutral-400 text-[10px] font-bold z-10 shadow-sm">
                   {idx + 2}
                 </div>
-                <div className="bg-neutral-50/50 border border-neutral-200 border-dashed rounded-2xl p-6 hover:bg-white transition-all group">
+                <div className="bg-neutral-50/50 border border-neutral-200 border-dashed rounded-2xl p-2 hover:bg-white transition-all group">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">보완 {idx + 1}</h3>
                     <button onClick={() => handleCopy(prompt)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50 rounded-lg transition-colors">
@@ -145,7 +145,7 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
               transition={{ delay: 0.6 }}
               className="relative pl-12"
             >
-              <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 w-fit px-4 py-2 rounded-full border border-emerald-100">
+              <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 w-fit px-2 py-2 rounded-full border border-emerald-100">
                 <CheckCircle2 size={16} /> 최종 버전 생성 완료
               </div>
             </motion.div>
@@ -153,10 +153,10 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
         </section>
 
         {/* Right Column: Visual Result */}
-        <section className="space-y-8 sticky top-24">
-          <div className="flex items-center gap-3 border-b border-neutral-100 pb-4">
+        <section className="space-y-3 sticky top-24">
+          <div className="flex items-center gap-3 border-b border-neutral-100 pb-2">
             <ImageIcon size={20} className="text-neutral-600" />
-            <h2 className="text-xl font-bold tracking-tight">최종 결과물 캡처</h2>
+            <h2 className="text-sm font-bold tracking-tight">최종 결과물 캡처</h2>
           </div>
 
           <motion.div
@@ -172,23 +172,23 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
             />
             <div className="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/10 transition-colors pointer-events-none" />
             <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="px-4 py-2 bg-white/90 backdrop-blur rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 hover:bg-white transition-all">
+              <button className="px-2 py-2 bg-white/90 backdrop-blur rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 hover:bg-white transition-all">
                 <Layout size={14} /> 전체 미리보기
               </button>
             </div>
           </motion.div>
 
-          <div className="bg-neutral-900 rounded-3xl p-8 text-white shadow-xl shadow-neutral-200 overflow-hidden relative group">
+          <div className="bg-neutral-900 rounded-3xl p-3 text-white shadow-xl shadow-neutral-200 overflow-hidden relative group">
             {/* Decorative bubbles */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-neutral-400/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700" />
 
             <div className="relative z-10 space-y-4">
-              <h3 className="text-xl font-bold">이 워크플로우를 적용할까요?</h3>
+              <h3 className="text-sm font-bold">이 워크플로우를 적용할까요?</h3>
               <p className="text-neutral-400 text-sm leading-relaxed opacity-90">
                 이 프롬프트 시퀀스를 활용하면 4단 반응형 대시보드 레이아웃과 인터랙티브 필터링을 구현할 수 있습니다.
               </p>
-              <button className="px-6 py-3 bg-white text-neutral-900 rounded-xl text-sm font-bold shadow-lg hover:bg-neutral-50 transition-colors flex items-center gap-2">
+              <button className="px-3 py-3 bg-white text-neutral-900 rounded-xl text-sm font-bold shadow-lg hover:bg-neutral-50 transition-colors flex items-center gap-2">
                 유사한 앱 생성하기 <ChevronRight size={16} />
               </button>
             </div>

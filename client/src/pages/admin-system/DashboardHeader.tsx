@@ -2,10 +2,10 @@ import React from "react";
 
 export const DashboardHeader: React.FC = () => {
   return (
-    <header className="mb-10 flex justify-between items-end pb-6 border-b border-zinc-200">
+    <header className="mb-3 flex justify-between items-end pb-2 border-b border-zinc-200">
       <div>
-        <h1 className="text-3xl font-black text-zinc-900 flex items-center gap-3 tracking-tighter uppercase leading-none">
-          <span className="text-3xl transform -rotate-12 hover:rotate-0 transition-transform cursor-pointer">🛸</span>
+        <h1 className="text-base font-black text-zinc-900 flex items-center gap-3 tracking-tighter uppercase leading-none">
+          <span className="text-base transform -rotate-12 hover:rotate-0 transition-transform cursor-pointer">🛸</span>
           관리자 통합 시스템
         </h1>
         <div className="mt-2 flex items-center gap-2">

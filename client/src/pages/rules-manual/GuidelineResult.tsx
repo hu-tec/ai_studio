@@ -45,8 +45,8 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
   const showCommentInGrid = activeGroups.length <= 3;
 
   return (
-    <div className="h-full bg-gray-50 overflow-y-auto no-scrollbar p-8">
-      <div className="max-w-[1200px] mx-auto space-y-8">
+    <div className="h-full bg-gray-50 overflow-y-auto no-scrollbar p-3">
+      <div className="max-w-[1200px] mx-auto space-y-3">
 
         {/* Header Actions */}
         <div className="flex items-center justify-between no-print">
@@ -57,10 +57,10 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Edit
           </button>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-gray-600 flex items-center gap-2 hover:bg-gray-50 shadow-sm transition-all uppercase tracking-wider">
+            <button className="px-2 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-gray-600 flex items-center gap-2 hover:bg-gray-50 shadow-sm transition-all uppercase tracking-wider">
               <Printer className="w-3.5 h-3.5" /> Print
             </button>
-            <button className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black flex items-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95 uppercase tracking-wider">
+            <button className="px-2 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black flex items-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95 uppercase tracking-wider">
               <Download className="w-3.5 h-3.5" /> Export PDF
             </button>
           </div>
@@ -73,10 +73,10 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
           className="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden"
         >
           {/* Document Header */}
-          <div className="bg-[#0A0F1E] p-10 text-white relative overflow-hidden">
-            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="bg-[#0A0F1E] p-3 text-white relative overflow-hidden">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-3">
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/40">
                     <FileText className="w-7 h-7 text-white" />
                   </div>
@@ -85,7 +85,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
                     <p className="text-blue-400/80 text-[10px] font-black uppercase tracking-[0.4em] mt-1">Integrated Business Directives</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-6 pt-4">
+                <div className="flex items-center gap-2 pt-2">
                   <div className="space-y-1">
                     <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">분류 정보</span>
                     <p className="text-sm font-bold text-white/90">
@@ -103,7 +103,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               </div>
 
               <div className="flex flex-col items-end">
-                <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                <div className="px-2 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
                   <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Serial No: 2026-X842</span>
                 </div>
               </div>
@@ -111,8 +111,8 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
           </div>
 
           {/* 4-Column Horizontal Layout Grid */}
-          <div className="p-10">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="p-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
 
               {/* 1. Fixed Rules */}
               <div className={groupedRules.fixed.length > 0 ? "block" : "hidden opacity-20 pointer-events-none"}>
@@ -163,14 +163,14 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
 
             {/* Bottom Separate Comment (Only if Field rules exist) */}
             {!showCommentInGrid && (
-              <div className="mt-8">
+              <div className="mt-3">
                 <CommentBox comment={comment} fullWidth />
               </div>
             )}
 
             {/* Document Footer */}
             <div className="mt-16 pt-10 border-t border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shadow-inner">
                   <User className="w-6 h-6 text-gray-400" />
                 </div>
@@ -181,11 +181,11 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               </div>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                   <div className="w-24 h-24 border-8 border-blue-500 rounded-full flex items-center justify-center text-xl font-black rotate-12">SEAL</div>
+                   <div className="w-24 h-24 border-8 border-blue-500 rounded-full flex items-center justify-center text-sm font-black rotate-12">SEAL</div>
                 </div>
-                <div className="text-right pr-6">
+                <div className="text-right pr-2">
                   <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Approved for Delivery</p>
-                  <div className="text-2xl font-black text-blue-500 italic tracking-tighter">OFFICIAL</div>
+                  <div className="text-base font-black text-blue-500 italic tracking-tighter">OFFICIAL</div>
                 </div>
               </div>
             </div>
@@ -209,7 +209,7 @@ function CategoryHeader({ icon, title, subTitle, color }: { icon: React.ReactNod
   };
 
   return (
-    <div className="flex flex-col gap-1 mb-6">
+    <div className="flex flex-col gap-1 mb-2">
       <div className="flex items-center gap-2">
         <div className={`w-7 h-7 rounded-lg ${colorMap[color]} flex items-center justify-center`}>
           {icon}
@@ -236,7 +236,7 @@ function RuleCard({ rule, color }: { rule: Regulation, color: string }) {
   };
 
   return (
-    <div className={`p-4 rounded-2xl border ${borderMap[color]} transition-all cursor-default group space-y-3`}>
+    <div className={`p-2 rounded-2xl border ${borderMap[color]} transition-all cursor-default group space-y-3`}>
       <div className="space-y-1">
         <h3 className="text-xs font-black text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors">
           {rule.title}
@@ -267,7 +267,7 @@ function RuleCard({ rule, color }: { rule: Regulation, color: string }) {
 function CommentBox({ comment, fullWidth }: { comment: string, fullWidth?: boolean }) {
   return (
     <div className={`${fullWidth ? 'w-full' : 'h-full'} min-h-[160px]`}>
-      <div className="flex flex-col gap-1 mb-6">
+      <div className="flex flex-col gap-1 mb-2">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gray-900 text-white flex items-center justify-center">
             <MessageCircle className="w-4 h-4" />
@@ -276,7 +276,7 @@ function CommentBox({ comment, fullWidth }: { comment: string, fullWidth?: boole
         </div>
         <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-9">Admin Comment</span>
       </div>
-      <div className="p-6 bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] h-[calc(100%-60px)] flex flex-col items-center justify-center text-center">
+      <div className="p-2 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg h-[calc(100%-60px)] flex flex-col items-center justify-center text-center">
         {comment ? (
           <p className="text-xs font-bold text-gray-600 leading-relaxed max-w-[200px]">
             "{comment}"

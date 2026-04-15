@@ -60,20 +60,20 @@ export function DashboardView({ data }: DashboardViewProps) {
   }));
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto no-scrollbar p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-col h-full overflow-y-auto no-scrollbar p-2 space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Integrated Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         <StatCard title="전체 대분류" value={totalLarge} icon={<LayoutGrid className="text-blue-600" />} color="bg-blue-50" border="border-blue-100" />
         <StatCard title="전체 중분류" value={totalMedium} icon={<Activity className="text-indigo-600" />} color="bg-indigo-50" border="border-indigo-100" />
         <StatCard title="전체 소분류" value={totalSmall} icon={<Zap className="text-amber-600" />} color="bg-amber-50" border="border-amber-100" />
         <StatCard title="전체 규정 수" value={allRegs.length} icon={<ShieldCheck className="text-emerald-600" />} color="bg-emerald-50" border="border-emerald-100" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         {/* Regulation Type Distribution */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-gray-800 flex items-center gap-3">
+        <div className="lg:col-span-2 bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-black text-gray-800 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">📊</div>
               전체 규정 유형별 실시간 통계
             </h3>
@@ -126,12 +126,12 @@ export function DashboardView({ data }: DashboardViewProps) {
         </div>
 
         {/* Category Distribution Sidebar */}
-        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col">
-          <h3 className="text-xl font-black text-gray-800 flex items-center gap-3 mb-8">
+        <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col">
+          <h3 className="text-sm font-black text-gray-800 flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">📑</div>
             분류별 비중
           </h3>
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 space-y-2">
             {categoryDistribution.map((cat, idx) => (
               <div key={cat.name} className="space-y-2">
                 <div className="flex justify-between items-center px-1">
@@ -149,8 +149,8 @@ export function DashboardView({ data }: DashboardViewProps) {
               </div>
             ))}
           </div>
-          <div className="mt-8 pt-6 border-t border-gray-50">
-            <button className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black text-sm tracking-widest hover:bg-black transition-all shadow-lg shadow-gray-200">
+          <div className="mt-3 pt-2 border-t border-gray-50">
+            <button className="w-full py-2 bg-gray-900 text-white rounded-2xl font-black text-sm tracking-widest hover:bg-black transition-all shadow-lg shadow-gray-200">
               전체 보고서 다운로드
             </button>
           </div>
@@ -158,14 +158,14 @@ export function DashboardView({ data }: DashboardViewProps) {
       </div>
 
       {/* Recent Updates Horizontal Scroll */}
-      <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-        <h3 className="text-xl font-black text-gray-800 flex items-center gap-3 mb-6">
+      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+        <h3 className="text-sm font-black text-gray-800 flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">⚡</div>
           최근 업데이트 기록
         </h3>
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
           {allRegs.slice(0, 10).map((reg, i) => (
-            <div key={`${reg.id}-${i}`} className="min-w-[280px] p-5 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-white transition-all group">
+            <div key={`${reg.id}-${i}`} className="min-w-[280px] p-2 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-white transition-all group">
               <div className="flex items-center gap-2 mb-3">
                 <span className={clsx(
                   "w-2 h-2 rounded-full",
@@ -188,10 +188,10 @@ export function DashboardView({ data }: DashboardViewProps) {
 
 function StatCard({ title, value, icon, color, border }: { title: string, value: number, icon: React.ReactNode, color: string, border: string }) {
   return (
-    <div className={clsx("p-8 rounded-[2.5rem] border shadow-2xl shadow-gray-200/20 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-gray-300/50 bg-white", border)}>
+    <div className={clsx("p-3 rounded-lg border shadow-2xl shadow-gray-200/20 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-gray-300/50 bg-white", border)}>
       <div className="space-y-1">
         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{title}</p>
-        <h4 className="text-3xl font-black text-gray-900">{value.toLocaleString()}</h4>
+        <h4 className="text-base font-black text-gray-900">{value.toLocaleString()}</h4>
       </div>
       <div className={clsx("w-16 h-16 rounded-[1.25rem] flex items-center justify-center", color)}>
         {icon}

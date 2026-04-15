@@ -322,12 +322,12 @@ export function PhotoDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-2">
       
       {/* Header Section */}
-      <header className="max-w-[1800px] mx-auto mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header className="max-w-[1800px] mx-auto mb-3 flex flex-col md:flex-row md:items-end justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
+          <h1 className="text-base font-bold flex items-center gap-2 mb-2">
             🖼️ 사진모음방 대시보드
           </h1>
           <p className="text-slate-500">이미지 보관 현황 및 카테고리별 분류 (총 {items.length}개)</p>
@@ -337,7 +337,7 @@ export function PhotoDashboardPage() {
           {/* Stats Toggle */}
           <button 
             onClick={() => setShowStats(!showStats)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
+            className={`flex items-center gap-2 px-2 py-2 rounded-xl text-sm font-semibold transition-all border ${
               showStats 
                 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' 
                 : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
@@ -368,14 +368,14 @@ export function PhotoDashboardPage() {
           <div className="flex bg-white rounded-xl shadow-sm border border-slate-200 p-1">
             <button 
               onClick={exportToExcel}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium hover:bg-emerald-50 text-emerald-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-2 py-2 text-sm font-medium hover:bg-emerald-50 text-emerald-700 rounded-lg transition-colors"
             >
               <FileSpreadsheet size={16} /> 엑셀 다운
             </button>
             <div className="w-[1px] bg-slate-200 my-1 mx-1" />
             <button 
               onClick={exportToWord}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium hover:bg-blue-50 text-blue-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-2 py-2 text-sm font-medium hover:bg-blue-50 text-blue-700 rounded-lg transition-colors"
             >
               <FileWordIcon size={16} /> 워드 다운
             </button>
@@ -392,7 +392,7 @@ export function PhotoDashboardPage() {
               <button
                 key={m.id}
                 onClick={() => setMode(m.id as Mode)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-semibold transition-all ${
                   mode === m.id 
                     ? 'bg-white text-slate-900 shadow-sm' 
                     : 'text-slate-500 hover:text-slate-700'
@@ -413,10 +413,10 @@ export function PhotoDashboardPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="max-w-[1800px] mx-auto mb-10 overflow-hidden"
+            className="max-w-[1800px] mx-auto mb-3 overflow-hidden"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex flex-col items-center min-h-[300px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+              <div className="bg-white p-2 rounded-[32px] border border-slate-200 shadow-sm flex flex-col items-center min-h-[300px]">
                 <h3 className="text-sm font-bold text-slate-500 mb-4 self-start flex items-center gap-2">
                   <Info size={14} /> 카테고리별 비중
                 </h3>
@@ -450,7 +450,7 @@ export function PhotoDashboardPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm min-h-[300px]">
+              <div className="lg:col-span-2 bg-white p-2 rounded-[32px] border border-slate-200 shadow-sm min-h-[300px]">
                 <h3 className="text-sm font-bold text-slate-500 mb-4 flex items-center gap-2">
                   <BarChart3 size={14} /> 데이터 분포 현황
                 </h3>
@@ -475,8 +475,8 @@ export function PhotoDashboardPage() {
       </AnimatePresence>
 
       {/* Filter & Search */}
-      <div className="max-w-[1800px] mx-auto mb-8 flex flex-col md:flex-row gap-4 items-center">
-        <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-3 rounded-2xl shadow-sm min-w-[140px]">
+      <div className="max-w-[1800px] mx-auto mb-3 flex flex-col md:flex-row gap-2 items-center">
+        <div className="flex items-center gap-3 bg-white border border-slate-200 px-2 py-3 rounded-2xl shadow-sm min-w-[140px]">
           <input 
             type="checkbox" 
             checked={isAllSelected}
@@ -493,14 +493,14 @@ export function PhotoDashboardPage() {
             placeholder="파일 제목으로 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-hidden focus:ring-2 focus:ring-slate-400 transition-all shadow-sm"
+            className="w-full pl-3 pr-2 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-hidden focus:ring-2 focus:ring-slate-400 transition-all shadow-sm"
           />
         </div>
         
         {selectedIds.size > 0 && mode === 'DELETE' && (
           <button 
             onClick={handleDeleteSelected}
-            className="flex items-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-100 rounded-2xl text-sm font-bold hover:bg-red-100 transition-colors"
+            className="flex items-center gap-2 px-2 py-3 bg-red-50 text-red-600 border border-red-100 rounded-2xl text-sm font-bold hover:bg-red-100 transition-colors"
           >
             <Trash2 size={16} /> {selectedIds.size}개 삭제하기
           </button>
@@ -509,7 +509,7 @@ export function PhotoDashboardPage() {
         <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
           <button 
             onClick={() => setSelectedCategory('ALL')}
-            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium border transition-all ${
+            className={`px-2 py-2 rounded-full whitespace-nowrap text-sm font-medium border transition-all ${
               selectedCategory === 'ALL' 
                 ? 'bg-slate-900 text-white border-slate-900' 
                 : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
@@ -521,7 +521,7 @@ export function PhotoDashboardPage() {
             <button 
               key={cat.label}
               onClick={() => setSelectedCategory(cat.label)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium border transition-all ${
+              className={`flex items-center gap-2 px-2 py-2 rounded-full whitespace-nowrap text-sm font-medium border transition-all ${
                 selectedCategory === cat.label 
                   ? 'bg-slate-900 text-white border-slate-900' 
                   : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
@@ -537,14 +537,14 @@ export function PhotoDashboardPage() {
       {/* Dashboard Content */}
       <main className="max-w-[1800px] mx-auto pb-24">
         {layout === 'GRID' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <AnimatePresence mode="popLayout">
               {mode === 'ADD' && (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="group relative border-2 border-dashed border-slate-300 rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:border-slate-400 hover:bg-slate-100/50 transition-all cursor-pointer min-h-[320px]"
+                  className="group relative border-2 border-dashed border-slate-300 rounded-3xl p-2 flex flex-col items-center justify-center gap-2 hover:border-slate-400 hover:bg-slate-100/50 transition-all cursor-pointer min-h-[320px]"
                   onClick={handleAddItem}
                 >
                   <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
@@ -608,7 +608,7 @@ export function PhotoDashboardPage() {
 
                   {/* Content - Clickable for popup too, except in EDIT mode */}
                   <div 
-                    className={`p-4 flex-1 flex flex-col ${mode !== 'EDIT' ? 'cursor-pointer' : ''}`}
+                    className={`p-2 flex-1 flex flex-col ${mode !== 'EDIT' ? 'cursor-pointer' : ''}`}
                     onClick={() => mode !== 'EDIT' && setPreviewItem(item)}
                   >
                     {mode === 'EDIT' ? (
@@ -655,7 +655,7 @@ export function PhotoDashboardPage() {
 
                   {/* Hover Action (View Mode) */}
                   {mode === 'VIEW' && (
-                    <div className="px-4 py-3 border-t border-slate-50 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="px-2 py-3 border-t border-slate-50 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }}
                         className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-1.5"
@@ -686,12 +686,12 @@ export function PhotoDashboardPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`group relative bg-white border rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex items-center gap-4 p-3 cursor-pointer ${
+                  className={`group relative bg-white border rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex items-center gap-2 p-3 cursor-pointer ${
                     selectedIds.has(item.id) ? 'border-slate-900 ring-2 ring-slate-900/5' : 'border-slate-200'
                   }`}
                   onClick={() => setPreviewItem(item)}
                 >
-                  <div className="flex items-center gap-4 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <input 
                       type="checkbox"
                       checked={selectedIds.has(item.id)}
@@ -744,7 +744,7 @@ export function PhotoDashboardPage() {
         )}
 
         {filteredItems.length === 0 && (
-          <div className="py-20 text-center">
+          <div className="py-2 text-center">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
               <Search size={32} />
             </div>
@@ -760,7 +760,7 @@ export function PhotoDashboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-slate-900/90 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-3 bg-slate-900/90 backdrop-blur-sm"
             onClick={() => setPreviewItem(null)}
           >
             <motion.div
@@ -772,7 +772,7 @@ export function PhotoDashboardPage() {
             >
               <button 
                 onClick={() => setPreviewItem(null)}
-                className="absolute top-4 right-4 z-10 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white transition-colors"
+                className="absolute top-2 right-4 z-10 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -788,7 +788,7 @@ export function PhotoDashboardPage() {
                 </div>
 
                 {/* Info Panel */}
-                <div className="md:w-1/3 p-8 flex flex-col justify-between border-l border-slate-100">
+                <div className="md:w-1/3 p-3 flex flex-col justify-between border-l border-slate-100">
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <span className="bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-slate-600 flex items-center gap-1.5">
@@ -796,12 +796,12 @@ export function PhotoDashboardPage() {
                       </span>
                       <span className="text-xs text-slate-400 font-medium tracking-tight">#{previewItem.id}</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-2 leading-tight">{previewItem.title}</h2>
-                    <p className="text-slate-400 text-sm mb-6 flex items-center gap-2">
+                    <h2 className="text-base font-bold text-slate-900 mb-2 leading-tight">{previewItem.title}</h2>
+                    <p className="text-slate-400 text-sm mb-2 flex items-center gap-2">
                       <FileText size={14} /> 등록일: {previewItem.date}
                     </p>
                     <div className="space-y-4 text-sm text-slate-600">
-                      <div className="p-4 bg-slate-50 rounded-2xl">
+                      <div className="p-2 bg-slate-50 rounded-2xl">
                         <p className="leading-relaxed font-medium">문서 설명</p>
                         <p className="mt-1 text-slate-500 leading-relaxed">
                           해당 문서는 {previewItem.category} 분류의 증빙 자료입니다. 
@@ -811,14 +811,14 @@ export function PhotoDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="mt-8 flex gap-3">
+                  <div className="mt-3 flex gap-3">
                     <button 
                       onClick={() => setPreviewItem(null)}
-                      className="flex-1 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-colors"
+                      className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-colors"
                     >
                       닫기
                     </button>
-                    <button className="flex-1 px-6 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                    <button className="flex-1 px-3 py-2 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
                       <Download size={18} /> 다운로드
                     </button>
                   </div>
@@ -830,16 +830,16 @@ export function PhotoDashboardPage() {
       </AnimatePresence>
 
       {/* Quick Stats Floating bar */}
-      <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-slate-200 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-8 z-50">
+      <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-slate-200 px-3 py-3 rounded-2xl shadow-xl flex items-center gap-3 z-50">
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Files</span>
-          <span className="text-lg font-bold leading-none">{items.length}</span>
+          <span className="text-sm font-bold leading-none">{items.length}</span>
         </div>
         <div className="w-[1px] h-6 bg-slate-200" />
-        <div className="flex gap-4">
+        <div className="flex gap-2">
           {CATEGORIES.map(cat => (
             <div key={cat.label} className="flex flex-col items-center">
-              <span className="text-lg">{cat.emoji}</span>
+              <span className="text-sm">{cat.emoji}</span>
               <span className="text-[10px] font-bold text-slate-500">
                 {items.filter(i => i.category === cat.label).length}
               </span>

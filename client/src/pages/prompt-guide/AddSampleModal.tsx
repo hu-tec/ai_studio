@@ -51,7 +51,7 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-3">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -66,13 +66,13 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
             className="relative w-full max-w-6xl max-h-[90vh] bg-[#f8f9fa] rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-10 py-6 bg-white border-b border-neutral-100">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-neutral-100">
+              <div className="flex items-center gap-2">
                 <div className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center text-white shadow-lg">
                   <PlusCircle size={24} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">새 샘플 추가</h2>
+                  <h2 className="text-base font-bold text-neutral-900 tracking-tight">새 샘플 추가</h2>
                   <p className="text-sm text-neutral-400 font-medium">프롬프트 워크플로우와 결과물을 등록하세요.</p>
                 </div>
               </div>
@@ -87,19 +87,19 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
                 {/* 왼쪽: 프롬프트 워크플로우 입력 */}
-                <section className="space-y-8">
+                <section className="space-y-3">
                   <div className="flex items-center gap-3 text-neutral-900">
                     <div className="p-2.5 bg-white rounded-xl shadow-sm border border-neutral-100">
                       <MessageSquare size={20} className="text-neutral-500" />
                     </div>
-                    <h3 className="text-lg font-bold uppercase tracking-wider">프롬프트 워크플로우</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wider">프롬프트 워크플로우</h3>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-2">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">업무명 (Title)</label>
                       <input
@@ -107,30 +107,30 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="예: 시험응시자 전용 대시보드 시스템"
-                        className="w-full px-6 py-4 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all font-bold placeholder:text-neutral-300 shadow-sm"
+                        className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all font-bold placeholder:text-neutral-300 shadow-sm"
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">카테고리</label>
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full px-6 py-4 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all font-bold text-neutral-700 shadow-sm"
+                          className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all font-bold text-neutral-700 shadow-sm"
                         >
                           {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] ml-1">등록일</label>
-                        <div className="w-full px-6 py-4 bg-neutral-100 border border-neutral-100 rounded-2xl text-sm text-neutral-400 flex items-center gap-2 font-bold shadow-inner">
+                        <div className="w-full px-3 py-2 bg-neutral-100 border border-neutral-100 rounded-2xl text-sm text-neutral-400 flex items-center gap-2 font-bold shadow-inner">
                           <Calendar size={16} /> {new Date().toISOString().split('T')[0]}
                         </div>
                       </div>
                     </div>
 
-                    <div className="relative space-y-10 pt-4 before:absolute before:left-4 before:top-6 before:bottom-6 before:w-[2px] before:bg-neutral-200/50">
+                    <div className="relative space-y-3 pt-2 before:absolute before:left-4 before:top-6 before:bottom-6 before:w-[2px] before:bg-neutral-200/50">
                       {/* Primary Prompt */}
                       <div className="relative pl-12">
                         <div className="absolute left-0 top-0 w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[10px] font-bold shadow-xl shadow-neutral-200 z-10">
@@ -143,7 +143,7 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                             onChange={(e) => setPrimaryPrompt(e.target.value)}
                             placeholder="최초에 입력한 프롬프트를 입력하세요..."
                             rows={4}
-                            className="w-full px-6 py-4 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all leading-relaxed placeholder:text-neutral-300 shadow-sm"
+                            className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all leading-relaxed placeholder:text-neutral-300 shadow-sm"
                           />
                         </div>
                       </div>
@@ -169,7 +169,7 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                               onChange={(e) => handleUpdateSupplementary(idx, e.target.value)}
                               placeholder="수정/보완 시 입력한 프롬프트를 입력하세요..."
                               rows={2}
-                              className="w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all leading-relaxed italic placeholder:text-neutral-300"
+                              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-100 rounded-2xl text-sm focus:ring-4 focus:ring-neutral-100 outline-none transition-all leading-relaxed italic placeholder:text-neutral-300"
                             />
                           </div>
                         </div>
@@ -178,7 +178,7 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                       <div className="pl-12">
                         <button
                           onClick={handleAddSupplementary}
-                          className="flex items-center gap-2 px-5 py-3.5 bg-white hover:bg-neutral-50 text-neutral-500 hover:text-neutral-900 rounded-2xl text-xs font-bold transition-all border-2 border-dashed border-neutral-200 shadow-sm"
+                          className="flex items-center gap-2 px-2 py-3.5 bg-white hover:bg-neutral-50 text-neutral-500 hover:text-neutral-900 rounded-2xl text-xs font-bold transition-all border-2 border-dashed border-neutral-200 shadow-sm"
                         >
                           <PlusCircle size={16} /> 보완 단계 추가
                         </button>
@@ -188,23 +188,23 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                 </section>
 
                 {/* 오른쪽: 최종 결과물 캡처 입력 */}
-                <section className="space-y-8">
+                <section className="space-y-3">
                   <div className="flex items-center gap-3 text-neutral-900">
                     <div className="p-2.5 bg-white rounded-xl shadow-sm border border-neutral-100">
                       <ImageIcon size={20} className="text-neutral-500" />
                     </div>
-                    <h3 className="text-lg font-bold uppercase tracking-wider">최종 결과물 캡처</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wider">최종 결과물 캡처</h3>
                   </div>
 
-                  <div className="space-y-8">
-                    <div className="aspect-[4/3] relative rounded-[32px] overflow-hidden border-2 border-dashed border-neutral-200 bg-white group hover:border-neutral-400 transition-all duration-500 flex flex-col items-center justify-center text-center p-10 shadow-sm">
+                  <div className="space-y-3">
+                    <div className="aspect-[4/3] relative rounded-[32px] overflow-hidden border-2 border-dashed border-neutral-200 bg-white group hover:border-neutral-400 transition-all duration-500 flex flex-col items-center justify-center text-center p-3 shadow-sm">
                       {imageUrl ? (
                         <>
                           <img src={imageUrl} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Preview" />
                           <div className="absolute inset-0 bg-neutral-900/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
                             <button
                               onClick={() => setImageUrl('')}
-                              className="px-6 py-3 bg-white text-neutral-900 rounded-2xl text-xs font-bold shadow-2xl hover:bg-neutral-100 transition-colors"
+                              className="px-3 py-3 bg-white text-neutral-900 rounded-2xl text-xs font-bold shadow-2xl hover:bg-neutral-100 transition-colors"
                             >
                               이미지 변경하기
                             </button>
@@ -212,10 +212,10 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                         </>
                       ) : (
                         <>
-                          <div className="p-6 bg-neutral-50 rounded-3xl text-neutral-300 mb-6 group-hover:scale-110 transition-transform duration-500 border border-neutral-100">
+                          <div className="p-2 bg-neutral-50 rounded-3xl text-neutral-300 mb-2 group-hover:scale-110 transition-transform duration-500 border border-neutral-100">
                             <ImageIcon size={40} />
                           </div>
-                          <h4 className="font-bold text-neutral-900 mb-2 text-lg">결과물 이미지 업로드</h4>
+                          <h4 className="font-bold text-neutral-900 mb-2 text-sm">결과물 이미지 업로드</h4>
                           <p className="text-xs text-neutral-400 leading-relaxed max-w-[260px] font-medium">
                             최종 결과물 캡처 이미지를 드래그하거나 클릭하여 업로드하세요.
                           </p>
@@ -228,11 +228,11 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
                       )}
                     </div>
 
-                    <div className="bg-neutral-900 rounded-[32px] p-8 text-white space-y-6 relative overflow-hidden shadow-2xl">
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl" />
+                    <div className="bg-neutral-900 rounded-[32px] p-3 text-white space-y-2 relative overflow-hidden shadow-2xl">
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-2 blur-3xl" />
                       <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full -ml-16 -mb-16 blur-3xl" />
                       <div className="relative z-10 space-y-4">
-                        <h4 className="text-xl font-bold tracking-tight">등록 안내</h4>
+                        <h4 className="text-sm font-bold tracking-tight">등록 안내</h4>
                         <p className="text-neutral-400 text-sm leading-relaxed font-medium">
                           프롬프트 샘플을 등록하면 팀원들이 이 워크플로우를 그대로 복사하여 사용할 수 있습니다. 정확한 기록은 팀의 생산성을 높이는 핵심 자산이 됩니다.
                         </p>
@@ -259,16 +259,16 @@ export function AddSampleModal({ isOpen, onClose }: AddSampleModalProps) {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-10 py-6 bg-white border-t border-neutral-100 flex items-center justify-end gap-3">
+            <div className="px-3 py-2 bg-white border-t border-neutral-100 flex items-center justify-end gap-3">
               <button
                 onClick={onClose}
-                className="px-6 py-3 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-colors"
+                className="px-3 py-3 text-sm font-bold text-neutral-500 hover:text-neutral-900 transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={handleSave}
-                className="px-8 py-3.5 bg-neutral-900 text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-200 active:scale-95"
+                className="px-3 py-3.5 bg-neutral-900 text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-200 active:scale-95"
               >
                 <Save size={18} /> 샘플 저장 및 등록
               </button>

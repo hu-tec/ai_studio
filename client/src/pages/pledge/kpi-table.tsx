@@ -12,8 +12,8 @@ interface KpiTableProps {
 export const KpiTable: React.FC<KpiTableProps> = ({ data, headers, title, emoji, mode, onUpdate }) => {
   return (
     <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-        <span className="text-lg">{emoji}</span>
+      <div className="bg-slate-50 px-2 py-3 border-b border-slate-200 flex items-center gap-2">
+        <span className="text-sm">{emoji}</span>
         <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
       </div>
       <div className="overflow-x-auto">
@@ -21,7 +21,7 @@ export const KpiTable: React.FC<KpiTableProps> = ({ data, headers, title, emoji,
           <thead>
             <tr className="border-b border-slate-100">
               {headers.map((header) => (
-                <th key={header} className="px-4 py-2 font-medium text-slate-500 bg-slate-50/50">
+                <th key={header} className="px-2 py-2 font-medium text-slate-500 bg-slate-50/50">
                   {header}
                 </th>
               ))}
@@ -31,7 +31,7 @@ export const KpiTable: React.FC<KpiTableProps> = ({ data, headers, title, emoji,
             {data.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
                 {headers.map((header) => (
-                  <td key={`${rowIndex}-${header}`} className="px-4 py-2 text-slate-700">
+                  <td key={`${rowIndex}-${header}`} className="px-2 py-2 text-slate-700">
                     {mode === 'edit' ? (
                       <input
                         type="text"

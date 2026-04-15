@@ -32,7 +32,7 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
           className="h-full bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden relative"
         >
           {/* Panel Header */}
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div className="p-2 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 text-gray-400" />
               <span className="text-[11px] font-black text-gray-900 uppercase tracking-widest leading-none">Activity Stream</span>
@@ -59,7 +59,7 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
                   />
                 ))
               ) : (
-                <div className="py-8 text-center space-y-2 opacity-30">
+                <div className="py-2 text-center space-y-2 opacity-30">
                   <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
                     <Clock className="w-5 h-5 text-gray-400" />
                   </div>
@@ -94,7 +94,7 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
           </div>
 
           {/* User Settings Footer */}
-          <div className="p-4 border-t border-gray-100 bg-gray-50/30">
+          <div className="p-2 border-t border-gray-100 bg-gray-50/30">
             <button className="w-full flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 shadow-sm hover:border-blue-200 group transition-all">
                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
@@ -166,7 +166,7 @@ function HistoryItem({ type, title, time, user, detail }: { type: 'edit' | 'add'
           </div>
           <div className="w-px h-full bg-gray-100 absolute top-6 left-[13px] last:hidden" />
        </div>
-       <div className="flex-1 pb-4">
+       <div className="flex-1 pb-2">
           <div className="flex items-center justify-between mb-0.5">
              <span className="text-[10px] font-black text-gray-900 leading-none">{title}</span>
              <span className="text-[8px] font-black text-gray-400">{time}</span>

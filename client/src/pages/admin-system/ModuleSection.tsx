@@ -39,10 +39,10 @@ export const ModuleSection: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="bg-zinc-200 py-2 px-4 mb-3">
+      <div className="bg-zinc-200 py-2 px-2 mb-3">
         <h2 className="text-sm font-black text-zinc-700 text-center tracking-tight">모듈관리</h2>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+      <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
         {modules.map((m) => (
           <ModuleCard key={m.id} {...m} status={m.id === "E" ? "ACTIVE" : "READY"} />
         ))}

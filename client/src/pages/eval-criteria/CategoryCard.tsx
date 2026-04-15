@@ -24,9 +24,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center justify-between">
+      <div className="bg-slate-50 p-2 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl">{emoji}</span>
+          <span className="text-sm">{emoji}</span>
           <h3 className="font-semibold text-slate-800">{title}</h3>
         </div>
         <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">전체</span>
         </div>
       </div>
-      <div className="p-4 space-y-3">
+      <div className="p-2 space-y-3">
         {items.map((item) => (
           <div key={item} className="flex items-center gap-3 group cursor-pointer" onClick={() => onToggleItem(item)}>
             <Checkbox.Root

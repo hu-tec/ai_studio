@@ -256,7 +256,7 @@ export function PledgePage() {
 
       {/* Utility Top Bar (Benchmark style) */}
       <div className="max-w-[2000px] mx-auto mb-2 flex justify-end items-center gap-2">
-        <div className="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-6">
+        <div className="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
           <button
             onClick={() => setCurrentView('worklog')}
             className={cn(
@@ -289,13 +289,13 @@ export function PledgePage() {
       </div>
 
       {/* Dashboard Header */}
-      <div className="max-w-[2000px] mx-auto mb-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="max-w-[2000px] mx-auto mb-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white">
             {currentView === 'pledge' ? <ShieldCheck size={28} /> : <ClipboardList size={28} />}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="text-sm font-bold text-slate-900">
               {currentView === 'pledge' ? '업무 및 보안 준수 서약 시스템' : '일일 업무 일지 시스템'}
             </h1>
             <p className="text-sm text-slate-500">본 대시보드에서 모든 항목을 확인 및 관리할 수 있습니다.</p>
@@ -313,7 +313,7 @@ export function PledgePage() {
               key={m.id}
               onClick={() => setMode(m.id as Mode)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                "flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium transition-all",
                 mode === m.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
@@ -324,10 +324,10 @@ export function PledgePage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => downloadFile('excel')} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100">
+          <button onClick={() => downloadFile('excel')} className="flex items-center gap-2 px-2 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100">
             <FileSpreadsheet size={16} /> 엑셀 다운받기
           </button>
-          <button onClick={() => downloadFile('word')} className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100">
+          <button onClick={() => downloadFile('word')} className="flex items-center gap-2 px-2 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100">
             <FileText size={16} /> 워드 다운받기
           </button>
         </div>
@@ -374,7 +374,7 @@ export function PledgePage() {
               <PolicyGroup section={sections.handover} mode={mode} checkedItems={checkedItems} onToggle={toggleCheck} onUpdate={handleUpdateItem} onDelete={handleDeleteItem} onAdd={() => handleAddItem('handover')} />
 
               <SectionContainer title="7. 비밀 유지" emoji="🤫">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200">
                   <p className="text-sm text-slate-600 leading-relaxed italic">
                     "본인은 업무 중 알게 된 회사 정보, 고객 정보, 자료를 외부에 공개하지 않을 것을 서약합니다."
                   </p>
@@ -434,15 +434,15 @@ export function PledgePage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-end mb-1">
                     <span className="text-xs font-medium text-slate-500 uppercase">전체 진행률</span>
-                    <span className="text-xl font-black text-slate-900">{totalProgress}%</span>
+                    <span className="text-sm font-black text-slate-900">{totalProgress}%</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <motion.div initial={{ width: 0 }} animate={{ width: `${totalProgress}%` }} className="bg-slate-900 h-full" />
                   </div>
-                  <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                  <div className="p-2 bg-white border border-slate-200 rounded-xl space-y-3">
                     <p className="text-[11px] text-slate-600 leading-normal">본인은 위 내용을 충분히 이해하였으며 이를 성실히 준수할 것을 서약합니다.</p>
                     <div className="relative h-24 w-full bg-slate-50 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
-                      {signature ? <span className="text-2xl font-cursive text-slate-800">{signature}</span> : <span className="text-[10px] text-slate-300">이름을 입력하여 서명하세요</span>}
+                      {signature ? <span className="text-base font-cursive text-slate-800">{signature}</span> : <span className="text-[10px] text-slate-300">이름을 입력하여 서명하세요</span>}
                       <input type="text" value={signature} onChange={(e) => setSignature(e.target.value)} disabled={totalProgress < 100} className="absolute inset-0 opacity-0 cursor-pointer" />
                     </div>
                   </div>
@@ -467,9 +467,9 @@ export function PledgePage() {
 function SectionContainer({ title, emoji, children }: { title: string, emoji: string, children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-fit">
-      <div className="px-4 py-2 border-b border-slate-50 bg-white flex items-center justify-between">
+      <div className="px-2 py-2 border-b border-slate-50 bg-white flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{emoji}</span>
+          <span className="text-sm">{emoji}</span>
           <h2 className="text-sm font-bold text-slate-900">{title}</h2>
         </div>
       </div>

@@ -103,8 +103,8 @@ export function ListView({
           <CategoryNavColumn title="소분류 (Target)" items={activeMedium?.smallCategories || []} activeId={activeSmallId} onSelect={setActiveSmallId} />
         </div>
 
-        <div className="px-4 py-2 bg-white flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-4">
+        <div className="px-2 py-2 bg-white flex items-center justify-between border-t border-gray-100">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-[9px] font-black text-gray-400 hover:text-blue-600 flex items-center gap-1.5 transition-all uppercase tracking-tighter"
@@ -118,7 +118,7 @@ export function ListView({
                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 shadow-sm">{activeSmall?.name || 'Selection Required'}</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <div className="flex-1 max-w-xs">
               <input
                 type="text"
@@ -145,7 +145,7 @@ export function ListView({
                     small: activeSmall?.name
                   }, comment);
                 }}
-                className="px-4 py-1.5 bg-blue-600 text-white text-[9px] font-black rounded flex items-center gap-1.5 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest shadow-sm shadow-blue-100"
+                className="px-2 py-1.5 bg-blue-600 text-white text-[9px] font-black rounded flex items-center gap-1.5 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest shadow-sm shadow-blue-100"
               >
                 <FileCheck2 className="w-3 h-3" /> 지시서 발행 (Generate)
               </button>
@@ -231,7 +231,7 @@ export function ListView({
               </div>
             </motion.div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-4 opacity-30 py-12">
+            <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-2 opacity-30 py-3">
               <Search className="w-10 h-10" />
               <div className="text-center space-y-1">
                 <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Selection Required</p>
@@ -295,7 +295,7 @@ function RuleStageColumn({ title, emoji, desc, rules, prefix, isExpanded, onUpda
     <div className="flex flex-col gap-3 min-w-0">
        <div className={clsx("bg-white rounded-xl border p-3 shadow-sm", color)}>
           <div className="flex items-center gap-2.5 mb-1">
-             <span className="text-lg">{emoji}</span>
+             <span className="text-sm">{emoji}</span>
              <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest">{title}</h3>
           </div>
           <p className="text-[9px] font-bold text-gray-400 pl-7">{desc}</p>
@@ -443,7 +443,7 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-4 space-y-5">
+            <div className="p-2 space-y-5">
               {/* (2) On/Off Toggle */}
               <div className="space-y-3">
                  <div className="flex items-center justify-between">

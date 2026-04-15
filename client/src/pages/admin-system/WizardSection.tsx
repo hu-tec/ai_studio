@@ -5,17 +5,17 @@ export const WizardSection: React.FC = () => {
   const [wizSiteType, setWizSiteType] = useState<'' | '전시형' | '커머스형'>('');
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-zinc-200 py-2 px-4 mb-4">
+      <div className="bg-zinc-200 py-1 px-3 mb-2">
         <h2 className="text-sm font-black text-zinc-700 text-center tracking-tight">사이트추가(마법사)</h2>
       </div>
 
-      <div className="bg-white border border-zinc-200 rounded-lg p-6 shadow-sm space-y-6">
+      <div className="bg-white border border-zinc-200 rounded-lg p-2 shadow-sm space-y-2">
         <div>
           <h3 className="text-sm font-black text-zinc-900 mb-1">새 사이트 생성</h3>
           <p className="text-[10px] text-zinc-400 font-bold mb-5">생성하려는 새 사이트의 정보를 입력해주세요(1분 소요)</p>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">사이트명 🔖</p>
                 <input
@@ -33,7 +33,7 @@ export const WizardSection: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">기본 언어 🌍</p>
                 <div className="flex gap-1">
@@ -115,11 +115,11 @@ export const WizardSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-4 flex items-center justify-between gap-4 border-t border-zinc-50">
+        <div className="pt-2 flex items-center justify-between gap-2 border-t border-zinc-50">
           <button className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-colors uppercase tracking-widest">
             취소
           </button>
-          <button className="px-8 py-2.5 bg-zinc-900 text-white text-[10px] font-black rounded hover:bg-black transition-all uppercase tracking-widest shadow-lg shadow-zinc-100">
+          <button className="px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded hover:bg-black transition-all uppercase tracking-widest shadow-lg shadow-zinc-100">
             사이트 생성
           </button>
         </div>

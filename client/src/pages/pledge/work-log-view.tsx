@@ -146,7 +146,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       {/* Column 1: Job Regulations */}
       <div className="space-y-3">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-2 border-b border-slate-50 flex items-center gap-2">
+          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
             <Target size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">5. 세부 업무 규정 ({jobTitle})</h2>
           </div>
@@ -163,7 +163,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
                 </li>
               ))}
             </ul>
-            <div className="pt-4 border-t border-slate-100 mt-4">
+            <div className="pt-2 border-t border-slate-100 mt-4">
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <ClipboardCheck size={12} />
                 <span>30분 단위 업무 일지 작성이 원칙입니다.</span>
@@ -172,16 +172,16 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2">
           <h3 className="text-xs font-bold text-slate-400 uppercase mb-4">현재 현황 요약</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-slate-50 rounded-xl">
               <span className="block text-[10px] text-slate-500 mb-1">완료 항목</span>
-              <span className="text-xl font-bold text-slate-900">{chartData[0].value}</span>
+              <span className="text-sm font-bold text-slate-900">{chartData[0].value}</span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl">
               <span className="block text-[10px] text-slate-500 mb-1">진행률</span>
-              <span className="text-xl font-bold text-slate-900">
+              <span className="text-sm font-bold text-slate-900">
                 {Math.round((chartData[0].value / entries.length) * 100)}%
               </span>
             </div>
@@ -191,7 +191,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
 
       {/* Column 2: 30-min Log Input */}
       <div className="xl:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
-        <div className="px-4 py-2 border-b border-slate-50 flex items-center justify-between shrink-0">
+        <div className="px-2 py-2 border-b border-slate-50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">일일 업무 일지 (30분 단위)</h2>
@@ -263,12 +263,12 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       {/* Column 3: Statistics & Graphs */}
       <div className="space-y-3">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-2 border-b border-slate-50 flex items-center gap-2">
+          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
             <TrendingUp size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">현황 분석 리포트</h2>
           </div>
           <div className="p-3">
-            <div className="h-48 w-full mb-8">
+            <div className="h-48 w-full mb-3">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -303,7 +303,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2 space-y-4">
           <h3 className="text-xs font-bold text-slate-400 uppercase">내보내기 옵션</h3>
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => handleDownload('excel')} className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors">
@@ -321,13 +321,13 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       {/* Column 4: History Data */}
       <div className="space-y-3">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-fit">
-          <div className="px-4 py-2 border-b border-slate-50 flex items-center gap-2">
+          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
             <History size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">이전 업무 기록 (히스토리)</h2>
           </div>
           <div className="divide-y divide-slate-50">
             {history.map((h, i) => (
-              <div key={i} className="p-4 hover:bg-slate-50 transition-colors group">
+              <div key={i} className="p-2 hover:bg-slate-50 transition-colors group">
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-[10px] font-bold text-slate-400">{h.date}</span>
                   <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded-md font-bold">
@@ -335,7 +335,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
                     <div>
                       <p className="text-[10px] text-slate-400 uppercase mb-0.5">수행 업무</p>
                       <p className="text-xs font-bold text-slate-700">{h.tasks}건</p>
@@ -352,12 +352,12 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
               </div>
             ))}
           </div>
-          <div className="p-4 bg-slate-50 border-t border-slate-50 text-center">
+          <div className="p-2 bg-slate-50 border-t border-slate-50 text-center">
             <button className="text-[10px] font-bold text-slate-400 hover:text-slate-600">전체 히스토리 보기</button>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-3">
+        <div className="p-2 rounded-2xl bg-slate-900 text-white space-y-3">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 size={16} className="text-emerald-400" />
             <h3 className="text-xs font-bold">작성 가이드</h3>
