@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PLAN_10H, PLAN_40H, PLAN_META, COMMON_AXES } from './data';
+import { PLAN_10H, PLAN_40H, PLAN_META, VERSION_META, COMMON_AXES } from './data';
 import type { CoursePlanId, HoursMode, TabKey } from './types';
 
 const PLAN_COLOR: Record<CoursePlanId, { bg: string; border: string; text: string; accent: string; ring: string }> = {
@@ -24,7 +24,7 @@ export default function AiCoursePlanPage() {
         <div>
           <h1 className="text-base font-bold">🎓 AI 강의안 (T1) — 교사 교육 / 기능 교육</h1>
           <p className="text-[11px] text-gray-500 leading-tight">
-            만다라트 8 AI 기능 · 같은 목차 헤더 · 각 섹션 채움이 다른 3 버전 (A/B/C) · 기초(10h)와 심화(40h)는 별개 강의
+            만다라트 8 AI 기능 · 같은 목차 + 각 섹션 채움이 다른 3 버전 (A/B/C) · 기초(10h)와 심화(40h)는 별개 강의
           </p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -55,7 +55,7 @@ export default function AiCoursePlanPage() {
           <span className="text-[10px] font-bold text-slate-600 mr-1">📋 목차 (3 버전 공통):</span>
           {sections.map(s => (
             <span key={s.num} className="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-[10px] leading-tight">
-              <b>{meta.unitLabel}{s.num}</b> {s.title}
+              <b>{meta.unitLabel}{s.num}</b> {s.title.split(' — ')[0]}
             </span>
           ))}
           <span className="ml-auto text-[10px] text-gray-500">{meta.duration} · {sections.length}개 섹션</span>
@@ -67,6 +67,7 @@ export default function AiCoursePlanPage() {
         {VERSION_IDS.map(v => {
           const c = PLAN_COLOR[v];
           const active = tab === v;
+          const vm = VERSION_META[v];
           return (
             <button
               key={v}
@@ -79,9 +80,9 @@ export default function AiCoursePlanPage() {
             >
               <div className="flex items-baseline gap-1">
                 <span className={`font-bold text-[10px] px-1 rounded text-white ${c.accent}`}>버전 {v}</span>
-                <span className="font-semibold text-[11px]">채움 #{v}</span>
+                <span className="font-semibold text-[11px]">{vm.name}</span>
               </div>
-              <div className="text-[10px] opacity-70 mt-0.5">{sections.length}개 섹션 · 단일 버전 보기</div>
+              <div className="text-[10px] opacity-70 mt-0.5 leading-tight">{vm.framing}</div>
             </button>
           );
         })}
@@ -94,29 +95,31 @@ export default function AiCoursePlanPage() {
           }`}
         >
           <div className="font-bold text-[11px]">📊 3 버전 비교</div>
-          <div className="text-[10px] opacity-70 mt-0.5">섹션별 A·B·C 나란히</div>
+          <div className="text-[10px] opacity-70 mt-0.5 leading-tight">섹션별 A·B·C 나란히</div>
         </button>
       </div>
 
-      {/* Single-version body — 4-col section card grid */}
+      {/* Single-version body */}
       {tab !== 'compare' && (
         <div className={`border rounded p-2 ${PLAN_COLOR[tab].bg} ${PLAN_COLOR[tab].border}`}>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {sections.map(s => {
               const c = PLAN_COLOR[tab];
               const items = s[tab];
               return (
-                <div key={s.num} className="bg-white rounded border p-1.5 hover:shadow-sm transition-shadow">
-                  <div className="flex items-center justify-between mb-0.5">
+                <div key={s.num} className="bg-white rounded border p-2">
+                  <div className="flex items-center gap-1 mb-1">
                     <span className={`text-[10px] font-bold px-1 rounded text-white ${c.accent}`}>
                       {meta.unitLabel}{s.num}
                     </span>
-                    <span className="text-[10px] text-gray-400">버전 {tab}</span>
+                    <span className="font-bold text-[12px] leading-tight">{s.title}</span>
                   </div>
-                  <div className="font-semibold text-[11px] leading-tight mb-1">{s.title}</div>
+                  <p className="text-[10px] text-gray-600 leading-tight mb-1.5 italic">{s.description}</p>
                   <ul className="space-y-0.5">
                     {items.map((it, i) => (
-                      <li key={i} className="text-[10px] leading-tight text-gray-700">• {it}</li>
+                      <li key={i} className="text-[11px] leading-snug text-gray-800">
+                        <span className="text-gray-400">{i + 1}.</span> {it}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -126,28 +129,35 @@ export default function AiCoursePlanPage() {
         </div>
       )}
 
-      {/* Compare body — section-by-section, 3-col A/B/C side by side */}
+      {/* Compare body */}
       {tab === 'compare' && (
         <div className="space-y-1.5">
           {sections.map(s => (
             <div key={s.num} className="border rounded p-1.5 bg-white">
-              <div className="flex items-center gap-1 mb-1 border-b pb-0.5">
-                <span className="text-[10px] font-bold px-1 rounded bg-slate-700 text-white">
-                  {meta.unitLabel}{s.num}
-                </span>
-                <span className="font-semibold text-[12px]">{s.title}</span>
+              <div className="mb-1 border-b pb-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-1 rounded bg-slate-700 text-white">
+                    {meta.unitLabel}{s.num}
+                  </span>
+                  <span className="font-bold text-[12px]">{s.title}</span>
+                </div>
+                <p className="text-[10px] text-gray-600 leading-tight italic mt-0.5">{s.description}</p>
               </div>
               <div className="grid grid-cols-3 gap-1">
                 {VERSION_IDS.map(v => {
                   const c = PLAN_COLOR[v];
+                  const vm = VERSION_META[v];
                   return (
-                    <div key={v} className={`rounded border p-1 ${c.bg} ${c.border}`}>
-                      <div className={`text-[10px] font-bold px-1 rounded text-white ${c.accent} inline-block mb-0.5`}>
-                        버전 {v}
+                    <div key={v} className={`rounded border p-1.5 ${c.bg} ${c.border}`}>
+                      <div className="flex items-baseline gap-1 mb-1">
+                        <span className={`text-[10px] font-bold px-1 rounded text-white ${c.accent}`}>버전 {v}</span>
+                        <span className={`text-[10px] font-semibold ${c.text}`}>{vm.name}</span>
                       </div>
                       <ul className="space-y-0.5">
                         {s[v].map((it, i) => (
-                          <li key={i} className="text-[10px] leading-tight text-gray-800">• {it}</li>
+                          <li key={i} className="text-[10px] leading-snug text-gray-800">
+                            <span className="text-gray-400">{i + 1}.</span> {it}
+                          </li>
                         ))}
                       </ul>
                     </div>

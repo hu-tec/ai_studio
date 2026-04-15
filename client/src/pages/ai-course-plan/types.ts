@@ -5,9 +5,16 @@ export type TabKey = CoursePlanId | 'compare';
 export interface CourseSection {
   num: number;
   title: string;
+  description: string;
   A: string[];
   B: string[];
   C: string[];
+}
+
+export interface VersionMeta {
+  id: CoursePlanId;
+  name: string;
+  framing: string;
 }
 
 export interface PlanMeta {
