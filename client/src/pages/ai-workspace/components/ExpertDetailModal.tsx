@@ -36,10 +36,10 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-[51] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-md shadow-sm z-[51] overflow-hidden"
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="px-2 py-1.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                   <User className="w-4 h-4" />
@@ -52,10 +52,10 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
             </div>
 
             {/* Content */}
-            <div className="p-8 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-8">
+            <div className="p-2 max-h-[70vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Left side: Basic Info */}
-                <div className="space-y-6">
+                <div className="space-y-2">
                   <div>
                     <label className="text-[12px] text-gray-400 block mb-1">성명</label>
                     <p className="text-[15px] text-gray-900 font-medium">{expert.name}</p>
@@ -80,7 +80,7 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
                 </div>
 
                 {/* Right side: Application Status */}
-                <div className="space-y-6">
+                <div className="space-y-2">
                   <div>
                     <label className="text-[12px] text-gray-400 block mb-1">신청일</label>
                     <div className="flex items-center gap-1.5">
@@ -111,20 +111,20 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-gray-100">
-                <h3 className="text-[14px] font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="mt-2 pt-2 border-t border-gray-100">
+                <h3 className="text-[14px] font-semibold text-gray-900 mb-1.5 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-500" />
                   신청 사유 및 전문성 기술
                 </h3>
-                <div className="bg-gray-50 rounded-xl p-4">
+                <div className="bg-gray-50 rounded-md p-2">
                   <p className="text-[13px] text-gray-600 leading-relaxed italic">
                     "해당 분야에서 10년 이상의 실무 경력을 보유하고 있으며, 특히 {expert.fieldMiddle} 관련 법적 분쟁 및 문서 작성에 특화되어 있습니다. 사내 Studio를 통해 더 많은 클라이언트들에게 정확한 가이드를 제공하고자 신청하게 되었습니다."
                   </p>
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="p-4 border border-gray-100 rounded-xl bg-emerald-50/30">
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                <div className="p-2 border border-gray-100 rounded-md bg-emerald-50/30">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="w-4 h-4 text-emerald-500" />
                     <span className="text-[13px] font-medium text-emerald-700">검증 완료 항목</span>
@@ -134,7 +134,7 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
                     <li>- 과거 경력 증명 완료</li>
                   </ul>
                 </div>
-                <div className="p-4 border border-gray-100 rounded-xl bg-blue-50/30">
+                <div className="p-2 border border-gray-100 rounded-md bg-blue-50/30">
                   <div className="flex items-center gap-2 mb-2">
                     <Shield className="w-4 h-4 text-blue-500" />
                     <span className="text-[13px] font-medium text-blue-700">추천 경로</span>
@@ -148,9 +148,9 @@ export function ExpertDetailModal({ isOpen, onClose, expert }: ExpertDetailModal
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/30">
+            <div className="px-2 py-1 border-t border-gray-100 flex justify-end gap-1 bg-gray-50/30">
               <Button variant="outline" onClick={onClose}>닫기</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8">승인 처리</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-2">승인 처리</Button>
             </div>
           </motion.div>
         </>

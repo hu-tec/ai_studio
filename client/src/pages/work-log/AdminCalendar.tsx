@@ -62,7 +62,7 @@ export function AdminCalendar({ filteredRows, onViewDetail }: AdminCalendarProps
   return (
     <div className="bg-card rounded border border-border overflow-hidden">
       {/* Month Navigation */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-accent/30">
+      <div className="flex items-center justify-between px-2 py-1.5 bg-accent/30">
         <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1 hover:bg-accent rounded">
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -73,7 +73,7 @@ export function AdminCalendar({ filteredRows, onViewDetail }: AdminCalendarProps
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 px-3 py-1 border-b border-border bg-accent/10">
+      <div className="flex flex-wrap gap-2 px-2 py-1 border-b border-border bg-accent/10">
         {employees.map(emp => {
           const c = getEmpColor(emp.id);
           return (

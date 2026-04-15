@@ -13,7 +13,7 @@ export function CollapsibleSection({
 
   return (
     <div className="border border-gray-300 bg-white">
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-100 border-b border-gray-300">
+      <div className="flex items-center justify-between px-2 py-1.5 bg-gray-100 border-b border-gray-300">
         <h1 className="text-black">{title}</h1>
         <button
           onClick={() => setExpanded(!expanded)}
@@ -22,7 +22,7 @@ export function CollapsibleSection({
           {expanded ? "🔽 접기" : "▶️ 펼치기"}
         </button>
       </div>
-      {expanded && <div className="p-4">{children}</div>}
+      {expanded && <div className="p-2">{children}</div>}
     </div>
   );
 }

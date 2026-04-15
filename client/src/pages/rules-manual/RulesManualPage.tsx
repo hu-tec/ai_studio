@@ -135,7 +135,7 @@ export default function RulesManualPage() {
     <div className="flex flex-col h-screen overflow-hidden bg-[#FBFBFC]">
       <Toaster position="top-right" expand={true} richColors />
       {/* T9 SoT 배너 */}
-      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
+      <div className="flex items-center gap-2 px-2 py-1 bg-amber-50 border-b border-amber-200 text-[11px] text-amber-800">
         <span>⚠</span>
         <span>대중소 카테고리(분야·급수·홈페이지·부서·직급) 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성 전용 (좌측 카테고리는 read-only 마이그레이션 대상).</span>
       </div>
@@ -190,7 +190,7 @@ export default function RulesManualPage() {
       {viewMode !== 'result' && (
         <div className="fixed bottom-6 right-8 z-[60]">
           <div className={`
-            flex items-center gap-2 px-3 py-1.5 rounded-full shadow-xl border transition-all duration-500 transform scale-100 backdrop-blur-md
+            flex items-center gap-2 px-2 py-1.5 rounded-full shadow-sm border transition-all duration-500 transform scale-100 backdrop-blur-md
             ${actionMode === 'view' ? 'bg-white text-gray-800 border-gray-200' :
               actionMode === 'edit' ? 'bg-amber-500 text-white border-amber-400' :
               actionMode === 'add' ? 'bg-blue-600 text-white border-blue-500' :

@@ -141,29 +141,29 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
       {/* Column 1: Job Regulations */}
-      <div className="space-y-3">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
+      <div className="space-y-1">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-2 py-1 border-b border-slate-50 flex items-center gap-2">
             <Target size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">5. 세부 업무 규정 ({jobTitle})</h2>
           </div>
-          <div className="p-3 space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-900 rounded-xl text-white">
+          <div className="p-1 space-y-1">
+            <div className="flex items-center justify-between p-1 bg-slate-900 rounded-md text-white">
               <span className="text-xs font-medium">일일 목표 할당량</span>
               <span className="text-sm font-bold">{jobRules.target}</span>
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               {jobRules.items.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-xs text-slate-600 leading-relaxed">
+                <li key={i} className="flex items-start gap-1 text-xs text-slate-600 leading-relaxed">
                   <div className="mt-1 w-1 h-1 rounded-full bg-slate-300 shrink-0" />
                   {item}
                 </li>
               ))}
             </ul>
-            <div className="pt-2 border-t border-slate-100 mt-4">
+            <div className="pt-2 border-t border-slate-100 mt-1.5">
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <ClipboardCheck size={12} />
                 <span>30분 단위 업무 일지 작성이 원칙입니다.</span>
@@ -172,14 +172,14 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2">
-          <h3 className="text-xs font-bold text-slate-400 uppercase mb-4">현재 현황 요약</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-slate-50 rounded-xl">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm p-2">
+          <h3 className="text-xs font-bold text-slate-400 uppercase mb-1.5">현재 현황 요약</h3>
+          <div className="grid grid-cols-2 gap-1">
+            <div className="p-1 bg-slate-50 rounded-md">
               <span className="block text-[10px] text-slate-500 mb-1">완료 항목</span>
               <span className="text-sm font-bold text-slate-900">{chartData[0].value}</span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl">
+            <div className="p-1 bg-slate-50 rounded-md">
               <span className="block text-[10px] text-slate-500 mb-1">진행률</span>
               <span className="text-sm font-bold text-slate-900">
                 {Math.round((chartData[0].value / entries.length) * 100)}%
@@ -190,8 +190,8 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       </div>
 
       {/* Column 2: 30-min Log Input */}
-      <div className="xl:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
-        <div className="px-2 py-2 border-b border-slate-50 flex items-center justify-between shrink-0">
+      <div className="xl:col-span-1 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
+        <div className="px-2 py-1 border-b border-slate-50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">일일 업무 일지 (30분 단위)</h2>
@@ -202,12 +202,12 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
              <button onClick={() => onModeChange('delete')} className={cn("p-1 rounded", mode === 'delete' ? "bg-white shadow-sm" : "text-slate-400")}><Trash2 size={14}/></button>
           </div>
         </div>
-        <div className="flex-grow overflow-y-auto p-3 space-y-2">
+        <div className="flex-grow overflow-y-auto p-1 space-y-2">
           {entries.map((entry) => (
             <div
               key={entry.id}
               className={cn(
-                "group flex items-center gap-3 p-2.5 rounded-xl border transition-all",
+                "group flex items-center gap-1 p-2.5 rounded-md border transition-all",
                 entry.task ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-transparent border-dashed border-slate-200"
               )}
             >
@@ -249,10 +249,10 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
             </div>
           ))}
         </div>
-        <div className="p-3 bg-slate-50 border-t border-slate-100 shrink-0">
+        <div className="p-1 bg-slate-50 border-t border-slate-100 shrink-0">
           <button
             onClick={handleSubmit}
-            className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-200 hover:scale-[1.02] transition-transform"
+            className="w-full py-1 bg-slate-900 text-white rounded-md text-xs font-bold flex items-center justify-center gap-2 shadow-sm shadow-slate-200 hover:scale-[1.02] transition-transform"
           >
             <Send size={14} />
             관리자에게 업무 보고 전송
@@ -261,14 +261,14 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       </div>
 
       {/* Column 3: Statistics & Graphs */}
-      <div className="space-y-3">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
+      <div className="space-y-1">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
+          <div className="px-2 py-1 border-b border-slate-50 flex items-center gap-2">
             <TrendingUp size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">현황 분석 리포트</h2>
           </div>
-          <div className="p-3">
-            <div className="h-48 w-full mb-3">
+          <div className="p-1">
+            <div className="h-48 w-full mb-1">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -289,7 +289,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
               </ResponsiveContainer>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-1">
               {chartData.map((d, i) => (
                 <div key={i} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-slate-500">
@@ -303,14 +303,14 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2 space-y-4">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm p-2 space-y-1">
           <h3 className="text-xs font-bold text-slate-400 uppercase">내보내기 옵션</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => handleDownload('excel')} className="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors">
+          <div className="grid grid-cols-2 gap-1">
+            <button onClick={() => handleDownload('excel')} className="flex items-center justify-center gap-2 py-1 bg-emerald-50 text-emerald-700 rounded-md text-xs font-bold hover:bg-emerald-100 transition-colors">
               <FileSpreadsheet size={14} />
               엑셀 다운
             </button>
-            <button onClick={() => handleDownload('word')} className="flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors">
+            <button onClick={() => handleDownload('word')} className="flex items-center justify-center gap-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold hover:bg-blue-100 transition-colors">
               <FileText size={14} />
               워드 다운
             </button>
@@ -319,9 +319,9 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
       </div>
 
       {/* Column 4: History Data */}
-      <div className="space-y-3">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-fit">
-          <div className="px-2 py-2 border-b border-slate-50 flex items-center gap-2">
+      <div className="space-y-1">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden h-fit">
+          <div className="px-2 py-1 border-b border-slate-50 flex items-center gap-2">
             <History size={18} className="text-slate-900" />
             <h2 className="text-sm font-bold text-slate-900">이전 업무 기록 (히스토리)</h2>
           </div>
@@ -357,7 +357,7 @@ export const WorkLogView: React.FC<WorkLogViewProps> = ({ jobTitle, mode, onMode
           </div>
         </div>
 
-        <div className="p-2 rounded-2xl bg-slate-900 text-white space-y-3">
+        <div className="p-2 rounded-md bg-slate-900 text-white space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 size={16} className="text-emerald-400" />
             <h3 className="text-xs font-bold">작성 가이드</h3>

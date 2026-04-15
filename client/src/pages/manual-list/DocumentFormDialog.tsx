@@ -117,7 +117,7 @@ export function DocumentFormDialog({ open, onOpenChange, manual }: DocumentFormD
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1440px] w-[95vw] max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-3 py-2 border-b border-border flex-row items-center gap-2 space-y-0">
+        <DialogHeader className="px-2 py-1 border-b border-border flex-row items-center gap-2 space-y-0">
           <DialogTitle className="text-[11px] text-foreground truncate">{manual.title}</DialogTitle>
           <span className="px-1 py-px text-[9px] rounded bg-emerald-50 text-emerald-700 shrink-0">서류</span>
           <div className="ml-auto flex items-center gap-1.5">
@@ -129,7 +129,7 @@ export function DocumentFormDialog({ open, onOpenChange, manual }: DocumentFormD
           </div>
         </DialogHeader>
 
-        <div className="overflow-auto max-h-[calc(90vh-50px)] px-3 py-2">
+        <div className="overflow-auto max-h-[calc(90vh-50px)] px-2 py-1">
           <div className="flex gap-2">
             {/* 좌: 폼 */}
             <div className="flex-1 min-w-0 space-y-1.5">
@@ -244,7 +244,7 @@ function SectionBox({ meta, title, desc, children }: { meta: { color: string; ic
         <span className="text-[11px] text-foreground">{title}</span>
         <span className="text-[9px] text-muted-foreground/50 ml-1 truncate">{desc}</span>
       </div>
-      <div className="px-2.5 py-2">{children}</div>
+      <div className="px-2.5 py-1">{children}</div>
     </div>
   );
 }
@@ -299,8 +299,8 @@ function Preview({ title, dept, template, formData, activeFields, getDisplay, fm
 
   return (
     <div className="bg-white border border-border rounded shadow-sm overflow-auto max-h-[calc(90vh-120px)]">
-      <div className="p-3 min-h-[480px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
-        <div className="border-2 border-[#333] p-3">
+      <div className="p-1 min-h-[480px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
+        <div className="border-2 border-[#333] p-1">
           <div className="flex justify-between items-start mb-1">
             <span className="text-[8px] text-[#999] tracking-wider">문서번호 : ___-____-_____</span>
             <div className="text-right">
@@ -314,11 +314,11 @@ function Preview({ title, dept, template, formData, activeFields, getDisplay, fm
             </div>
           </div>
 
-          <div className="text-center my-5">
-            <h1 className="text-[16px] tracking-[0.4em] text-[#111] border-b-2 border-t-2 border-[#333] py-2 inline-block px-6">{title}</h1>
+          <div className="text-center my-1.5">
+            <h1 className="text-[16px] tracking-[0.4em] text-[#111] border-b-2 border-t-2 border-[#333] py-1 inline-block px-2">{title}</h1>
           </div>
 
-          <table className="w-full border-collapse mb-4">
+          <table className="w-full border-collapse mb-1.5">
             <tbody>
               <tr>
                 <th className={thCls} style={{ width: "22%" }}>소속 부서</th>
@@ -336,8 +336,8 @@ function Preview({ title, dept, template, formData, activeFields, getDisplay, fm
           </table>
 
           {!hasAny ? (
-            <div className="flex flex-col items-center justify-center py-14 text-center">
-              <div className="w-14 h-14 rounded border-2 border-dashed border-[#ddd] flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-1 text-center">
+              <div className="w-14 h-14 rounded border-2 border-dashed border-[#ddd] flex items-center justify-center mb-1">
                 <Eye size={20} className="text-[#ccc]" />
               </div>
               <p className="text-[10px] text-[#bbb]">좌측 양식에 내용을 입력하시면</p>
@@ -345,7 +345,7 @@ function Preview({ title, dept, template, formData, activeFields, getDisplay, fm
             </div>
           ) : (
             <>
-              <table className="w-full border-collapse mb-4">
+              <table className="w-full border-collapse mb-1.5">
                 <thead>
                   <tr>
                     <th className={`${thCls} text-center`} style={{ width: "26%" }}>항 목</th>
@@ -363,27 +363,27 @@ function Preview({ title, dept, template, formData, activeFields, getDisplay, fm
               </table>
 
               {allItems.filter(({ fi }) => fi.type === "textarea").map(({ fi, val }) => val && (
-                <div key={fi.id} className="mb-3">
+                <div key={fi.id} className="mb-1">
                   <div className="text-[9px] text-[#666] bg-[#f2f2f2] border border-[#333] border-b-0 px-2 py-0.5">{fi.label}</div>
-                  <div className="border border-[#333] px-3 py-2 text-[10px] min-h-[40px] whitespace-pre-wrap">{val}</div>
+                  <div className="border border-[#333] px-2 py-1 text-[10px] min-h-[40px] whitespace-pre-wrap">{val}</div>
                 </div>
               ))}
             </>
           )}
 
-          <div className="mt-8 text-center space-y-3">
+          <div className="mt-2 text-center space-y-1">
             <p className="text-[10px] text-[#444]">위 내용이 사실과 다름없음을 확인합니다.</p>
-            <div className="mt-5 space-y-0.5">
+            <div className="mt-1.5 space-y-0.5">
               <p className="text-[10px] text-[#666]">{dateVal ? fmtDate(dateVal) : "____년  __월  __일"}</p>
             </div>
-            <div className="mt-4 flex justify-end items-center gap-3 pr-4">
+            <div className="mt-1.5 flex justify-end items-center gap-1 pr-2">
               <span className="text-[10px] text-[#444]">작 성 자 :</span>
-              <span className="text-[10px] text-[#111] border-b border-[#333] px-3 min-w-[80px] inline-block text-center">{nameVal || ""}</span>
+              <span className="text-[10px] text-[#111] border-b border-[#333] px-2 min-w-[80px] inline-block text-center">{nameVal || ""}</span>
               <span className="text-[9px] text-[#999]">(인)</span>
             </div>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-2 text-center">
             <p className="text-[8px] text-[#bbb] tracking-[0.3em]">{dept}</p>
           </div>
         </div>

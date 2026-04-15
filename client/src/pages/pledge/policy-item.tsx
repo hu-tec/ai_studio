@@ -36,7 +36,7 @@ export const PolicyItem: React.FC<PolicyItemProps> = ({
     <motion.div
       layout
       className={cn(
-        "group flex items-start gap-3 p-3 rounded-lg border transition-all",
+        "group flex items-start gap-1 p-1 rounded-lg border transition-all",
         isChecked ? "bg-slate-50 border-slate-200" : "bg-white border-slate-100 shadow-sm",
         mode === 'delete' && "hover:border-red-300 hover:bg-red-50"
       )}

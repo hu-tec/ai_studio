@@ -86,7 +86,7 @@ export function ListView({
   }, [activeSmall]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F4F5F7] overflow-hidden p-3 gap-3">
+    <div className="flex flex-col h-full bg-[#F4F5F7] overflow-hidden p-1 gap-1">
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden shrink-0">
         <div className="grid grid-cols-3 divide-x divide-gray-100 h-[100px]">
@@ -103,7 +103,7 @@ export function ListView({
           <CategoryNavColumn title="소분류 (Target)" items={activeMedium?.smallCategories || []} activeId={activeSmallId} onSelect={setActiveSmallId} />
         </div>
 
-        <div className="px-2 py-2 bg-white flex items-center justify-between border-t border-gray-100">
+        <div className="px-2 py-1 bg-white flex items-center justify-between border-t border-gray-100">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -125,11 +125,11 @@ export function ListView({
                 placeholder="지시 코멘트 추가... (예: 기한 엄수 요망)"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
               />
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1 text-[9px] font-black text-gray-400 hover:text-gray-900 flex items-center gap-1.5 transition-colors uppercase tracking-widest">
+              <button className="px-2 py-1 text-[9px] font-black text-gray-400 hover:text-gray-900 flex items-center gap-1.5 transition-colors uppercase tracking-widest">
                 <RotateCcw className="w-3 h-3" /> Reset
               </button>
               <button
@@ -154,7 +154,7 @@ export function ListView({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-16">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-2">
         <AnimatePresence mode="wait">
           {activeSmall ? (
             <motion.div
@@ -164,7 +164,7 @@ export function ListView({
               exit={{ opacity: 0, y: -5 }}
               className="h-full"
             >
-              <div className="grid grid-cols-4 gap-3 h-full items-start">
+              <div className="grid grid-cols-4 gap-1 h-full items-start">
                 <RuleStageColumn
                    title="규정 (Fixed)"
                    emoji="🔒"
@@ -231,7 +231,7 @@ export function ListView({
               </div>
             </motion.div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-2 opacity-30 py-3">
+            <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-2 opacity-30 py-1">
               <Search className="w-10 h-10" />
               <div className="text-center space-y-1">
                 <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Selection Required</p>
@@ -248,7 +248,7 @@ export function ListView({
 function CategoryNavColumn({ title, items, activeId, onSelect }: { title: string, items: any[], activeId: string | null, onSelect: (id: string) => void }) {
   return (
     <div className="flex flex-col h-full bg-white overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-100 text-gray-500 px-3 py-1.5 flex items-center justify-between">
+      <div className="bg-gray-50 border-b border-gray-100 text-gray-500 px-2 py-1.5 flex items-center justify-between">
         <span className="text-[9px] font-black uppercase tracking-widest leading-none">{title}</span>
         <button className="text-gray-400 hover:text-gray-900 transition-colors">
           <MoreVertical className="w-3 h-3" />
@@ -260,7 +260,7 @@ function CategoryNavColumn({ title, items, activeId, onSelect }: { title: string
             key={item.id}
             onClick={() => onSelect(item.id)}
             className={clsx(
-              "w-full text-left px-3 py-1.5 rounded-md text-[10px] font-black transition-all flex items-center justify-between group",
+              "w-full text-left px-2 py-1.5 rounded-md text-[10px] font-black transition-all flex items-center justify-between group",
               activeId === item.id ? "bg-blue-50 text-blue-700 shadow-sm border border-blue-100/50" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
@@ -292,15 +292,15 @@ function RuleStageColumn({ title, emoji, desc, rules, prefix, isExpanded, onUpda
   color: string
 }) {
   return (
-    <div className="flex flex-col gap-3 min-w-0">
-       <div className={clsx("bg-white rounded-xl border p-3 shadow-sm", color)}>
+    <div className="flex flex-col gap-1 min-w-0">
+       <div className={clsx("bg-white rounded-md border p-1 shadow-sm", color)}>
           <div className="flex items-center gap-2.5 mb-1">
              <span className="text-sm">{emoji}</span>
              <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest">{title}</h3>
           </div>
           <p className="text-[9px] font-bold text-gray-400 pl-7">{desc}</p>
        </div>
-       <div className="space-y-3">
+       <div className="space-y-1">
           {rules.length > 0 ? (
             rules.map((reg, idx) => (
               <RegulationBox
@@ -316,7 +316,7 @@ function RuleStageColumn({ title, emoji, desc, rules, prefix, isExpanded, onUpda
               />
             ))
           ) : (
-            <div className="bg-white/40 border-2 border-dashed border-gray-100 rounded-xl h-40 flex flex-col items-center justify-center text-gray-300 gap-2 opacity-50">
+            <div className="bg-white/40 border-2 border-dashed border-gray-100 rounded-md h-40 flex flex-col items-center justify-center text-gray-300 gap-2 opacity-50">
                <PlusCircle className="w-5 h-5" />
                <span className="text-[8px] font-black uppercase tracking-widest">입력 대기중</span>
             </div>
@@ -325,7 +325,7 @@ function RuleStageColumn({ title, emoji, desc, rules, prefix, isExpanded, onUpda
           {actionMode !== 'view' && actionMode !== 'delete' && (
             <button
               onClick={onAdd}
-              className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-300 hover:text-blue-500 hover:border-blue-100 transition-all flex flex-col items-center gap-1 group bg-white/50"
+              className="w-full py-1 border-2 border-dashed border-gray-200 rounded-md text-gray-300 hover:text-blue-500 hover:border-blue-100 transition-all flex flex-col items-center gap-1 group bg-white/50"
             >
                <PlusCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
                <span className="text-[8px] font-black uppercase tracking-widest">항목 추가 (Add Item)</span>
@@ -388,11 +388,11 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
 
   return (
     <div className={clsx(
-      "bg-white rounded-xl border overflow-hidden shadow-sm flex flex-col h-fit group transition-all",
+      "bg-white rounded-md border overflow-hidden shadow-sm flex flex-col h-fit group transition-all",
       isSelected ? "border-blue-400 ring-2 ring-blue-500/10" : "border-gray-200",
       isDeleteMode ? "hover:border-red-400 hover:shadow-red-50/50" : "hover:shadow-md hover:border-blue-100"
     )}>
-      <div className="bg-white p-3 flex items-center justify-between transition-colors border-b border-gray-50">
+      <div className="bg-white p-1 flex items-center justify-between transition-colors border-b border-gray-50">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
              <input
@@ -443,9 +443,9 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-2 space-y-5">
+            <div className="p-2 space-y-1">
               {/* (2) On/Off Toggle */}
-              <div className="space-y-3">
+              <div className="space-y-1">
                  <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">적용 활성화 (ON/OFF)</span>
                     <OnOFFToggle value={isActive} onChange={setIsActive} />
@@ -457,7 +457,7 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
                       disabled={isViewMode}
                       value={regulation.content}
                       onChange={(e) => onUpdate({...regulation, content: e.target.value})}
-                      className="w-full text-[10px] font-bold text-gray-700 bg-gray-50 border border-gray-100 focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 rounded-lg p-3 min-h-[60px] resize-none transition-all placeholder:text-gray-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full text-[10px] font-bold text-gray-700 bg-gray-50 border border-gray-100 focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 rounded-lg p-1 min-h-[60px] resize-none transition-all placeholder:text-gray-300 disabled:opacity-70 disabled:cursor-not-allowed"
                       placeholder="내용을 입력하세요..."
                    />
                  </div>
@@ -490,7 +490,7 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
                    <button
                       disabled={isViewMode}
                       onClick={() => setShowNotes(true)}
-                      className="w-full py-2 border-2 border-dashed border-gray-100 rounded-lg text-[9px] font-black text-gray-300 hover:text-blue-500 hover:border-blue-100 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-1 border-2 border-dashed border-gray-100 rounded-lg text-[9px] font-black text-gray-300 hover:text-blue-500 hover:border-blue-100 transition-all flex items-center justify-center gap-2"
                    >
                       <PlusCircle className="w-3 h-3" /> 특이사항 추가 (Selectable)
                    </button>
@@ -510,7 +510,7 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
               </div>
 
               {/* (11) 하위 규정 펼쳐보기 */}
-              <div className="pt-2 border-t border-gray-50 space-y-3">
+              <div className="pt-2 border-t border-gray-50 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">하위 세부 지침 (Sub-Directives)</span>
                   <div className="flex gap-1">
@@ -560,7 +560,7 @@ function RegulationBox({ regulation, isExpanded, prefix, onUpdate, onDelete, onT
                     </div>
                   ))}
                   {subDirectives.length === 0 && (
-                    <p className="text-[9px] font-bold text-gray-300 text-center py-2 italic">등록된 하위 지침이 없습니다.</p>
+                    <p className="text-[9px] font-bold text-gray-300 text-center py-1 italic">등록된 하위 지침이 없습니다.</p>
                   )}
                 </div>
               </div>

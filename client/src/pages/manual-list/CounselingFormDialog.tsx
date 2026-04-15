@@ -277,7 +277,7 @@ export function CounselingFormDialog({ open, onOpenChange, manual }: CounselingF
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1600px] w-[95vw] max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-3 py-2 border-b border-border flex-row items-center gap-2 space-y-0">
+        <DialogHeader className="px-2 py-1 border-b border-border flex-row items-center gap-2 space-y-0">
           <DialogTitle className="text-[11px] text-foreground truncate">{manual.title}</DialogTitle>
           <span className="px-1 py-px text-[9px] rounded bg-emerald-50 text-emerald-700 shrink-0">서류</span>
           <div className="ml-auto flex items-center gap-1.5">
@@ -289,7 +289,7 @@ export function CounselingFormDialog({ open, onOpenChange, manual }: CounselingF
           </div>
         </DialogHeader>
 
-        <div className="overflow-auto max-h-[calc(90vh-50px)] px-3 py-2">
+        <div className="overflow-auto max-h-[calc(90vh-50px)] px-2 py-1">
           <div className="flex gap-2">
             {/* 좌 */}
             <div className="flex-1 min-w-0 space-y-1.5">
@@ -465,7 +465,7 @@ function Sec({ meta, title, desc, children }: { meta: { color: string; icon: Rea
         <span className="text-[11px] text-foreground">{title}</span>
         <span className="text-[9px] text-muted-foreground/50 ml-1 truncate">{desc}</span>
       </div>
-      <div className="px-2.5 py-2">{children}</div>
+      <div className="px-2.5 py-1">{children}</div>
     </div>
   );
 }
@@ -483,8 +483,8 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
 
   return (
     <div className="bg-white border border-border rounded shadow-sm overflow-auto max-h-[calc(90vh-120px)]">
-      <div className="p-3 min-h-[480px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
-        <div className="border-2 border-[#333] p-3">
+      <div className="p-1 min-h-[480px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
+        <div className="border-2 border-[#333] p-1">
           <div className="flex justify-between items-start mb-1">
             <span className="text-[8px] text-[#999] tracking-wider">문서번호 : CRS-____-_____</span>
             <div className="text-right">
@@ -498,21 +498,21 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
             </div>
           </div>
 
-          <div className="text-center my-5">
-            <h1 className="text-[15px] tracking-[0.5em] text-[#111] border-b-2 border-t-2 border-[#333] py-2 inline-block px-6">상 담 기 록</h1>
+          <div className="text-center my-1.5">
+            <h1 className="text-[15px] tracking-[0.5em] text-[#111] border-b-2 border-t-2 border-[#333] py-1 inline-block px-2">상 담 기 록</h1>
             <p className="text-[8px] text-[#999] mt-1.5 tracking-wider">{cats.join(" / ")}</p>
           </div>
 
           {!hasAny ? (
-            <div className="flex flex-col items-center justify-center py-14 text-center">
-              <div className="w-14 h-14 rounded border-2 border-dashed border-[#ddd] flex items-center justify-center mb-3"><Eye size={20} className="text-[#ccc]" /></div>
+            <div className="flex flex-col items-center justify-center py-1 text-center">
+              <div className="w-14 h-14 rounded border-2 border-dashed border-[#ddd] flex items-center justify-center mb-1"><Eye size={20} className="text-[#ccc]" /></div>
               <p className="text-[10px] text-[#bbb]">좌측 양식에 내용을 입력하시면</p>
               <p className="text-[10px] text-[#bbb]">실시간으로 문서가 작성됩니다.</p>
             </div>
           ) : (
             <>
               {/* 기본 정보 */}
-              <table className="w-full border-collapse mb-3">
+              <table className="w-full border-collapse mb-1">
                 <thead><tr><th className={`${th} text-center`} colSpan={4}>기 본 정 보</th></tr></thead>
                 <tbody>
                   <tr>
@@ -547,7 +547,7 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
                   pairs.push(b ? [a[0], a[1]!, b[0], b[1]!] : [a[0], a[1]!]);
                 }
                 return (
-                  <table className="w-full border-collapse mb-3">
+                  <table className="w-full border-collapse mb-1">
                     <thead><tr><th className={`${th} text-center`} colSpan={4}>상 세 정 보</th></tr></thead>
                     <tbody>
                       {pairs.map(([l1, v1, l2, v2], i) => (
@@ -568,7 +568,7 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
                 const ta = bFields.filter((f) => on.has(f.id) && f.type === "textarea" && fd[f.id]?.trim());
                 if (!ta.length) return null;
                 return (
-                  <table className="w-full border-collapse mb-3">
+                  <table className="w-full border-collapse mb-1">
                     <thead><tr><th className={`${th} text-center`} colSpan={2}>상 담 내 용</th></tr></thead>
                     <tbody>
                       {ta.map((f) => (
@@ -584,7 +584,7 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
 
               {/* 상담 이력 */}
               {hist.some((h) => h.date || h.result) && (
-                <table className="w-full border-collapse mb-3 text-[9px]">
+                <table className="w-full border-collapse mb-1 text-[9px]">
                   <thead>
                     <tr><th className={`${th} text-center`} colSpan={5}>상 담 이 력</th></tr>
                     <tr>
@@ -610,7 +610,7 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
                 const rows = cFields.filter((f) => on.has(f.id) && f.type !== "textarea").map((f) => [f.label, gv(f)] as [string, string | null]).filter(([, v]) => v);
                 if (!rows.length) return null;
                 return (
-                  <table className="w-full border-collapse mb-3">
+                  <table className="w-full border-collapse mb-1">
                     <thead><tr><th className={`${th} text-center`} colSpan={4}>수 납 정 보</th></tr></thead>
                     <tbody>
                       {rows.map(([l, v], i) => {
@@ -632,7 +632,7 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
 
               {/* 결제 내역 */}
               {pay.some((p) => p.amount) && (
-                <table className="w-full border-collapse mb-3 text-[9px]">
+                <table className="w-full border-collapse mb-1 text-[9px]">
                   <thead>
                     <tr><th className={`${th} text-center`} colSpan={5}>결 제 내 역</th></tr>
                     <tr>
@@ -662,17 +662,17 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
             </>
           )}
 
-          <div className="mt-8 text-center space-y-3">
+          <div className="mt-2 text-center space-y-1">
             <p className="text-[10px] text-[#444]">위 내용은 사실과 다름없음을 확인합니다.</p>
-            <p className="text-[10px] text-[#666] mt-3">{fd.c_date ? fD(fd.c_date) : "____년  __월  __일"}</p>
-            <div className="mt-4 flex justify-end items-center gap-3 pr-4">
+            <p className="text-[10px] text-[#666] mt-1">{fd.c_date ? fD(fd.c_date) : "____년  __월  __일"}</p>
+            <div className="mt-1.5 flex justify-end items-center gap-1 pr-2">
               <span className="text-[10px] text-[#444]">상 담 원 :</span>
-              <span className="text-[10px] text-[#111] border-b border-[#333] px-3 min-w-[80px] inline-block text-center">{fd.c_counselor || ""}</span>
+              <span className="text-[10px] text-[#111] border-b border-[#333] px-2 min-w-[80px] inline-block text-center">{fd.c_counselor || ""}</span>
               <span className="text-[9px] text-[#999]">(인)</span>
             </div>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-2 text-center">
             <p className="text-[8px] text-[#bbb] tracking-[0.3em]">상담팀</p>
           </div>
         </div>

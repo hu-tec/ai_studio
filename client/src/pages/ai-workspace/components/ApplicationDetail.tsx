@@ -34,10 +34,10 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-2xl pointer-events-auto overflow-y-auto"
+          className="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-sm pointer-events-auto overflow-y-auto"
         >
-          <div className="sticky top-0 z-10 bg-white border-b border-slate-100 flex items-center justify-between px-6 py-4">
-            <h2 className="text-xl font-bold text-slate-800">신청 상세 정보</h2>
+          <div className="sticky top-0 z-10 bg-white border-b border-slate-100 flex items-center justify-between px-2 py-1.5">
+            <h2 className="text-sm font-bold text-slate-800">신청 상세 정보</h2>
             <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
@@ -46,15 +46,15 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
             </button>
           </div>
 
-          <div className="p-8 space-y-8">
+          <div className="p-2 space-y-2">
             {/* Profile Header */}
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-2xl border border-blue-100 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-20 h-20 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-100 shadow-sm">
                 {application.name[0]}
               </div>
               <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-2xl font-bold text-slate-900">{application.name}</h3>
+                <div className="flex items-center gap-1 mb-1">
+                  <h3 className="text-sm font-bold text-slate-900">{application.name}</h3>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(application.status)}`}>
                     {application.status === "approved" ? "승인" : application.status === "rejected" ? "거절" : "대기"}
                   </span>
@@ -67,8 +67,8 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
             </div>
 
             {/* Application Info */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1.5 p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5 p-2 bg-slate-50 rounded-md border border-slate-100">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Briefcase className="w-3.5 h-3.5" /> A. 분야
                 </label>
@@ -76,7 +76,7 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
                   {application.field.large} &gt; {application.field.middle} &gt; {application.field.small || "-"}
                 </p>
               </div>
-              <div className="space-y-1.5 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="space-y-1.5 p-2 bg-slate-50 rounded-md border border-slate-100">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5" /> D. 부서
                 </label>
@@ -84,13 +84,13 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
                   {application.dept.large} &gt; {application.dept.middle || "-"}
                 </p>
               </div>
-              <div className="space-y-1.5 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="space-y-1.5 p-2 bg-slate-50 rounded-md border border-slate-100">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" /> 신청일
                 </label>
                 <p className="text-sm font-semibold text-slate-700">{application.appliedAt}</p>
               </div>
-              <div className="space-y-1.5 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="space-y-1.5 p-2 bg-slate-50 rounded-md border border-slate-100">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Briefcase className="w-3.5 h-3.5" /> 경력
                 </label>
@@ -99,16 +99,16 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
             </div>
 
             {/* Portfolio & Description */}
-            <div className="space-y-6">
-              <div className="space-y-3">
+            <div className="space-y-2">
+              <div className="space-y-1">
                 <h4 className="text-sm font-bold text-slate-800">포트폴리오</h4>
                 <a
                   href={application.portfolio}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 rounded-xl group transition-all"
+                  className="flex items-center justify-between p-2 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 rounded-md group transition-all"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                       <ExternalLink className="w-5 h-5" />
                     </div>
@@ -118,9 +118,9 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
                 </a>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <h4 className="text-sm font-bold text-slate-800">자기소개</h4>
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="p-2 bg-slate-50 rounded-md border border-slate-100">
                   <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                     {application.description}
                   </p>
@@ -130,17 +130,17 @@ export function ApplicationDetail({ application, onClose, onUpdateStatus }: Appl
 
             {/* Action Buttons */}
             {application.status === "pending" && (
-              <div className="flex gap-4 pt-6">
+              <div className="flex gap-1.5 pt-2">
                 <button
                   onClick={() => onUpdateStatus(application.id, "approved")}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-200 transition-all transform active:scale-[0.98]"
+                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-2 rounded-md shadow-sm shadow-emerald-200 transition-all transform active:scale-[0.98]"
                 >
                   <CheckCircle className="w-5 h-5" />
                   승인하기
                 </button>
                 <button
                   onClick={() => onUpdateStatus(application.id, "rejected")}
-                  className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold py-3.5 px-6 rounded-xl transition-all transform active:scale-[0.98]"
+                  className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold py-1.5 px-2 rounded-md transition-all transform active:scale-[0.98]"
                 >
                   <XCircle className="w-5 h-5" />
                   거절하기

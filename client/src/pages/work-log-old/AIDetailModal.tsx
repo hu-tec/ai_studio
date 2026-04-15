@@ -162,12 +162,12 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
-        className="bg-card rounded shadow-2xl w-full max-w-[1400px] h-[90vh] flex flex-col m-3"
+        className="bg-card rounded shadow-sm w-full max-w-[1400px] h-[90vh] flex flex-col m-3"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="shrink-0 bg-card border-b border-border px-3 py-2 flex items-center justify-between z-10">
-          <div className="flex items-center gap-4">
+        <div className="shrink-0 bg-card border-b border-border px-2 py-1 flex items-center justify-between z-10">
+          <div className="flex items-center gap-1.5">
             <div>
               <span className="text-sm font-medium">AI 활용 작성</span>
               <span className="text-[11px] text-muted-foreground ml-2">{timeSlot}</span>
@@ -206,9 +206,9 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
           </button>
         </div>
 
-        <div className="flex-1 overflow-hidden flex flex-col p-3 space-y-3">
+        <div className="flex-1 overflow-hidden flex flex-col p-1 space-y-1">
           {/* Top Section: Work Types & AI Tools (Fixed height) */}
-          <div className="shrink-0 space-y-3">
+          <div className="shrink-0 space-y-1">
             {/* Work Types */}
             <div>
               <label className="block mb-1 text-muted-foreground text-xs font-medium uppercase tracking-tight">작업 유형</label>
@@ -253,7 +253,7 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
           </div>
 
           {/* Shared Expansion Area (Sections 1, 2, 3) */}
-          <div className="flex-1 flex flex-col min-h-0 space-y-3">
+          <div className="flex-1 flex flex-col min-h-0 space-y-1">
             {/* 1. Main Inputs (Prompt & Instructions) - Toggleable */}
             <div className={`transition-all duration-300 flex flex-col overflow-hidden border-t border-border pt-2 ${isMainExpanded ? 'flex-1 min-h-[100px]' : 'shrink-0'}`}>
               <div className="flex items-center justify-between mb-1 shrink-0">
@@ -276,7 +276,7 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
               </div>
 
               {isMainExpanded && (
-                <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+                <div className="grid grid-cols-4 gap-1 flex-1 min-h-0">
                   {/* 1st Column: Instructions & Remarks */}
                   <div className="flex flex-col min-h-0">
                     <label className="block mb-1 text-muted-foreground text-[11px]">업무 지시 사항</label>
@@ -356,7 +356,7 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
               </div>
 
               {isResultExpanded && (
-                <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+                <div className="grid grid-cols-4 gap-1 flex-1 min-h-0">
                   <div className="border border-border rounded p-2 flex flex-col min-h-[140px]">
                     <p className="mb-1 text-muted-foreground text-[11px] font-medium uppercase tracking-tighter">Before</p>
                     <div className="flex-1 min-h-0">
@@ -486,7 +486,7 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
               </div>
 
               {isRegulationExpanded && (
-                <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+                <div className="grid grid-cols-4 gap-1 flex-1 min-h-0">
                   <div className="flex flex-col min-h-0">
                     <label className="block mb-1 text-muted-foreground text-[11px]">규정</label>
                     <textarea
@@ -531,7 +531,7 @@ export function AIDetailModal({ isOpen, onClose, timeSlot, initialData, onSave, 
 
         {/* Footer */}
         {!readOnly && (
-          <div className="shrink-0 bg-card border-t border-border px-3 py-2 flex justify-end gap-2">
+          <div className="shrink-0 bg-card border-t border-border px-2 py-1 flex justify-end gap-2">
             <button
               onClick={onClose}
               className="px-2.5 py-1 border border-border rounded hover:bg-accent text-xs"

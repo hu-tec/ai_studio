@@ -114,7 +114,7 @@ export default function ManualListPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-card border-b border-border">
-        <div className="max-w-[1440px] mx-auto px-3 h-9 flex items-center gap-3">
+        <div className="max-w-[1440px] mx-auto px-2 h-9 flex items-center gap-1">
           <span className="text-[11px] text-muted-foreground shrink-0 tracking-wide uppercase">Admin · 매뉴얼/서류</span>
 
           <div className="relative flex-1 max-w-xs">
@@ -124,7 +124,7 @@ export default function ManualListPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="제목 검색..."
-              className="w-full pl-6 pr-6 py-1 text-[11px] rounded border border-border bg-input-background focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
+              className="w-full pl-2 pr-2 py-1 text-[11px] rounded border border-border bg-input-background focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
             />
             {keyword && (
               <button onClick={() => setKeyword("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
@@ -153,7 +153,7 @@ export default function ManualListPage() {
         </div>
       </header>
 
-      <div className="max-w-[1440px] mx-auto px-3 py-2 space-y-1.5">
+      <div className="max-w-[1440px] mx-auto px-2 py-1 space-y-1.5">
         <FilterBar selectedFilters={selectedFilters} onFilterChange={handleFilterChange} onClearAll={handleClearAll} />
         <ManualTable manuals={filteredManuals} totalCount={manuals.length} onDocumentOpen={handleDocumentOpen} />
       </div>

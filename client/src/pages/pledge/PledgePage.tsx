@@ -256,7 +256,7 @@ export function PledgePage() {
 
       {/* Utility Top Bar (Benchmark style) */}
       <div className="max-w-[2000px] mx-auto mb-2 flex justify-end items-center gap-2">
-        <div className="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+        <div className="bg-white px-2 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
           <button
             onClick={() => setCurrentView('worklog')}
             className={cn(
@@ -289,9 +289,9 @@ export function PledgePage() {
       </div>
 
       {/* Dashboard Header */}
-      <div className="max-w-[2000px] mx-auto mb-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-2 flex flex-wrap items-center justify-between gap-2">
+      <div className="max-w-[2000px] mx-auto mb-1.5 bg-white rounded-md shadow-sm border border-slate-200 p-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+          <div className="w-12 h-12 bg-slate-900 rounded-md flex items-center justify-center text-white">
             {currentView === 'pledge' ? <ShieldCheck size={28} /> : <ClipboardList size={28} />}
           </div>
           <div>
@@ -302,7 +302,7 @@ export function PledgePage() {
           </div>
         </div>
 
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+        <div className="flex items-center bg-slate-100 p-1 rounded-md">
           {[
             { id: 'view', icon: <CheckCircle2 size={16} />, label: '조회' },
             { id: 'add', icon: <Plus size={16} />, label: '추가' },
@@ -313,7 +313,7 @@ export function PledgePage() {
               key={m.id}
               onClick={() => setMode(m.id as Mode)}
               className={cn(
-                "flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium transition-all",
+                "flex items-center gap-2 px-2 py-1 rounded-lg text-sm font-medium transition-all",
                 mode === m.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
@@ -323,11 +323,11 @@ export function PledgePage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => downloadFile('excel')} className="flex items-center gap-2 px-2 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100">
+        <div className="flex items-center gap-1">
+          <button onClick={() => downloadFile('excel')} className="flex items-center gap-2 px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100">
             <FileSpreadsheet size={16} /> 엑셀 다운받기
           </button>
-          <button onClick={() => downloadFile('word')} className="flex items-center gap-2 px-2 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100">
+          <button onClick={() => downloadFile('word')} className="flex items-center gap-2 px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100">
             <FileText size={16} /> 워드 다운받기
           </button>
         </div>
@@ -335,11 +335,11 @@ export function PledgePage() {
 
       <div className="max-w-[2000px] mx-auto">
         {currentView === 'pledge' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Column 1: Info & Core Policies */}
-            <div className="space-y-3">
+            <div className="space-y-1">
               <SectionContainer title="1. 기본 정보" emoji="📝">
-                <div className="space-y-4">
+                <div className="space-y-1">
                   <InputGroup label="이름" value={userName} onChange={setUserName} icon={<User size={14}/>} placeholder="성함 입력" />
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-slate-400 uppercase flex items-center gap-1.5">
@@ -369,19 +369,19 @@ export function PledgePage() {
             </div>
 
             {/* Column 2: Operations & Detailed Clauses */}
-            <div className="space-y-3">
+            <div className="space-y-1">
               <PolicyGroup section={sections.operational} mode={mode} checkedItems={checkedItems} onToggle={toggleCheck} onUpdate={handleUpdateItem} onDelete={handleDeleteItem} onAdd={() => handleAddItem('operational')} />
               <PolicyGroup section={sections.handover} mode={mode} checkedItems={checkedItems} onToggle={toggleCheck} onUpdate={handleUpdateItem} onDelete={handleDeleteItem} onAdd={() => handleAddItem('handover')} />
 
               <SectionContainer title="7. 비밀 유지" emoji="🤫">
-                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="p-2 bg-slate-50 rounded-md border border-slate-200">
                   <p className="text-sm text-slate-600 leading-relaxed italic">
                     "본인은 업무 중 알게 된 회사 정보, 고객 정보, 자료를 외부에 공개하지 않을 것을 서약합니다."
                   </p>
                   <button
                     onClick={() => toggleCheck('secret-pledge')}
                     className={cn(
-                      "mt-4 w-full py-2 rounded-lg text-xs font-bold transition-all border",
+                      "mt-1.5 w-full py-1 rounded-lg text-xs font-bold transition-all border",
                       checkedItems.has('secret-pledge') ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-400 border-slate-200"
                     )}
                   >
@@ -392,15 +392,15 @@ export function PledgePage() {
             </div>
 
             {/* Column 3: 5. Detailed Work Regulations (KPI Standards) */}
-            <div className="space-y-3">
+            <div className="space-y-1">
               <SectionContainer title="5. 세부 업무 규정" emoji="📊">
-                <div className="space-y-5">
+                <div className="space-y-1">
                   {[
                     { title: "개발/기획/디자인 업무 기준", target: "1일 10개 작업", items: ["1시간은 프롬프트 정리/수정으로 대처", "작업 기준 : 30분 단위", "타업무 지연 시 10/20분 단위 쪼개기"] },
                     { title: "마케팅 업무 기준", target: "1일 10개 콘텐츠", items: ["SNS / 블로그 / 광고 유형 등록", "등록 후 조회수 필수로 기록"] },
                     { title: "아웃바운드/전화 업무 기준", target: "1일 100통", items: ["결과 상세 기록 (신규, 연결, 상담 등)", "상담 대상 상담팀 전달"] }
                   ].map((w, idx) => (
-                    <div key={idx} className="space-y-3">
+                    <div key={idx} className="space-y-1">
                       <div className="flex items-center justify-between border-b border-slate-100 pb-1">
                         <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                           <Target size={14} className="text-slate-400" /> {w.title}
@@ -423,15 +423,15 @@ export function PledgePage() {
             </div>
 
             {/* Column 4: Records & Final Pledge */}
-            <div className="space-y-3">
+            <div className="space-y-1">
               <SectionContainer title="담당자용 일일 업무 기록" emoji="📅">
-                <div className="space-y-4">
+                <div className="space-y-1">
                   <KpiTable title="최근 3일 기록" emoji="📈" headers={Object.keys(dailyRecordData[0])} data={dailyRecordData} mode={mode} />
                 </div>
               </SectionContainer>
 
               <SectionContainer title="8. 최종 서약 및 서명" emoji="✍️">
-                <div className="space-y-4">
+                <div className="space-y-1">
                   <div className="flex justify-between items-end mb-1">
                     <span className="text-xs font-medium text-slate-500 uppercase">전체 진행률</span>
                     <span className="text-sm font-black text-slate-900">{totalProgress}%</span>
@@ -439,14 +439,14 @@ export function PledgePage() {
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <motion.div initial={{ width: 0 }} animate={{ width: `${totalProgress}%` }} className="bg-slate-900 h-full" />
                   </div>
-                  <div className="p-2 bg-white border border-slate-200 rounded-xl space-y-3">
+                  <div className="p-2 bg-white border border-slate-200 rounded-md space-y-1">
                     <p className="text-[11px] text-slate-600 leading-normal">본인은 위 내용을 충분히 이해하였으며 이를 성실히 준수할 것을 서약합니다.</p>
                     <div className="relative h-24 w-full bg-slate-50 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
-                      {signature ? <span className="text-base font-cursive text-slate-800">{signature}</span> : <span className="text-[10px] text-slate-300">이름을 입력하여 서명하세요</span>}
+                      {signature ? <span className="text-xs font-cursive text-slate-800">{signature}</span> : <span className="text-[10px] text-slate-300">이름을 입력하여 서명하세요</span>}
                       <input type="text" value={signature} onChange={(e) => setSignature(e.target.value)} disabled={totalProgress < 100} className="absolute inset-0 opacity-0 cursor-pointer" />
                     </div>
                   </div>
-                  <button disabled={totalProgress < 100 || !signature} onClick={submitPledge} className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-sm">최종 서약서 제출</button>
+                  <button disabled={totalProgress < 100 || !signature} onClick={submitPledge} className="w-full py-1 bg-slate-900 text-white rounded-md font-bold text-sm">최종 서약서 제출</button>
                 </div>
               </SectionContainer>
             </div>
@@ -466,14 +466,14 @@ export function PledgePage() {
 // Sub-components
 function SectionContainer({ title, emoji, children }: { title: string, emoji: string, children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-fit">
-      <div className="px-2 py-2 border-b border-slate-50 bg-white flex items-center justify-between">
+    <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden h-fit">
+      <div className="px-2 py-1 border-b border-slate-50 bg-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm">{emoji}</span>
           <h2 className="text-sm font-bold text-slate-900">{title}</h2>
         </div>
       </div>
-      <div className="p-3">{children}</div>
+      <div className="p-1">{children}</div>
     </div>
   );
 }
@@ -505,7 +505,7 @@ function PolicyGroup({ section, mode, checkedItems, onToggle, onUpdate, onDelete
           <PolicyItem key={item.id} id={item.id} text={item.text} isChecked={checkedItems.has(item.id)} onToggle={onToggle} mode={mode} onUpdate={(id:any, text:any) => onUpdate(section.id, id, text)} onDelete={(id:any) => onDelete(section.id, id)} />
         ))}
         {mode === 'add' && (
-          <button onClick={onAdd} className="w-full py-2 border-2 border-dashed border-slate-100 rounded-lg text-slate-300 hover:text-slate-500 hover:border-slate-200 transition-all flex items-center justify-center gap-2 text-[10px] font-bold">
+          <button onClick={onAdd} className="w-full py-1 border-2 border-dashed border-slate-100 rounded-lg text-slate-300 hover:text-slate-500 hover:border-slate-200 transition-all flex items-center justify-center gap-2 text-[10px] font-bold">
             <Plus size={12} /> 항목 추가
           </button>
         )}

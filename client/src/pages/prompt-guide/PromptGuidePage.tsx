@@ -38,9 +38,9 @@ function Header({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   return (
-    <header className="flex-shrink-0 z-20 bg-white/80 backdrop-blur-md border-b border-neutral-200 px-3 py-3 flex items-center justify-between">
+    <header className="flex-shrink-0 z-20 bg-white/80 backdrop-blur-md border-b border-neutral-200 px-2 py-1 flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center flex-shrink-0">
             <Plus className="text-white w-5 h-5" />
           </div>
@@ -54,7 +54,7 @@ function Header({
         <div className="relative">
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-50 transition-all bg-white shadow-sm"
+            className="flex items-center gap-1 pl-1 pr-2 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-50 transition-all bg-white shadow-sm"
           >
             <div className="text-right hidden sm:block">
               <p className="text-xs font-bold text-neutral-900">{currentUser.name}</p>
@@ -74,9 +74,9 @@ function Header({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-56 bg-white border border-neutral-200 rounded-2xl shadow-xl z-20 overflow-hidden"
+                  className="absolute right-0 mt-2 w-56 bg-white border border-neutral-200 rounded-md shadow-sm z-20 overflow-hidden"
                 >
-                  <div className="p-3 border-b border-neutral-100 bg-neutral-50">
+                  <div className="p-1 border-b border-neutral-100 bg-neutral-50">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2">계정 전환</p>
                   </div>
                   <div className="p-1">
@@ -88,7 +88,7 @@ function Header({
                           setIsUserMenuOpen(false);
                         }}
                         className={clsx(
-                          "flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm transition-colors",
+                          "flex items-center gap-1 w-full px-2 py-1 rounded-md text-sm transition-colors",
                           currentUser.name === staff.name ? "bg-neutral-100 font-bold" : "hover:bg-neutral-50"
                         )}
                       >
@@ -103,7 +103,7 @@ function Header({
                   </div>
                   {currentUser.role === 'Admin' && (
                     <div className="p-2 border-t border-neutral-100">
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 text-white text-[10px] font-bold">
+                      <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-neutral-900 text-white text-[10px] font-bold">
                         <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         전체 직원 데이터 조회 모드 활성
                       </div>
@@ -142,7 +142,7 @@ function SampleCard({
       onMouseEnter={onMouseEnter}
       className={clsx(
         "group cursor-pointer bg-white border rounded-[24px] overflow-hidden transition-all duration-300 flex flex-col h-full relative",
-        isHovered ? "ring-2 ring-neutral-800 border-transparent shadow-xl translate-y-[-4px]" : "border-neutral-200 shadow-sm",
+        isHovered ? "ring-2 ring-neutral-800 border-transparent shadow-sm translate-y-[-4px]" : "border-neutral-200 shadow-sm",
         isCheckboxSelected ? "bg-neutral-50" : ""
       )}
     >
@@ -172,7 +172,7 @@ function SampleCard({
         </div>
       </div>
       <div className="p-2 flex flex-col flex-1 space-y-2">
-        <h3 className="font-bold text-base text-neutral-900 uppercase tracking-tight group-hover:text-neutral-600 transition-colors">
+        <h3 className="font-bold text-xs text-neutral-900 uppercase tracking-tight group-hover:text-neutral-600 transition-colors">
           {sample.category}
         </h3>
         <div className="space-y-1">
@@ -250,12 +250,12 @@ function DashboardView({
     <div className="flex flex-col h-full overflow-hidden p-2 space-y-2">
       {/* 보기 전환 및 액션 바 */}
       <section className="flex items-center justify-between">
-        <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-neutral-200 shadow-sm">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-md border border-neutral-200 shadow-sm">
           <button
             onClick={() => setViewMode('grid')}
             className={clsx(
-              "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
-              viewMode === 'grid' ? "bg-neutral-900 text-white shadow-lg" : "text-neutral-400 hover:text-neutral-900"
+              "flex items-center gap-2 px-2 py-1 rounded-md text-xs font-bold transition-all",
+              viewMode === 'grid' ? "bg-neutral-900 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-900"
             )}
           >
             <LayoutGrid size={16} /> 대시보드
@@ -263,15 +263,15 @@ function DashboardView({
           <button
             onClick={() => setViewMode('list')}
             className={clsx(
-              "flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
-              viewMode === 'list' ? "bg-neutral-900 text-white shadow-lg" : "text-neutral-400 hover:text-neutral-900"
+              "flex items-center gap-2 px-2 py-1 rounded-md text-xs font-bold transition-all",
+              viewMode === 'list' ? "bg-neutral-900 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-900"
             )}
           >
             <List size={16} /> 샘플 리스트
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
@@ -279,12 +279,12 @@ function DashboardView({
               placeholder="검색..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-neutral-200 rounded-xl pl-3 pr-2 py-2.5 text-sm focus:ring-2 focus:ring-neutral-200 outline-none shadow-sm"
+              className="w-full bg-white border border-neutral-200 rounded-md pl-1 pr-2 py-1 text-sm focus:ring-2 focus:ring-neutral-200 outline-none shadow-sm"
             />
           </div>
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-2 px-3 py-2.5 bg-neutral-900 text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 px-2 py-1 bg-neutral-900 text-white rounded-md text-xs font-bold hover:bg-neutral-800 transition-all shadow-sm active:scale-95"
           >
             <Plus size={16} /> 샘플 추가
           </button>
@@ -292,8 +292,8 @@ function DashboardView({
       </section>
 
       {/* 최상단 현황 기록 */}
-      <section className="bg-white border border-neutral-200 rounded-2xl p-2 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-3 px-2 overflow-x-auto">
+      <section className="bg-white border border-neutral-200 rounded-md p-2 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-1 px-2 overflow-x-auto">
           {categories.map(cat => (
             <button
               key={cat}
@@ -305,17 +305,17 @@ function DashboardView({
             >
               <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{cat}</span>
               <div className="flex items-baseline gap-1">
-                <span className="text-base font-black text-neutral-900">{categoryStats[cat] || 0}</span>
+                <span className="text-xs font-black text-neutral-900">{categoryStats[cat] || 0}</span>
                 <span className="text-[10px] text-neutral-400 font-bold">개</span>
               </div>
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2 pr-2">
-          <button className="flex items-center gap-2 px-2 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
+          <button className="flex items-center gap-2 px-2 py-1 bg-neutral-50 rounded-md text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
             <Download size={14} /> 엑셀 다운로드
           </button>
-          <button className="flex items-center gap-2 px-2 py-2 bg-neutral-50 rounded-xl text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
+          <button className="flex items-center gap-2 px-2 py-1 bg-neutral-50 rounded-md text-[11px] font-bold text-neutral-500 border border-neutral-100 hover:text-neutral-900 transition-colors">
             <FileText size={14} /> 워드 다운로드
           </button>
         </div>
@@ -349,7 +349,7 @@ function DashboardView({
               </div>
 
               {/* 호버 상세 사이드바 */}
-              <aside className="w-[450px] lg:w-[550px] bg-white border border-neutral-200 rounded-[32px] overflow-hidden shadow-xl flex flex-col min-h-0 self-stretch relative">
+              <aside className="w-[450px] lg:w-[550px] bg-white border border-neutral-200 rounded-[32px] overflow-hidden shadow-sm flex flex-col min-h-0 self-stretch relative">
                 <AnimatePresence mode="wait">
                   {hoveredSample ? (
                     <motion.div
@@ -374,22 +374,22 @@ function DashboardView({
 
                       <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
                         {/* 프롬프트 워크플로우 */}
-                        <div className="space-y-4">
+                        <div className="space-y-1">
                           <div className="flex items-center gap-2 text-neutral-900">
                             <MessageSquare size={16} className="text-neutral-400" />
                             <h3 className="text-sm font-bold uppercase tracking-wider">프롬프트 워크플로우</h3>
                           </div>
-                          <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-neutral-100">
-                            <div className="relative pl-3">
+                          <div className="space-y-1 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[1px] before:bg-neutral-100">
+                            <div className="relative pl-1">
                               <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[10px] font-bold shadow-md">1</div>
-                              <div className="p-2 bg-white rounded-2xl border border-neutral-100 text-xs text-neutral-700 leading-relaxed shadow-sm">
+                              <div className="p-2 bg-white rounded-md border border-neutral-100 text-xs text-neutral-700 leading-relaxed shadow-sm">
                                 {hoveredSample.primaryPrompt}
                               </div>
                             </div>
                             {hoveredSample.supplementaryPrompts.map((p, i) => (
-                              <div key={i} className="relative pl-3">
+                              <div key={i} className="relative pl-1">
                                 <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 text-[10px] font-bold border border-neutral-200">{i + 2}</div>
-                                <div className="p-2 bg-neutral-50/50 rounded-2xl border border-neutral-100 text-xs text-neutral-500 italic leading-relaxed">
+                                <div className="p-2 bg-neutral-50/50 rounded-md border border-neutral-100 text-xs text-neutral-500 italic leading-relaxed">
                                   {p}
                                 </div>
                               </div>
@@ -399,14 +399,14 @@ function DashboardView({
 
                         {/* 요구사항 목록 */}
                         {hoveredSample.requirements && hoveredSample.requirements.length > 0 && (
-                          <div className="space-y-4">
+                          <div className="space-y-1">
                             <div className="flex items-center gap-2 text-neutral-900">
                               <CheckCircle2 size={16} className="text-neutral-400" />
                               <h3 className="text-sm font-bold uppercase tracking-wider">주요 구현 요구사항</h3>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
                               {hoveredSample.requirements.map((req, idx) => (
-                                <div key={idx} className="flex items-start gap-3 p-3 bg-white border border-neutral-100 rounded-xl shadow-sm">
+                                <div key={idx} className="flex items-start gap-1 p-1 bg-white border border-neutral-100 rounded-md shadow-sm">
                                   <div className="w-5 h-5 rounded-full bg-neutral-100 flex items-center justify-center text-[10px] font-bold text-neutral-500 flex-shrink-0">
                                     {idx + 1}
                                   </div>
@@ -418,7 +418,7 @@ function DashboardView({
                         )}
 
                         {/* 최종 결과물 캡처 */}
-                        <div className="space-y-4 pb-2">
+                        <div className="space-y-1 pb-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-neutral-900">
                               <ImageIcon size={16} className="text-neutral-400" />
@@ -433,7 +433,7 @@ function DashboardView({
                               </button>
                             </div>
                           </div>
-                          <div className="rounded-2xl overflow-hidden border border-neutral-200 shadow-xl shadow-neutral-100">
+                          <div className="rounded-md overflow-hidden border border-neutral-200 shadow-sm shadow-neutral-100">
                             <img src={hoveredSample.imageUrl} className="w-full h-auto object-cover" alt="Result" />
                           </div>
                         </div>
@@ -442,14 +442,14 @@ function DashboardView({
                       <div className="p-2 bg-neutral-50 border-t border-neutral-100">
                         <button
                           onClick={() => onSelectSample(hoveredSample)}
-                          className="w-full py-3.5 bg-neutral-900 text-white rounded-2xl text-xs font-bold hover:bg-neutral-800 transition-all shadow-xl active:scale-95"
+                          className="w-full py-1.5 bg-neutral-900 text-white rounded-md text-xs font-bold hover:bg-neutral-800 transition-all shadow-sm active:scale-95"
                         >
                           이 워크플로우 그대로 적용하기
                         </button>
                       </div>
                     </motion.div>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-neutral-300 p-3 text-center space-y-4">
+                    <div className="flex-1 flex flex-col items-center justify-center text-neutral-300 p-1 text-center space-y-1">
                       <LayoutGrid size={48} strokeWidth={1} />
                       <p className="text-sm font-medium">카드를 마우스오버하여<br />상세 내용을 미리 확인하세요.</p>
                     </div>
@@ -469,7 +469,7 @@ function DashboardView({
                 <table className="w-full text-left border-collapse table-fixed min-w-[1200px]">
                   <thead>
                     <tr className="bg-neutral-50/80 border-b border-neutral-100 sticky top-0 z-10">
-                      <th className="px-3 py-2 w-12 text-center">
+                      <th className="px-2 py-1 w-12 text-center">
                         <input
                           type="checkbox"
                           checked={selectedIds.length === filteredSamples.length && filteredSamples.length > 0}
@@ -477,13 +477,13 @@ function DashboardView({
                           className="w-4 h-4 rounded border-neutral-300 focus:ring-neutral-200"
                         />
                       </th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">분류</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[180px]">업무명</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">프롬프트 요약</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">1차 프롬프트</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[200px]">중요포인트</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">등록일</th>
-                      <th className="px-3 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[60px] text-right pr-3">이동</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">분류</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[180px]">업무명</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">프롬프트 요약</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[220px]">1차 프롬프트</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[200px]">중요포인트</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[100px]">등록일</th>
+                      <th className="px-2 py-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest w-[60px] text-right pr-1">이동</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-50">
@@ -495,7 +495,7 @@ function DashboardView({
                           selectedIds.includes(sample.id) ? "bg-neutral-50/50" : ""
                         )}
                       >
-                        <td className="px-3 py-2 text-center align-top">
+                        <td className="px-2 py-1 text-center align-top">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(sample.id)}
@@ -507,35 +507,35 @@ function DashboardView({
                             className="w-4 h-4 rounded border-neutral-300 focus:ring-neutral-200"
                           />
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <span className="px-2 py-0.5 bg-neutral-100 text-neutral-800 text-[9px] font-black rounded uppercase italic">
                             {sample.category}
                           </span>
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <span className="font-bold text-sm text-neutral-900 group-hover:text-neutral-600 transition-colors">
                             {sample.title}
                           </span>
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">
                             {sample.summary}
                           </p>
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2 italic">
                             {sample.primaryPrompt}
                           </p>
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <p className="text-[11px] text-neutral-700 font-semibold leading-relaxed line-clamp-2">
                             {sample.keyPoint}
                           </p>
                         </td>
-                        <td className="px-3 py-2 align-top">
+                        <td className="px-2 py-1 align-top">
                           <span className="text-[11px] text-neutral-400 font-bold">{sample.date}</span>
                         </td>
-                        <td className="px-3 py-2 text-right align-top pr-3">
+                        <td className="px-2 py-1 text-right align-top pr-1">
                           <button
                             onClick={() => onSelectSample(sample)}
                             className="p-2 inline-block text-neutral-300 hover:text-neutral-900 transition-colors"
@@ -548,7 +548,7 @@ function DashboardView({
                   </tbody>
                 </table>
                 {filteredSamples.length === 0 && (
-                  <div className="py-32 flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="py-1 flex flex-col items-center justify-center text-center space-y-1">
                     <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center">
                       <Search size={32} className="text-neutral-200" />
                     </div>

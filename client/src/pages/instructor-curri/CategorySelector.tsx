@@ -72,7 +72,7 @@ export function CategorySelector({
           </Select>
         </div>
 
-        <span className="text-neutral-300 mt-5 text-[0.75rem]">→</span>
+        <span className="text-neutral-300 mt-1.5 text-[0.75rem]">→</span>
 
         {/* 중 */}
         <div className="flex-1 min-w-0">
@@ -89,7 +89,7 @@ export function CategorySelector({
           </Select>
         </div>
 
-        <span className="text-neutral-300 mt-5 text-[0.75rem]">→</span>
+        <span className="text-neutral-300 mt-1.5 text-[0.75rem]">→</span>
 
         {/* 소 */}
         <div className="flex-1 min-w-0">

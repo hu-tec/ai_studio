@@ -304,9 +304,9 @@ export function ExportWordModal({ open, onClose, data }: Props) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* modal */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-lg shadow-sm w-full max-w-md mx-1.5 overflow-hidden">
         {/* header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center justify-between px-2 py-1 border-b border-border">
           <div className="flex items-center gap-2">
             <FileDown className="w-4 h-4 text-blue-600" />
             <h3 className="text-sm">Word 문서 다운로드</h3>
@@ -317,8 +317,8 @@ export function ExportWordModal({ open, onClose, data }: Props) {
         </div>
 
         {/* body */}
-        <div className="px-4 py-3">
-          <p className="text-sm text-muted-foreground mb-3">
+        <div className="px-2 py-1">
+          <p className="text-sm text-muted-foreground mb-1">
             다운로드할 섹션을 선택하세요.
           </p>
 
@@ -377,15 +377,15 @@ export function ExportWordModal({ open, onClose, data }: Props) {
         </div>
 
         {/* footer */}
-        <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border bg-gray-50/50">
+        <div className="flex items-center justify-end gap-2 px-2 py-1 border-t border-border bg-gray-50/50">
           <button onClick={onClose}
-            className="px-3 py-1.5 text-sm rounded border border-border hover:bg-gray-100 transition-colors">
+            className="px-2 py-1.5 text-sm rounded border border-border hover:bg-gray-100 transition-colors">
             취소
           </button>
           <button
             onClick={handleExport}
             disabled={selected.size === 0 || exporting}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             {exporting ? "생성 중..." : `다운로드 (${selected.size}개 섹션)`}

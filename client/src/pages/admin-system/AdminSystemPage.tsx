@@ -38,10 +38,10 @@ function AdminSystemPage() {
           </div>
         </div>
 
-        <footer className="mt-6 pt-3 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-2">
+        <footer className="mt-2 pt-1 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex flex-col gap-1">
             <p className="text-[11px] font-black text-zinc-900 tracking-widest uppercase flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-zinc-900 shadow-lg shadow-zinc-400"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-zinc-900 shadow-sm shadow-zinc-400"></span>
               관리자 통합 시스템 v1.0.4 🛡️
             </p>
             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">

@@ -9,7 +9,7 @@ interface SavedListProps {
 export function SavedList({ items, onEdit, onDelete }: SavedListProps) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-neutral-300">
+      <div className="flex flex-col items-center justify-center py-1 text-neutral-300">
         <span className="text-[2rem] opacity-30 mb-1">📭</span>
         <p className="text-[0.75rem]">저장된 항목 없음</p>
       </div>

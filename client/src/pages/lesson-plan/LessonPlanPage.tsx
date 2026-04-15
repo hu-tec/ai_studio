@@ -7,7 +7,7 @@ function LessonPlanPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-white sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto px-3">
+        <div className="max-w-[1400px] mx-auto px-2">
           <div className="flex items-center justify-between h-11">
             <Link to="/lesson-plan" className="flex items-center gap-1.5 text-primary no-underline">
               <BookOpen className="w-4 h-4 text-blue-600" />
@@ -41,7 +41,7 @@ function LessonPlanPage() {
         </div>
       </header>
       <main className="flex-1">
-        <div className="max-w-[1400px] mx-auto px-3 py-3">
+        <div className="max-w-[1400px] mx-auto px-2 py-1">
           <Outlet />
         </div>
       </main>

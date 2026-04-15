@@ -132,7 +132,7 @@ export default function TaxonomyPicker({ scope, gov, axes, initialId, onPick, on
 
 function Row({ label, indent, children }: { label: string; indent?: boolean; children: React.ReactNode }) {
   return (
-    <div className={['flex items-start gap-1', indent ? 'pl-4' : ''].join(' ')}>
+    <div className={['flex items-start gap-1', indent ? 'pl-2' : ''].join(' ')}>
       {indent && <ChevronRight className="h-2.5 w-2.5 text-slate-400 mt-0.5" />}
       <div className="text-[10px] font-bold text-slate-500 min-w-[28px] pt-0.5">{label}</div>
       <div className="flex-1 flex flex-wrap gap-1">{children}</div>

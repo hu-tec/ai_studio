@@ -42,7 +42,7 @@ export function PlanBTab({ item }: Props) {
                 <span>📚 {d.label}</span>
               </button>
               {openDomain === d.code && (
-                <div className="ml-3 space-y-0.5">
+                <div className="ml-1 space-y-0.5">
                   {TIERS.map((t) => (
                     <div key={t.code}>
                       <button
@@ -54,7 +54,7 @@ export function PlanBTab({ item }: Props) {
                         <span className="text-[9px] text-slate-400">[{t.grades.length}급]</span>
                       </button>
                       {openTier === t.code && (
-                        <div className="ml-3 flex flex-wrap gap-0.5 py-0.5">
+                        <div className="ml-1 flex flex-wrap gap-0.5 py-0.5">
                           {INDUSTRIES.map((i) => {
                             const active =
                               selected?.domain === d.code &&

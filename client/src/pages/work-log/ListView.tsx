@@ -45,7 +45,7 @@ export function ListView({ logs, onSelectDate }: ListViewProps) {
 
   return (
     <div className="bg-card rounded border border-border overflow-hidden">
-      <div className="px-3 py-2 border-b border-border bg-accent/20 flex items-center justify-between">
+      <div className="px-2 py-1 border-b border-border bg-accent/20 flex items-center justify-between">
         <span className="font-semibold">리스트 — 날짜별 요약 ({sorted.length}일)</span>
         <span className="text-[10px] text-muted-foreground">행 클릭 → 해당 날짜로 이동</span>
       </div>
@@ -62,7 +62,7 @@ export function ListView({ logs, onSelectDate }: ListViewProps) {
           <tbody>
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-2 py-6 text-center text-muted-foreground text-[11px]">
+                <td colSpan={4} className="px-2 py-1 text-center text-muted-foreground text-[11px]">
                   기록된 일지가 없습니다.
                 </td>
               </tr>

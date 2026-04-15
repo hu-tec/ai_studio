@@ -64,8 +64,8 @@ export function SavedList({ entries, onEdit, onDelete }: SavedListProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <span className="text-4xl opacity-30 mb-2">📋</span>
+        <div className="flex flex-col items-center justify-center py-1">
+          <span className="text-sm opacity-30 mb-2">📋</span>
           <span className="text-xs text-gray-400">
             {entries.length === 0 ? "저장된 데이터 없음" : "검색 결과 없음"}
           </span>
@@ -126,7 +126,7 @@ export function SavedList({ entries, onEdit, onDelete }: SavedListProps) {
       )}
 
       <Dialog open={!!detailEntry} onOpenChange={() => setDetailEntry(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-4 rounded-md">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2 rounded-md">
           <DialogHeader className="pb-1.5">
             <DialogTitle className="text-sm">
               📌 {detailEntry?.marketing_copy.headline || "상세 보기"}
@@ -278,7 +278,7 @@ export function SavedList({ entries, onEdit, onDelete }: SavedListProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs px-3 rounded-md border-gray-200 hover:bg-[#f4f4f5]"
+                className="h-7 text-xs px-2 rounded-md border-gray-200 hover:bg-[#f4f4f5]"
                 onClick={() => {
                   onEdit(detailEntry);
                   setDetailEntry(null);
@@ -289,7 +289,7 @@ export function SavedList({ entries, onEdit, onDelete }: SavedListProps) {
               <Button
                 variant="destructive"
                 size="sm"
-                className="h-7 text-xs px-3 rounded-md"
+                className="h-7 text-xs px-2 rounded-md"
                 onClick={() => {
                   onDelete(detailEntry.id);
                   setDetailEntry(null);

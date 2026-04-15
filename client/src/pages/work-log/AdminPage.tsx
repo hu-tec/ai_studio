@@ -122,7 +122,7 @@ export function AdminPage() {
   const hasActiveFilters = dateFrom || dateTo || filterDepts.length || filterHp.length || filterWorkTypes.length || filterAI.length || searchText;
 
   return (
-    <div className="max-w-[2000px] mx-auto px-3 py-3 space-y-2">
+    <div className="max-w-[2000px] mx-auto px-2 py-1 space-y-2">
       {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-1">
         <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function AdminPage() {
           <span className="text-xs text-muted-foreground">{filteredRows.length}건</span>
           
           {viewMode === 'list' && (
-            <div className="flex items-center gap-1 ml-4 border-l border-border pl-4">
+            <div className="flex items-center gap-1 ml-1.5 border-l border-border pl-2">
               <button
                 onClick={expandAll}
                 className="px-2 py-0.5 border border-border rounded text-[10px] hover:bg-accent transition-colors"
@@ -181,7 +181,7 @@ export function AdminPage() {
 
       {/* Filters */}
       {showFilters && (
-        <div className="bg-card border border-border rounded p-3 space-y-2">
+        <div className="bg-card border border-border rounded p-1 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">필터</span>
             {hasActiveFilters && (
@@ -200,7 +200,7 @@ export function AdminPage() {
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
               placeholder="검색..."
-              className="w-full pl-7 pr-3 py-1.5 border border-border rounded bg-input-background"
+              className="w-full pl-7 pr-1 py-1.5 border border-border rounded bg-input-background"
             />
           </div>
 
@@ -263,7 +263,7 @@ export function AdminPage() {
               {filteredRows.length === 0 ? (
                 <tbody className="text-xs">
                   <tr>
-                    <td colSpan={7} className="px-2 py-8 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-2 py-1 text-center text-muted-foreground">
                       데이터가 없습니다.
                     </td>
                   </tr>
@@ -302,10 +302,10 @@ export function AdminPage() {
                       </tr>
                       {isExpanded && row.slotEntry.aiDetail && (
                         <tr className="bg-accent/5 border-b border-border">
-                          <td colSpan={7} className="px-4 py-3">
-                            <div className="grid grid-cols-4 gap-6">
+                          <td colSpan={7} className="px-2 py-1">
+                            <div className="grid grid-cols-4 gap-2">
                               {/* Left Side: Basic Info & Instructions */}
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 <div>
                                   <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-1">작업 유형</h4>
                                   <div className="flex flex-wrap gap-1">
@@ -326,7 +326,7 @@ export function AdminPage() {
                               </div>
 
                               {/* Prompts Grid */}
-                              <div className="col-span-2 grid grid-cols-2 gap-3">
+                              <div className="col-span-2 grid grid-cols-2 gap-1">
                                 <div>
                                   <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-1">1차 프롬프트</h4>
                                   <div className="border border-border rounded overflow-hidden text-[10px] bg-white">
@@ -370,7 +370,7 @@ export function AdminPage() {
                               </div>
 
                               {/* Images & Regulations */}
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 <div className="flex gap-2">
                                   <div className="flex-1">
                                     <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Before</h4>
@@ -417,7 +417,7 @@ export function AdminPage() {
           {/* Mobile Cards */}
           <div className="md:hidden divide-y divide-border">
             {filteredRows.length === 0 ? (
-              <div className="px-3 py-8 text-center text-muted-foreground">
+              <div className="px-2 py-1 text-center text-muted-foreground">
                 데이터가 없습니다.
               </div>
             ) : (
@@ -457,7 +457,7 @@ export function AdminPage() {
                     </div>
                     
                     {isExpanded && row.slotEntry.aiDetail && (
-                      <div className="mt-2 p-2 bg-accent/10 rounded border border-border space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="mt-2 p-2 bg-accent/10 rounded border border-border space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
                         <div>
                           <h4 className="text-[9px] font-bold text-muted-foreground uppercase mb-1">지시사항</h4>
                           <p className="text-xs whitespace-pre-wrap">{row.slotEntry.aiDetail.instructions}</p>

@@ -211,11 +211,11 @@ export function WritePage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1 px-3 py-1.5 border border-border rounded hover:bg-gray-50 text-sm transition-colors">
+            className="flex items-center gap-1 px-2 py-1.5 border border-border rounded hover:bg-gray-50 text-sm transition-colors">
             <FileDown className="w-3 h-3" />
             Word 다운로드
           </button>
-          <button onClick={handleSave} className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+          <button onClick={handleSave} className="flex items-center gap-1 px-2 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
             <Save className="w-3 h-3" />
             {isEdit ? "수정" : "저장"}
           </button>
@@ -227,7 +227,7 @@ export function WritePage() {
         {/* ====== LEFT COLUMN ====== */}
         <div className="space-y-2">
           {/* Section 1: 기본 정보 */}
-          <section className="bg-white border border-border rounded-lg p-3">
+          <section className="bg-white border border-border rounded-lg p-1">
             <h3 className="text-sm text-blue-700 pb-1.5 mb-2 border-b border-border flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs">1</span>
               기본 정보
@@ -276,7 +276,7 @@ export function WritePage() {
           </section>
 
           {/* Section 2: 수업 정보 */}
-          <section className="bg-white border border-border rounded-lg p-3">
+          <section className="bg-white border border-border rounded-lg p-1">
             <h3 className="text-sm text-orange-700 pb-1.5 mb-2 border-b border-border flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-xs">2</span>
               수업 정보
@@ -497,7 +497,7 @@ export function WritePage() {
         {/* ====== RIGHT COLUMN ====== */}
         <div className="space-y-2">
           {/* Section 3: Categories */}
-          <section className="bg-white border border-border rounded-lg p-3">
+          <section className="bg-white border border-border rounded-lg p-1">
             <h3 className="text-sm text-emerald-700 pb-1.5 mb-2 border-b border-border flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">3</span>
               범주형 상세 내용
@@ -619,7 +619,7 @@ export function WritePage() {
           </section>
 
           {/* Section 4: Steps */}
-          <section className="bg-white border border-border rounded-lg p-3">
+          <section className="bg-white border border-border rounded-lg p-1">
             <h3 className="text-sm text-violet-700 pb-1.5 mb-2 border-b border-border flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs">4</span>
               단계별 활동 내용
@@ -748,7 +748,7 @@ export function WritePage() {
           </section>
 
           {/* Section 5: Attachments */}
-          <section className="bg-white border border-border rounded-lg p-3">
+          <section className="bg-white border border-border rounded-lg p-1">
             <h3 className="text-sm text-amber-700 pb-1.5 mb-2 border-b border-border flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs">5</span>
               첨부파일
@@ -780,7 +780,7 @@ export function WritePage() {
             <div
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-border rounded-lg p-3 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-1 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-pointer"
               onClick={() => document.getElementById("file-input")?.click()}
             >
               <Upload className="w-4 h-4 mx-auto mb-0.5 text-muted-foreground" />

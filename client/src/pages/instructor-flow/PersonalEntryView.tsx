@@ -59,10 +59,10 @@ export function PersonalEntryView() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-8">
+    <div className="space-y-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-1.5 border-b border-gray-200 pb-2">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-sm font-bold text-gray-900 tracking-tight">
             강사 채용 지원서
           </h2>
           <p className="mt-2 text-gray-500">
@@ -70,7 +70,7 @@ export function PersonalEntryView() {
             모십니다.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-blue-600 font-semibold bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+        <div className="flex items-center gap-2 text-sm text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
           <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
           현재 채용 중
         </div>
@@ -78,17 +78,17 @@ export function PersonalEntryView() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-2"
       >
         {/* Left Column: Basic Info */}
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+        <div className="lg:col-span-2 space-y-2">
+          <section className="bg-white p-2 md:p-2 rounded-md shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
               <User className="text-blue-600" size={20} />
               인적사항
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
                   성명
@@ -97,7 +97,7 @@ export function PersonalEntryView() {
                   {...register("name", { required: true })}
                   type="text"
                   placeholder="홍길동"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                 />
                 {errors.name && (
                   <span className="text-xs text-red-500">
@@ -114,7 +114,7 @@ export function PersonalEntryView() {
                   <input
                     {...register("birthDate", { required: true })}
                     type="date"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                    className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   />
                   <Calendar
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -132,7 +132,7 @@ export function PersonalEntryView() {
                     {...register("phone", { required: true })}
                     type="tel"
                     placeholder="010-0000-0000"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                    className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   />
                   <Phone
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -150,7 +150,7 @@ export function PersonalEntryView() {
                     {...register("email", { required: true })}
                     type="email"
                     placeholder="example@email.com"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                    className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   />
                   <Mail
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -168,7 +168,7 @@ export function PersonalEntryView() {
                     {...register("address", { required: true })}
                     type="text"
                     placeholder="주소를 입력하세요"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                    className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   />
                   <MapPin
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -179,20 +179,20 @@ export function PersonalEntryView() {
             </div>
           </section>
 
-          <section className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+          <section className="bg-white p-2 md:p-2 rounded-md shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
               <Award className="text-blue-600" size={20} />
               지원 분야
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
                   대분류
                 </label>
                 <select
                   {...register("category", { required: true })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                 >
                   <option value="">선택하세요</option>
                   {Object.keys(categories).map((cat) => (
@@ -209,7 +209,7 @@ export function PersonalEntryView() {
                 </label>
                 <select
                   {...register("type", { required: true })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   disabled={!selectedCategory}
                 >
                   <option value="">선택하세요</option>
@@ -225,7 +225,7 @@ export function PersonalEntryView() {
                 </label>
                 <select
                   {...register("grade", { required: true })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                   disabled={!selectedType || !selectedCategory}
                 >
                   <option value="">선택하세요</option>
@@ -243,20 +243,20 @@ export function PersonalEntryView() {
             </div>
           </section>
 
-          <section className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+          <section className="bg-white p-2 md:p-2 rounded-md shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-2">
               <GraduationCap className="text-blue-600" size={20} />
               학력 및 경력
             </h3>
 
-            <div className="space-y-6">
+            <div className="space-y-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
                   최종학력
                 </label>
                 <select
                   {...register("education")}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50"
                 >
                   <option value="bachelor">학사 졸업</option>
                   <option value="master">석사 졸업</option>
@@ -273,7 +273,7 @@ export function PersonalEntryView() {
                   {...register("experience")}
                   rows={4}
                   placeholder="관련 분야 경력 위주로 작성해 주세요."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50 resize-none"
+                  className="w-full px-2 py-1 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50 resize-none"
                 />
               </div>
             </div>
@@ -281,20 +281,20 @@ export function PersonalEntryView() {
         </div>
 
         {/* Right Column: Additional Info & Submit */}
-        <div className="space-y-8">
-          <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
+        <div className="space-y-2">
+          <section className="bg-white p-2 rounded-md shadow-sm border border-gray-100">
+            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2 mb-2">
               <Languages className="text-blue-600" size={20} />
               어학 및 자격증
             </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-1">
               <div className="flex flex-wrap gap-2">
                 {["TOEIC", "TOEFL", "JLPT", "HSK", "OPIC", "IELTS"].map(
                   (lang) => (
                     <label
                       key={lang}
-                      className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-200 transition-colors"
+                      className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 cursor-pointer hover:border-blue-200 transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -308,18 +308,18 @@ export function PersonalEntryView() {
               <input
                 type="text"
                 placeholder="기타 자격증 입력"
-                className="w-full px-4 py-2 text-sm rounded-lg border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50"
+                className="w-full px-2 py-1 text-sm rounded-lg border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50"
               />
             </div>
           </section>
 
-          <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
+          <section className="bg-white p-2 rounded-md shadow-sm border border-gray-100">
+            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2 mb-2">
               <Briefcase className="text-blue-600" size={20} />
               지원 경로
             </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-1">
               {[
                 "사람인/잡코리아",
                 "링크드인",
@@ -329,7 +329,7 @@ export function PersonalEntryView() {
               ].map((path) => (
                 <label
                   key={path}
-                  className="flex items-center gap-3 cursor-pointer group"
+                  className="flex items-center gap-1 cursor-pointer group"
                 >
                   <input
                     type="radio"
@@ -344,8 +344,8 @@ export function PersonalEntryView() {
             </div>
           </section>
 
-          <div className="sticky top-8 space-y-4">
-            <div className="bg-blue-600 p-6 rounded-2xl shadow-lg shadow-blue-200 text-white">
+          <div className="sticky top-8 space-y-1">
+            <div className="bg-blue-600 p-2 rounded-md shadow-sm shadow-blue-200 text-white">
               <h4 className="font-bold mb-2">제출 안내</h4>
               <p className="text-sm text-blue-50 opacity-90 leading-relaxed">
                 작성하신 정보는 채용 목적으로만 사용되며, 허위 사실이 있을 경우
@@ -355,7 +355,7 @@ export function PersonalEntryView() {
                 type="submit"
                 disabled={isSubmitting}
                 className={`
-                  mt-6 w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all
+                  mt-2 w-full py-1.5 rounded-md font-bold flex items-center justify-center gap-2 transition-all
                   ${
                     isSubmitting
                       ? "bg-white/20 cursor-not-allowed"
@@ -374,10 +374,10 @@ export function PersonalEntryView() {
               </button>
             </div>
 
-            <div className="bg-gray-900 p-6 rounded-2xl text-white">
+            <div className="bg-gray-900 p-2 rounded-md text-white">
               <p className="text-xs text-gray-400 mb-1">문의처</p>
               <p className="text-sm font-medium">hr@aiedu.co.kr</p>
-              <p className="text-xs text-gray-500 mt-4">
+              <p className="text-xs text-gray-500 mt-1.5">
                 &copy; 2026 AI Edu Co. Ltd.
               </p>
             </div>

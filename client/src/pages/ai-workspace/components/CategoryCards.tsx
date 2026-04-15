@@ -17,13 +17,13 @@ export function CategoryCards() {
       {categories.map((cat, i) => (
         <div
           key={i}
-          className={`min-w-[110px] p-3 rounded-xl border cursor-pointer transition-all ${
+          className={`min-w-[110px] p-1 rounded-md border cursor-pointer transition-all ${
             cat.active
               ? "bg-blue-600 text-white border-blue-600"
               : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
           }`}
         >
-          <cat.icon className={`w-5 h-5 mb-3 ${cat.active ? "text-white" : "text-gray-400"}`} />
+          <cat.icon className={`w-5 h-5 mb-1 ${cat.active ? "text-white" : "text-gray-400"}`} />
           <div className={`text-[13px] mb-1 ${cat.active ? "text-white" : "text-gray-900"}`}>
             {cat.title}
           </div>

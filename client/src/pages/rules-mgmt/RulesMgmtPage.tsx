@@ -67,7 +67,7 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f5f7]">
       {/* T9 SoT 배너 */}
-      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800">
+      <div className="flex items-center gap-2 px-2 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800">
         <span>⚠</span>
         <span>부서·직급·서비스 등 카테고리 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성/편집 전용 (카테고리 자체는 read-only).</span>
       </div>
@@ -76,7 +76,7 @@ function Layout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white border-b border-[#e8e8e8] px-3 py-1.5 flex items-center justify-between shrink-0">
+        <header className="bg-white border-b border-[#e8e8e8] px-2 py-1.5 flex items-center justify-between shrink-0">
           <div className="min-w-0">
             <h1 className="text-[13px] text-[#111] font-bold truncate">{current.title}</h1>
             <p className="text-[10px] text-[#aaa] truncate">{current.desc}</p>

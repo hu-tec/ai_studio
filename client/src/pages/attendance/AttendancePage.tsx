@@ -249,38 +249,38 @@ export function AttendancePage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-2 font-sans text-[#333] flex flex-col gap-2">
       {/* Header & Mode Switcher */}
-      <header className="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200">
+      <header className="flex items-center justify-between bg-white px-2 py-1 rounded-md shadow-sm border border-gray-200">
         <div className="flex items-center gap-2">
           <div className="bg-blue-600 p-1.5 rounded-lg">
             <Clock className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-base font-bold tracking-tight">출퇴근 통합 관리</h1>
+          <h1 className="text-xs font-bold tracking-tight">출퇴근 통합 관리</h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {/* Mode Controls */}
           <div className="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
             <button
               onClick={() => setMode('view')}
-              className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'view' ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700")}
+              className={cn("px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'view' ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700")}
             >
               <Eye size={14} /> 조회
             </button>
             <button
               onClick={() => setMode('add')}
-              className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'add' ? "bg-white shadow-sm text-green-600" : "text-gray-500 hover:text-gray-700")}
+              className={cn("px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'add' ? "bg-white shadow-sm text-green-600" : "text-gray-500 hover:text-gray-700")}
             >
               <Plus size={14} /> 추가
             </button>
             <button
               onClick={() => setMode('edit')}
-              className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'edit' ? "bg-white shadow-sm text-amber-600" : "text-gray-500 hover:text-gray-700")}
+              className={cn("px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'edit' ? "bg-white shadow-sm text-amber-600" : "text-gray-500 hover:text-gray-700")}
             >
               <Edit3 size={14} /> 수정
             </button>
             <button
               onClick={() => setMode('delete')}
-              className={cn("px-3 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'delete' ? "bg-white shadow-sm text-red-600" : "text-gray-500 hover:text-gray-700")}
+              className={cn("px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5", mode === 'delete' ? "bg-white shadow-sm text-red-600" : "text-gray-500 hover:text-gray-700")}
             >
               <Trash2 size={14} /> 삭제
             </button>
@@ -301,11 +301,11 @@ export function AttendancePage() {
       </header>
 
       {/* Top Grid: 4 Sections Layout */}
-      <div className="grid grid-cols-4 gap-3 h-[380px]">
+      <div className="grid grid-cols-4 gap-1 h-[380px]">
 
         {/* 1st Column: Employee List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+          <div className="p-1 border-b border-gray-100 bg-gray-50/50">
             <CardActions
               title="직원 목록"
               onAdd={() => alert('직원 추가')}
@@ -318,7 +318,7 @@ export function AttendancePage() {
               <input
                 type="text"
                 placeholder="이름 또는 부서 검색..."
-                className="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+                className="w-full pl-2 pr-1 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -371,7 +371,7 @@ export function AttendancePage() {
         </div>
 
         {/* 2nd Column: Planned Schedule */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col p-3">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col p-1">
           <CardActions
             title="근무 규정 및 계획"
             onAdd={() => alert('규정 추가')}
@@ -380,8 +380,8 @@ export function AttendancePage() {
           />
 
           {selectedEmployee ? (
-            <div className="space-y-3">
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="space-y-1">
+              <div className="p-1 bg-gray-50 rounded-lg border border-gray-100">
                 <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">고정 설정값 (규정)</div>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -398,7 +398,7 @@ export function AttendancePage() {
                   </div>
                 </div>
               </div>
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+              <div className="p-1 bg-amber-50 rounded-lg border border-amber-100">
                 <div className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider mb-1">변경 가능값 (준규정)</div>
                 <p className="text-[11px] text-amber-700 leading-relaxed">실제 출근 시간은 당일 상황에 따라 유동적으로 입력 가능하며, 사유 발생 시 상세 내용을 기록해야 합니다.</p>
               </div>
@@ -412,7 +412,7 @@ export function AttendancePage() {
         </div>
 
         {/* 3rd Column: Form / Action Area */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col p-3">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col p-1">
           <CardActions
             title={mode === 'view' ? '기록 요약' : mode === 'add' ? '기록 추가' : mode === 'edit' ? '기록 수정' : '기록 삭제'}
             onAdd={() => setMode('add')}
@@ -448,7 +448,7 @@ export function AttendancePage() {
               <textarea rows={1} disabled={mode === 'view'} value={formData.reason} onChange={(e) => setFormData({...formData, reason: e.target.value})} placeholder="사유..." className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs disabled:opacity-60 resize-none" />
             </div>
             {mode !== 'view' && (
-              <button onClick={handleSubmit} className={cn("w-full py-2 rounded-lg text-white text-xs font-bold shadow-sm mt-1 active:scale-95", mode === 'add' ? "bg-green-500 hover:bg-green-600" : mode === 'edit' ? "bg-amber-500 hover:bg-amber-600" : "bg-red-500 hover:bg-red-600")}>
+              <button onClick={handleSubmit} className={cn("w-full py-1 rounded-lg text-white text-xs font-bold shadow-sm mt-1 active:scale-95", mode === 'add' ? "bg-green-500 hover:bg-green-600" : mode === 'edit' ? "bg-amber-500 hover:bg-amber-600" : "bg-red-500 hover:bg-red-600")}>
                 {mode === 'add' ? '등록' : mode === 'edit' ? '저장' : '삭제'}
               </button>
             )}
@@ -456,8 +456,8 @@ export function AttendancePage() {
         </div>
 
         {/* 4th Column: Dashboard Summary */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
-          <div className="bg-blue-600 px-3 py-2.5 text-white">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+          <div className="bg-blue-600 px-2 py-1 text-white">
             <div className="flex items-center justify-between mb-1.5">
               <h2 className="text-xs font-bold flex items-center gap-1.5"><TrendingUp size={14} /> 대시보드 요약</h2>
               <div className="flex gap-0.5">
@@ -481,14 +481,14 @@ export function AttendancePage() {
               </button>
             </div>
           </div>
-          <div className="p-3 flex-1 flex flex-col justify-between">
+          <div className="p-1 flex-1 flex flex-col justify-between">
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-blue-100 text-blue-600 rounded-md"><Users size={14}/></div>
                   <span className="text-xs font-medium text-gray-500">{summaryView === 'day' ? '금일 총 인원' : '당월 총 인원'}</span>
                 </div>
-                <span className="text-base font-bold">{summaryStats.total}명</span>
+                <span className="text-xs font-bold">{summaryStats.total}명</span>
               </div>
 
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
@@ -496,7 +496,7 @@ export function AttendancePage() {
                   <div className="p-1.5 bg-green-100 text-green-600 rounded-md"><UserCheck size={14}/></div>
                   <span className="text-xs font-medium text-gray-500">{summaryView === 'day' ? '금일 출근' : '당월 평균 출근'}</span>
                 </div>
-                <span className="text-base font-bold text-green-600">{summaryView === 'day' ? summaryStats.todayPresent : summaryStats.monthlyAttendance}명</span>
+                <span className="text-xs font-bold text-green-600">{summaryView === 'day' ? summaryStats.todayPresent : summaryStats.monthlyAttendance}명</span>
               </div>
 
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
@@ -504,7 +504,7 @@ export function AttendancePage() {
                   <div className="p-1.5 bg-amber-100 text-amber-600 rounded-md"><Timer size={14}/></div>
                   <span className="text-xs font-medium text-gray-500">{summaryView === 'day' ? '금일 지각' : '당월 지각 건수'}</span>
                 </div>
-                <span className="text-base font-bold text-amber-600">{summaryStats.late}건</span>
+                <span className="text-xs font-bold text-amber-600">{summaryStats.late}건</span>
               </div>
             </div>
 
@@ -530,10 +530,10 @@ export function AttendancePage() {
         maxHeight={600}
         enable={{ top: true }}
         handleComponent={{ top: <div className="w-full h-1.5 hover:bg-blue-400/30 cursor-ns-resize transition-colors absolute -top-1" title="드래그하여 높이 조절" /> }}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden relative"
+        className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col overflow-hidden relative"
       >
-        <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="px-2 py-1 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-1">
             <h2 className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
               <History size={14} className="text-blue-500" /> 최근 근무 기록
             </h2>
@@ -572,35 +572,35 @@ export function AttendancePage() {
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 bg-white z-10 shadow-sm">
               <tr className="bg-gray-50/50 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                <th className="px-3 py-2 border-b border-gray-100">날짜</th>
-                <th className="px-3 py-2 border-b border-gray-100">계획 시간</th>
-                <th className="px-3 py-2 border-b border-gray-100">실제 출근</th>
-                <th className="px-3 py-2 border-b border-gray-100">실제 퇴근</th>
-                <th className="px-3 py-2 border-b border-gray-100">점심 시간</th>
-                <th className="px-3 py-2 border-b border-gray-100">변경 사유</th>
-                <th className="px-3 py-2 border-b border-gray-100">특이사항</th>
+                <th className="px-2 py-1 border-b border-gray-100">날짜</th>
+                <th className="px-2 py-1 border-b border-gray-100">계획 시간</th>
+                <th className="px-2 py-1 border-b border-gray-100">실제 출근</th>
+                <th className="px-2 py-1 border-b border-gray-100">실제 퇴근</th>
+                <th className="px-2 py-1 border-b border-gray-100">점심 시간</th>
+                <th className="px-2 py-1 border-b border-gray-100">변경 사유</th>
+                <th className="px-2 py-1 border-b border-gray-100">특이사항</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {employeeRecords.length > 0 ? (
                 employeeRecords.map(rec => (
                   <tr key={rec.id} className="hover:bg-blue-50/30 transition-colors">
-                    <td className="px-3 py-2"><div className="text-xs font-bold text-gray-700">{rec.date}</div></td>
-                    <td className="px-3 py-2"><div className="text-[11px] text-gray-500">{rec.clockIn} - {rec.clockOut}</div></td>
-                    <td className="px-3 py-2">
+                    <td className="px-2 py-1"><div className="text-xs font-bold text-gray-700">{rec.date}</div></td>
+                    <td className="px-2 py-1"><div className="text-[11px] text-gray-500">{rec.clockIn} - {rec.clockOut}</div></td>
+                    <td className="px-2 py-1">
                       <div className={cn("text-xs font-bold", rec.actualIn > rec.clockIn ? "text-red-500" : "text-green-600")}>
                         {rec.actualIn} {rec.actualIn > rec.clockIn && <span className="ml-1 text-[10px] font-normal">(지각)</span>}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-xs font-medium text-gray-700">{rec.clockOut}</td>
-                    <td className="px-3 py-2 text-[11px] text-gray-500">{rec.lunchStart} ~ {rec.lunchEnd}</td>
-                    <td className="px-3 py-2">{rec.reason ? <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-medium border border-amber-100">{rec.reason}</span> : <span className="text-gray-300 text-[11px]">-</span>}</td>
-                    <td className="px-3 py-2 text-xs text-gray-500 italic max-w-xs truncate">{rec.remarks || '-'}</td>
+                    <td className="px-2 py-1 text-xs font-medium text-gray-700">{rec.clockOut}</td>
+                    <td className="px-2 py-1 text-[11px] text-gray-500">{rec.lunchStart} ~ {rec.lunchEnd}</td>
+                    <td className="px-2 py-1">{rec.reason ? <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-medium border border-amber-100">{rec.reason}</span> : <span className="text-gray-300 text-[11px]">-</span>}</td>
+                    <td className="px-2 py-1 text-xs text-gray-500 italic max-w-xs truncate">{rec.remarks || '-'}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-2 py-1 text-center text-gray-400">
                     <div className="flex flex-col items-center gap-1">
                       <AlertCircle size={24} strokeWidth={1} />
                       <p className="text-xs">기록이 없거나 필터와 일치하는 데이터가 없습니다.</p>

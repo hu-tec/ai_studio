@@ -10,7 +10,7 @@ interface PluginCardProps {
 
 const PluginCard: React.FC<PluginCardProps> = ({ id, title, description, icon, status }) => {
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg p-3 shadow-sm hover:border-zinc-400 transition-all group flex-1 min-w-[200px]">
+    <div className="bg-white border border-zinc-200 rounded-lg p-1 shadow-sm hover:border-zinc-400 transition-all group flex-1 min-w-[200px]">
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
           <span className="text-sm">{icon}</span>
@@ -36,7 +36,7 @@ export const PluginSection: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="bg-zinc-200 py-2 px-2 mb-3">
+      <div className="bg-zinc-200 py-1 px-2 mb-1">
         <h2 className="text-sm font-black text-zinc-700 text-center tracking-tight">플러그인 관리</h2>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">

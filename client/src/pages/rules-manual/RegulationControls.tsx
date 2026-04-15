@@ -11,7 +11,7 @@ export function OnOFFToggle({ value, onChange }: ToggleProps) {
       <button
         onClick={() => onChange?.(true)}
         className={clsx(
-          "px-3 py-1 rounded-full text-[9px] font-black transition-all",
+          "px-2 py-1 rounded-full text-[9px] font-black transition-all",
           value ? "bg-blue-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
         )}
       >
@@ -20,7 +20,7 @@ export function OnOFFToggle({ value, onChange }: ToggleProps) {
       <button
         onClick={() => onChange?.(false)}
         className={clsx(
-          "px-3 py-1 rounded-full text-[9px] font-black transition-all",
+          "px-2 py-1 rounded-full text-[9px] font-black transition-all",
           !value ? "bg-blue-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
         )}
       >

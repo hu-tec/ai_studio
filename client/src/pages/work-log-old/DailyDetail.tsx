@@ -143,7 +143,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
   return (
     <div className="bg-card rounded border border-border overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-border bg-accent/20 flex items-center justify-between">
+      <div className="px-2 py-1 border-b border-border bg-accent/20 flex items-center justify-between">
         <span>{format(date, 'yyyy.M.d (EEE)', { locale: ko })} 업무일지</span>
         <div className="flex items-center gap-1">
           <button
@@ -163,7 +163,7 @@ export function DailyDetail({ date, log, onSave }: DailyDetailProps) {
         </div>
       </div>
 
-      <div className="p-3 space-y-3">
+      <div className="p-1 space-y-1">
 
         {/* ① 직급 */}
         <div>

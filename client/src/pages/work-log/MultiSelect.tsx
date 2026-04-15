@@ -46,7 +46,7 @@ export function MultiSelect({ label, options, selected, onChange, grouped }: Mul
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full left-0 right-0 mt-0.5 bg-card border border-border rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-0.5 bg-card border border-border rounded shadow-sm z-50 max-h-48 overflow-y-auto">
             {grouped ? (
               Object.entries(grouped).map(([group, subs]) => (
                 <div key={group}>
@@ -62,7 +62,7 @@ export function MultiSelect({ label, options, selected, onChange, grouped }: Mul
                   {subs.map(sub => (
                     <div
                       key={sub}
-                      className="px-2 py-1 pl-6 hover:bg-accent cursor-pointer flex items-center gap-1.5 text-xs"
+                      className="px-2 py-1 pl-2 hover:bg-accent cursor-pointer flex items-center gap-1.5 text-xs"
                       onClick={() => toggle(sub)}
                     >
                       <div className={`w-3 h-3 rounded border flex items-center justify-center ${selected.includes(sub) ? 'bg-primary border-primary' : 'border-border'}`}>

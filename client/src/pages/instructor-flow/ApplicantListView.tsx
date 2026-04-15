@@ -116,10 +116,10 @@ export function ApplicantListView() {
   );
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-8">
+    <div className="space-y-2 pb-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-200 pb-2">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          <h2 className="text-sm font-bold text-gray-900 tracking-tight flex items-center gap-1">
             <Users className="text-blue-600" size={32} />
             지원자 관리
           </h2>
@@ -127,66 +127,66 @@ export function ApplicantListView() {
             전체 지원 현황 및 면접 결과를 관리합니다.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
+        <div className="flex items-center gap-1">
+          <button className="flex items-center gap-2 px-2 py-1 bg-white border border-gray-200 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
             <Download size={16} />
             데이터 내보내기
           </button>
-          <button className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+          <button className="flex items-center gap-2 px-2 py-1 bg-blue-600 text-white rounded-md text-sm font-bold hover:bg-blue-700 transition-all shadow-sm shadow-blue-100">
             신규 지원자 수동 등록
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className="w-10 h-10 rounded-md bg-blue-50 flex items-center justify-center text-blue-600">
               <Users size={20} />
             </div>
             <span className="text-xs font-bold text-green-500">+12%</span>
           </div>
           <p className="text-sm text-gray-500">전체 지원자</p>
-          <h4 className="text-2xl font-bold text-gray-900">128명</h4>
+          <h4 className="text-sm font-bold text-gray-900">128명</h4>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+        <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+            <div className="w-10 h-10 rounded-md bg-orange-50 flex items-center justify-center text-orange-600">
               <Clock size={20} />
             </div>
             <span className="text-xs font-bold text-orange-500">진행 중</span>
           </div>
           <p className="text-sm text-gray-500">검토 중</p>
-          <h4 className="text-2xl font-bold text-gray-900">24명</h4>
+          <h4 className="text-sm font-bold text-gray-900">24명</h4>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+        <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+            <div className="w-10 h-10 rounded-md bg-green-50 flex items-center justify-center text-green-600">
               <CheckCircle2 size={20} />
             </div>
             <span className="text-xs font-bold text-green-500">성공</span>
           </div>
           <p className="text-sm text-gray-500">최종 합격</p>
-          <h4 className="text-2xl font-bold text-gray-900">15명</h4>
+          <h4 className="text-sm font-bold text-gray-900">15명</h4>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+        <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+            <div className="w-10 h-10 rounded-md bg-red-50 flex items-center justify-center text-red-600">
               <AlertCircle size={20} />
             </div>
             <span className="text-xs font-bold text-red-500">-2%</span>
           </div>
           <p className="text-sm text-gray-500">서류 탈락</p>
-          <h4 className="text-2xl font-bold text-gray-900">42명</h4>
+          <h4 className="text-sm font-bold text-gray-900">42명</h4>
         </div>
       </div>
 
       {/* Filter & Search */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-4">
+      <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-1.5">
         <div className="relative flex-1 w-full">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -197,37 +197,37 @@ export function ApplicantListView() {
             placeholder="이름, 분야, 급수 등으로 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+            className="w-full pl-2 pr-2 py-1 rounded-md border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
           />
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 border border-gray-100 rounded-2xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all w-full md:w-auto">
+        <button className="flex items-center gap-2 px-2 py-1 border border-gray-100 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all w-full md:w-auto">
           <Filter size={18} />
           필터
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   지원자명
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   지원 분야
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   지원일
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">
                   면접 점수
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   상태
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   관리
                 </th>
               </tr>
@@ -238,8 +238,8 @@ export function ApplicantListView() {
                   key={applicant.id}
                   className="hover:bg-gray-50/50 transition-colors group"
                 >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
+                  <td className="px-2 py-1.5">
+                    <div className="flex items-center gap-1">
                       <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold border border-blue-100">
                         {applicant.name[0]}
                       </div>
@@ -248,7 +248,7 @@ export function ApplicantListView() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-1.5">
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-gray-900">
                         {applicant.category}
@@ -258,13 +258,13 @@ export function ApplicantListView() {
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar size={14} />
                       {applicant.date}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-2 py-1.5 text-center">
                     <span
                       className={`text-sm font-bold ${
                         typeof applicant.score === "number" &&
@@ -276,16 +276,16 @@ export function ApplicantListView() {
                       {applicant.score}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-1.5">
                     <span
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
+                      className={`px-2 py-1.5 rounded-full text-xs font-bold border ${
                         statusStyles[applicant.status] ?? ""
                       }`}
                     >
                       {applicant.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
@@ -311,34 +311,34 @@ export function ApplicantListView() {
         </div>
 
         {/* Pagination */}
-        <div className="p-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="p-2 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-1.5">
           <p className="text-sm text-gray-500">
             총 <span className="font-bold text-gray-900">128명</span> 중{" "}
             <span className="font-bold text-gray-900">1-8명</span> 표시
           </p>
           <div className="flex items-center gap-2">
             <button
-              className="p-2 border border-gray-200 rounded-xl text-gray-400 hover:bg-gray-50 disabled:opacity-50"
+              className="p-2 border border-gray-200 rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-50"
               disabled
             >
               <ChevronLeft size={20} />
             </button>
             <div className="flex items-center gap-1">
-              <button className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-md">
+              <button className="w-10 h-10 rounded-md bg-blue-600 text-white font-bold text-sm shadow-md">
                 1
               </button>
-              <button className="w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-50 font-bold text-sm">
+              <button className="w-10 h-10 rounded-md text-gray-600 hover:bg-gray-50 font-bold text-sm">
                 2
               </button>
-              <button className="w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-50 font-bold text-sm">
+              <button className="w-10 h-10 rounded-md text-gray-600 hover:bg-gray-50 font-bold text-sm">
                 3
               </button>
               <span className="px-2 text-gray-400">...</span>
-              <button className="w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-50 font-bold text-sm">
+              <button className="w-10 h-10 rounded-md text-gray-600 hover:bg-gray-50 font-bold text-sm">
                 16
               </button>
             </div>
-            <button className="p-2 border border-gray-200 rounded-xl text-gray-400 hover:bg-gray-50">
+            <button className="p-2 border border-gray-200 rounded-md text-gray-400 hover:bg-gray-50">
               <ChevronRight size={20} />
             </button>
           </div>

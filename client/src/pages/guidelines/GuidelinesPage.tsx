@@ -230,12 +230,12 @@ export function GuidelinesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-black text-white px-8 py-5 border-b border-gray-700">
+      <header className="bg-black text-white px-2 py-1.5 border-b border-gray-700">
         <h1 className="tracking-tight">사내 업무지침 DB</h1>
         <p className="text-gray-400 mt-1">Company Guideline Dashboard — 전사 업무 규정 관리 시스템</p>
       </header>
 
-      <main className="px-6 py-6 space-y-6">
+      <main className="px-2 py-1 space-y-2">
         {/* 1. 회사 전체 */}
         <CollapsibleSection title="회사 전체 공통 지침">
           <GuidelineGrid
@@ -249,12 +249,12 @@ export function GuidelinesPage() {
 
         {/* 2. 부서별 */}
         <CollapsibleSection title="부서별 업무 지침">
-          <div className="space-y-5">
+          <div className="space-y-1">
             {Object.keys(deptData).map((dept) => {
               const handlers = createSectionHandlers(setDeptData, dept);
               return (
                 <div key={dept}>
-                  <div className="bg-gray-700 text-white px-4 py-2 mb-0">
+                  <div className="bg-gray-700 text-white px-2 py-1 mb-0">
                     <h3>{dept}</h3>
                   </div>
                   <GuidelineGrid
@@ -272,12 +272,12 @@ export function GuidelinesPage() {
 
         {/* 3. 직급별 */}
         <CollapsibleSection title="직급별 업무 지침">
-          <div className="space-y-5">
+          <div className="space-y-1">
             {Object.keys(rankData).map((rank) => {
               const handlers = createSectionHandlers(setRankData, rank);
               return (
                 <div key={rank}>
-                  <div className="bg-gray-700 text-white px-4 py-2 mb-0">
+                  <div className="bg-gray-700 text-white px-2 py-1 mb-0">
                     <h3>{rank}</h3>
                   </div>
                   <GuidelineGrid

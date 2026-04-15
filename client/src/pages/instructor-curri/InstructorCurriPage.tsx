@@ -242,7 +242,7 @@ export default function InstructorCurriPage() {
     <div>
       {/* ── Header ── */}
       <header className="border-b border-neutral-200 sticky top-0 z-10 bg-white">
-        <div className="px-3 py-2 flex items-center justify-between">
+        <div className="px-2 py-1 flex items-center justify-between">
           <span className="text-[1.25rem]">📋 강사 급수 & 커리큘럼 관리</span>
           {editingId && (
             <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export default function InstructorCurriPage() {
       </header>
 
       {/* ── Main ── */}
-      <main className="px-3 py-2">
+      <main className="px-2 py-1">
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-2 items-start">
 
           {/* Left: Form */}
@@ -327,7 +327,7 @@ export default function InstructorCurriPage() {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="sticky bottom-0 bg-white border border-neutral-200 rounded-md px-2.5 py-2">
+            <div className="sticky bottom-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1">
               <div className="flex items-center justify-between gap-2">
                 {/* Summary */}
                 <div className="flex items-center gap-1.5 flex-wrap text-[0.625rem] text-neutral-500 min-w-0">
@@ -352,7 +352,7 @@ export default function InstructorCurriPage() {
                   <button
                     onClick={handleSave}
                     disabled={!canSave}
-                    className="text-[0.75rem] rounded-md px-3 py-1 bg-black text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-800"
+                    className="text-[0.75rem] rounded-md px-2 py-1 bg-black text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-800"
                   >
                     💾 {editingId ? "수정" : "저장"}
                   </button>

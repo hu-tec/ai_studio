@@ -748,7 +748,7 @@ function DbFilters({
                 <select
                   value={catMajor}
                   onChange={(e) => handleMajorChange(e.target.value)}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300"
                 >
                   <option value="">선택</option>
                   {Object.keys(CATEGORY_TREE).map((major) => (
@@ -770,7 +770,7 @@ function DbFilters({
                   value={catMid}
                   onChange={(e) => handleMidChange(e.target.value)}
                   disabled={!catMajor}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
                 >
                   <option value="">선택</option>
                   {midOptions.map((mid) => (
@@ -792,7 +792,7 @@ function DbFilters({
                   value={catMinor}
                   onChange={(e) => setCatMinor(e.target.value)}
                   disabled={!catMid || !hasMinor}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
                 >
                   <option value="">선택</option>
                   {(minorOptions as string[]).map((minor: string) => (
@@ -857,7 +857,7 @@ function DbFilters({
                 <select
                   value={gradeField}
                   onChange={(e) => handleFieldChange(e.target.value)}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300"
                 >
                   <option value="">선택</option>
                   {GRADE_FIELD_OPTIONS.map((field) => (
@@ -879,7 +879,7 @@ function DbFilters({
                   value={gradeMid}
                   onChange={(e) => handleMidGradeChange(e.target.value)}
                   disabled={!gradeField}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
                 >
                   <option value="">선택</option>
                   {GRADE_MID_OPTIONS.map((mid) => (
@@ -901,7 +901,7 @@ function DbFilters({
                   value={gradeLevel}
                   onChange={(e) => handleLevelChange(e.target.value)}
                   disabled={!gradeMid}
-                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-6 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  className="w-full px-2 py-1.5 text-[11px] border border-neutral-200 rounded bg-white appearance-none pr-2 cursor-pointer hover:border-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
                 >
                   <option value="">선택</option>
                   {levelOptions.map((level) => (
@@ -1030,7 +1030,7 @@ function PageRow({
           <div className="flex-1 relative">
             <LinkIcon className="absolute left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-neutral-400" />
             <input
-              className="w-full pl-5 pr-1 py-0.5 text-[10px] border border-neutral-200 rounded outline-none focus:border-blue-400 text-neutral-500"
+              className="w-full pl-2 pr-1 py-0.5 text-[10px] border border-neutral-200 rounded outline-none focus:border-blue-400 text-neutral-500"
               value={page.figmaMakeUrl || ""}
               onChange={(e) => onUpdate({ figmaMakeUrl: e.target.value })}
               placeholder="Figma URL"
@@ -1039,7 +1039,7 @@ function PageRow({
           <div className="w-16 relative">
             <Calendar className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-neutral-400" />
             <input
-              className="w-full pl-4 pr-1 py-0.5 text-[10px] border border-neutral-200 rounded outline-none focus:border-blue-400 text-center text-neutral-500"
+              className="w-full pl-2 pr-1 py-0.5 text-[10px] border border-neutral-200 rounded outline-none focus:border-blue-400 text-center text-neutral-500"
               value={page.updatedAt || ""}
               onChange={(e) => onUpdate({ updatedAt: e.target.value })}
               placeholder="MM.DD"
@@ -1211,7 +1211,7 @@ function CategoryBox({
           />
         ))}
         {category.pages.length === 0 && !isAdding && (
-          <div className="py-2 text-center text-[9px] text-neutral-300 italic">
+          <div className="py-1 text-center text-[9px] text-neutral-300 italic">
             Empty
           </div>
         )}
@@ -1506,10 +1506,10 @@ export default function ShortcutsPage() {
   const total = topTotal + bottomTotal + historyTotal;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] p-4 space-y-6">
+    <div className="min-h-screen bg-[#f8f9fa] p-2 space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <div className="bg-neutral-900 text-white px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1">
             <span className="text-blue-400">◆</span> PROJECT MANAGER : 차지예 /
             황준걸
@@ -1519,10 +1519,10 @@ export default function ShortcutsPage() {
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setIsEditMode(!isEditMode)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded border transition-all text-[11px] font-medium ${
+            className={`flex items-center gap-1.5 px-2 py-1 rounded border transition-all text-[11px] font-medium ${
               isEditMode
                 ? "bg-blue-500 border-blue-600 text-white"
                 : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-400"
@@ -1547,7 +1547,7 @@ export default function ShortcutsPage() {
       </div>
 
       {/* 1. PROJECTS (차지예) */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div className="flex items-center gap-2 px-1">
           <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
           <h2 className="text-[13px] font-bold text-neutral-800 flex items-center gap-2">
@@ -1578,7 +1578,7 @@ export default function ShortcutsPage() {
       <div className="border-t-2 border-neutral-200"></div>
 
       {/* 2. PROJECTS (황준걸) */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
@@ -1630,7 +1630,7 @@ export default function ShortcutsPage() {
       <div className="border-t-2 border-neutral-200"></div>
 
       {/* 3. PROJECTS (history) */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div className="flex items-center gap-2 px-1">
           <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full"></div>
           <h2 className="text-[13px] font-bold text-neutral-800 flex items-center gap-2">
@@ -1658,8 +1658,8 @@ export default function ShortcutsPage() {
       </div>
 
       {/* 삭제된 페이지 (Recycle Bin) */}
-      <div className="bg-neutral-100 rounded-md p-3 border border-neutral-200">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="bg-neutral-100 rounded-md p-1 border border-neutral-200">
+        <div className="flex items-center gap-2 mb-1">
           <span className="text-neutral-700 text-[12px] font-bold">
             RECYCLE BIN
           </span>
@@ -1685,7 +1685,7 @@ export default function ShortcutsPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-4 text-[11px] text-neutral-400 italic">
+          <div className="text-center py-1.5 text-[11px] text-neutral-400 italic">
             비어 있음
           </div>
         )}

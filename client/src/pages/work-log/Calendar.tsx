@@ -110,7 +110,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
   return (
     <div className="bg-card rounded border border-border overflow-hidden flex flex-col h-full max-h-[1200px]">
       {/* Month Navigation */}
-      <div className="flex items-center justify-between px-3 py-2 bg-accent/30 border-b border-border shrink-0">
+      <div className="flex items-center justify-between px-2 py-1 bg-accent/30 border-b border-border shrink-0">
         <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1 hover:bg-accent rounded transition-colors">
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -263,7 +263,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
               <div
                 key={i}
                 onClick={() => onSelectDate(d)}
-                className={`group flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
+                className={`group flex items-start gap-1 p-1 rounded-lg border transition-all cursor-pointer ${
                   isSelected ? 'bg-white border-primary shadow-md ring-1 ring-primary' : 'bg-white border-border hover:border-primary/50 hover:shadow-sm'
                 }`}
               >
@@ -271,7 +271,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
                   isToday ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary'
                 }`}>
                   <span className="text-[10px] font-bold uppercase leading-none mb-1">{format(d, 'eee', { locale: ko })}</span>
-                  <span className="text-lg font-black leading-none">{format(d, 'd')}</span>
+                  <span className="text-xs font-black leading-none">{format(d, 'd')}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
@@ -295,7 +295,7 @@ export function Calendar({ selectedDate, onSelectDate, logs, onUpdateLog, compac
                       <p className="text-[11px] text-muted-foreground/40 italic">작성된 업무가 없습니다.</p>
                     )}
                     {filledSlots.length > 3 && (
-                      <p className="text-[10px] text-blue-500 font-semibold pl-3.5">+ {filledSlots.length - 3}건의 업무가 더 있습니다.</p>
+                      <p className="text-[10px] text-blue-500 font-semibold pl-1.5">+ {filledSlots.length - 3}건의 업무가 더 있습니다.</p>
                     )}
                   </div>
                 </div>

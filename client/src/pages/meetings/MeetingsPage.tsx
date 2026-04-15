@@ -241,21 +241,21 @@ export default function MeetingsPage() {
 
   if (showPreview) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-2 sm:p-3 font-sans">
+      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-2 sm:p-1 font-sans">
 
         <button 
           onClick={() => setShowPreview(false)}
-          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-2 py-2 rounded-full text-sm font-bold transition-all border border-white/10 backdrop-blur-md"
+          className="fixed top-8 left-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-2 py-1 rounded-full text-sm font-bold transition-all border border-white/10 backdrop-blur-md"
         >
           <ChevronLeft size={16} /> 대시보드로 돌아가기
         </button>
         
-        <main className="w-full max-w-6xl bg-white text-slate-900 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px]">
+        <main className="w-full max-w-6xl bg-white text-slate-900 rounded-[3rem] shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[700px]">
           {/* Left: Calendar Preview */}
           <div className="flex-1 p-2 border-r border-slate-100 overflow-y-auto">
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-1 flex items-center justify-between">
               <div>
-                <h1 className="text-base font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
+                <h1 className="text-xs font-black tracking-tight text-slate-800">미팅 예약 신청</h1>
                 <p className="text-slate-400 font-bold mt-1 uppercase tracking-widest text-xs">CEO Secretary Schedule Service</p>
               </div>
               <div className="text-right">
@@ -266,7 +266,7 @@ export default function MeetingsPage() {
 
             <div className="grid grid-cols-7 gap-1">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={`head-${i}`} className="text-center text-[10px] font-black text-slate-300 py-3 uppercase tracking-widest">{d}</div>
+                <div key={`head-${i}`} className="text-center text-[10px] font-black text-slate-300 py-1 uppercase tracking-widest">{d}</div>
               ))}
               {(() => {
                 const monthStart = startOfMonth(new Date());
@@ -286,10 +286,10 @@ export default function MeetingsPage() {
                       key={`preview-day-${i}`}
                       onClick={() => availability === 'OPEN' && setSelectedDate(day)}
                       className={cn(
-                        "aspect-square p-2 flex flex-col items-center justify-center rounded-2xl transition-all relative border border-transparent",
+                        "aspect-square p-2 flex flex-col items-center justify-center rounded-md transition-all relative border border-transparent",
                         !isCurrentMonth ? "opacity-20" : "opacity-100",
                         availability === 'OPEN' ? "cursor-pointer hover:border-slate-200 hover:bg-slate-50 active:scale-95" : "cursor-not-allowed bg-slate-50/30",
-                        isSelected && "bg-slate-800 text-white hover:bg-slate-800 ring-2 ring-inset ring-slate-800 z-10 shadow-lg",
+                        isSelected && "bg-slate-800 text-white hover:bg-slate-800 ring-2 ring-inset ring-slate-800 z-10 shadow-sm",
                         availability === 'CLOSED' && "cursor-not-allowed"
                       )}
                     >
@@ -318,7 +318,7 @@ export default function MeetingsPage() {
 
           {/* Right: Request Form */}
           <div className="w-full md:w-[400px] bg-slate-50/50 p-2 flex flex-col overflow-y-auto">
-            <div className="mb-3">
+            <div className="mb-1">
               <h2 className="text-sm font-bold text-slate-800 mb-1">신청 폼</h2>
               <p className="text-sm text-slate-500 font-medium">{format(selectedDate, 'yyyy년 MM월 dd일')} 미팅 요청</p>
             </div>
@@ -326,14 +326,14 @@ export default function MeetingsPage() {
             <div className="space-y-2">
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">미팅 제목</label>
-                <input type="text" placeholder="예: 사업 제안 및 협력 논의" className="w-full bg-white border border-slate-200 rounded-xl px-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
+                <input type="text" placeholder="예: 사업 제안 및 협력 논의" className="w-full bg-white border border-slate-200 rounded-md px-2 py-1 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
               </div>
 
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">분류 선택</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['개인', '업무'].map(type => (
-                    <button key={type} className="flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-slate-800 hover:text-slate-800 transition-all shadow-sm">
+                    <button key={type} className="flex items-center justify-center gap-2 py-1 bg-white border border-slate-200 rounded-md text-sm font-bold text-slate-600 hover:border-slate-800 hover:text-slate-800 transition-all shadow-sm">
                       {type === '업무' ? '🏢 업무' : '👤 개인'}
                     </button>
                   ))}
@@ -344,7 +344,7 @@ export default function MeetingsPage() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">희망 소요 시간</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['10분', '30분', '1시간'].map(time => (
-                    <button key={time} className="flex items-center justify-center py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:border-slate-800 hover:text-slate-800 transition-all shadow-sm">
+                    <button key={time} className="flex items-center justify-center py-1 bg-white border border-slate-200 rounded-md text-[11px] font-bold text-slate-600 hover:border-slate-800 hover:text-slate-800 transition-all shadow-sm">
                       {time}
                     </button>
                   ))}
@@ -355,13 +355,13 @@ export default function MeetingsPage() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">미팅 장소 요청</label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" placeholder="예: 판교 사옥 3층 미팅실" className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
+                  <input type="text" placeholder="예: 판교 사옥 3층 미팅실" className="w-full bg-white border border-slate-200 rounded-md pl-11 pr-2 py-1 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all shadow-sm" />
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">코멘트 / 추가 요청사항</label>
-                <textarea rows={4} placeholder="비서에게 전달할 메모를 입력해주세요." className="w-full bg-white border border-slate-200 rounded-xl px-2 py-3 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all resize-none shadow-sm" />
+                <textarea rows={4} placeholder="비서에게 전달할 메모를 입력해주세요." className="w-full bg-white border border-slate-200 rounded-md px-2 py-1 text-sm font-medium focus:ring-2 focus:ring-slate-800 outline-none transition-all resize-none shadow-sm" />
               </div>
 
               <button 
@@ -369,7 +369,7 @@ export default function MeetingsPage() {
                   toast.success('미팅 요청이 완료되었습니다!', { description: '비서 확인 후 일정이 확정됩니다.' });
                   setShowPreview(false);
                 }}
-                className="w-full bg-slate-800 text-white py-2 rounded-2xl font-bold text-md shadow-xl shadow-slate-200 hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-slate-800 text-white py-1 rounded-md font-bold text-md shadow-sm shadow-slate-200 hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <CheckCircle2 size={20} /> 미팅 요청하기
               </button>
@@ -402,14 +402,14 @@ export default function MeetingsPage() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex flex-col md:flex-row p-3 gap-3">
+      <main className="flex-1 overflow-hidden flex flex-col md:flex-row p-1 gap-1">
         {/* Main Content Area */}
-        <section className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-slate-100 bg-slate-50/30">
+        <section className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+          <div className="p-1 border-b border-slate-100 bg-slate-50/30">
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-slate-800 text-white rounded-lg shadow-lg">
+                  <div className="p-1.5 bg-slate-800 text-white rounded-lg shadow-sm">
                     <CalendarIcon size={18} />
                   </div>
                   <div>
@@ -423,7 +423,7 @@ export default function MeetingsPage() {
                   <button
                     onClick={() => setViewType('calendar')}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all",
+                      "flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-black transition-all",
                       viewType === 'calendar' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600"
                     )}
                   >
@@ -432,7 +432,7 @@ export default function MeetingsPage() {
                   <button
                     onClick={() => setViewType('list')}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-black transition-all",
+                      "flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-black transition-all",
                       viewType === 'list' ? "bg-white text-slate-800 shadow-md" : "text-slate-400 hover:text-slate-600"
                     )}
                   >
@@ -449,7 +449,7 @@ export default function MeetingsPage() {
                   { label: '평균 소요', value: '35분', icon: Clock, color: 'amber', trend: '적정' },
                   { label: '예약 점유율', value: '84%', icon: TrendingUp, color: 'rose', trend: '+5.2%' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center gap-2.5 group">
+                  <div key={i} className="bg-white p-2.5 rounded-md border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center gap-2.5 group">
                     <div className={cn(
                       "p-2 rounded-lg transition-transform group-hover:scale-110",
                       stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" :
@@ -463,7 +463,7 @@ export default function MeetingsPage() {
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
                         <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-1 py-0 rounded-full">{stat.trend}</span>
                       </div>
-                      <p className="text-base font-bold text-slate-800 leading-none mt-0.5">{stat.value}</p>
+                      <p className="text-xs font-bold text-slate-800 leading-none mt-0.5">{stat.value}</p>
                     </div>
                   </div>
                 ))}
@@ -475,7 +475,7 @@ export default function MeetingsPage() {
                   <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-50 rounded-md transition-colors">
                     <ChevronLeft size={16} className="text-slate-400" />
                   </button>
-                  <span className="text-xs font-black px-3 min-w-[110px] text-center text-slate-700">
+                  <span className="text-xs font-black px-2 min-w-[110px] text-center text-slate-700">
                     {format(currentMonth, 'yyyy년 MM월')}
                   </span>
                   <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-50 rounded-md transition-colors">
@@ -510,7 +510,7 @@ export default function MeetingsPage() {
           </div>
 
           {/* Dynamic Content View */}
-          <div className="flex-1 overflow-y-auto p-3 bg-white">
+          <div className="flex-1 overflow-y-auto p-1 bg-white">
             {viewType === 'calendar' ? (
               <div className="flex flex-col h-full">
                 <div className="grid grid-cols-7 border-b border-slate-100 pb-1.5">
@@ -562,7 +562,7 @@ export default function MeetingsPage() {
                             <div className="flex flex-col">
                               <span className={cn(
                                 "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg transition-all",
-                                isToday ? "bg-slate-800 text-white shadow-lg shadow-slate-200" : "text-slate-600",
+                                isToday ? "bg-slate-800 text-white shadow-sm shadow-slate-200" : "text-slate-600",
                                 !isCurrentMonth && "text-slate-300"
                               )}>
                                 {format(day, 'd')}
@@ -620,7 +620,7 @@ export default function MeetingsPage() {
               </div>
             ) : (
               /* List View Rendering */
-              <div className="max-w-4xl mx-auto space-y-2 pb-10">
+              <div className="max-w-4xl mx-auto space-y-2 pb-2">
                 {filteredSchedules.sort((a, b) => a.date.localeCompare(b.date)).map((s, idx) => {
                   const cat = categories.find(c => c.id === s.categoryId);
                   const sDate = parseISO(s.date);
@@ -631,15 +631,15 @@ export default function MeetingsPage() {
                       onClick={() => setSelectedSchedule(s)}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="group bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
+                      className="group bg-white p-1 rounded-md border border-slate-100 shadow-sm hover:border-slate-800 hover:shadow-sm transition-all cursor-pointer flex items-center gap-2"
                     >
-                      <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 rounded-xl border border-slate-100 text-slate-400 group-hover:bg-slate-800 group-hover:text-white transition-all">
+                      <div className="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 rounded-md border border-slate-100 text-slate-400 group-hover:bg-slate-800 group-hover:text-white transition-all">
                         <span className="text-[9px] font-black uppercase tracking-wider">{format(sDate, 'MMM')}</span>
                         <span className="text-sm font-black leading-none">{format(sDate, 'd')}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{cat?.emoji}</span>
+                          <span className="text-xs">{cat?.emoji}</span>
                           <h4 className="font-bold text-slate-800 text-sm tracking-tight">{s.title}</h4>
                           <span className={cn(
                             "px-2 py-0.5 rounded-full text-[9px] font-black border tracking-wider uppercase",
@@ -671,13 +671,13 @@ export default function MeetingsPage() {
         </section>
 
         {/* Sidebar */}
-        <section className="w-full md:w-[280px] flex flex-col gap-3">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex flex-col h-full overflow-hidden">
-            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-3">
+        <section className="w-full md:w-[280px] flex flex-col gap-1">
+          <div className="bg-white rounded-md border border-slate-200 shadow-sm p-1 flex flex-col h-full overflow-hidden">
+            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-1">
               <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><PieChart size={16} /></div>
               분석 리포트
             </h2>
-            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1">
               <div>
                 <p className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">일정 타입 분포</p>
                 <div className="h-[160px] w-full">
@@ -701,8 +701,8 @@ export default function MeetingsPage() {
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="space-y-2 pt-3 border-t border-slate-100">
-                <button onClick={handleShareLink} className="w-full flex items-center justify-between p-3 bg-slate-800 text-white rounded-xl shadow-lg hover:bg-slate-700 transition-all group">
+              <div className="space-y-2 pt-1 border-t border-slate-100">
+                <button onClick={handleShareLink} className="w-full flex items-center justify-between p-1 bg-slate-800 text-white rounded-md shadow-sm hover:bg-slate-700 transition-all group">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 bg-white/10 rounded-lg"><Share2 size={16} /></div>
                     <div className="text-left">
@@ -713,11 +713,11 @@ export default function MeetingsPage() {
                   <ChevronRight size={14} className="opacity-40" />
                 </button>
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => handleDownload('EXCEL')} className="flex flex-col items-start gap-2 p-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-all group">
+                  <button onClick={() => handleDownload('EXCEL')} className="flex flex-col items-start gap-2 p-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100 hover:bg-emerald-100 transition-all group">
                     <div className="p-1.5 bg-emerald-600 text-white rounded-lg"><FileSpreadsheet size={14} /></div>
                     <p className="text-[10px] font-black uppercase tracking-widest">Excel</p>
                   </button>
-                  <button onClick={() => handleDownload('WORD')} className="flex flex-col items-start gap-2 p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 hover:bg-blue-100 transition-all group">
+                  <button onClick={() => handleDownload('WORD')} className="flex flex-col items-start gap-2 p-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 transition-all group">
                     <div className="p-1.5 bg-blue-600 text-white rounded-lg"><FileText size={14} /></div>
                     <p className="text-[10px] font-black uppercase tracking-widest">Word</p>
                   </button>
@@ -743,7 +743,7 @@ export default function MeetingsPage() {
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="relative w-full max-w-[380px] bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200"
+              className="relative w-full max-w-[380px] bg-white rounded-md overflow-hidden shadow-sm border border-slate-200"
             >
               <div className="h-40 relative overflow-hidden bg-slate-100">
                 <ImageWithFallback 
@@ -752,14 +752,14 @@ export default function MeetingsPage() {
                   className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <button onClick={() => setSelectedSchedule(null)} className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg hover:bg-slate-800 hover:text-white transition-all"><X size={16} /></button>
-                <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/50">
+                <button onClick={() => setSelectedSchedule(null)} className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-1.5 rounded-md shadow-sm hover:bg-slate-800 hover:text-white transition-all"><X size={16} /></button>
+                <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-md px-2 py-1.5 rounded-md shadow-sm border border-white/50">
                   <MapPin size={14} className="text-slate-800" />
                   <span className="text-[11px] font-black text-slate-800 tracking-tight">{selectedSchedule.location}</span>
                 </div>
               </div>
 
-              <div className="p-2 space-y-3">
+              <div className="p-2 space-y-1">
                 <div className="flex items-center justify-between">
                   <div className={cn(
                     "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm",
@@ -786,7 +786,7 @@ export default function MeetingsPage() {
                 </div>
 
                 {selectedSchedule.note && (
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 relative overflow-hidden group">
+                  <div className="p-1 bg-slate-50 rounded-md border border-slate-100 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity"><Lock size={18} /></div>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">비서 전용 메모 (Private)</p>
                     <p className="text-xs text-slate-600 leading-relaxed font-bold italic">"{selectedSchedule.note}"</p>
@@ -794,10 +794,10 @@ export default function MeetingsPage() {
                 )}
 
                 <div className="flex items-center gap-2 pt-1">
-                  <button className="flex-1 bg-slate-800 text-white py-2.5 rounded-xl font-black text-sm shadow-lg hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                  <button className="flex-1 bg-slate-800 text-white py-1 rounded-md font-black text-sm shadow-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
                     <Edit size={16} /> 일정 편집
                   </button>
-                  <button className="p-2.5 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-800 transition-all"><Trash2 size={16} className="text-slate-400 hover:text-red-500 transition-colors" /></button>
+                  <button className="p-2.5 bg-white border border-slate-200 rounded-md shadow-sm hover:border-slate-800 transition-all"><Trash2 size={16} className="text-slate-400 hover:text-red-500 transition-colors" /></button>
                 </div>
               </div>
             </motion.div>

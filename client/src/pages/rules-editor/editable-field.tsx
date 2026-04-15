@@ -12,7 +12,7 @@ export function EditableField({ field, onUpdate }: EditableFieldProps) {
         <select
           value={field.value}
           onChange={(e) => onUpdate(field.id, e.target.value)}
-          className="appearance-none w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-black text-[12px] py-0.5 px-1 rounded-none focus:outline-none cursor-pointer pr-4 transition-colors"
+          className="appearance-none w-full bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-black text-[12px] py-0.5 px-1 rounded-none focus:outline-none cursor-pointer pr-2 transition-colors"
         >
           {field.options.map((opt) => (
             <option key={opt} value={opt}>{opt}</option>

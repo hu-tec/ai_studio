@@ -27,23 +27,23 @@ function RatingRow({
   onRate: (v: number) => void;
 }) {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:shadow-md">
+    <div className="bg-white p-2 rounded-md border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2 transition-all hover:shadow-md">
       <div className="space-y-1">
         <h4 className="font-bold text-gray-900">{title}</h4>
         <p className="text-xs text-gray-500">
           1점에서 5점 사이로 평가해 주세요.
         </p>
       </div>
-      <div className="flex items-center gap-1 md:gap-3">
+      <div className="flex items-center gap-1 md:gap-1">
         {[1, 2, 3, 4, 5].map((num) => (
           <button
             key={num}
             onClick={() => onRate(num)}
             className={`
-              w-10 h-10 md:w-12 md:h-12 rounded-xl flex flex-col items-center justify-center transition-all border
+              w-10 h-10 md:w-12 md:h-12 rounded-md flex flex-col items-center justify-center transition-all border
               ${
                 value === num
-                  ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200"
+                  ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200"
                   : "bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100"
               }
             `}
@@ -51,7 +51,7 @@ function RatingRow({
             <span className="text-sm font-bold">{num}</span>
           </button>
         ))}
-        <div className="ml-2 px-3 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600 min-w-16 text-center">
+        <div className="ml-2 px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600 min-w-16 text-center">
           {ratingLabels[value - 1]}
         </div>
       </div>
@@ -83,10 +83,10 @@ export function InterviewEvaluationView() {
   };
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-2 pb-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          <h2 className="text-sm font-bold text-gray-900 tracking-tight flex items-center gap-1">
             <ClipboardCheck className="text-blue-600" size={32} />
             면접 평가표
           </h2>
@@ -94,65 +94,65 @@ export function InterviewEvaluationView() {
             면접관은 지원자의 역량을 객관적으로 평가해 주세요.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <button
             onClick={handleSave}
-            className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-sm"
+            className="px-2 py-1 bg-gray-900 text-white rounded-md font-bold hover:bg-black transition-all shadow-sm"
           >
             중간 저장
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+            className="px-2 py-1 bg-blue-600 text-white rounded-md font-bold hover:bg-blue-700 transition-all shadow-sm shadow-blue-100"
           >
             평가 완료
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+        <div className="lg:col-span-2 space-y-2">
           {/* Section A: Applicant Overview */}
-          <section className="bg-gray-900 p-8 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-center gap-8">
-            <div className="w-24 h-24 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+          <section className="bg-gray-900 p-2 rounded-md text-white shadow-sm flex flex-col md:flex-row items-center gap-2">
+            <div className="w-24 h-24 rounded-md bg-white/10 flex items-center justify-center border border-white/20">
               <User size={48} className="text-blue-400" />
             </div>
-            <div className="flex-1 space-y-4 text-center md:text-left">
+            <div className="flex-1 space-y-1 text-center md:text-left">
               <div>
-                <h3 className="text-2xl font-bold">
+                <h3 className="text-sm font-bold">
                   홍길동{" "}
-                  <span className="text-blue-400 text-lg font-normal ml-2">
+                  <span className="text-blue-400 text-xs font-normal ml-2">
                     지원자
                   </span>
                 </h3>
                 <p className="text-gray-400">TESOL / 일반 / 1급</p>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+              <div className="flex flex-wrap justify-center md:justify-start gap-1.5 text-sm">
+                <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1.5 rounded-full border border-white/10">
                   <Calendar size={14} className="text-blue-400" /> 2026-03-13
                 </span>
-                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1.5 rounded-full border border-white/10">
                   <Globe size={14} className="text-blue-400" /> 서울시 강남구
                 </span>
-                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1.5 rounded-full border border-white/10">
                   <Briefcase size={14} className="text-blue-400" /> 경력 5년
                 </span>
               </div>
             </div>
             <div className="flex gap-2">
-              <div className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl border border-green-500/30 text-xs font-bold">
+              <div className="px-2 py-1 bg-green-500/20 text-green-400 rounded-md border border-green-500/30 text-xs font-bold">
                 1차 합격
               </div>
-              <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/30 text-xs font-bold">
+              <div className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-md border border-blue-500/30 text-xs font-bold">
                 화상 면접
               </div>
             </div>
           </section>
 
           {/* Section B: Evaluation Ratings */}
-          <section className="space-y-4">
+          <section className="space-y-1">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <Star className="text-blue-600" size={20} />
                 항목별 상세 평가
               </h3>
@@ -189,30 +189,30 @@ export function InterviewEvaluationView() {
           </section>
 
           {/* Section C: Memo */}
-          <section className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <section className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-1">
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
               <MessageSquare className="text-blue-600" size={20} />
               종합 의견
             </h3>
             <textarea
               placeholder="지원자에 대한 전반적인 의견을 자유롭게 작성해 주세요."
               rows={5}
-              className="w-full p-6 rounded-2xl border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none"
+              className="w-full p-2 rounded-md border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none"
             />
           </section>
         </div>
 
         {/* Right Column: Skills & Decision */}
-        <div className="space-y-8">
+        <div className="space-y-2">
           {/* Skill Checklist */}
-          <section className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <section className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-2">
+            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2">
               <Zap className="text-blue-600" size={20} />
               역량 체크리스트
             </h3>
 
-            <div className="space-y-6">
-              <div className="space-y-3">
+            <div className="space-y-2">
+              <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                   AI Tools
                 </p>
@@ -220,18 +220,18 @@ export function InterviewEvaluationView() {
                   {skills.ai.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-100"
+                      className="px-2 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-100"
                     >
                       {skill}
                     </span>
                   ))}
-                  <button className="px-3 py-1.5 bg-gray-50 text-gray-400 text-xs font-medium rounded-lg border border-dashed border-gray-200 hover:bg-gray-100 transition-colors">
+                  <button className="px-2 py-1.5 bg-gray-50 text-gray-400 text-xs font-medium rounded-lg border border-dashed border-gray-200 hover:bg-gray-100 transition-colors">
                     + 추가
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                   Languages
                 </p>
@@ -239,7 +239,7 @@ export function InterviewEvaluationView() {
                   {skills.lang.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded-lg border border-green-100"
+                      className="px-2 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded-lg border border-green-100"
                     >
                       {skill}
                     </span>
@@ -247,7 +247,7 @@ export function InterviewEvaluationView() {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                   Collaboration Tools
                 </p>
@@ -255,7 +255,7 @@ export function InterviewEvaluationView() {
                   {skills.tool.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-lg border border-purple-100"
+                      className="px-2 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-lg border border-purple-100"
                     >
                       {skill}
                     </span>
@@ -266,31 +266,31 @@ export function InterviewEvaluationView() {
           </section>
 
           {/* Final Result Select */}
-          <section className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6 sticky top-8">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <section className="bg-white p-2 rounded-md border border-gray-100 shadow-sm space-y-2 sticky top-8">
+            <h3 className="text-xs font-bold text-gray-900 flex items-center gap-2">
               <Award className="text-blue-600" size={20} />
               최종 판정
             </h3>
 
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 rounded-2xl border-2 border-green-500 bg-green-50 text-green-700 group transition-all">
-                <div className="flex items-center gap-3">
+            <div className="space-y-1">
+              <button className="w-full flex items-center justify-between p-2 rounded-md border-2 border-green-500 bg-green-50 text-green-700 group transition-all">
+                <div className="flex items-center gap-1">
                   <CheckCircle2 className="text-green-500" />
                   <span className="font-bold">합격</span>
                 </div>
                 <div className="w-4 h-4 rounded-full border-2 border-green-500 bg-green-500" />
               </button>
 
-              <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50 text-gray-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all">
-                <div className="flex items-center gap-3">
+              <button className="w-full flex items-center justify-between p-2 rounded-md border border-gray-100 bg-gray-50 text-gray-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all">
+                <div className="flex items-center gap-1">
                   <XCircle />
                   <span className="font-bold">불합격</span>
                 </div>
                 <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
               </button>
 
-              <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50 text-gray-500 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 transition-all">
-                <div className="flex items-center gap-3">
+              <button className="w-full flex items-center justify-between p-2 rounded-md border border-gray-100 bg-gray-50 text-gray-500 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 transition-all">
+                <div className="flex items-center gap-1">
                   <HelpCircle />
                   <span className="font-bold">보류</span>
                 </div>
@@ -298,7 +298,7 @@ export function InterviewEvaluationView() {
               </button>
             </div>
 
-            <div className="pt-4 border-t border-gray-50">
+            <div className="pt-1.5 border-t border-gray-50">
               <p className="text-xs text-center text-gray-400 leading-relaxed">
                 판정 결과는 인사팀에 즉시 전달됩니다.
               </p>

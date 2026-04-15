@@ -11,9 +11,9 @@ const data = [
 
 export function StatSummary() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="col-span-1 md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-6">분야별 신청 현황</h3>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+      <div className="col-span-1 md:col-span-2 bg-white rounded-md shadow-sm border border-slate-200 p-2">
+        <h3 className="text-xs font-semibold text-slate-800 mb-2">분야별 신청 현황</h3>
         <div className="h-[240px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -29,8 +29,8 @@ export function StatSummary() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center justify-center relative">
-        <h3 className="text-lg font-semibold text-slate-800 self-start mb-6">상태별 요약</h3>
+      <div className="bg-white rounded-md shadow-sm border border-slate-200 p-2 flex flex-col items-center justify-center relative">
+        <h3 className="text-xs font-semibold text-slate-800 self-start mb-2">상태별 요약</h3>
         <div className="h-[240px] w-full flex items-center justify-center relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -55,7 +55,7 @@ export function StatSummary() {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-3xl font-bold text-slate-800 leading-tight">100</span>
+            <span className="text-sm font-bold text-slate-800 leading-tight">100</span>
             <span className="text-sm text-slate-500">전체 신청 건수</span>
           </div>
         </div>

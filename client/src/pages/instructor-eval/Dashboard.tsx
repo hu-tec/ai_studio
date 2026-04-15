@@ -83,9 +83,9 @@ function DetailContent({ a }: { a: Applicant }) {
   ] : [];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_2fr] gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_2fr] gap-2">
       {/* Col 1: Basic Info Detail */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div style={{ fontSize: "0.78rem", fontWeight: 900 }} className="text-gray-900 flex items-center gap-1.5 border-b-2 border-gray-100 pb-1 uppercase tracking-tight">
           기본 정보 상세
         </div>
@@ -122,7 +122,7 @@ function DetailContent({ a }: { a: Applicant }) {
       </div>
 
       {/* Col 2: Score Detail */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div style={{ fontSize: "0.78rem", fontWeight: 900 }} className="text-gray-900 flex items-center gap-1.5 border-b-2 border-gray-100 pb-1 uppercase tracking-tight">
           평가 점수 상세
         </div>
@@ -146,7 +146,7 @@ function DetailContent({ a }: { a: Applicant }) {
       </div>
 
       {/* Col 3: Skills */}
-      <div className="space-y-3">
+      <div className="space-y-1">
         <div style={{ fontSize: "0.78rem", fontWeight: 900 }} className="text-gray-900 flex items-center gap-1.5 border-b-2 border-gray-100 pb-1 uppercase tracking-tight">
           보유 스킬
         </div>
@@ -290,11 +290,11 @@ export function Dashboard() {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-2 pb-2">
       {/* Header with View Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 bg-white p-2 rounded-md border border-gray-200 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2">
             면접 평가 대시보드
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">실시간 면접 데이터 요약 및 상세 관리</p>
@@ -302,7 +302,7 @@ export function Dashboard() {
         <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg self-start md:self-center">
           <button
             onClick={() => setViewMode("summary")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-sm font-medium transition-all ${
               viewMode === "summary" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -311,7 +311,7 @@ export function Dashboard() {
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-sm font-medium transition-all ${
               viewMode === "list" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -328,60 +328,60 @@ export function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-2"
           >
             {/* Top Stats KPIs */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-gray-200 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-indigo-100 group-hover:text-indigo-200 transition-colors">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+              <div className="bg-white rounded-md border border-gray-200 p-2 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-1 text-indigo-100 group-hover:text-indigo-200 transition-colors">
                   <Users className="w-12 h-12" />
                 </div>
                 <div className="relative z-10">
                   <div className="text-gray-600 text-xs font-black uppercase tracking-wider">총 지원자</div>
-                  <div className="text-3xl font-black text-gray-900 mt-1">{stats.total}<span className="text-sm font-black text-gray-500 ml-1">명</span></div>
+                  <div className="text-sm font-black text-gray-900 mt-1">{stats.total}<span className="text-sm font-black text-gray-500 ml-1">명</span></div>
                   <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-500 font-black">
                     <TrendingUp className="w-3 h-3 text-emerald-600 font-black" />
                     최근 7일 대비 +2명
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl border-2 border-gray-100 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-emerald-100 group-hover:text-emerald-200 transition-colors">
+              <div className="bg-white rounded-md border-2 border-gray-100 p-2 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-1 text-emerald-100 group-hover:text-emerald-200 transition-colors">
                   <Star className="w-12 h-12" />
                 </div>
                 <div className="relative z-10">
                   <div className="text-gray-600 text-xs font-black uppercase tracking-wider">우수 인재 (A등급)</div>
-                  <div className="text-3xl font-black text-emerald-600 mt-1">{stats.byGrade.A}<span className="text-sm font-black text-gray-500 ml-1">명</span></div>
+                  <div className="text-sm font-black text-emerald-600 mt-1">{stats.byGrade.A}<span className="text-sm font-black text-gray-500 ml-1">명</span></div>
                   <div className="mt-2 text-[10px] text-gray-500 font-black">전체 대비 {stats.total > 0 ? ((stats.byGrade.A / stats.total) * 100).toFixed(1) : 0}% 비율</div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl border-2 border-gray-100 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-blue-100 group-hover:text-blue-200 transition-colors">
+              <div className="bg-white rounded-md border-2 border-gray-100 p-2 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-1 text-blue-100 group-hover:text-blue-200 transition-colors">
                   <Award className="w-12 h-12" />
                 </div>
                 <div className="relative z-10">
                   <div className="text-gray-600 text-xs font-black uppercase tracking-wider">평균 평가 점수</div>
-                  <div className="text-3xl font-black text-blue-600 mt-1">{stats.avgScore}<span className="text-sm font-black text-gray-500 ml-1">점</span></div>
+                  <div className="text-sm font-black text-blue-600 mt-1">{stats.avgScore}<span className="text-sm font-black text-gray-500 ml-1">점</span></div>
                   <div className="mt-2 text-[10px] text-gray-500 font-black">전체 항목 기준 산출</div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl border-2 border-gray-100 p-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 text-amber-100 group-hover:text-amber-200 transition-colors">
+              <div className="bg-white rounded-md border-2 border-gray-100 p-2 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-1 text-amber-100 group-hover:text-amber-200 transition-colors">
                   <LayoutDashboard className="w-12 h-12" />
                 </div>
                 <div className="relative z-10">
                   <div className="text-gray-600 text-xs font-black uppercase tracking-wider">합격 결정 완료</div>
-                  <div className="text-3xl font-black text-amber-600 mt-1">{stats.passStatus["합격"] + stats.passStatus["불합격"]}<span className="text-sm font-black text-gray-500 ml-1">건</span></div>
+                  <div className="text-sm font-black text-amber-600 mt-1">{stats.passStatus["합격"] + stats.passStatus["불합격"]}<span className="text-sm font-black text-gray-500 ml-1">건</span></div>
                   <div className="mt-2 text-[10px] text-gray-500 font-black">미정 {stats.passStatus["미정"]}건 진행 중</div>
                 </div>
               </div>
             </div>
 
             {/* Visual Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="bg-white rounded-md border border-gray-200 p-2 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-gray-800 flex items-center gap-2">
                     등급별 분포 현황
                   </h3>
                   <div className="flex gap-2">
@@ -429,9 +429,9 @@ export function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
+              <div className="bg-white rounded-md border border-gray-200 p-2 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-gray-800 flex items-center gap-2">
                     분류 및 합격 여부
                   </h3>
                 </div>
@@ -489,8 +489,8 @@ export function Dashboard() {
             </div>
 
             {/* Top Rank Table Preview */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
+              <div className="px-2 py-1.5 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-gray-800">최근 고득점 지원자</h3>
                 <button onClick={() => setViewMode("list")} className="text-xs text-indigo-600 hover:underline">전체보기</button>
               </div>
@@ -498,27 +498,27 @@ export function Dashboard() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">분류</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">등급</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">총점</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">액션</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">분류</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">등급</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase">총점</th>
+                      <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase">액션</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {applicants.slice().sort((a, b) => b.totalScore - a.totalScore).slice(0, 5).map((a) => (
                       <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-3 font-medium text-gray-900">{a.name}</td>
-                        <td className="px-6 py-3">
+                        <td className="px-2 py-1 font-medium text-gray-900">{a.name}</td>
+                        <td className="px-2 py-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${a.type === "강사" ? "bg-indigo-50 text-indigo-600" : "bg-purple-50 text-purple-600"}`}>
                             {TYPE_LABEL[a.type]} {a.type}
                           </span>
                         </td>
-                        <td className="px-6 py-3">
+                        <td className="px-2 py-1">
                           <span className="font-bold" style={{ color: GRADE_COLORS[a.grade] }}>{a.grade}등급</span>
                         </td>
-                        <td className="px-6 py-3 font-bold text-indigo-600">{a.totalScore}</td>
-                        <td className="px-6 py-3 text-right">
+                        <td className="px-2 py-1 font-bold text-indigo-600">{a.totalScore}</td>
+                        <td className="px-2 py-1 text-right">
                           <button onClick={() => setPreviewApplicant(a)} className="text-gray-400 hover:text-indigo-600">
                             <Eye className="w-4 h-4" />
                           </button>
@@ -536,23 +536,23 @@ export function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-4"
+            className="space-y-1"
           >
             {/* Filters & Actions */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
                     placeholder="지원자 검색..."
-                    className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-48 md:w-64 transition-all"
+                    className="pl-9 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-48 md:w-64 transition-all"
                   />
                 </div>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none"
                 >
                   <option value="전체">전체 분류</option>
                   <option value="강사">강사</option>
@@ -561,7 +561,7 @@ export function Dashboard() {
                 <select
                   value={filterGrade}
                   onChange={(e) => setFilterGrade(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none"
                 >
                   <option value="전체">전체 등급</option>
                   <option value="A">A등급</option>
@@ -574,13 +574,13 @@ export function Dashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setExpandedIds(expandedIds.size === filtered.length ? new Set() : new Set(filtered.map(a => a.id)))}
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1.5 transition-colors"
+                  className="px-2 py-1 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1.5 transition-colors"
                 >
                   {expandedIds.size === filtered.length ? "모두 접기" : "모두 펼치기"}
                 </button>
                 <button
                   onClick={handleExcelDownload}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 px-2 py-1 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors shadow-sm"
                 >
                   <Download className="w-4 h-4" />
                   엑셀 다운로드
@@ -589,26 +589,26 @@ export function Dashboard() {
             </div>
 
             {/* Main Data Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-100 border-b-2 border-gray-200 text-gray-700">
-                      <th className="px-4 py-3 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>등급</th>
-                      <th className="px-4 py-3 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>이름 / 분류</th>
-                      <th className="px-4 py-3 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>카테고리</th>
-                      <th className="px-4 py-3 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>경력 / 학력</th>
-                      <th className="px-4 py-3 text-center font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>상태</th>
-                      <th className="px-4 py-3 text-center font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>총점</th>
-                      <th className="px-4 py-3 text-right font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>관리</th>
+                      <th className="px-2 py-1 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>등급</th>
+                      <th className="px-2 py-1 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>이름 / 분류</th>
+                      <th className="px-2 py-1 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>카테고리</th>
+                      <th className="px-2 py-1 text-left font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>경력 / 학력</th>
+                      <th className="px-2 py-1 text-center font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>상태</th>
+                      <th className="px-2 py-1 text-center font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>총점</th>
+                      <th className="px-2 py-1 text-right font-black uppercase tracking-tighter" style={{ fontSize: "0.75rem" }}>관리</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-20 text-center">
+                        <td colSpan={7} className="px-2 py-1 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-400">
-                            <Users className="w-12 h-12 mb-3 opacity-20" />
+                            <Users className="w-12 h-12 mb-1 opacity-20" />
                             <p className="text-sm">검색 결과가 없습니다.</p>
                           </div>
                         </td>
@@ -620,7 +620,7 @@ export function Dashboard() {
                             className={`group cursor-pointer transition-colors ${expandedIds.has(a.id) ? "bg-indigo-50/30" : "hover:bg-gray-50/80"}`}
                             onClick={() => toggleExpand(a.id)}
                           >
-                            <td className="px-4 py-4">
+                            <td className="px-2 py-1.5">
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-bold text-xs"
                                 style={{
                                   color: GRADE_COLORS[a.grade],
@@ -630,7 +630,7 @@ export function Dashboard() {
                                 {GRADE_EMOJI[a.grade]} {a.grade}
                               </span>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-2 py-1.5">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-gray-900">{a.name}</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.type === "강사" ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700"}`}>
@@ -639,19 +639,19 @@ export function Dashboard() {
                               </div>
                               <div className="text-[10px] text-gray-400 mt-0.5">{a.date} / {a.mbti || "MBTI 미정"}</div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-2 py-1.5">
                               <div className="text-xs text-gray-700">{a.categoryLarge}</div>
                               <div className="text-[10px] text-gray-400 truncate max-w-[120px]">
                                 {a.categoryMedium} {a.categorySmall && `> ${a.categorySmall}`}
                               </div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-2 py-1.5">
                               <div className="text-xs text-gray-700 flex items-center gap-1">
                                 {a.career === "경력" ? `경력 ${a.careerYears}년` : "신입"}
                               </div>
                               <div className="text-[10px] text-gray-400">{a.education || "-"}</div>
                             </td>
-                            <td className="px-4 py-4 text-center">
+                            <td className="px-2 py-1.5 text-center">
                               <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 a.passStatus === "합격" ? "bg-emerald-100 text-emerald-700" :
                                 a.passStatus === "불합격" ? "bg-red-100 text-red-700" :
@@ -660,10 +660,10 @@ export function Dashboard() {
                                 {a.passStatus || "미정"}
                               </span>
                             </td>
-                            <td className="px-4 py-4 text-center">
+                            <td className="px-2 py-1.5 text-center">
                               <span className="text-sm font-bold text-indigo-600">{a.totalScore}</span>
                             </td>
-                            <td className="px-4 py-4 text-right">
+                            <td className="px-2 py-1.5 text-right">
                               <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setPreviewApplicant(a); }}
@@ -687,7 +687,7 @@ export function Dashboard() {
                                 <motion.div
                                   initial={{ height: 0, opacity: 0 }}
                                   animate={{ height: "auto", opacity: 1 }}
-                                  className="bg-gray-50/50 px-6 py-6 border-t border-gray-100"
+                                  className="bg-gray-50/50 px-2 py-1 border-t border-gray-100"
                                 >
                                   <DetailContent a={a} />
                                 </motion.div>
@@ -707,42 +707,42 @@ export function Dashboard() {
 
       {/* Preview Modal */}
       <Dialog open={!!previewApplicant} onOpenChange={() => setPreviewApplicant(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-sm">
           {previewApplicant && (
             <div className="bg-white">
-              <div className="bg-indigo-600 px-6 py-6 text-white relative">
+              <div className="bg-indigo-600 px-2 py-1 text-white relative">
                 <button
                   onClick={() => setPreviewApplicant(null)}
                   className="absolute top-4 right-4 p-1.5 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
-                <div className="flex items-end gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
+                <div className="flex items-end gap-1.5">
+                  <div className="w-16 h-16 bg-white/20 rounded-md flex items-center justify-center text-sm shadow-inner">
                     {previewApplicant.type === "강사" ? "강" : "직"}
                   </div>
                   <div className="mb-1">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold">{previewApplicant.name}</h2>
+                      <h2 className="text-sm font-bold">{previewApplicant.name}</h2>
                       <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-medium">{previewApplicant.type}</span>
                     </div>
                     <p className="text-indigo-100 text-sm mt-1">{previewApplicant.categoryLarge} &gt; {previewApplicant.categoryMedium} &gt; {previewApplicant.categorySmall}</p>
                   </div>
                   <div className="ml-auto flex flex-col items-end gap-1">
                     <div className="text-xs text-indigo-200">종합 평가 등급</div>
-                    <div className="text-4xl font-black bg-white text-indigo-600 w-12 h-12 flex items-center justify-center rounded-xl shadow-lg border-2 border-indigo-400">
+                    <div className="text-sm font-black bg-white text-indigo-600 w-12 h-12 flex items-center justify-center rounded-md shadow-sm border-2 border-indigo-400">
                       {previewApplicant.grade}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="p-8 max-h-[70vh] overflow-y-auto">
+              <div className="p-2 max-h-[70vh] overflow-y-auto">
                 <DetailContent a={previewApplicant} />
 
-                <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="mt-1 pt-2 border-t border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
                     <div className="text-xs text-gray-400">결정된 상태</div>
-                    <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${
+                    <div className={`px-2 py-1.5 rounded-full font-bold text-sm ${
                       previewApplicant.passStatus === "합격" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
                       previewApplicant.passStatus === "불합격" ? "bg-red-50 text-red-600 border border-red-100" :
                       "bg-gray-50 text-gray-500 border border-gray-100"

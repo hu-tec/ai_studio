@@ -34,7 +34,7 @@ export function ResultPage({ onBack }: ResultPageProps) {
   ];
 
   const SectionHeader = ({ title, icon: Icon }: { title: string; icon: React.ElementType }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 bg-white sticky top-0 z-10">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-2 py-1.5 border-b border-slate-100 bg-white sticky top-0 z-10">
       <div className="flex items-center gap-2.5">
         <div className="p-2 bg-blue-50 rounded-lg shrink-0">
           <Icon className="w-4 h-4 text-blue-600" />
@@ -48,7 +48,7 @@ export function ResultPage({ onBack }: ResultPageProps) {
         <button title="AI챗봇도움" className="p-2 bg-blue-50 border border-blue-100 text-blue-400 rounded-lg hover:text-blue-600 hover:bg-blue-100 transition-all">
           <MessageSquare className="w-3.5 h-3.5" />
         </button>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white text-[11px] font-black rounded-lg hover:bg-slate-800 transition-all shadow-md">
+        <button className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-900 text-white text-[11px] font-black rounded-lg hover:bg-slate-800 transition-all shadow-md">
           <Edit3 className="w-3 h-3" />
           에디터 편집
         </button>
@@ -58,9 +58,9 @@ export function ResultPage({ onBack }: ResultPageProps) {
 
   return (
     <div className="flex-1 overflow-y-auto bg-[#F8FAFC]">
-      <div className="max-w-[1700px] mx-auto py-6 px-6 pb-12">
+      <div className="max-w-[1700px] mx-auto py-1 px-2 pb-2">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 mb-2">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-[13px] text-slate-400">
               <Home className="w-4 h-4 cursor-pointer hover:text-blue-600 transition-colors" onClick={onBack} />
@@ -69,16 +69,16 @@ export function ResultPage({ onBack }: ResultPageProps) {
               <ChevronRight className="w-3.5 h-3.5" />
               <span className="text-slate-900 font-medium">AI분석결과</span>
             </div>
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-slate-900">AI 분석 결과 리포트</h1>
-              <div className="flex items-center bg-white p-1 rounded-2xl border border-slate-200 shadow-sm ml-2">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm font-bold text-slate-900">AI 분석 결과 리포트</h1>
+              <div className="flex items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm ml-2">
                 {levels.map((level) => (
                   <button
                     key={level.id}
                     onClick={() => setAnalysisLevel(level.id as 1 | 2 | 3)}
-                    className={`px-6 py-2 rounded-xl transition-all flex flex-col items-center leading-tight min-w-[100px] ${
+                    className={`px-2 py-1 rounded-md transition-all flex flex-col items-center leading-tight min-w-[100px] ${
                       analysisLevel === level.id
-                        ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                        ? "bg-slate-900 text-white shadow-sm shadow-slate-200"
                         : "text-slate-400 hover:text-slate-600"
                     }`}
                   >
@@ -89,10 +89,10 @@ export function ResultPage({ onBack }: ResultPageProps) {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setShowStats(!showStats)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all ${
+              className={`flex items-center gap-2 px-2 py-1 rounded-md border text-sm font-semibold transition-all ${
                 showStats
                   ? "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
@@ -112,12 +112,12 @@ export function ResultPage({ onBack }: ResultPageProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="space-y-8"
+            className="space-y-2"
           >
             {/* Stats Overview Dashboard */}
             {showStats && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-8 shadow-sm">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="bg-white border border-slate-200 rounded-md p-2 mb-2 shadow-sm">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                   <div className="space-y-2">
                     <div className="text-[12px] font-black text-slate-400 uppercase tracking-wider">AI 분석 정확도</div>
                     <div className="text-[32px] font-black text-blue-600">{analysisLevel === 1 ? "92.4" : analysisLevel === 2 ? "94.8" : "98.2"}%</div>
@@ -144,8 +144,8 @@ export function ResultPage({ onBack }: ResultPageProps) {
 
                 {/* Donut Graphs visible from Level 2 */}
                 {analysisLevel >= 2 && (
-                  <div className="mt-10 pt-10 border-t border-slate-50">
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8">
+                  <div className="mt-1 pt-2 border-t border-slate-50">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
                       {questionBreakdown.map((item, i) => (
                         <DonutChart key={i} item={item} index={i} />
                       ))}
@@ -156,14 +156,14 @@ export function ResultPage({ onBack }: ResultPageProps) {
             )}
 
             {/* Analysis Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-2 items-stretch">
               {/* Card 1 */}
-              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+              <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                 <SectionHeader title="1. 사건 요약 및 사실관계" icon={FileSearch} />
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
                   {analysisLevel === 1 ? (
-                    <div className="space-y-5">
-                      <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-2xl">
+                    <div className="space-y-1">
+                      <div className="p-2 bg-blue-50/50 border border-blue-100 rounded-md">
                         <h4 className="text-[13px] font-black text-blue-900 mb-2">사건 요약</h4>
                         <p className="text-[14px] text-slate-600 leading-relaxed font-medium">
                           피고소인 '을'이 IT 사업 투자 명목으로 5,000만 원을 편취한 뒤 사업을 이행하지 않고 잠적한 전형적인 투자 사기 의심 사건입니다.
@@ -171,18 +171,18 @@ export function ResultPage({ onBack }: ResultPageProps) {
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      <div className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="space-y-1">
                         <h4 className="text-[13px] font-black text-slate-900 flex items-center gap-2">
                           <History className="w-4 h-4 text-blue-500" /> 심층 타임라인
                         </h4>
-                        <div className="space-y-5 relative pl-4 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-200">
+                        <div className="space-y-1 relative pl-2 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-200">
                           {[
                             { d: "2023.11.15", t: "투자 약정서 체결", s: "2,000만 원 선입금" },
                             { d: "2024.01.05", t: "2차 중도금 입금", s: "3,000만 원 송금" },
                             { d: "2024.02.20", t: "연락 두절 발생", s: "사업장 폐쇄 확인" }
                           ].map((step, i) => (
-                            <div key={i} className="relative pl-4">
+                            <div key={i} className="relative pl-2">
                               <div className="absolute left-[-21px] top-1.5 w-2.5 h-2.5 rounded-full bg-blue-500 border-2 border-white" />
                               <p className="text-[11px] font-black text-slate-400">{step.d}</p>
                               <p className="text-[13px] font-bold text-slate-700">{step.t}</p>
@@ -197,18 +197,18 @@ export function ResultPage({ onBack }: ResultPageProps) {
               </div>
 
               {/* Card 2 */}
-              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+              <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                 <SectionHeader title="2. 법리적 검토 및 적용 조항" icon={Gavel} />
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
                   {analysisLevel === 1 ? (
-                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <div className="p-2 bg-emerald-50 border border-emerald-100 rounded-md">
                       <h4 className="text-[13px] font-black text-emerald-900 mb-1">형법 제347조 (사기)</h4>
                       <p className="text-[12px] text-emerald-700">기망을 통한 재물 교부 행위 성립 가능성 높음.</p>
                     </div>
                   ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-2">
                       <h4 className="text-[13px] font-black text-slate-900">범죄 구성 요건 정밀 분석</h4>
-                      <div className="space-y-4">
+                      <div className="space-y-1">
                         {[
                           { l: "기망의 의사", s: 85, c: "bg-blue-500" },
                           { l: "재산상 처분", s: 100, c: "bg-emerald-500" },
@@ -231,10 +231,10 @@ export function ResultPage({ onBack }: ResultPageProps) {
               </div>
 
               {/* Card 3 */}
-              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+              <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                 <SectionHeader title="3. 증거력 분석 및 리스크 점검" icon={ShieldAlert} />
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                  <div className="space-y-3">
+                <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
+                  <div className="space-y-1">
                     <h4 className="text-[13px] font-black text-slate-900">확보된 증거</h4>
                     {["투자 약정서", "이체 내역"].map((s, i) => (
                       <div key={i} className="flex items-center gap-2 text-[13px] text-emerald-600 font-bold">
@@ -246,15 +246,15 @@ export function ResultPage({ onBack }: ResultPageProps) {
               </div>
 
               {/* Card 4 */}
-              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+              <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                 <SectionHeader title="4. 향후 대응 전략 및 전문가 제언" icon={TrendingUp} />
-                <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                  <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-2xl relative overflow-hidden">
-                    <h4 className="text-[13px] font-black mb-4 text-blue-400">AI 추천 대응</h4>
+                <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
+                  <div className="bg-slate-900 rounded-md p-2 text-white shadow-sm relative overflow-hidden">
+                    <h4 className="text-[13px] font-black mb-1.5 text-blue-400">AI 추천 대응</h4>
                     <p className="text-[12px] opacity-80 leading-tight">1. 내용증명 발송을 통한 최종 변제 기회 부여</p>
                     <p className="text-[12px] opacity-80 leading-tight mt-2">2. 피고소인 명의 부동산 가압류 신청</p>
                   </div>
-                  <button className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg flex items-center justify-center gap-2 text-[14px]">
+                  <button className="w-full py-1.5 bg-blue-600 text-white font-black rounded-md shadow-sm flex items-center justify-center gap-2 text-[14px]">
                     변호사와 상담 <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -263,15 +263,15 @@ export function ResultPage({ onBack }: ResultPageProps) {
               {/* Row 2 (Visible from Level 2) */}
               {analysisLevel >= 2 && (
                 <>
-                  <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+                  <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                     <SectionHeader title="5. 관련 판례 정밀 매칭" icon={BookOpen} />
-                    <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                      <div className="space-y-4">
-                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
+                      <div className="space-y-1">
+                        <div className="p-2 bg-slate-50 rounded-md border border-slate-100">
                           <h4 className="text-[13px] font-black text-slate-900 mb-2">유사 판례 검색</h4>
-                          <div className="space-y-3">
+                          <div className="space-y-1">
                             {[{ t: "2023다12345", m: "98%" }, { t: "2022고합789", m: "94%" }].map((item, i) => (
-                              <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-50 rounded-xl">
+                              <div key={i} className="flex items-center justify-between p-1 bg-white border border-slate-50 rounded-md">
                                 <p className="text-[12px] font-black text-blue-600">{item.t}</p>
                                 <span className="text-[12px] font-black text-emerald-600">{item.m}</span>
                               </div>
@@ -281,30 +281,30 @@ export function ResultPage({ onBack }: ResultPageProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+                  <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                     <SectionHeader title="6. 법률 키워드 분석" icon={Search} />
-                    <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                    <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
                       <div className="flex flex-wrap gap-2">
                         {["용도기망", "미필적고의", "자본잠식", "편취의사"].map((tag, i) => (
-                          <span key={i} className="px-3 py-1 bg-slate-100 text-slate-600 text-[11px] font-bold rounded-full">#{tag}</span>
+                          <span key={i} className="px-2 py-1 bg-slate-100 text-slate-600 text-[11px] font-bold rounded-full">#{tag}</span>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+                  <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                     <SectionHeader title="7. 예상 합의금 및 손해액 산정" icon={Landmark} />
-                    <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                      <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mb-4">
+                    <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
+                      <div className="p-2 bg-emerald-50 border border-emerald-100 rounded-md mb-1.5">
                         <p className="text-[11px] font-black text-emerald-600">피해 산정액</p>
-                        <p className="text-2xl font-black text-emerald-900">50,000,000원</p>
+                        <p className="text-sm font-black text-emerald-900">50,000,000원</p>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col min-h-[750px]">
+                  <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm flex flex-col min-h-[750px]">
                     <SectionHeader title="8. 전문 변호사 전략 제언" icon={Briefcase} />
-                    <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                      <div className="p-5 bg-slate-900 rounded-3xl text-white shadow-xl relative overflow-hidden mb-4">
-                        <h4 className="text-[13px] font-black text-blue-400 mb-3">Killer Strategy</h4>
+                    <div className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-1">
+                      <div className="p-2 bg-slate-900 rounded-md text-white shadow-sm relative overflow-hidden mb-1.5">
+                        <h4 className="text-[13px] font-black text-blue-400 mb-1">Killer Strategy</h4>
                         <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                           피고소인의 법인 자금 세탁 정황을 집중 추적하여 특경법 위반 소지를 검토해야 합니다.
                         </p>
@@ -316,16 +316,16 @@ export function ResultPage({ onBack }: ResultPageProps) {
             </div>
 
             {/* Bottom CTA */}
-            <div className="bg-slate-900 rounded-[40px] p-12 flex flex-col lg:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden mt-12">
-              <div className="flex items-center gap-10 relative z-10">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-[32px] flex items-center justify-center text-5xl shadow-2xl shadow-blue-500/40">
+            <div className="bg-slate-900 rounded-[40px] p-2 flex flex-col lg:flex-row items-center justify-between gap-2 shadow-sm relative overflow-hidden mt-1">
+              <div className="flex items-center gap-2 relative z-10">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-[32px] flex items-center justify-center text-xs shadow-sm shadow-blue-500/40">
                   <span role="img" aria-label="scales">&#x2696;&#xFE0F;</span>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="text-3xl font-black text-white tracking-tight">AI 법률 분석이 완료되었습니다.</h4>
+                  <h4 className="text-sm font-black text-white tracking-tight">AI 법률 분석이 완료되었습니다.</h4>
                 </div>
               </div>
-              <button className="w-full lg:w-auto px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl flex items-center justify-center gap-3 text-[17px]">
+              <button className="w-full lg:w-auto px-2 py-1.5 bg-blue-600 text-white font-black rounded-md hover:bg-blue-700 transition-all shadow-sm flex items-center justify-center gap-1 text-[17px]">
                 전문가 매칭 시작 <ArrowRight className="w-6 h-6" />
               </button>
             </div>
@@ -356,7 +356,7 @@ function DonutChart({ item, index }: { item: typeof questionBreakdown[number]; i
   const offset = circumference - (item.percent / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-3 group">
+    <div className="flex flex-col items-center gap-1 group">
       <div className="relative">
         <svg width={size} height={size} className="transform -rotate-90">
           <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={strokeWidth} />
@@ -368,7 +368,7 @@ function DonutChart({ item, index }: { item: typeof questionBreakdown[number]; i
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-slate-900 leading-none">{item.percent}<span className="text-[12px] opacity-40">%</span></span>
+          <span className="text-sm font-black text-slate-900 leading-none">{item.percent}<span className="text-[12px] opacity-40">%</span></span>
         </div>
       </div>
       <div className="text-center">

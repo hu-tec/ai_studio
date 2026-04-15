@@ -23,7 +23,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   const isSomeSelected = items.some((item) => selectedItems.includes(item)) && !isAllSelected;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="bg-slate-50 p-2 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm">{emoji}</span>
@@ -44,9 +44,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">전체</span>
         </div>
       </div>
-      <div className="p-2 space-y-3">
+      <div className="p-2 space-y-1">
         {items.map((item) => (
-          <div key={item} className="flex items-center gap-3 group cursor-pointer" onClick={() => onToggleItem(item)}>
+          <div key={item} className="flex items-center gap-1 group cursor-pointer" onClick={() => onToggleItem(item)}>
             <Checkbox.Root
               className={`flex h-5 w-5 appearance-none items-center justify-center rounded border outline-none transition-colors ${
                 selectedItems.includes(item) ? "bg-slate-700 border-slate-700" : "bg-white border-slate-300 group-hover:border-slate-400"

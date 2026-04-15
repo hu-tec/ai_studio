@@ -164,10 +164,10 @@ const colorMap: Record<string, { bg50: string; bg600: string; text700: string; b
 
 export function CurriculumDescriptionView() {
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-10">
+    <div className="space-y-2 pb-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-200 pb-2">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          <h2 className="text-sm font-bold text-gray-900 tracking-tight flex items-center gap-1">
             <BookOpen className="text-blue-600" size={32} />
             교육 과정 커리큘럼
           </h2>
@@ -182,24 +182,24 @@ export function CurriculumDescriptionView() {
       </div>
 
       {/* Grid of Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {curriculumData.map((item) => {
           const colors = colorMap[item.color] ?? colorMap.blue;
           return (
             <div
               key={item.category}
-              className="group flex flex-col bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-blue-50/50 transition-all duration-500 overflow-hidden"
+              className="group flex flex-col bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-sm hover:shadow-blue-50/50 transition-all duration-500 overflow-hidden"
             >
               <div
-                className={`p-8 ${colors.bg50} flex items-center gap-6 border-b ${colors.border100} transition-colors group-hover:bg-white`}
+                className={`p-2 ${colors.bg50} flex items-center gap-2 border-b ${colors.border100} transition-colors group-hover:bg-white`}
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl ${colors.bg600} text-white flex items-center justify-center shadow-lg ${colors.shadow200} transition-transform group-hover:scale-110`}
+                  className={`w-16 h-16 rounded-md ${colors.bg600} text-white flex items-center justify-center shadow-sm ${colors.shadow200} transition-transform group-hover:scale-110`}
                 >
                   <item.icon size={32} />
                 </div>
                 <div className="flex-1 space-y-1">
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-sm font-bold text-gray-900">
                     {item.category}
                   </h3>
                   <p className="text-sm font-medium text-gray-500">
@@ -208,16 +208,16 @@ export function CurriculumDescriptionView() {
                 </div>
               </div>
 
-              <div className="p-8 space-y-6">
+              <div className="p-2 space-y-2">
                 {item.levels.map((level, idx) => (
                   <div
                     key={idx}
-                    className="relative pl-6 space-y-2 border-l-2 border-gray-100 group-hover:border-blue-100 transition-colors"
+                    className="relative pl-2 space-y-2 border-l-2 border-gray-100 group-hover:border-blue-100 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-3 py-1 ${colors.bg50} ${colors.text700} text-xs font-bold rounded-full`}
+                          className={`px-2 py-1 ${colors.bg50} ${colors.text700} text-xs font-bold rounded-full`}
                         >
                           {level.type}
                         </span>
@@ -237,7 +237,7 @@ export function CurriculumDescriptionView() {
                 ))}
               </div>
 
-              <div className="mt-auto p-6 bg-gray-50/50 border-t border-gray-50">
+              <div className="mt-auto p-2 bg-gray-50/50 border-t border-gray-50">
                 <button className="w-full flex items-center justify-center gap-2 text-sm font-bold text-gray-400 hover:text-blue-600 transition-colors">
                   상세 커리큘럼 보기
                   <ChevronRight size={14} />
@@ -249,29 +249,29 @@ export function CurriculumDescriptionView() {
       </div>
 
       {/* Additional Info Section */}
-      <div className="bg-gray-900 rounded-[2.5rem] p-10 md:p-16 text-white overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] -mr-32 -mt-32 rounded-full" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/20 blur-[100px] -ml-32 -mb-32 rounded-full" />
+      <div className="bg-gray-900 rounded-[2.5rem] p-2 md:p-2 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] -mr-32 -mt-1 rounded-full" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/20 blur-[100px] -ml-32 -mb-1 rounded-full" />
 
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold border border-blue-500/30">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold border border-blue-500/30">
               <Sparkles size={14} />
               AI-Powered Education
             </div>
-            <h3 className="text-4xl font-bold leading-tight">
+            <h3 className="text-sm font-bold leading-tight">
               미래를 선도하는
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                 AI 교육 생태계
               </span>
             </h3>
-            <p className="text-gray-400 leading-relaxed text-lg">
+            <p className="text-gray-400 leading-relaxed text-xs">
               단순한 기술 전달을 넘어, AI와 인간이 공존하며 시너지를 내는 최상의
               커리큘럼을 제공합니다. 각 등급별 체계적인 역량 로드맵을 통해 최고의
               강사진으로 성장하세요.
             </p>
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-wrap gap-1.5 pt-1.5">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="text-blue-500" size={18} />
                 <span className="text-sm font-medium">검증된 AI 도구 활용</span>
@@ -287,17 +287,17 @@ export function CurriculumDescriptionView() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm space-y-4">
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-white/5 border border-white/10 p-2 rounded-md backdrop-blur-sm space-y-1">
               <Cpu className="text-blue-400" size={32} />
-              <h4 className="font-bold text-xl">LMS 통합</h4>
+              <h4 className="font-bold text-sm">LMS 통합</h4>
               <p className="text-xs text-gray-500">
                 자체 학습 관리 시스템을 통한 데이터 기반 성과 추적
               </p>
             </div>
-            <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm space-y-4 mt-8">
+            <div className="bg-white/5 border border-white/10 p-2 rounded-md backdrop-blur-sm space-y-1 mt-2">
               <Star className="text-yellow-400" size={32} />
-              <h4 className="font-bold text-xl">인증서 발급</h4>
+              <h4 className="font-bold text-sm">인증서 발급</h4>
               <p className="text-xs text-gray-500">
                 전 과정 이수 시 공신력 있는 급수별 자격증 발급
               </p>

@@ -71,10 +71,10 @@ export function DashboardView({ data }: DashboardViewProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         {/* Regulation Type Distribution */}
-        <div className="lg:col-span-2 bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-black text-gray-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">📊</div>
+        <div className="lg:col-span-2 bg-white p-1 rounded-lg border border-gray-100 shadow-sm shadow-gray-200/50">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-sm font-black text-gray-800 flex items-center gap-1">
+              <div className="w-10 h-10 rounded-md bg-gray-50 flex items-center justify-center border border-gray-100">📊</div>
               전체 규정 유형별 실시간 통계
             </h3>
             <div className="flex gap-2">
@@ -126,9 +126,9 @@ export function DashboardView({ data }: DashboardViewProps) {
         </div>
 
         {/* Category Distribution Sidebar */}
-        <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col">
-          <h3 className="text-sm font-black text-gray-800 flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">📑</div>
+        <div className="bg-white p-1 rounded-lg border border-gray-100 shadow-sm shadow-gray-200/50 flex flex-col">
+          <h3 className="text-sm font-black text-gray-800 flex items-center gap-1 mb-1">
+            <div className="w-10 h-10 rounded-md bg-gray-50 flex items-center justify-center border border-gray-100">📑</div>
             분류별 비중
           </h3>
           <div className="flex-1 space-y-2">
@@ -149,8 +149,8 @@ export function DashboardView({ data }: DashboardViewProps) {
               </div>
             ))}
           </div>
-          <div className="mt-3 pt-2 border-t border-gray-50">
-            <button className="w-full py-2 bg-gray-900 text-white rounded-2xl font-black text-sm tracking-widest hover:bg-black transition-all shadow-lg shadow-gray-200">
+          <div className="mt-1 pt-2 border-t border-gray-50">
+            <button className="w-full py-1 bg-gray-900 text-white rounded-md font-black text-sm tracking-widest hover:bg-black transition-all shadow-sm shadow-gray-200">
               전체 보고서 다운로드
             </button>
           </div>
@@ -158,15 +158,15 @@ export function DashboardView({ data }: DashboardViewProps) {
       </div>
 
       {/* Recent Updates Horizontal Scroll */}
-      <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-        <h3 className="text-sm font-black text-gray-800 flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100">⚡</div>
+      <div className="bg-white p-1 rounded-lg border border-gray-100 shadow-sm shadow-gray-200/50 overflow-hidden">
+        <h3 className="text-sm font-black text-gray-800 flex items-center gap-1 mb-2">
+          <div className="w-10 h-10 rounded-md bg-gray-50 flex items-center justify-center border border-gray-100">⚡</div>
           최근 업데이트 기록
         </h3>
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
           {allRegs.slice(0, 10).map((reg, i) => (
-            <div key={`${reg.id}-${i}`} className="min-w-[280px] p-2 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-white transition-all group">
-              <div className="flex items-center gap-2 mb-3">
+            <div key={`${reg.id}-${i}`} className="min-w-[280px] p-2 bg-gray-50/50 rounded-md border border-gray-100 hover:border-blue-200 hover:bg-white transition-all group">
+              <div className="flex items-center gap-2 mb-1">
                 <span className={clsx(
                   "w-2 h-2 rounded-full",
                   reg.type === 'fixed' ? "bg-red-500" : reg.type === 'semi' ? "bg-amber-500" : "bg-emerald-500"
@@ -174,7 +174,7 @@ export function DashboardView({ data }: DashboardViewProps) {
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">{reg.type} RULE</span>
               </div>
               <h4 className="text-sm font-bold text-gray-800 truncate mb-1">{reg.title}</h4>
-              <p className="text-[10px] text-gray-400 font-medium mb-4">Last Updated: {reg.lastUpdated}</p>
+              <p className="text-[10px] text-gray-400 font-medium mb-1.5">Last Updated: {reg.lastUpdated}</p>
               <div className="flex justify-end">
                 <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform">View Details →</button>
               </div>
@@ -188,10 +188,10 @@ export function DashboardView({ data }: DashboardViewProps) {
 
 function StatCard({ title, value, icon, color, border }: { title: string, value: number, icon: React.ReactNode, color: string, border: string }) {
   return (
-    <div className={clsx("p-3 rounded-lg border shadow-2xl shadow-gray-200/20 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-gray-300/50 bg-white", border)}>
+    <div className={clsx("p-1 rounded-lg border shadow-sm shadow-gray-200/20 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-gray-300/50 bg-white", border)}>
       <div className="space-y-1">
         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{title}</p>
-        <h4 className="text-base font-black text-gray-900">{value.toLocaleString()}</h4>
+        <h4 className="text-xs font-black text-gray-900">{value.toLocaleString()}</h4>
       </div>
       <div className={clsx("w-16 h-16 rounded-[1.25rem] flex items-center justify-center", color)}>
         {icon}

@@ -100,8 +100,8 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
   return (
     <div className={fullscreen
-      ? "fixed inset-0 z-50 bg-background p-4 overflow-auto space-y-3"
-      : "space-y-3"
+      ? "fixed inset-0 z-50 bg-background p-2 overflow-auto space-y-1"
+      : "space-y-1"
     }>
       {/* Add bar */}
       <div className="flex items-center gap-1 p-2 border border-border rounded-lg bg-muted/20 flex-wrap">
@@ -127,7 +127,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
       {/* Task list (타임라인은 왼쪽 타임테이블에 표시됨) */}
       <div className="border border-border rounded-lg overflow-hidden">
-        <div className="bg-accent/40 px-3 py-1 border-b border-border flex items-center justify-between">
+        <div className="bg-accent/40 px-2 py-1 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold">업무 목록</span>
             <button onClick={() => { const allExp = sorted.every(t => expandedIds.has(t.id)); setExpandedIds(allExp ? new Set() : new Set(sorted.map(t => t.id))); }}
@@ -153,7 +153,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
         <div className="overflow-y-auto" style={{ scrollbarWidth: 'none', maxHeight: fullscreen ? 'calc(100vh - 180px)' : 'calc(100vh - 450px)' }}>
           {sorted.length === 0 ? (
-            <div className="p-6 text-center text-[11px] text-muted-foreground">업무를 추가하세요</div>
+            <div className="p-2 text-center text-[11px] text-muted-foreground">업무를 추가하세요</div>
           ) : sorted.map(task => {
             const pCfg = FRANKLIN_PRIORITY_CONFIG[task.priority];
             const stCfg = FRANKLIN_STATUS_CONFIG[task.status];
@@ -224,7 +224,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="px-8 py-2 bg-accent/5 border-t border-border/30 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="px-2 py-1 bg-accent/5 border-t border-border/30 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
                     {/* Time range edit */}
                     <div className="flex items-center gap-2 text-[11px]">
                       <span className="text-muted-foreground w-12">시간</span>
@@ -233,7 +233,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                       <span>~</span>
                       <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
                         className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[90px]" />
-                      <label className="flex items-center gap-1 ml-4 cursor-pointer">
+                      <label className="flex items-center gap-1 ml-1.5 cursor-pointer">
                         <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })}
                           className="w-3 h-3 accent-amber-500" />
                         <span className="text-amber-600 text-[10px] font-bold">⚠ 이슈</span>
@@ -276,7 +276,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                       {(task.children || []).map(sub => {
                         const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
                         return (
-                          <div key={sub.id} className="flex items-center gap-1.5 pl-14 py-0.5 group/sub">
+                          <div key={sub.id} className="flex items-center gap-1.5 pl-2 py-0.5 group/sub">
                             <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                               className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0"
                               style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
@@ -303,7 +303,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
         {/* Forwarded */}
         {tasks.some(t => t.status === 'forwarded') && (
-          <div className="px-3 py-1.5 bg-amber-50 border-t border-amber-200 text-[10px] text-amber-700">
+          <div className="px-2 py-1.5 bg-amber-50 border-t border-amber-200 text-[10px] text-amber-700">
             <strong>이월:</strong> {tasks.filter(t => t.status === 'forwarded').map(t => `${t.priority}${t.number} ${t.task}`).join(', ')}
           </div>
         )}

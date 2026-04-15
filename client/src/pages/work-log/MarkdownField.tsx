@@ -64,13 +64,13 @@ export function MarkdownField({ value, onChange, placeholder = '', minHeight = 6
             t.style.height = Math.max(minHeight, t.scrollHeight) + 'px';
           }}
           placeholder={placeholder}
-          className="w-full px-2 py-1.5 pr-16 bg-transparent outline-none resize-none text-[12px] font-mono"
+          className="w-full px-2 py-1.5 pr-2 bg-transparent outline-none resize-none text-[12px] font-mono"
           style={{ minHeight }}
         />
       ) : (
         <div
           onClick={() => setMode('edit')}
-          className="w-full px-2 py-1.5 pr-16 cursor-text"
+          className="w-full px-2 py-1.5 pr-2 cursor-text"
           style={{ minHeight, fontSize: 12, lineHeight: 1.5 }}
         >
           {value ? (

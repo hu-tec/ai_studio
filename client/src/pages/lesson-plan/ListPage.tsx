@@ -49,7 +49,7 @@ export function ListPage() {
     <div className="space-y-2">
       {/* Header + Search */}
       <div className="bg-white border border-border rounded-lg p-2.5">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-1 flex-wrap">
           <h2 className="text-sm shrink-0">레슨플랜 목록</h2>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {[
@@ -82,13 +82,13 @@ export function ListPage() {
                 className="w-full pl-7 pr-2 py-1.5 border border-border rounded bg-[var(--input-background)] focus:outline-none focus:ring-1 focus:ring-blue-500/30 text-sm"
               />
             </div>
-            <button className="px-3 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 text-sm">
+            <button className="px-2 py-1.5 bg-primary text-primary-foreground rounded hover:opacity-90 text-sm">
               검색
             </button>
           </div>
           <button
             onClick={() => navigate("/lesson-plan/write")}
-            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm shrink-0"
+            className="flex items-center gap-1 px-2 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm shrink-0"
           >
             <PenSquare className="w-3 h-3" />
             등록
@@ -110,7 +110,7 @@ export function ListPage() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={14} className="px-2 py-6 text-center text-muted-foreground text-sm">
+                  <td colSpan={14} className="px-2 py-1 text-center text-muted-foreground text-sm">
                     검색 결과가 없습니다.
                   </td>
                 </tr>

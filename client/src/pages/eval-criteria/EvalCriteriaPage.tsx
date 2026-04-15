@@ -122,7 +122,7 @@ const ColumnHeader = ({
         <span className="text-sm">{emoji}</span>
         <h3 className="font-bold text-slate-800 text-sm whitespace-nowrap">{title}</h3>
       </div>
-      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 focus-within:ring-2 focus-within:ring-slate-900/10 focus-within:border-slate-400 transition-all ml-2 w-[90px] shadow-sm">
+      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus-within:ring-2 focus-within:ring-slate-900/10 focus-within:border-slate-400 transition-all ml-2 w-[90px] shadow-sm">
         <input 
           type="text" 
           inputMode="numeric"
@@ -169,12 +169,12 @@ const CustomItem = ({
 
   return (
     <div 
-      className={`group flex items-center justify-between p-3 rounded-xl transition-all cursor-pointer relative border ${
+      className={`group flex items-center justify-between p-1 rounded-md transition-all cursor-pointer relative border ${
         isActive ? "bg-slate-100 border-slate-200 shadow-sm" : "bg-transparent border-transparent hover:bg-slate-50"
       }`}
       onClick={() => !isEditing && onLabelClick && onLabelClick()}
     >
-      <div className="flex items-center gap-3 flex-1 overflow-hidden">
+      <div className="flex items-center gap-1 flex-1 overflow-hidden">
         {mode === "VIEW" && (
           <Checkbox.Root
             className={`flex h-5 w-5 shrink-0 appearance-none items-center justify-center rounded border outline-none transition-colors ${
@@ -355,8 +355,8 @@ function EvalCriteriaPage() {
   return (
     <div className="h-screen bg-slate-50 flex flex-col font-sans text-slate-900 overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-3 py-2 flex items-center justify-between z-20 shadow-sm shrink-0">
-        <div className="flex items-center gap-3">
+      <header className="bg-white border-b border-slate-200 px-2 py-1 flex items-center justify-between z-20 shadow-sm shrink-0">
+        <div className="flex items-center gap-1">
           <div className="bg-slate-900 text-white p-2 rounded-lg">
             <LayoutDashboard size={20} />
           </div>
@@ -367,7 +367,7 @@ function EvalCriteriaPage() {
         </div>
 
         {/* Mode Transformation Control */}
-        <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+        <div className="flex items-center bg-slate-100 p-1.5 rounded-md border border-slate-200 shadow-inner">
           {[
             { id: "VIEW", label: "조회", emoji: "🔍" },
             { id: "ADD", label: "추가", emoji: "➕" },
@@ -377,7 +377,7 @@ function EvalCriteriaPage() {
             <button
               key={m.id}
               onClick={() => setAppMode(m.id as DashboardMode)}
-              className={`flex items-center gap-2 px-2 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center gap-2 px-2 py-1 rounded-md text-xs font-bold transition-all duration-200 ${
                 appMode === m.id 
                   ? "bg-white text-slate-900 shadow-md scale-105 ring-1 ring-slate-200/50" 
                   : "text-slate-500 hover:text-slate-800 hover:bg-white/40"
@@ -390,14 +390,14 @@ function EvalCriteriaPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+          <div className="flex items-center gap-2 bg-slate-100 px-2 py-1.5 rounded-full border border-slate-200">
             <CheckCircle2 size={14} className="text-slate-900" />
             <span className="text-xs font-bold">{totalSelectedCount}</span>
           </div>
           <button onClick={resetAll} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
             <RotateCcw size={18} />
           </button>
-          <button className="flex items-center gap-2 px-2 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-all shadow-sm">
+          <button className="flex items-center gap-2 px-2 py-1 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-all shadow-sm">
             <Save size={16} /> 저장
           </button>
         </div>
@@ -408,7 +408,7 @@ function EvalCriteriaPage() {
         {/* Col 1 */}
         <div className="w-1/4 min-w-[240px] border-r border-slate-200 bg-white overflow-y-auto flex flex-col">
           <ColumnHeader title="대분류" emoji="📁" targetValue={targetMainCount} onTargetChange={setTargetMainCount} />
-          <div className="p-3 space-y-1">
+          <div className="p-1 space-y-1">
             {data.map((main) => (
               <CustomItem
                 key={main.id}
@@ -423,7 +423,7 @@ function EvalCriteriaPage() {
               />
             ))}
             {appMode === "ADD" && (
-              <button onClick={() => addItem('MAIN')} className="w-full mt-2 p-3 border border-dashed border-slate-300 rounded-xl text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
+              <button onClick={() => addItem('MAIN')} className="w-full mt-2 p-1 border border-dashed border-slate-300 rounded-md text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
                 <PlusCircle size={14} /> 대분류 추가
               </button>
             )}
@@ -433,7 +433,7 @@ function EvalCriteriaPage() {
         {/* Col 2 */}
         <div className="w-1/4 min-w-[240px] border-r border-slate-200 bg-white overflow-y-auto flex flex-col">
           <ColumnHeader title="중분류" emoji="📂" targetValue={targetSubCount} onTargetChange={setTargetSubCount} />
-          <div className="p-3 space-y-1">
+          <div className="p-1 space-y-1">
             <AnimatePresence mode="wait">
               <motion.div key={activeMainId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
                 {activeMain?.subs.map((sub) => (
@@ -450,7 +450,7 @@ function EvalCriteriaPage() {
                   />
                 ))}
                 {appMode === "ADD" && (
-                  <button onClick={() => addItem('SUB')} className="w-full mt-2 p-3 border border-dashed border-slate-300 rounded-xl text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
+                  <button onClick={() => addItem('SUB')} className="w-full mt-2 p-1 border border-dashed border-slate-300 rounded-md text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
                     <PlusCircle size={14} /> 중분류 추가
                   </button>
                 )}
@@ -462,7 +462,7 @@ function EvalCriteriaPage() {
         {/* Col 3 */}
         <div className="w-1/4 min-w-[280px] border-r border-slate-200 bg-slate-50/50 overflow-y-auto flex flex-col">
           <ColumnHeader title="소분류 상세" emoji="🗒️" targetValue={targetDetailCount} onTargetChange={setTargetDetailCount} />
-          <div className="p-3 space-y-1">
+          <div className="p-1 space-y-1">
             <AnimatePresence mode="wait">
               <motion.div key={activeSubId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
                 {activeSub?.details.map((detail, idx) => (
@@ -481,7 +481,7 @@ function EvalCriteriaPage() {
                   />
                 ))}
                 {appMode === "ADD" && (
-                  <button onClick={() => addItem('DETAIL')} className="w-full mt-2 p-3 border border-dashed border-slate-300 rounded-xl text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
+                  <button onClick={() => addItem('DETAIL')} className="w-full mt-2 p-1 border border-dashed border-slate-300 rounded-md text-slate-400 text-xs font-bold hover:bg-slate-50 flex items-center justify-center gap-2">
                     <PlusCircle size={14} /> 상세지표 추가
                   </button>
                 )}
@@ -499,12 +499,12 @@ function EvalCriteriaPage() {
             </div>
           </div>
           <div className="p-2 space-y-2">
-            <div className="p-2 rounded-2xl bg-slate-900 text-white space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+            <div className="p-2 rounded-md bg-slate-900 text-white space-y-1 shadow-sm">
+              <div className="flex justify-between items-center border-b border-white/10 pb-1">
                 <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">현재 모드</span>
                 <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded uppercase">{appMode}</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-white/60">목표 달성도</span>
                   <span className="font-bold">{Math.min(100, (totalSelectedCount / (targetDetailCount || 1) * 100)).toFixed(0)}%</span>
@@ -515,11 +515,11 @@ function EvalCriteriaPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-1">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck size={12} /> 관리 기능 안내
               </label>
-              <div className="p-2 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3 text-[11px] text-slate-600 font-medium leading-relaxed">
+              <div className="p-2 rounded-md border border-slate-100 bg-slate-50/50 space-y-1 text-[11px] text-slate-600 font-medium leading-relaxed">
                 <p>🔍 <b>조회:</b> 항목 선택 및 요약 확인</p>
                 <p>➕ <b>추가:</b> 하단 버튼으로 새 항목 생성</p>
                 <p>✏️ <b>수정:</b> 아이콘 클릭 후 이름 직접 변경</p>
@@ -527,12 +527,12 @@ function EvalCriteriaPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-2 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+            <div className="grid grid-cols-2 gap-1">
+              <div className="p-2 bg-white border border-slate-200 rounded-md text-center shadow-sm">
                 <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">총 분류</p>
                 <p className="text-sm font-black">{data.length}</p>
               </div>
-              <div className="p-2 bg-white border border-slate-200 rounded-xl text-center shadow-sm">
+              <div className="p-2 bg-white border border-slate-200 rounded-md text-center shadow-sm">
                 <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">총 지표</p>
                 <p className="text-sm font-black">{data.reduce((a, m) => a + m.subs.reduce((s, d) => s + d.details.length, 0), 0)}</p>
               </div>
@@ -542,7 +542,7 @@ function EvalCriteriaPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-1.5 px-3 flex justify-between items-center text-[10px] font-bold text-slate-400 shrink-0">
+      <footer className="bg-white border-t border-slate-100 py-1.5 px-2 flex justify-between items-center text-[10px] font-bold text-slate-400 shrink-0">
         <div className="flex gap-2">
           <span>DASHBOARD v3.5</span>
           <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE SYNC</span>

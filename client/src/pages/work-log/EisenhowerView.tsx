@@ -102,7 +102,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   tasks.forEach(t => { if (t.timeSlotId) slotTaskMap.set(t.timeSlotId, t); });
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       {/* Add bar */}
       <div className="flex items-center gap-1 p-2 border border-border rounded-lg bg-muted/20">
         <div className="flex gap-0.5">
@@ -188,7 +188,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
               {/* Tasks */}
               <div className="flex-1 overflow-y-auto">
                 {items.length === 0 ? (
-                  <div className="p-4 text-center text-[11px] text-muted-foreground">
+                  <div className="p-2 text-center text-[11px] text-muted-foreground">
                     과업을 여기로 드래그하세요
                   </div>
                 ) : (
@@ -229,7 +229,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                         </div>
                         {/* Full expanded detail */}
                         {isExpanded && (
-                          <div className="px-4 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
+                          <div className="px-2 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
                             <div className="flex items-center gap-2">
                               <span className="text-muted-foreground w-10">시간</span>
                               <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
@@ -267,7 +267,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                               {(task.children || []).map(sub => {
                                 const subSt = FRANKLIN_STATUS_CONFIG[sub.status];
                                 return (
-                                  <div key={sub.id} className="flex items-center gap-1 pl-12 py-0.5 group/sub">
+                                  <div key={sub.id} className="flex items-center gap-1 pl-2 py-0.5 group/sub">
                                     <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                                       className="w-3.5 h-3.5 rounded flex items-center justify-center text-[8px] font-bold shrink-0"
                                       style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>

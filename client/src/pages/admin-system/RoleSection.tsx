@@ -3,7 +3,7 @@ import React from "react";
 export const RoleSection: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-zinc-200 py-1 px-3 mb-2">
+      <div className="bg-zinc-200 py-1 px-2 mb-2">
         <h2 className="text-sm font-black text-zinc-700 text-center tracking-tight">권한/역할(관리자)</h2>
       </div>
 
@@ -43,7 +43,7 @@ export const RoleSection: React.FC = () => {
 
         <div>
           <label className="block text-[10px] font-black text-zinc-400 mb-2 uppercase tracking-widest border-b border-zinc-100 pb-1">권한 가이드 🔐</label>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {[
               { title: "접근 제어", desc: "사용자 로그인 및 세션 유지 관리", role: "관리" },
               { title: "시스템 설정", desc: "데이터베이스 및 네트워크 접근 통제", role: "시스템" },

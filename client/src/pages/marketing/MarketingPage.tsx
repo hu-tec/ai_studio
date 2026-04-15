@@ -176,8 +176,8 @@ export default function MarketingPage() {
   return (
     <div className="size-full flex flex-col bg-white text-black overflow-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-3 py-1.5 flex items-center gap-3 shrink-0">
-        <span className="text-xl shrink-0">마케팅 타겟 DB</span>
+      <header className="border-b border-gray-200 px-2 py-1.5 flex items-center gap-1 shrink-0">
+        <span className="text-sm shrink-0">마케팅 타겟 DB</span>
 
         {/* Homepage pills */}
         <div className="flex items-center gap-1 overflow-x-auto">
@@ -226,7 +226,7 @@ export default function MarketingPage() {
           </Button>
           <Button
             size="sm"
-            className="h-7 text-xs px-3 bg-black text-white hover:bg-gray-800 rounded-md"
+            className="h-7 text-xs px-2 bg-black text-white hover:bg-gray-800 rounded-md"
             onClick={handleSave}
           >
             {editingId ? "수정" : "저장"}
@@ -250,7 +250,7 @@ export default function MarketingPage() {
                 onValueChange={setOpenSections}
               >
                 <AccordionItem value="category" className="border-b border-gray-200">
-                  <AccordionTrigger className="gap-1.5 px-3 py-1.5 hover:no-underline hover:bg-[#f4f4f5]">
+                  <AccordionTrigger className="gap-1.5 px-2 py-1.5 hover:no-underline hover:bg-[#f4f4f5]">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs">카테고리</span>
                       {category.big ? (
@@ -264,7 +264,7 @@ export default function MarketingPage() {
                       )}
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-3 pb-2.5">
+                  <AccordionContent className="px-2 pb-2.5">
                     <CategorySelector
                       big={category.big}
                       mid={category.mid}
@@ -275,7 +275,7 @@ export default function MarketingPage() {
                 </AccordionItem>
 
                 <AccordionItem value="persona" className="border-b-0">
-                  <AccordionTrigger className="gap-1.5 px-3 py-1.5 hover:no-underline hover:bg-[#f4f4f5]">
+                  <AccordionTrigger className="gap-1.5 px-2 py-1.5 hover:no-underline hover:bg-[#f4f4f5]">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs">페르소나</span>
                       {persona.targetClasses.length > 0 ? (
@@ -295,7 +295,7 @@ export default function MarketingPage() {
                       )}
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-3 pb-2.5">
+                  <AccordionContent className="px-2 pb-2.5">
                     <PersonaBuilder persona={persona} onChange={setPersona} />
                   </AccordionContent>
                 </AccordionItem>
@@ -303,7 +303,7 @@ export default function MarketingPage() {
             </div>
 
             {/* Main area: Marketing Copy (always visible) */}
-            <div className="p-3">
+            <div className="p-1">
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-xs">카피 작성</span>
                 {copy.headline && (
@@ -319,7 +319,7 @@ export default function MarketingPage() {
 
         {/* RIGHT: Saved List */}
         <div className="w-[45%] flex flex-col min-h-0">
-          <div className="border-b border-gray-200 px-3 py-1.5 flex items-center justify-between shrink-0 bg-[#f4f4f5]">
+          <div className="border-b border-gray-200 px-2 py-1.5 flex items-center justify-between shrink-0 bg-[#f4f4f5]">
             <span className="text-xs">저장 목록</span>
             <span className="text-[10px] text-gray-400">{entries.length}건</span>
           </div>

@@ -32,14 +32,14 @@ export function PreviewPanel({ applicant }: PreviewPanelProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+      <div className="flex items-center gap-2 px-2 py-1 border-b border-gray-100 bg-gray-50 rounded-t-lg">
         <Eye className="w-3.5 h-3.5 text-gray-500" />
         <span className="text-gray-700" style={{ fontSize: "0.8rem" }}>{"\uBBF8\uB9AC\uBCF4\uAE30"}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-1 space-y-1">
         {/* Grade Display */}
-        <div className={`${colors.bg} ${colors.border} border-2 rounded-lg p-3 text-center`}>
+        <div className={`${colors.bg} ${colors.border} border-2 rounded-lg p-1 text-center`}>
           <div className={`${colors.text}`} style={{ fontSize: "0.7rem", fontWeight: 500 }}>{"\uD3C9\uAC00 \uB4F1\uAE09"}</div>
           <div className={`${colors.text} mt-1`} style={{ fontSize: "2.5rem", fontWeight: 700, lineHeight: 1 }}>
             {grade}

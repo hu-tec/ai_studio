@@ -498,7 +498,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   return (
     <div className="bg-card rounded border border-border overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-border bg-accent/20 flex items-center justify-between">
+      <div className="px-2 py-1 border-b border-border bg-accent/20 flex items-center justify-between">
         <span className="font-semibold">{format(date, 'yyyy.M.d (EEE)', { locale: ko })} 업무일지</span>
         <div className="flex items-center gap-1">
           <span className="text-[9px] text-muted-foreground mr-1">자동저장</span>
@@ -512,13 +512,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
         </div>
       </div>
 
-      <div className="p-3 space-y-2 [&_::-webkit-scrollbar]:hidden [&_*]:scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+      <div className="p-1 space-y-2 [&_::-webkit-scrollbar]:hidden [&_*]:scrollbar-none" style={{ scrollbarWidth: 'none' }}>
 
         {/* Settings summary (collapsed) + expand toggle */}
         <div className="rounded-lg border border-border overflow-hidden">
           <button
             onClick={() => setSettingsOpen(p => !p)}
-            className="w-full px-3 py-1.5 flex items-center justify-between bg-accent/10 hover:bg-accent/20 transition-colors"
+            className="w-full px-2 py-1.5 flex items-center justify-between bg-accent/10 hover:bg-accent/20 transition-colors"
           >
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
               <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold text-[10px]">{emp.name}</span>
@@ -692,7 +692,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
               </div>
               {/* 인라인 통계 바 */}
               {showStats && (
-                <div className="w-full flex items-center gap-3 px-2 py-1 bg-slate-50 rounded border border-slate-200 text-[10px]">
+                <div className="w-full flex items-center gap-1 px-2 py-1 bg-slate-50 rounded border border-slate-200 text-[10px]">
                   <span className="text-slate-500 font-semibold">{period==='daily'?'오늘':period==='weekly'?'이번 주':'이번 달'}</span>
                   {viewMode === 'mandalart' && mStats ? (<>
                     <span className="text-blue-600 font-bold">작성 {mStats.filled}/{mandalartChildCount(activeSize)}</span>
@@ -781,7 +781,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
         })()}
 
         {/* ⑥ 타임테이블 (Classic=확장, Franklin/Eisenhower=축소+우측패널) */}
-        <div className="flex gap-3 items-start">
+        <div className="flex gap-1 items-start">
           {/* Timetable — Classic: 전체너비 확장, 나머지: 300px 축소 */}
           <div
             className="shrink-0 border border-border rounded-lg overflow-hidden transition-all duration-300 ease-in-out"

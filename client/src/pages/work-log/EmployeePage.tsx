@@ -45,7 +45,7 @@ function PromptTemplateManager() {
 
   return (
     <div className="border border-border rounded-lg bg-card overflow-hidden flex flex-col h-[400px]">
-      <div className="bg-muted/50 px-3 py-2 border-b border-border flex items-center justify-between">
+      <div className="bg-muted/50 px-2 py-1 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-semibold">프롬프트 템플릿 관리</span>
@@ -73,7 +73,7 @@ function PromptTemplateManager() {
             </button>
           ))}
         </div>
-        <div className="flex-1 p-3 overflow-y-auto space-y-4">
+        <div className="flex-1 p-1 overflow-y-auto space-y-1">
           {currentTemplate ? (
             <>
               <div>
@@ -85,7 +85,7 @@ function PromptTemplateManager() {
                   className="w-full border border-border rounded px-2 py-1.5 text-sm bg-input-background focus:ring-1 focus:ring-primary/30 outline-none"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3 h-[250px]">
+              <div className="grid grid-cols-2 gap-1 h-[250px]">
                 <div className="flex flex-col">
                   <label className="block text-[11px] font-medium text-muted-foreground mb-1 uppercase">1차 프롬프트 베이스</label>
                   <textarea
@@ -311,11 +311,11 @@ export function EmployeePage() {
   };
 
   return (
-    <div ref={appRef} className="max-w-[1920px] mx-auto px-1 py-3 bg-background">
+    <div ref={appRef} className="max-w-[1920px] mx-auto px-1 py-1 bg-background">
       {/* Top Bar */}
-      <div className="flex items-center justify-between mb-3 px-2">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-black text-primary tracking-tight">업무일지</h1>
+      <div className="flex items-center justify-between mb-1 px-2">
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-xs font-black text-primary tracking-tight">업무일지</h1>
           {/* 작성자 선택 */}
           <div className="flex items-center gap-1">
             {employees.map(emp => (
@@ -368,15 +368,15 @@ export function EmployeePage() {
           <div className="flex bg-muted rounded-lg p-0.5">
             <button
               onClick={() => { setPageMode('today'); setSelectedDate(new Date()); }}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'today' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'today' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >오늘</button>
             <button
               onClick={() => setPageMode('calendar')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >캘린더</button>
             <button
               onClick={() => setPageMode('list')}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'list' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >리스트</button>
           </div>
           {/* 날짜 이동: 이전/다음 + 현재 날짜 표시 (오늘 복귀) */}
@@ -426,7 +426,7 @@ export function EmployeePage() {
         /* Calendar mode — left calendar + right detail (left 숨기기 가능) */
         <div className="flex gap-0 items-start">
           {leftPanelOpen && (
-            <div className="shrink-0 sticky top-3 flex flex-col gap-3" style={{ width: '50%' }}>
+            <div className="shrink-0 sticky top-3 flex flex-col gap-1" style={{ width: '50%' }}>
               <div className="pr-2">
                 <Calendar selectedDate={selectedDate} onSelectDate={setSelectedDate} logs={myLogs} onUpdateLog={handleSaveLog} compact={false} mode={calendarMode} employeeId={activeEmpId} />
               </div>

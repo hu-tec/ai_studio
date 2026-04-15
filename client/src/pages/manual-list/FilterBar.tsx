@@ -26,7 +26,7 @@ export function FilterBar({ selectedFilters, onFilterChange, onClearAll }: Filte
     }`;
 
   return (
-    <div className="bg-card border border-border rounded px-2.5 py-2 space-y-1.5">
+    <div className="bg-card border border-border rounded px-2.5 py-1 space-y-1.5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {/* 홈페이지 (대/중/소) */}
         <div className="space-y-1.5">

@@ -32,7 +32,7 @@ const DashboardWidget = ({
   items: { icon?: React.ElementType; label: string; active?: boolean }[];
   color?: string;
 }) => (
-  <div className="bg-white border border-slate-200 rounded shadow-sm flex flex-col mb-3 last:mb-0">
+  <div className="bg-white border border-slate-200 rounded shadow-sm flex flex-col mb-1 last:mb-0">
     <div className={`${color} p-2 flex items-center justify-between text-white`}>
       <div className="flex items-center gap-2">
         <Icon className="w-3.5 h-3.5 opacity-70" />
@@ -86,8 +86,8 @@ export const ColumnOne = () => {
 
   return (
     <div className="flex flex-col h-full bg-white p-2 space-y-2 overflow-y-auto custom-scrollbar">
-      <div className="p-3 rounded border border-slate-200 bg-slate-50/30 shadow-sm">
-        <h3 className="text-[12px] font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
+      <div className="p-1 rounded border border-slate-200 bg-slate-50/30 shadow-sm">
+        <h3 className="text-[12px] font-bold text-slate-800 mb-1 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
           <Layers className="w-3.5 h-3.5 text-slate-500" /> A. 분야 탐색
         </h3>
         <div className="space-y-1">
@@ -123,7 +123,7 @@ export const ColumnOne = () => {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded border border-slate-200">
+      <div className="bg-white p-1 rounded border border-slate-200">
         <h4 className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">
           IT/개발 소분류
         </h4>
@@ -161,11 +161,11 @@ export const ColumnTwo = () => {
 
   return (
     <div className="flex flex-col h-full bg-white border-x border-slate-200 p-2 space-y-2 overflow-y-auto custom-scrollbar">
-      <div className="bg-slate-50/50 p-3 rounded border border-slate-200">
-        <h3 className="text-[12px] font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
+      <div className="bg-slate-50/50 p-1 rounded border border-slate-200">
+        <h3 className="text-[12px] font-bold text-slate-800 mb-1 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
           <Settings2 className="w-3.5 h-3.5 text-slate-500" /> 2. 급수 (B)
         </h3>
-        <div className="flex gap-1 mb-3">
+        <div className="flex gap-1 mb-1">
           {grades.map((g) => (
             <button
               key={g.name}
@@ -181,7 +181,7 @@ export const ColumnTwo = () => {
           ))}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-1">
           {grades
             .find((g) => g.name === activeTab)
             ?.sub.map((s) => (
@@ -206,8 +206,8 @@ export const ColumnTwo = () => {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded border border-slate-200 flex-1 flex flex-col">
-        <h4 className="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest border-b border-slate-50 pb-2">
+      <div className="bg-white p-1 rounded border border-slate-200 flex-1 flex flex-col">
+        <h4 className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest border-b border-slate-50 pb-2">
           분야별 급수 현황
         </h4>
         <div className="space-y-2 overflow-y-auto no-scrollbar">
@@ -247,8 +247,8 @@ export const ColumnThree = () => {
 
   return (
     <div className="flex flex-col h-full bg-slate-50/20 p-2 space-y-2 overflow-y-auto custom-scrollbar">
-      <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
-        <div className="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
+      <div className="bg-white p-1 rounded border border-slate-200 shadow-sm">
+        <div className="flex justify-between items-center mb-1 border-b border-slate-100 pb-2">
           <h3 className="text-[12px] font-bold text-slate-800 flex items-center gap-2 uppercase tracking-tight">
             <Globe className="w-3.5 h-3.5 text-slate-500" /> 3. 홈페이지 (C)
           </h3>
@@ -279,11 +279,11 @@ export const ColumnThree = () => {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded border border-slate-200">
-        <h3 className="text-[12px] font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-tight border-b border-slate-100 pb-2">
+      <div className="bg-white p-1 rounded border border-slate-200">
+        <h3 className="text-[12px] font-bold text-slate-800 mb-1 flex items-center gap-2 uppercase tracking-tight border-b border-slate-100 pb-2">
           <Briefcase className="w-3.5 h-3.5 text-slate-500" /> D. 부서 (관리)
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-1">
           {[
             { team: "강사 팀", subs: ["테슬", "프롬프트", "AI번역", "윤리"] },
             { team: "커리 교재 팀", subs: ["테슬", "프롬프트", "AI번역", "윤리"] },
@@ -308,8 +308,8 @@ export const ColumnThree = () => {
         </div>
       </div>
 
-      <div className="bg-slate-800 rounded p-3 text-white mt-auto border border-slate-700 shadow-inner">
-        <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+      <div className="bg-slate-800 rounded p-1 text-white mt-auto border border-slate-700 shadow-inner">
+        <div className="flex items-center justify-between mb-1 border-b border-white/10 pb-2">
           <h4 className="text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-wider">
             <BarChart3 className="w-3 h-3 text-slate-400" /> Experts Matching
           </h4>
@@ -342,8 +342,8 @@ export const ColumnFour = () => {
 
   return (
     <div className="flex flex-col h-full bg-white border-l border-slate-200 p-2 space-y-2 overflow-y-auto custom-scrollbar">
-      <div className="p-3 rounded border border-slate-200 bg-slate-50/30">
-        <h3 className="text-[12px] font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
+      <div className="p-1 rounded border border-slate-200 bg-slate-50/30">
+        <h3 className="text-[12px] font-bold text-slate-800 mb-1 flex items-center gap-2 uppercase tracking-tight border-b border-slate-200 pb-2">
           <Briefcase className="w-3.5 h-3.5 text-slate-500" /> D. 부서 (전체)
         </h3>
         <div className="grid grid-cols-2 gap-1">
@@ -358,8 +358,8 @@ export const ColumnFour = () => {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded border border-slate-200 shadow-sm">
-        <h3 className="text-[12px] font-bold text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-tight border-b border-slate-100 pb-2">
+      <div className="bg-white p-1 rounded border border-slate-200 shadow-sm">
+        <h3 className="text-[12px] font-bold text-slate-800 mb-1 flex items-center gap-2 uppercase tracking-tight border-b border-slate-100 pb-2">
           <ShieldCheck className="w-3.5 h-3.5 text-slate-500" /> E. 직급 (Standard)
         </h3>
         <div className="space-y-0.5">
@@ -386,7 +386,7 @@ export const ColumnFour = () => {
         </div>
       </div>
 
-      <div className="mt-auto bg-slate-50 p-3 rounded border border-slate-200 shadow-inner">
+      <div className="mt-auto bg-slate-50 p-1 rounded border border-slate-200 shadow-inner">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
             저장 리포트

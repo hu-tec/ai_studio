@@ -197,7 +197,7 @@ function ColumnBlock({
       {/* Items */}
       <div className="flex-1 bg-[#fafafa] p-1 space-y-1">
         {filteredItems.length === 0 && !adding && (
-          <div className="py-2 text-center text-[10px] text-[#ccc]">항목 없음</div>
+          <div className="py-1 text-center text-[10px] text-[#ccc]">항목 없음</div>
         )}
         {filteredItems.map((item) => (
           <RuleCard key={item.id} item={item} section={section} group={group} type={type} />

@@ -49,8 +49,8 @@ export default function InstructorFlowPage() {
 
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
-          <h1 className="text-2xl font-bold text-blue-600">AI Edu HR</h1>
+        <div className="max-w-7xl mx-auto px-2 md:px-2 py-1">
+          <h1 className="text-sm font-bold text-blue-600">AI Edu HR</h1>
           <p className="text-xs text-gray-400 mt-1">
             강사 채용 관리 시스템
           </p>
@@ -59,8 +59,8 @@ export default function InstructorFlowPage() {
 
       {/* Tab Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <nav className="flex gap-1 overflow-x-auto py-2 -mb-px scrollbar-hide">
+        <div className="max-w-7xl mx-auto px-2 md:px-2">
+          <nav className="flex gap-1 overflow-x-auto py-1 -mb-px scrollbar-hide">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -68,7 +68,7 @@ export default function InstructorFlowPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all
+                    flex items-center gap-2 px-2 py-1 rounded-lg text-sm font-medium whitespace-nowrap transition-all
                     ${
                       isActive
                         ? "bg-blue-50 text-blue-700 font-semibold"
@@ -89,12 +89,12 @@ export default function InstructorFlowPage() {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-4 md:p-8">{renderContent()}</main>
+      <main className="max-w-7xl mx-auto p-2 md:p-2">{renderContent()}</main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 mt-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <footer className="bg-white border-t border-gray-100 mt-1">
+        <div className="max-w-7xl mx-auto px-2 md:px-2 py-1.5 flex items-center justify-between">
+          <div className="flex items-center gap-1">
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
               A
             </div>

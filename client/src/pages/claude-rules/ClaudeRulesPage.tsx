@@ -117,7 +117,7 @@ function DesignRulesTab() {
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="검색..."
-            className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none"
+            className="rounded-md border border-gray-300 py-0.5 pl-2 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none"
           />
         </div>
         <button onClick={toggleAll} className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
@@ -168,7 +168,7 @@ function DesignRulesTab() {
 
                       {/* 소분류 항목 */}
                       {expandedMid.has(midKey) && (
-                        <div className="ml-4 border-l border-gray-200 pl-2 pb-1">
+                        <div className="ml-1.5 border-l border-gray-200 pl-2 pb-1">
                           {mc.items.map((item, si) => (
                             <div key={si} className="flex gap-1 py-0.5">
                               <span className="flex-shrink-0 rounded bg-gray-100 px-1 py-px text-[10px] font-semibold text-gray-600">{item.title}</span>
@@ -227,7 +227,7 @@ function ClaudeRulesTab() {
         <div className="flex-1" />
         <div className="relative">
           <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..." className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..." className="rounded-md border border-gray-300 py-0.5 pl-2 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none" />
         </div>
         <button onClick={toggleAll} className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
           {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
@@ -252,7 +252,7 @@ function ClaudeRulesTab() {
                     <span className="text-[10px] text-gray-400">({r.rules.length})</span>
                   </button>
                   {expandedIds.has(r.id) && (
-                    <div className="ml-6 border-l border-gray-200 pl-2 pb-1">
+                    <div className="ml-1.5 border-l border-gray-200 pl-2 pb-1">
                       {r.rules.map((ru, i) => (
                         <div key={i} className="flex items-start gap-1 py-px">
                           <span className="mt-0.5 h-1 w-1 flex-shrink-0 rounded-full bg-gray-400" />
@@ -355,7 +355,7 @@ function HRRulesTab() {
         <div className="relative">
           <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="규정 검색..."
-            className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none" />
+            className="rounded-md border border-gray-300 py-0.5 pl-2 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none" />
         </div>
         <button onClick={toggleAll}
           className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
@@ -428,7 +428,7 @@ export default function ClaudeRulesPage() {
   return (
     <div className="flex flex-col gap-1.5 p-2">
       {/* 목적 배너 — 눈에 띄게 */}
-      <div className="rounded-md border-2 border-dashed border-violet-400 bg-gradient-to-r from-violet-50 via-indigo-50 to-blue-50 px-3 py-2">
+      <div className="rounded-md border-2 border-dashed border-violet-400 bg-gradient-to-r from-violet-50 via-indigo-50 to-blue-50 px-2 py-1">
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-violet-600 px-1.5 py-0.5 text-[10px] font-bold text-white">TEST PAGE</span>
           <span className="text-[13px] font-bold text-violet-800">규정 (임시_혁_test)</span>

@@ -51,7 +51,7 @@ function FactorEvaluation({
   const scoreLabels = ["매우 미흡", "미흡", "보통", "보통", "우수", "매우 우수"];
 
   return (
-    <div className="space-y-4 p-4 border border-gray-100 rounded-xl bg-white shadow-sm transition-all hover:shadow-md h-full flex flex-col">
+    <div className="space-y-1 p-2 border border-gray-100 rounded-md bg-white shadow-sm transition-all hover:shadow-md h-full flex flex-col">
       {/* Header */}
       <div className="space-y-1">
         <span className="text-[11px] font-black text-gray-900 block">{label}</span>
@@ -80,7 +80,7 @@ function FactorEvaluation({
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 pt-2 border-t border-gray-50 overflow-hidden">
+      <div className="flex-1 space-y-1 pt-2 border-t border-gray-50 overflow-hidden">
         {/* Deduction */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-1">
@@ -223,13 +223,13 @@ export function InterviewForm() {
   const categoryOpts = CATEGORY_OPTIONS[form.type];
 
   return (
-    <div className="flex gap-3 h-auto p-4 bg-white">
+    <div className="flex gap-1 h-auto p-2 bg-white">
       {/* Left: Form */}
       <div className="flex-1 min-w-0">
-        <div className="space-y-4 pb-8">
+        <div className="space-y-1 pb-2">
           {/* Header for Print */}
-          <div className="hidden print:block mb-6 border-b-2 border-gray-900 pb-2">
-            <h1 className="text-2xl font-black text-center uppercase tracking-widest">면접 평가 기록지</h1>
+          <div className="hidden print:block mb-2 border-b-2 border-gray-900 pb-2">
+            <h1 className="text-sm font-black text-center uppercase tracking-widest">면접 평가 기록지</h1>
             <div className="flex justify-between mt-2 text-xs font-bold">
               <span>면접관: ____________________</span>
               <span>날짜: {new Date().toISOString().split("T")[0]}</span>
@@ -239,29 +239,29 @@ export function InterviewForm() {
           {/* ============================================ */}
           {/* SECTION A: Fixed (Required) - 4 Card Groups */}
           {/* ============================================ */}
-          <div className="border-2 border-gray-900 p-4 rounded-xl">
-            <div className="flex items-center gap-2 mb-4 border-b-2 border-gray-100 pb-2">
+          <div className="border-2 border-gray-900 p-2 rounded-md">
+            <div className="flex items-center gap-2 mb-1.5 border-b-2 border-gray-100 pb-2">
               <span className="bg-gray-900 text-white w-6 h-6 flex items-center justify-center rounded" style={{ fontSize: "0.8rem", fontWeight: 900 }}>A</span>
               <span className="text-gray-900 font-black uppercase tracking-tight" style={{ fontSize: "1rem" }}>인적사항 및 고정 평가 항목</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-2">
               {/* Left Column: Basic Info */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-1.5">
                   <div>
                     <label className="text-gray-700 block mb-1 font-black" style={{ fontSize: "0.75rem" }}>지원자명</label>
                     <input
                       type="text"
                       value={form.name}
                       onChange={(e) => update("name", e.target.value)}
-                      className="h-10 border-b-2 border-gray-400 w-full bg-transparent font-black text-xl text-gray-900 focus:outline-none focus:border-indigo-500 px-1"
+                      className="h-10 border-b-2 border-gray-400 w-full bg-transparent font-black text-sm text-gray-900 focus:outline-none focus:border-indigo-500 px-1"
                       placeholder="이름 입력"
                     />
                   </div>
                   <div>
                     <label className="text-gray-700 block mb-1 font-black" style={{ fontSize: "0.75rem" }}>지원 분류</label>
-                    <div className="flex gap-4 mt-2">
+                    <div className="flex gap-1.5 mt-2">
                       {(["강사", "직원"] as ApplicantType[]).map(t => (
                         <button key={t} type="button" onClick={() => update("type", t)} className="flex items-center gap-2">
                           <div className={`w-5 h-5 border-2 border-gray-500 rounded flex items-center justify-center ${form.type === t ? "bg-gray-900 border-gray-900" : ""}`}>
@@ -276,9 +276,9 @@ export function InterviewForm() {
 
                 <div>
                   <label className="text-gray-700 block mb-2 font-black" style={{ fontSize: "0.75rem" }}>지원 분야 (대분류 체크 및 상세 기록)</label>
-                  <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="grid grid-cols-2 gap-2 mb-1">
                     {categoryOpts.large.map(cat => (
-                      <button key={cat} type="button" onClick={() => update("categoryLarge", cat)} className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-gray-200 rounded-lg">
+                      <button key={cat} type="button" onClick={() => update("categoryLarge", cat)} className="flex items-center gap-1.5 px-2 py-1.5 border-2 border-gray-200 rounded-lg">
                          <div className={`w-4 h-4 border-2 border-gray-400 rounded flex items-center justify-center ${form.categoryLarge === cat ? "bg-gray-900 border-gray-900" : ""}`}>
                            {form.categoryLarge === cat && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                          </div>
@@ -286,7 +286,7 @@ export function InterviewForm() {
                       </button>
                     ))}
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex gap-1.5">
                     <div className="flex-1">
                       <span className="text-[10px] text-gray-500 font-black block mb-1">중분류: ________________</span>
                     </div>
@@ -298,7 +298,7 @@ export function InterviewForm() {
 
                 <div>
                   <label className="text-gray-700 block mb-2 font-black" style={{ fontSize: "0.75rem" }}>경력 사항</label>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
                     {["신입", "경력"].map(c => (
                       <button key={c} type="button" onClick={() => update("career", c)} className="flex items-center gap-2">
                         <div className={`w-5 h-5 border-2 border-gray-500 rounded flex items-center justify-center ${form.career === c ? "bg-gray-900 border-gray-900" : ""}`}>
@@ -312,7 +312,7 @@ export function InterviewForm() {
               </div>
 
               {/* Right Column: Education & Certs */}
-              <div className="space-y-4">
+              <div className="space-y-1">
                 <div>
                   <label className="text-gray-700 block mb-2 font-black" style={{ fontSize: "0.75rem" }}>최종 학력</label>
                   <div className="grid grid-cols-3 gap-y-2">
@@ -360,19 +360,19 @@ export function InterviewForm() {
           {/* ================================================ */}
           {/* SECTION B: 평가 점수 (2 PARTS - 통합)            */}
           {/* ================================================ */}
-          <div className="border-2 border-gray-900 p-5 rounded-xl space-y-8 bg-gray-50/30">
+          <div className="border-2 border-gray-900 p-2 rounded-md space-y-2 bg-gray-50/30">
             <div className="flex items-center gap-2 mb-2 border-b-2 border-gray-900 pb-2">
               <span className="bg-gray-900 text-white w-6 h-6 flex items-center justify-center rounded" style={{ fontSize: "0.8rem", fontWeight: 900 }}>B</span>
               <span className="text-gray-900 font-black uppercase tracking-tight" style={{ fontSize: "1.1rem" }}>평가 점수 (수기 기록 및 상세 분석)</span>
             </div>
 
             {/* PART 1: 기본 역량 및 인성 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] font-black bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded uppercase tracking-wider">PART 1</span>
                 <span className="text-sm font-black text-gray-800">기본 역량 및 인성 태도</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
                 <FactorEvaluation
                   label="1. 판단력"
                   desc="논리적 상황 대처, 가치관 일관성, 최적의 문제 해결 능력"
@@ -425,12 +425,12 @@ export function InterviewForm() {
             </div>
 
             {/* PART 2: 직무 및 경력 전문성 */}
-            <div className="space-y-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="space-y-1 pt-1.5 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded uppercase tracking-wider">PART 2</span>
                 <span className="text-sm font-black text-gray-800">직무 및 경력 역량 전문성</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
                 <FactorEvaluation
                   label="5. 업무경력"
                   desc="핵심 프로젝트 기여도, 실무 프로세스 이해도, 성과 창출 사례"
@@ -486,8 +486,8 @@ export function InterviewForm() {
           {/* ================================================ */}
           {/* SECTION C: Skills Checklist                      */}
           {/* ================================================ */}
-          <div className="border-2 border-gray-900 p-4 rounded-xl">
-             <div className="flex items-center gap-2 mb-4 border-b-2 border-gray-100 pb-2">
+          <div className="border-2 border-gray-900 p-2 rounded-md">
+             <div className="flex items-center gap-2 mb-1.5 border-b-2 border-gray-100 pb-2">
               <span className="bg-gray-900 text-white w-6 h-6 flex items-center justify-center rounded" style={{ fontSize: "0.8rem", fontWeight: 900 }}>C</span>
               <span className="text-gray-900 font-black uppercase tracking-tight" style={{ fontSize: "1rem" }}>보유 스킬 및 상세 체크리스트</span>
             </div>
@@ -548,11 +548,11 @@ export function InterviewForm() {
               })}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-gray-200" />
+            <div className="mt-2 pt-1.5 border-t border-gray-200" />
           </div>
 
           {/* Action Buttons (Hidden on Print) */}
-          <div className="flex justify-end gap-3 print:hidden pt-4 pb-10">
+          <div className="flex justify-end gap-1 print:hidden pt-1.5 pb-2">
             <Button variant="outline" onClick={handleNew} className="gap-2">
               <Plus className="w-4 h-4" /> 초기화
             </Button>
@@ -565,7 +565,7 @@ export function InterviewForm() {
 
       {/* Right: Preview Panel (Hidden on Print) */}
       <div className="w-80 shrink-0 print:hidden">
-        <div className="sticky top-0 space-y-3">
+        <div className="sticky top-0 space-y-1">
           <PreviewPanel applicant={form} />
         </div>
       </div>

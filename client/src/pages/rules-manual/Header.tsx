@@ -42,12 +42,12 @@ export function Header({
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 px-2 py-2 sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-100 px-2 py-1 sticky top-0 z-50">
       <div className="w-full flex items-center justify-between gap-2">
         {/* Left: Title & Dashboard Toggle */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-100">
+          <div className="flex items-center gap-1">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm shadow-blue-100">
               <FolderOpen className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
@@ -60,7 +60,7 @@ export function Header({
             <button
               onClick={() => setViewMode('dashboard')}
               className={clsx(
-                "flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-black transition-all uppercase tracking-wider",
+                "flex items-center gap-2 px-2 py-1.5 rounded-md text-[10px] font-black transition-all uppercase tracking-wider",
                 viewMode === 'dashboard' ? "bg-white text-blue-600 shadow-sm border border-gray-200" : "text-gray-400 hover:text-gray-600"
               )}
             >
@@ -70,7 +70,7 @@ export function Header({
             <button
               onClick={() => setViewMode('list')}
               className={clsx(
-                "flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-black transition-all uppercase tracking-wider",
+                "flex items-center gap-2 px-2 py-1.5 rounded-md text-[10px] font-black transition-all uppercase tracking-wider",
                 viewMode === 'list' ? "bg-white text-blue-600 shadow-sm border border-gray-200" : "text-gray-400 hover:text-gray-600"
               )}
             >
@@ -81,11 +81,11 @@ export function Header({
         </div>
 
         {/* Center: Action Mode & Selection */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <button
             onClick={onToggleAll}
             className={clsx(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black border transition-all uppercase tracking-wider",
+              "flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] font-black border transition-all uppercase tracking-wider",
               allSelected ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-gray-400 border-gray-200 hover:bg-gray-50"
             )}
           >
@@ -147,7 +147,7 @@ function ModeToggle({ active, onClick, icon, label }: { active: boolean, onClick
     <button
       onClick={onClick}
       className={clsx(
-        "flex items-center gap-1.5 px-3 py-1 rounded-md text-[9px] font-black transition-all uppercase tracking-wider",
+        "flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-black transition-all uppercase tracking-wider",
         active ? "bg-white text-blue-600 shadow-sm border border-gray-200" : "text-gray-400 hover:text-gray-600"
       )}
     >
@@ -162,7 +162,7 @@ function ExportButton({ label, icon, onClick, className }: { label: string, icon
     <button
       onClick={onClick}
       className={clsx(
-        "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all active:scale-95",
+        "flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all active:scale-95",
         className
       )}
     >

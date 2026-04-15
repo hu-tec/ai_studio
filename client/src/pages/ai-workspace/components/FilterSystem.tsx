@@ -49,39 +49,39 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
   const currentDeptLarge = DEPT_D_CATEGORIES.find(d => d.large === selectedDept.large);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-      <div className="flex flex-col gap-6">
+    <div className="bg-white rounded-md shadow-sm border border-slate-200 p-2 mb-2">
+      <div className="flex flex-col gap-2">
         {/* Search and Reset */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-1.5">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input
               type="text"
               placeholder="전문가 이름 또는 이메일 검색"
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+              className="w-full pl-2 pr-2 py-1 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-all text-sm font-medium border border-slate-200"
+            className="flex items-center gap-2 px-2 py-1 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-all text-sm font-medium border border-slate-200"
           >
             <RefreshCw className="w-4 h-4" />
             초기화
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {/* Field A Filter */}
-          <div className="space-y-4">
+          <div className="space-y-1">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">A. 분야 필터</h4>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-1">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-slate-400 ml-1">대분류</label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
                     value={selectedField.large}
                     onChange={(e) => handleFieldChange("large", e.target.value)}
                   >
@@ -98,7 +98,7 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
                 <label className="text-[11px] font-medium text-slate-400 ml-1">중분류</label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     value={selectedField.middle}
                     onChange={(e) => handleFieldChange("middle", e.target.value)}
                     disabled={!selectedField.large || !currentFieldLarge?.middle.length}
@@ -116,7 +116,7 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
                 <label className="text-[11px] font-medium text-slate-400 ml-1">소분류</label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     value={selectedField.small}
                     onChange={(e) => handleFieldChange("small", e.target.value)}
                     disabled={!selectedField.middle || !currentFieldMiddle?.small.length}
@@ -133,14 +133,14 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
           </div>
 
           {/* Dept D Filter */}
-          <div className="space-y-4">
+          <div className="space-y-1">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">D. 부서 필터</h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-1">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-slate-400 ml-1">대분류 (부서)</label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
                     value={selectedDept.large}
                     onChange={(e) => handleDeptChange("large", e.target.value)}
                   >
@@ -157,7 +157,7 @@ export function FilterSystem({ onFilterChange }: FilterProps) {
                 <label className="text-[11px] font-medium text-slate-400 ml-1">중분류 (팀)</label>
                 <div className="relative">
                   <select
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     value={selectedDept.middle}
                     onChange={(e) => handleDeptChange("middle", e.target.value)}
                     disabled={!selectedDept.large || !currentDeptLarge?.middle.length}

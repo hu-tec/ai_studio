@@ -28,9 +28,9 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
 
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50">
-      <div className="max-w-[900px] mx-auto py-6 px-6">
+      <div className="max-w-[900px] mx-auto py-1 px-2">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-[13px] text-gray-500 mb-4">
+        <div className="flex items-center gap-1.5 text-[13px] text-gray-500 mb-1.5">
           <Home className="w-4 h-4" />
           <ChevronRight className="w-3.5 h-3.5" />
           <span>창작작업실</span>
@@ -39,17 +39,17 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
         </div>
 
         {/* Title */}
-        <h1 className="mb-5">창작작업실</h1>
+        <h1 className="mb-1.5">창작작업실</h1>
 
         {/* Category Cards */}
         <CategoryCards />
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mt-6 mb-5">
+        <div className="flex flex-wrap gap-2 mt-2 mb-1.5">
           {tabs.map((tab, i) => (
             <button
               key={i}
-              className={`px-4 py-2 rounded-full text-[13px] border transition-all ${
+              className={`px-2 py-1 rounded-full text-[13px] border transition-all ${
                 tab.active
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
@@ -61,7 +61,7 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
         </div>
 
         {/* Filter Row */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-1.5">
           <FilterDropdowns />
           <button className="flex items-center gap-1 text-[13px] text-gray-600 hover:text-gray-800">
             문서 설정
@@ -70,11 +70,11 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
         </div>
 
         {/* Content Card: AI Selection + Textarea + File Upload */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div className="bg-white border border-gray-200 rounded-md p-2 mb-2 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
           {/* AI Model Selection */}
-          <div className="flex items-center gap-4 mb-5">
+          <div className="flex items-center gap-1.5 mb-1.5">
             <span className="text-[13px] text-gray-500">사용 AI</span>
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-1.5">
               {aiModels.map((model) => (
                 <label
                   key={model.value}
@@ -98,13 +98,13 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
           </div>
 
           {/* Textarea */}
-          <div className="relative border border-gray-200 rounded-xl min-h-[260px]">
+          <div className="relative border border-gray-200 rounded-md min-h-[260px]">
             <textarea
               placeholder="입력하세요"
-              className="w-full h-full min-h-[260px] p-5 bg-transparent resize-none text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none rounded-xl"
+              className="w-full h-full min-h-[260px] p-2 bg-transparent resize-none text-[14px] text-gray-800 placeholder-gray-400 focus:outline-none rounded-md"
             />
             <div className="absolute bottom-4 right-4">
-              <button className="px-4 py-1.5 text-[13px] text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 bg-white">
+              <button className="px-2 py-1.5 text-[13px] text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 bg-white">
                 파일 올리기
               </button>
             </div>
@@ -115,7 +115,7 @@ export function WorkspaceContent({ onGenerate }: WorkspaceContentProps) {
         <div className="flex justify-center">
           <button
             onClick={onGenerate}
-            className="flex items-center gap-2.5 px-14 py-3.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/25"
+            className="flex items-center gap-2.5 px-2 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/25"
           >
             <Play className="w-4 h-4 fill-white" />
             <span className="text-[15px]">문서 생성</span>

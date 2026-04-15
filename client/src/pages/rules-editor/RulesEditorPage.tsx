@@ -755,7 +755,7 @@ function RulesEditorPage() {
           </button>
           <button
             onClick={handleSave}
-            className="text-[12px] text-white bg-black rounded-md px-3 hover:bg-gray-800 transition-colors"
+            className="text-[12px] text-white bg-black rounded-md px-2 hover:bg-gray-800 transition-colors"
             style={{ height: 28 }}
           >
             저장
@@ -776,7 +776,7 @@ function RulesEditorPage() {
       </div>
 
       {/* ===== Main Content ===== */}
-      <div className="flex-1 overflow-auto px-2 py-2 min-h-0 space-y-2">
+      <div className="flex-1 overflow-auto px-2 py-1 min-h-0 space-y-2">
         {/* Global toggle bar */}
         <div className="flex items-center gap-2">
           <button

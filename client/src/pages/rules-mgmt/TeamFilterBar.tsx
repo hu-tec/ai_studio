@@ -15,7 +15,7 @@ export function TeamFilterBar() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="규정 본문 검색…"
-          className="w-full pl-6 pr-6 py-1 text-[11px] bg-[#f8f8f8] border border-[#e0e0e0] rounded outline-none focus:bg-white focus:border-[#999] transition-colors"
+          className="w-full pl-2 pr-2 py-1 text-[11px] bg-[#f8f8f8] border border-[#e0e0e0] rounded outline-none focus:bg-white focus:border-[#999] transition-colors"
         />
         {searchQuery && (
           <button

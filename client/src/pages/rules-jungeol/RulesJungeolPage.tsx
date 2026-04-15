@@ -702,7 +702,7 @@ export default function RulesJungeolPage() {
   return (
     <div className="h-full flex flex-col bg-white">
       {/* T9 SoT 배너 */}
-      <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800 shrink-0">
+      <div className="flex items-center gap-2 px-2 py-1 bg-amber-50 border-b border-amber-200 text-[10px] text-amber-800 shrink-0">
         <span>⚠</span>
         <span>대중소 카테고리(분야·중·소) 정의는 <a href="/app/work-class-demo" className="font-bold text-blue-700 underline">업무 분류(최종DB) — T9</a> 에서만. 이 페이지는 규정 항목 작성 전용 (카테고리 자체는 read-only).</span>
       </div>
@@ -733,7 +733,7 @@ export default function RulesJungeolPage() {
           </button>
           <button
             onClick={handleSave}
-            className="text-[12px] text-white bg-black rounded-md px-3 hover:bg-gray-800 transition-colors"
+            className="text-[12px] text-white bg-black rounded-md px-2 hover:bg-gray-800 transition-colors"
             style={{ height: 28 }}
           >
             저장
@@ -754,7 +754,7 @@ export default function RulesJungeolPage() {
       </div>
 
       {/* ===== Main Content ===== */}
-      <div className="flex-1 overflow-auto px-2 py-2 min-h-0 space-y-2">
+      <div className="flex-1 overflow-auto px-2 py-1 min-h-0 space-y-2">
         {/* Global toggle bar */}
         <div className="flex items-center gap-2">
           <button

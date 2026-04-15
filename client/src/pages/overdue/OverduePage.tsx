@@ -126,13 +126,13 @@ const formatCurrency = (amount: number) => {
 // --- Sub-Components ---
 
 const StatCard = ({ title, value, emoji, subtitle }: { title: string; value: string; emoji: string; subtitle?: string }) => (
-  <div className="bg-white p-2rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+  <div className="bg-white p-2 rounded-md border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
     <div className="flex justify-between items-start">
       <span className="text-slate-500 text-sm font-medium">{title}</span>
       <span className="text-sm">{emoji}</span>
     </div>
     <div className="mt-2">
-      <div className="text-base font-bold text-slate-800">{value}</div>
+      <div className="text-xs font-bold text-slate-800">{value}</div>
       {subtitle && <div className="text-xs text-slate-400 mt-1">{subtitle}</div>}
     </div>
   </div>
@@ -151,7 +151,7 @@ function DetailItem({ label, value, isBold, isGreen, isRed, isBadge }: { label: 
           {value}
         </span>
       ) : (
-        <span className={`font-semibold ${isBold ? 'text-slate-800 text-base' : 'text-slate-600'} ${isGreen ? 'text-green-600' : ''} ${isRed ? 'text-red-600' : ''}`}>
+        <span className={`font-semibold ${isBold ? 'text-slate-800 text-xs' : 'text-slate-600'} ${isGreen ? 'text-green-600' : ''} ${isRed ? 'text-red-600' : ''}`}>
           {value || '-'}
         </span>
       )}
@@ -192,7 +192,7 @@ function FormGroup({
       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{label}</label>
       {type === 'select' ? (
         <select
-          className="w-full text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-1 focus:ring-slate-400 outline-none"
+          className="w-full text-sm bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-slate-400 outline-none"
           value={value}
           onChange={(e) => setFormData(prev => ({ ...prev, [field]: e.target.value }))}
         >
@@ -202,7 +202,7 @@ function FormGroup({
       ) : (
         <input
           type={type}
-          className="w-full text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 focus:ring-1 focus:ring-slate-400 outline-none"
+          className="w-full text-sm bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-slate-400 outline-none"
           value={value}
           onChange={(e) => setFormData(prev => ({ ...prev, [field]: type === 'number' ? Number(e.target.value) : e.target.value }))}
         />
@@ -310,14 +310,14 @@ export default function OverduePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-2">
-      <div className="max-w-[1800px] mx-auto mb-3">
+      <div className="max-w-[1800px] mx-auto mb-1">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-1">
+            <div className="p-1 bg-white rounded-md shadow-sm border border-slate-100">
               <LayoutDashboard className="w-6 h-6 text-slate-600" />
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight">미수금 관리 대시보드</h1>
+              <h1 className="text-xs font-bold tracking-tight">미수금 관리 대시보드</h1>
               <p className="text-slate-500 text-sm">실시간 채권 회수 및 미수 현황을 관리합니다.</p>
             </div>
           </div>
@@ -339,14 +339,14 @@ export default function OverduePage() {
             </div>
             <button
               onClick={() => handleDownload('Excel')}
-              className="flex items-center gap-2 px-2 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-2 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm"
             >
               <FileSpreadsheet className="w-4 h-4 text-green-600" />
               Excel 다운받기
             </button>
             <button
               onClick={() => handleDownload('Word')}
-              className="flex items-center gap-2 px-2 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-2 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm"
             >
               <FileText className="w-4 h-4 text-blue-600" />
               Word 다운받기
@@ -354,35 +354,35 @@ export default function OverduePage() {
           </div>
         </div>
 
-        <div className="bg-white p-1 rounded-xl border border-slate-200 inline-flex shadow-sm mb-2">
+        <div className="bg-white p-1 rounded-md border border-slate-200 inline-flex shadow-sm mb-2">
           <button
             onClick={() => { setMode('view'); setSelectedRecordId(null); }}
-            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'view' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`px-2 py-1 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'view' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Eye className="w-4 h-4" /> 조회 모드
           </button>
           <button
             onClick={() => { setMode('add'); setFormData({}); setSelectedRecordId(null); }}
-            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'add' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`px-2 py-1 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'add' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Plus className="w-4 h-4" /> 추가 모드
           </button>
           <button
             onClick={() => { setMode('edit'); setFormData({}); setSelectedRecordId(null); }}
-            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'edit' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`px-2 py-1 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'edit' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Edit3 className="w-4 h-4" /> 수정 모드
           </button>
           <button
             onClick={() => { setMode('delete'); setSelectedRecordId(null); }}
-            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'delete' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`px-2 py-1 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'delete' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <Trash2 className="w-4 h-4" /> 삭제 모드
           </button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-1">
           <StatCard title="총 미수금액" value={formatCurrency(stats.totalUnpaid)} emoji="💸" subtitle={`전체 ${formatCurrency(stats.totalAmount)} 중`} />
           <StatCard title="회수 완료" value={formatCurrency(stats.totalRecovered)} emoji="✅" subtitle={`${((stats.totalRecovered / stats.totalAmount) * 100 || 0).toFixed(1)}% 회수율`} />
           <StatCard title="전체 관리 대상" value={`${stats.totalPeople}명`} emoji="👥" subtitle="현재 등록된 전체 인원" />
@@ -390,9 +390,9 @@ export default function OverduePage() {
         </div>
 
         {/* Visualized Statistics Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-3">
-          <div className="lg:col-span-1 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-1">
+          <div className="lg:col-span-1 bg-white p-2 rounded-md border border-slate-200 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 text-slate-400" /> 수납 결과 분포
             </h3>
             <div className="h-[250px] w-full">
@@ -415,8 +415,8 @@ export default function OverduePage() {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="lg:col-span-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+          <div className="lg:col-span-2 bg-white p-2 rounded-md border border-slate-200 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-slate-400" /> 담당자별 회수 현황 (단위: 만원)
             </h3>
             <div className="h-[250px] w-full">
@@ -440,8 +440,8 @@ export default function OverduePage() {
 
         {/* Main Content Area: Dashboard vs Full List Toggle */}
         {viewLayout === 'dashboard' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-3">
-            <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[700px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-1">
+            <div className="lg:col-span-4 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[700px]">
               <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-700 flex items-center gap-2">
                   <User className="w-4 h-4" /> 개인별 현황 리스트
@@ -451,7 +451,7 @@ export default function OverduePage() {
                   <input
                     type="text"
                     placeholder="이름 검색"
-                    className="pl-3 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-slate-400 outline-none w-32"
+                    className="pl-1 pr-1 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-slate-400 outline-none w-32"
                   />
                 </div>
               </div>
@@ -460,7 +460,7 @@ export default function OverduePage() {
                   <div key={record.id} className="relative group">
                     <button
                       onClick={() => handleRecordAction(record)}
-                      className={`w-full text-left p-3 rounded-xl transition-all border ${
+                      className={`w-full text-left p-1 rounded-md transition-all border ${
                         selectedRecordId === record.id
                           ? 'bg-slate-800 text-white border-slate-800'
                           : 'hover:bg-slate-50 border-transparent text-slate-600'
@@ -494,14 +494,14 @@ export default function OverduePage() {
                   </div>
                 ))}
                 {mode === 'add' && (
-                  <div className="p-3 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-sm">
+                  <div className="p-1 border-2 border-dashed border-slate-200 rounded-md flex items-center justify-center text-slate-400 text-sm">
                     <Plus className="w-4 h-4 mr-1" /> 신규 입력 대기 중
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="lg:col-span-8 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-700 flex items-center gap-2 text-sm uppercase">
                   {mode === 'add' ? '신규 등록' : mode === 'edit' ? '정보 수정' : '상세 정보'}
@@ -525,14 +525,14 @@ export default function OverduePage() {
               </div>
               <div className="p-2">
                 {(!selectedRecordId && mode !== 'add') ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-300 py-2">
-                    <Eye className="w-12 h-12 mb-4 opacity-20" />
+                  <div className="h-full flex flex-col items-center justify-center text-slate-300 py-1">
+                    <Eye className="w-12 h-12 mb-1.5 opacity-20" />
                     <p className="text-sm font-medium">왼쪽 리스트에서 인원을 선택해주세요.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-1">
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
                         <span className="w-4 h-px bg-slate-200"></span> 계약내용
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -547,7 +547,7 @@ export default function OverduePage() {
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
                         <span className="w-4 h-px bg-slate-200"></span> 진행사항
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -560,10 +560,10 @@ export default function OverduePage() {
                       </div>
                     </div>
                     <div className="pt-2 border-t border-slate-100">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-slate-50 p-2 rounded-md border border-slate-100">
                         <div>
                           <div className="text-xs text-slate-400 mb-1">총 수익 예상액</div>
-                          <div className="text-base font-bold text-slate-800">
+                          <div className="text-xs font-bold text-slate-800">
                             {mode === 'add' || mode === 'edit' ? (
                               <input
                                 type="number"
@@ -577,7 +577,7 @@ export default function OverduePage() {
                           </div>
                         </div>
                         <div className="flex items-center justify-end">
-                           <span className={`px-2 py-2 rounded-xl font-bold text-sm ${
+                           <span className={`px-2 py-1 rounded-md font-bold text-sm ${
                              (selectedRecordId && data.find(d => d.id === selectedRecordId)?.result === '완료') ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'
                            }`}>
                              상태: {selectedRecordId ? data.find(d => d.id === selectedRecordId)?.result : '대기'}
@@ -591,7 +591,7 @@ export default function OverduePage() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-3">
+          <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mb-1">
             <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <h3 className="font-bold text-slate-700 flex items-center gap-2">
                 <List className="w-4 h-4" /> 전체 개인별 채권 현황 목록
@@ -602,7 +602,7 @@ export default function OverduePage() {
                     <input
                       type="text"
                       placeholder="이름/담당자 검색"
-                      className="pl-3 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-slate-400 outline-none w-48"
+                      className="pl-1 pr-1 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-slate-400 outline-none w-48"
                     />
                   </div>
               </div>
@@ -611,27 +611,27 @@ export default function OverduePage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold uppercase tracking-tight">
-                    <th className="px-3 py-3 border-b border-slate-100">성함 / 담당자</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center">계약 정보</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center">회수 상태</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center text-green-600">회수액</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center text-red-500">미수액</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center">남은 횟수</th>
-                    <th className="px-3 py-3 border-b border-slate-100 text-center">관리</th>
+                    <th className="px-2 py-1 border-b border-slate-100">성함 / 담당자</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center">계약 정보</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center">회수 상태</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center text-green-600">회수액</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center text-red-500">미수액</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center">남은 횟수</th>
+                    <th className="px-2 py-1 border-b border-slate-100 text-center">관리</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.map((record) => (
                     <tr key={record.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50">
-                      <td className="px-3 py-2">
+                      <td className="px-2 py-1">
                         <div className="text-sm font-bold text-slate-800">{record.name}</div>
                         <div className="text-[10px] text-slate-400 font-medium">{record.manager}</div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-2 py-1 text-center">
                         <div className="text-[11px] font-bold text-slate-700">{formatCurrency(record.expenseAmount)}</div>
                         <div className="text-[10px] text-slate-400">{record.frequency} / {record.contractDate}</div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-2 py-1 text-center">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           record.result === '완료' ? 'bg-green-100 text-green-700' :
                           record.result === '미납' ? 'bg-red-100 text-red-700' :
@@ -640,16 +640,16 @@ export default function OverduePage() {
                           {record.result}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-center text-[11px] font-bold text-green-600">
+                      <td className="px-2 py-1 text-center text-[11px] font-bold text-green-600">
                         {formatCurrency(record.principalRecovered)}
                       </td>
-                      <td className="px-3 py-2 text-center text-[11px] font-bold text-red-500">
+                      <td className="px-2 py-1 text-center text-[11px] font-bold text-red-500">
                         {formatCurrency(record.principalUnpaid)}
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-2 py-1 text-center">
                         <div className="text-xs font-bold text-slate-600">{record.remainingFrequency} / {record.totalFrequency}회</div>
                       </td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-2 py-1 text-center">
                         <div className="flex justify-center gap-1">
                           <button
                             onClick={() => setPreviewId(record.id)}
@@ -674,15 +674,15 @@ export default function OverduePage() {
         )}
 
         {/* Manager Statistics Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-3">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mb-1">
           <div className="p-2border-b border-slate-100 flex justify-between items-center bg-white">
-            <h2 className="text-base font-bold flex items-center gap-2">
+            <h2 className="text-xs font-bold flex items-center gap-2">
               <Settings className="w-4 h-4 text-slate-400" />
               전체 및 현황 통계
             </h2>
             <button
               onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-              className="text-slate-600 hover:text-slate-900 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 rounded-lg transition-colors border border-slate-100"
+              className="text-slate-600 hover:text-slate-900 flex items-center gap-1.5 text-xs font-bold px-2 py-1.5 hover:bg-slate-50 rounded-lg transition-colors border border-slate-100"
             >
               {isStatsExpanded ? '접기' : '펼쳐보기'}
             </button>
@@ -691,37 +691,37 @@ export default function OverduePage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-500 text-[11px] font-bold uppercase tracking-tight">
-                  <th className="px-3 py-3 border-b border-slate-100">담당자별</th>
-                  <th className="px-3 py-3 border-b border-slate-100 text-center">인원 / 금액</th>
-                  <th className="px-3 py-3 border-b border-slate-100 text-center text-green-600">완료</th>
-                  <th className="px-3 py-3 border-b border-slate-100 text-center text-red-500">미납</th>
-                  <th className="px-3 py-3 border-b border-slate-100 text-center text-amber-500">연기</th>
-                  <th className="px-3 py-3 border-b border-slate-100">회수율</th>
+                  <th className="px-2 py-1 border-b border-slate-100">담당자별</th>
+                  <th className="px-2 py-1 border-b border-slate-100 text-center">인원 / 금액</th>
+                  <th className="px-2 py-1 border-b border-slate-100 text-center text-green-600">완료</th>
+                  <th className="px-2 py-1 border-b border-slate-100 text-center text-red-500">미납</th>
+                  <th className="px-2 py-1 border-b border-slate-100 text-center text-amber-500">연기</th>
+                  <th className="px-2 py-1 border-b border-slate-100">회수율</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.managerStats.map((mgr) => (
                   <React.Fragment key={mgr.manager}>
                     <tr className="hover:bg-slate-50/30 transition-colors border-b border-slate-50">
-                      <td className="px-3 py-2 font-bold text-slate-700 text-sm">{mgr.manager}</td>
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-2 py-1 font-bold text-slate-700 text-sm">{mgr.manager}</td>
+                      <td className="px-2 py-1 text-center">
                         <div className="text-sm font-bold text-slate-800">{mgr.count}명</div>
                         <div className="text-[10px] text-slate-400 font-medium">{formatCurrency(mgr.totalAmount)}</div>
                       </td>
-                      <td className="px-3 py-2 text-center text-green-600">
+                      <td className="px-2 py-1 text-center text-green-600">
                         <div className="text-sm font-bold">{mgr.completedCount}건</div>
                         <div className="text-[10px] text-slate-400 font-medium">{formatCurrency(mgr.recovered)}</div>
                       </td>
-                      <td className="px-3 py-2 text-center text-red-500">
+                      <td className="px-2 py-1 text-center text-red-500">
                         <div className="text-sm font-bold">{mgr.unpaidCount}건</div>
                         <div className="text-[10px] text-slate-400 font-medium">{formatCurrency(mgr.unpaid)}</div>
                       </td>
-                      <td className="px-3 py-2 text-center text-amber-500">
+                      <td className="px-2 py-1 text-center text-amber-500">
                         <div className="text-sm font-bold">{mgr.delayedCount}건</div>
                         <div className="text-[10px] text-slate-400 font-medium">요청 건</div>
                       </td>
-                      <td className="px-3 py-2 min-w-[200px]">
-                        <div className="flex items-center gap-3">
+                      <td className="px-2 py-1 min-w-[200px]">
+                        <div className="flex items-center gap-1">
                           <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div
                               className="bg-slate-800 h-full rounded-full transition-all duration-700 ease-out"
@@ -736,15 +736,15 @@ export default function OverduePage() {
                     </tr>
                     {isStatsExpanded && data.filter(d => d.manager === mgr.manager).map(person => (
                       <tr key={person.id} className="bg-slate-50/50 border-b border-slate-100/50">
-                        <td className="px-3 py-3 pl-3">
+                        <td className="px-2 py-1 pl-1">
                           <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
                              <ArrowRight className="w-3 h-3 text-slate-400" /> {person.name}
                           </div>
                         </td>
-                        <td className="px-3 py-3 text-center text-[10px] text-slate-500">
+                        <td className="px-2 py-1 text-center text-[10px] text-slate-500">
                           {person.frequency} / {formatCurrency(person.expenseAmount)}
                         </td>
-                        <td className="px-3 py-3" colSpan={4}>
+                        <td className="px-2 py-1" colSpan={4}>
                           <div className="flex items-center gap-2">
                             <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                               person.result === '완료' ? 'bg-green-100 text-green-700' :
@@ -763,23 +763,23 @@ export default function OverduePage() {
               </tbody>
               <tfoot>
                 <tr className="bg-slate-800 text-white font-bold border-t border-slate-700">
-                  <td className="px-3 py-2 text-sm">합계</td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="px-2 py-1 text-sm">합계</td>
+                  <td className="px-2 py-1 text-center">
                     <div className="text-sm">{stats.totalPeople}명</div>
                     <div className="text-[10px] text-slate-300 font-normal">{formatCurrency(stats.totalAmount)}</div>
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="px-2 py-1 text-center">
                     <div className="text-sm">{data.filter(d => d.result === '완료').length}건</div>
                     <div className="text-[10px] text-slate-300 font-normal">{formatCurrency(stats.totalRecovered)}</div>
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="px-2 py-1 text-center">
                     <div className="text-sm">{data.filter(d => d.result === '미납').length}건</div>
                     <div className="text-[10px] text-slate-300 font-normal">{formatCurrency(stats.totalUnpaid)}</div>
                   </td>
-                  <td className="px-3 py-2 text-center">
+                  <td className="px-2 py-1 text-center">
                     <div className="text-sm">{data.filter(d => d.result === '연기').length}건</div>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1">
                     <div className="text-sm font-bold">평균 회수율: {((stats.totalRecovered / stats.totalAmount) * 100 || 0).toFixed(1)}%</div>
                   </td>
                 </tr>
@@ -791,10 +791,10 @@ export default function OverduePage() {
         {/* Individual Detail Quick Preview Modal */}
         {previewId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-2bg-slate-900/60 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-white w-full max-w-2xl rounded-md shadow-sm overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-800 rounded-xl">
+                <div className="flex items-center gap-1">
+                  <div className="p-2 bg-slate-800 rounded-md">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -809,7 +809,7 @@ export default function OverduePage() {
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
-              <div className="p-3 grid grid-cols-2 gap-3">
+              <div className="p-1 grid grid-cols-2 gap-1">
                 <div className="space-y-2">
                   <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">기본 정보</h4>
                   <div className="grid grid-cols-1 gap-2">
@@ -829,7 +829,7 @@ export default function OverduePage() {
                   </div>
                 </div>
               </div>
-              <div className="p-2 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <div className="p-2 bg-slate-50 border-t border-slate-100 flex justify-end gap-1">
                 <button
                   onClick={() => {
                     const record = data.find(d => d.id === previewId);
@@ -840,13 +840,13 @@ export default function OverduePage() {
                     }
                     setPreviewId(null);
                   }}
-                  className="px-3 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-lg shadow-slate-200 hover:bg-slate-900 transition-all flex items-center gap-2"
+                  className="px-2 py-1 bg-slate-800 text-white rounded-md text-sm font-bold shadow-sm shadow-slate-200 hover:bg-slate-900 transition-all flex items-center gap-2"
                 >
                   <Edit3 className="w-4 h-4" /> 정보 수정하기
                 </button>
                 <button
                   onClick={() => setPreviewId(null)}
-                  className="px-3 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all"
+                  className="px-2 py-1 bg-white border border-slate-200 text-slate-600 rounded-md text-sm font-bold hover:bg-slate-100 transition-all"
                 >
                   닫기
                 </button>

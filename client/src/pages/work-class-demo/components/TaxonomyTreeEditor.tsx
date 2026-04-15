@@ -182,7 +182,7 @@ export default function TaxonomyTreeEditor({ scope, gov, axes }: Props) {
           </thead>
           <tbody>
             {rows.length === 0 && !loading && (
-              <tr><td colSpan={4} className="text-center text-slate-400 py-4">데이터 없음 — 우측 상단 [대 추가]</td></tr>
+              <tr><td colSpan={4} className="text-center text-slate-400 py-1.5">데이터 없음 — 우측 상단 [대 추가]</td></tr>
             )}
             {rows.map((row, i) => (
               <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">

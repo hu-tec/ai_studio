@@ -187,7 +187,7 @@ export default function ItemViewSubTab({ scope, gov }: { scope: TaxonomyScope; g
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {filtered.length === 0 && !loading && (
-            <div className="text-center text-[10px] text-slate-400 py-3">아이템 없음</div>
+            <div className="text-center text-[10px] text-slate-400 py-1">아이템 없음</div>
           )}
           {filtered.map((it) => (
             <div key={it.item_id} className="p-1 flex items-start gap-1 hover:bg-slate-50 dark:hover:bg-slate-800/40 group">

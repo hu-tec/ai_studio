@@ -17,7 +17,7 @@ const HP_CLR: Record<string, string> = {
 export function ManualTable({ manuals, totalCount, onDocumentOpen }: ManualTableProps) {
   if (manuals.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
+      <div className="flex flex-col items-center justify-center py-1 text-center">
         <p className="text-[11px] text-muted-foreground">검색 조건에 맞는 항목이 없습니다.</p>
       </div>
     );

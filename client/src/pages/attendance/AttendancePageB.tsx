@@ -254,7 +254,7 @@ export function AttendancePageB() {
           <div className="bg-indigo-600 p-1.5 rounded-lg">
             <Clock className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-base font-bold tracking-tight">출퇴근 관리 <span className="text-xs font-normal text-gray-400 ml-1">ver.B — 날짜별 뷰</span></h1>
+          <h1 className="text-xs font-bold tracking-tight">출퇴근 관리 <span className="text-xs font-normal text-gray-400 ml-1">ver.B — 날짜별 뷰</span></h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -327,7 +327,7 @@ export function AttendancePageB() {
           <input
             type="text"
             placeholder="이름 검색..."
-            className="pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-100 w-36"
+            className="pl-2 pr-1 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-100 w-36"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -336,21 +336,21 @@ export function AttendancePageB() {
 
       {/* ── Summary Bar ── */}
       <div className="grid grid-cols-3 gap-1">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 px-2 py-1 flex items-center gap-2">
           <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg"><Users size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 총 인원</div>
             <div className="text-sm font-bold">{visibleEmployees.length}명</div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 px-2 py-1 flex items-center gap-2">
           <div className="p-1.5 bg-green-100 text-green-600 rounded-lg"><UserCheck size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 출근 기록</div>
             <div className="text-sm font-bold text-green-600">{monthRecords.length}건</div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-3 py-2 flex items-center gap-2">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 px-2 py-1 flex items-center gap-2">
           <div className="p-1.5 bg-amber-100 text-amber-600 rounded-lg"><AlertCircle size={18} /></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase">이번 달 지각</div>
@@ -374,8 +374,8 @@ export function AttendancePageB() {
         return (
           <div key={emp.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Employee Header */}
-            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="px-2 py-1 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-1">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
                   emp.jobType === '직원' ? "bg-blue-100 text-blue-700" :
@@ -399,7 +399,7 @@ export function AttendancePageB() {
                     </span>
                     <span className="text-[11px] text-gray-400">{emp.dept} · {emp.subDept}</span>
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5">
+                  <div className="flex items-center gap-1 mt-0.5">
                     <div className="flex items-center gap-1 text-[11px] text-gray-500">
                       <span className="font-medium">출퇴근 요일:</span>
                       <div className="flex gap-0.5">
@@ -436,12 +436,12 @@ export function AttendancePageB() {
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                    <th className="px-4 py-2 w-[130px]">날짜</th>
-                    <th className="px-3 py-2 w-[50px]">요일</th>
-                    <th className="px-3 py-2 w-[90px]">출근</th>
-                    <th className="px-3 py-2 w-[90px]">퇴근</th>
-                    <th className="px-3 py-2">특이사항</th>
-                    <th className="px-3 py-2 w-[70px] text-center">관리</th>
+                    <th className="px-2 py-1 w-[130px]">날짜</th>
+                    <th className="px-2 py-1 w-[50px]">요일</th>
+                    <th className="px-2 py-1 w-[90px]">출근</th>
+                    <th className="px-2 py-1 w-[90px]">퇴근</th>
+                    <th className="px-2 py-1">특이사항</th>
+                    <th className="px-2 py-1 w-[70px] text-center">관리</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -462,7 +462,7 @@ export function AttendancePageB() {
                         )}
                       >
                         {/* 날짜 */}
-                        <td className="px-4 py-1.5">
+                        <td className="px-2 py-1.5">
                           <div className="flex items-center gap-1.5">
                             {isToday && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
                             <span className={cn("text-xs", isToday ? "font-bold text-indigo-700" : "text-gray-700")}>
@@ -472,7 +472,7 @@ export function AttendancePageB() {
                         </td>
 
                         {/* 요일 */}
-                        <td className="px-3 py-1.5">
+                        <td className="px-2 py-1.5">
                           <span className={cn(
                             "text-xs font-bold",
                             row.day === '일' ? "text-red-500" : row.day === '토' ? "text-blue-500" : "text-gray-600"
@@ -482,7 +482,7 @@ export function AttendancePageB() {
                         </td>
 
                         {/* 출근 */}
-                        <td className="px-3 py-1.5">
+                        <td className="px-2 py-1.5">
                           {isAdding ? (
                             <input
                               type="time"
@@ -524,7 +524,7 @@ export function AttendancePageB() {
                         </td>
 
                         {/* 퇴근 */}
-                        <td className="px-3 py-1.5">
+                        <td className="px-2 py-1.5">
                           {isAdding ? (
                             <input
                               type="time"
@@ -560,7 +560,7 @@ export function AttendancePageB() {
                         </td>
 
                         {/* 특이사항 */}
-                        <td className="px-3 py-1.5">
+                        <td className="px-2 py-1.5">
                           {isAdding ? (
                             <input
                               type="text"
@@ -598,7 +598,7 @@ export function AttendancePageB() {
                         </td>
 
                         {/* 관리 */}
-                        <td className="px-3 py-1.5 text-center">
+                        <td className="px-2 py-1.5 text-center">
                           {isAdding ? (
                             <div className="flex items-center justify-center gap-1">
                               <button onClick={confirmAdd} className="p-0.5 text-green-500 hover:text-green-700"><Check size={14} /></button>

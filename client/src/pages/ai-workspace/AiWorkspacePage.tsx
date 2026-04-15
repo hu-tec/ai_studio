@@ -25,7 +25,7 @@ const sidebarIcons = [
 
 function LeftSidebar() {
   return (
-    <aside className="w-14 border-r border-gray-200 flex flex-col items-center py-3 gap-4 bg-white shrink-0">
+    <aside className="w-14 border-r border-gray-200 flex flex-col items-center py-1 gap-1.5 bg-white shrink-0">
       {sidebarIcons.map((item, i) => (
         <div
           key={i}
@@ -48,7 +48,7 @@ function LeftSidebar() {
 /* ── Right Sidebar ────────────────────────────────────────── */
 function RightSidebar() {
   return (
-    <aside className="w-14 border-l border-gray-200 flex flex-col items-center py-3 gap-4 bg-white shrink-0">
+    <aside className="w-14 border-l border-gray-200 flex flex-col items-center py-1 gap-1.5 bg-white shrink-0">
       <div className="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer text-gray-400 hover:text-gray-600">
         <Upload className="w-5 h-5" />
       </div>
@@ -78,13 +78,13 @@ function TopNav({
   const isWorkspaceArea = currentPage === "workspace" || currentPage === "page2" || currentPage === "page3" || currentPage === "page4" || currentPage === "result";
 
   return (
-    <header className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white shrink-0 shadow-sm z-30">
-      <div className="flex items-center gap-10">
+    <header className="h-14 border-b border-gray-200 flex items-center justify-between px-2 bg-white shrink-0 shadow-sm z-30">
+      <div className="flex items-center gap-2">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onPageChange("workspace")}>
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
           <span className="text-[17px] font-extrabold tracking-tight text-slate-900">AI STUDIO</span>
         </div>
-        <nav className="flex items-center gap-8 text-[14px] font-medium text-slate-500 h-14">
+        <nav className="flex items-center gap-2 text-[14px] font-medium text-slate-500 h-14">
           <span
             className={`cursor-pointer transition-colors hover:text-blue-600 ${isWorkspaceArea ? "text-blue-600 border-b-2 border-blue-600 h-14 flex items-center" : "flex items-center"}`}
             onClick={() => onPageChange("workspace")}
@@ -103,13 +103,13 @@ function TopNav({
           <span className="cursor-pointer hover:text-blue-600 flex items-center">고객센터</span>
         </nav>
       </div>
-      <div className="flex items-center gap-5 text-slate-400">
+      <div className="flex items-center gap-1.5 text-slate-400">
         <div className="relative cursor-pointer hover:text-slate-600 transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
         </div>
         <ShoppingCart className="w-5 h-5 cursor-pointer hover:text-slate-600 transition-colors" />
-        <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 hover:bg-slate-100 transition-colors">
+        <div className="flex items-center gap-2 cursor-pointer bg-slate-50 px-2 py-1.5 rounded-full border border-slate-100 hover:bg-slate-100 transition-colors">
           <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
             <User className="w-3.5 h-3.5 text-blue-600" />
           </div>

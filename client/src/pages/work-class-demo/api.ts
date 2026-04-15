@@ -22,6 +22,20 @@ async function http<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+// 서버가 관리하는 필드와 blob 포장은 절대 클라이언트에서 다시 보내지 않는다.
+// 특히 `data` 를 그대로 보내면 구 서버 PUT 의 `req.body.data || req.body` 가
+// nested blob 을 저장해 outer 의 새 label 을 버리는 버그를 유발한다.
+const SERVER_MANAGED = new Set(['data', 'updated_at', 'created_at']);
+function sanitizePayload<T extends Record<string, any>>(p: T): Partial<T> {
+  const out: any = {};
+  for (const [k, v] of Object.entries(p)) {
+    if (SERVER_MANAGED.has(k)) continue;
+    if (v === undefined) continue;
+    out[k] = v;
+  }
+  return out;
+}
+
 // ─── Taxonomy ─────────────────────────────────────────────
 export async function fetchAllTaxonomy(): Promise<TaxonomyNode[]> {
   const rows: any[] = await http(`${BASE}/work-class-taxonomy`);
@@ -53,7 +67,7 @@ export async function saveTaxonomyNode(node: Partial<TaxonomyNode>): Promise<{ s
   // POST upsert — 신규는 taxonomy_id 생략, 서버가 생성
   return http(`${BASE}/work-class-taxonomy`, {
     method: 'POST',
-    body: JSON.stringify(node),
+    body: JSON.stringify(sanitizePayload(node)),
   });
 }
 
@@ -63,7 +77,7 @@ export async function updateTaxonomyNode(
 ): Promise<{ success: boolean; revision?: number; error?: string }> {
   return http(`${BASE}/work-class-taxonomy/${encodeURIComponent(id)}`, {
     method: 'PUT',
-    body: JSON.stringify(patch),
+    body: JSON.stringify(sanitizePayload(patch)),
   });
 }
 
@@ -78,11 +92,11 @@ export async function fetchItems(scope?: TaxonomyScope) {
 }
 
 export async function saveItem(item: any) {
-  return http(`${BASE}/work-class-items`, { method: 'POST', body: JSON.stringify(item) });
+  return http(`${BASE}/work-class-items`, { method: 'POST', body: JSON.stringify(sanitizePayload(item)) });
 }
 
 export async function updateItem(id: string, patch: any) {
-  return http(`${BASE}/work-class-items/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(patch) });
+  return http(`${BASE}/work-class-items/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(sanitizePayload(patch)) });
 }
 
 export async function softDeleteItem(id: string) {

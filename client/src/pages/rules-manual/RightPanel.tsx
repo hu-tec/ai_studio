@@ -43,10 +43,10 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
           </div>
 
           {/* History List */}
-          <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-4">
+          <div className="flex-1 overflow-y-auto no-scrollbar p-1 space-y-1">
 
             <SectionHeader label="Directive History" icon={<FileCheck2 className="w-3 h-3 text-blue-500" />} />
-            <div className="space-y-3">
+            <div className="space-y-1">
               {history.length > 0 ? (
                 history.map((item) => (
                   <HistoryItem
@@ -59,7 +59,7 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
                   />
                 ))
               ) : (
-                <div className="py-2 text-center space-y-2 opacity-30">
+                <div className="py-1 text-center space-y-2 opacity-30">
                   <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
                     <Clock className="w-5 h-5 text-gray-400" />
                   </div>
@@ -69,7 +69,7 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
             </div>
 
             <SectionHeader label="System Logs" icon={<Clock className="w-3 h-3 text-gray-400" />} />
-            <div className="space-y-3 opacity-60">
+            <div className="space-y-1 opacity-60">
                <HistoryItem
                  type="edit"
                  title="근무시간 조항 수정"
@@ -95,8 +95,8 @@ export function RightPanel({ isOpen, setIsOpen, history }: RightPanelProps) {
 
           {/* User Settings Footer */}
           <div className="p-2 border-t border-gray-100 bg-gray-50/30">
-            <button className="w-full flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 shadow-sm hover:border-blue-200 group transition-all">
-               <div className="flex items-center gap-3">
+            <button className="w-full flex items-center justify-between p-1 bg-white rounded-md border border-gray-200 shadow-sm hover:border-blue-200 group transition-all">
+               <div className="flex items-center gap-1">
                   <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
                      <User className="w-4 h-4" />
                   </div>
@@ -133,7 +133,7 @@ function SectionHeader({ label, icon }: { label: string, icon: React.ReactNode }
 
 function FavoriteItem({ label, category }: { label: string, category: string }) {
   return (
-    <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-blue-50 group transition-all text-left">
+    <button className="w-full flex items-center justify-between px-2 py-1 rounded-lg hover:bg-blue-50 group transition-all text-left">
        <div className="flex flex-col">
           <span className="text-[10px] font-bold text-gray-700 group-hover:text-blue-700">{label}</span>
           <span className="text-[8px] text-gray-400 uppercase font-black">{category}</span>
@@ -159,7 +159,7 @@ function HistoryItem({ type, title, time, user, detail }: { type: 'edit' | 'add'
   };
 
   return (
-    <div className="flex gap-3 relative group px-1">
+    <div className="flex gap-1 relative group px-1">
        <div className="flex flex-col items-center">
           <div className={clsx("w-6 h-6 rounded-full flex items-center justify-center shadow-sm z-10 transition-transform group-hover:scale-110", colors[type as keyof typeof colors])}>
              {icon[type as keyof typeof icon]}

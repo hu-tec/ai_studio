@@ -44,18 +44,18 @@ export function ExpertDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
-      <div className="max-w-[1600px] mx-auto space-y-8">
+    <div className="min-h-screen bg-[#F8FAFC] p-2 md:p-2">
+      <div className="max-w-[1600px] mx-auto space-y-2">
         {/* Header */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">전문가 신청 관리</h1>
+          <h1 className="text-sm font-extrabold text-slate-900 tracking-tight">전문가 신청 관리</h1>
           <p className="text-slate-500 font-medium">분야별 전문가 신청 현황을 확인하고 승인 여부를 결정합니다.</p>
         </div>
 
         {/* Dashboard Components */}
         <StatSummary />
 
-        <div className="space-y-6">
+        <div className="space-y-2">
           <FilterSystem onFilterChange={setFilters} />
 
           <ApplicationList

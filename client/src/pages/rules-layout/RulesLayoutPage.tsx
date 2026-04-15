@@ -35,7 +35,7 @@ const GlobalFilterBar = () => {
     });
   };
   return (
-    <div className="bg-white border-b border-slate-200 px-3 py-1.5 flex items-start gap-3 shrink-0 shadow-xs">
+    <div className="bg-white border-b border-slate-200 px-2 py-1.5 flex items-start gap-1 shrink-0 shadow-xs">
       <div className="flex items-center gap-1 text-slate-400 mt-0.5">
         <Filter className="w-3.5 h-3.5" />
         <span className="text-[10px] font-bold uppercase tracking-wider">Filter</span>
@@ -95,14 +95,14 @@ export default function RulesLayoutPage() {
   return (
     <div className="flex flex-col h-screen w-full bg-slate-100 font-sans text-slate-900 overflow-hidden">
       {/* 글로벌 헤더 */}
-      <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 z-10 shadow-sm">
-        <div className="flex items-center gap-6">
+      <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-2 shrink-0 z-10 shadow-sm">
+        <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-2 group cursor-pointer"
             onClick={() => toast.info("홈으로 이동합니다.")}
           >
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-              <span className="text-white font-bold text-lg">M</span>
+              <span className="text-white font-bold text-xs">M</span>
             </div>
             <h1 className="text-sm font-bold tracking-tight">마케팅 타겟 DB</h1>
           </div>
@@ -115,7 +115,7 @@ export default function RulesLayoutPage() {
                   setActiveTab(tab.label);
                   toast(`모드 전환: ${tab.label}`);
                 }}
-                className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all whitespace-nowrap active:scale-95 ${
+                className={`px-2 py-1.5 rounded-full text-[12px] font-medium transition-all whitespace-nowrap active:scale-95 ${
                   activeTab === tab.label
                     ? "bg-slate-900 text-white shadow-md"
                     : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
@@ -127,7 +127,7 @@ export default function RulesLayoutPage() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <div className="flex items-center bg-slate-50 rounded-lg p-1 border border-slate-200">
             <button
               onClick={() =>
@@ -149,13 +149,13 @@ export default function RulesLayoutPage() {
             <div className="w-px h-4 bg-slate-200 mx-1"></div>
             <button
               onClick={() => toast.success("현재 작업 설정이 저장되었습니다.")}
-              className="flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded font-medium text-[12px] shadow-sm hover:bg-slate-800 active:scale-95 transition-all"
+              className="flex items-center gap-2 px-2 py-1 bg-slate-900 text-white rounded font-medium text-[12px] shadow-sm hover:bg-slate-800 active:scale-95 transition-all"
             >
               <Save className="w-3.5 h-3.5" />
               저장
             </button>
           </div>
-          <div className="flex items-center gap-3 ml-2 border-l border-slate-200 pl-4">
+          <div className="flex items-center gap-1 ml-2 border-l border-slate-200 pl-2">
             <button
               onClick={() => toast("새로운 알림이 없습니다.")}
               className="relative p-1.5 text-slate-400 hover:text-slate-600 active:bg-slate-50 rounded-full transition-colors"
@@ -217,8 +217,8 @@ export default function RulesLayoutPage() {
       </main>
 
       {/* 하단 상태바 */}
-      <footer className="h-8 bg-slate-900 text-slate-400 border-t border-slate-800 flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-4">
+      <footer className="h-8 bg-slate-900 text-slate-400 border-t border-slate-800 flex items-center justify-between px-2 shrink-0">
+        <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-[10px] font-medium tracking-wide">DB SYSTEM ONLINE</span>
@@ -226,7 +226,7 @@ export default function RulesLayoutPage() {
           <span className="text-[10px] opacity-40">|</span>
           <span className="text-[10px]">VER 2.4.12-STABLE</span>
         </div>
-        <div className="flex items-center gap-4 text-[10px]">
+        <div className="flex items-center gap-1.5 text-[10px]">
           <span className="hover:text-white cursor-pointer transition-colors">시스템 매뉴얼</span>
           <span className="hover:text-white cursor-pointer transition-colors">업데이트 노트</span>
           <div className="flex items-center gap-1 text-slate-500">

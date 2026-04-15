@@ -643,7 +643,7 @@ export default function InterviewAlbaGuide() {
             }
             setShowResult(true);
           }}
-          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded"
+          className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded"
         >
           <CheckCircle2 size={12} className="inline mr-1" />
           테스트 완료
@@ -652,7 +652,7 @@ export default function InterviewAlbaGuide() {
 
       {showResult && (
         <Card title="성격 유형 결과">
-          <div className="text-2xl font-bold text-blue-600 tracking-widest text-center mb-1.5">
+          <div className="text-sm font-bold text-blue-600 tracking-widest text-center mb-1.5">
             {mbtiResult.type}
           </div>
           <div className="grid grid-cols-4 gap-1.5 mb-1.5">
@@ -1196,7 +1196,7 @@ export default function InterviewAlbaGuide() {
         <button
           onClick={goPrev}
           disabled={phase === 'interview' && activeIdx === 0}
-          className="px-3 py-1 text-xs border border-slate-300 bg-white hover:bg-slate-50 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-2 py-1 text-xs border border-slate-300 bg-white hover:bg-slate-50 rounded disabled:opacity-40 disabled:cursor-not-allowed"
         >
           ← 이전
         </button>
@@ -1205,11 +1205,11 @@ export default function InterviewAlbaGuide() {
         </div>
         <div className="flex gap-1">
           {activeIdx < currentStepList.length - 1 || phase === 'interview' ? (
-            <button onClick={goNext} className="px-3 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded font-semibold">
+            <button onClick={goNext} className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded font-semibold">
               다음 →
             </button>
           ) : (
-            <button onClick={handleSubmit} className="px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded font-semibold">
+            <button onClick={handleSubmit} className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded font-semibold">
               제출
             </button>
           )}

@@ -34,7 +34,7 @@ function Dropdown({
     <div className="relative" ref={ref}>
       <button
         onClick={() => !disabled && setOpen(!open)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border bg-white text-[13px] min-w-[120px] justify-between transition-colors ${
+        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-white text-[13px] min-w-[120px] justify-between transition-colors ${
           disabled
             ? "border-gray-100 text-gray-300 cursor-not-allowed"
             : "border-gray-200 text-gray-700 hover:border-gray-300 cursor-pointer"
@@ -44,14 +44,14 @@ function Dropdown({
         <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${open ? "rotate-180" : ""} ${disabled ? "text-gray-100" : "text-gray-400"}`} />
       </button>
       {open && !disabled && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-lg shadow-xl z-50 min-w-[160px] py-1 max-h-[300px] overflow-y-auto">
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-lg shadow-sm z-50 min-w-[160px] py-1 max-h-[300px] overflow-y-auto">
           {options.length === 0 ? (
-            <div className="px-4 py-2 text-[12px] text-gray-400">데이터가 없습니다.</div>
+            <div className="px-2 py-1 text-[12px] text-gray-400">데이터가 없습니다.</div>
           ) : (
             options.map((opt) => (
               <div
                 key={opt}
-                className={`px-4 py-2 text-[13px] cursor-pointer hover:bg-slate-50 transition-colors ${
+                className={`px-2 py-1 text-[13px] cursor-pointer hover:bg-slate-50 transition-colors ${
                   opt === value ? "text-blue-600 bg-blue-50/50 font-bold" : "text-gray-600 font-medium"
                 }`}
                 onClick={() => {
@@ -130,7 +130,7 @@ export function FilterDropdowns() {
         disabled={smallOptions.length === 0}
         placeholder="소분류"
       />
-      <button className="px-5 py-1.5 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-slate-800 transition-all shadow-sm active:scale-95">
+      <button className="px-2 py-1.5 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-slate-800 transition-all shadow-sm active:scale-95">
         프리셋
       </button>
     </div>

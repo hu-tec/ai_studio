@@ -45,8 +45,8 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
   const showCommentInGrid = activeGroups.length <= 3;
 
   return (
-    <div className="h-full bg-gray-50 overflow-y-auto no-scrollbar p-3">
-      <div className="max-w-[1200px] mx-auto space-y-3">
+    <div className="h-full bg-gray-50 overflow-y-auto no-scrollbar p-1">
+      <div className="max-w-[1200px] mx-auto space-y-1">
 
         {/* Header Actions */}
         <div className="flex items-center justify-between no-print">
@@ -56,11 +56,11 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Edit
           </button>
-          <div className="flex items-center gap-3">
-            <button className="px-2 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-gray-600 flex items-center gap-2 hover:bg-gray-50 shadow-sm transition-all uppercase tracking-wider">
+          <div className="flex items-center gap-1">
+            <button className="px-2 py-1 bg-white border border-gray-200 rounded-md text-[10px] font-black text-gray-600 flex items-center gap-2 hover:bg-gray-50 shadow-sm transition-all uppercase tracking-wider">
               <Printer className="w-3.5 h-3.5" /> Print
             </button>
-            <button className="px-2 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black flex items-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95 uppercase tracking-wider">
+            <button className="px-2 py-1 bg-blue-600 text-white rounded-md text-[10px] font-black flex items-center gap-2 hover:bg-blue-700 shadow-sm shadow-blue-100 transition-all active:scale-95 uppercase tracking-wider">
               <Download className="w-3.5 h-3.5" /> Export PDF
             </button>
           </div>
@@ -70,18 +70,18 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden"
+          className="bg-white rounded-[3rem] shadow-sm shadow-gray-200/50 border border-gray-100 overflow-hidden"
         >
           {/* Document Header */}
-          <div className="bg-[#0A0F1E] p-3 text-white relative overflow-hidden">
-            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-3">
-              <div className="space-y-4">
+          <div className="bg-[#0A0F1E] p-1 text-white relative overflow-hidden">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-1">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/40">
+                  <div className="w-14 h-14 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-blue-500/40">
                     <FileText className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-4xl font-black tracking-tighter">업무지시 가이드라인</h1>
+                    <h1 className="text-sm font-black tracking-tighter">업무지시 가이드라인</h1>
                     <p className="text-blue-400/80 text-[10px] font-black uppercase tracking-[0.4em] mt-1">Integrated Business Directives</p>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               </div>
 
               <div className="flex flex-col items-end">
-                <div className="px-2 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                <div className="px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
                   <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Serial No: 2026-X842</span>
                 </div>
               </div>
@@ -111,13 +111,13 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
           </div>
 
           {/* 4-Column Horizontal Layout Grid */}
-          <div className="p-3">
+          <div className="p-1">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
 
               {/* 1. Fixed Rules */}
               <div className={groupedRules.fixed.length > 0 ? "block" : "hidden opacity-20 pointer-events-none"}>
                 <CategoryHeader icon={<ShieldCheck className="w-4 h-4 text-red-500" />} title="1. 필수 규정" subTitle="Fixed Rules" color="red" />
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {groupedRules.fixed.map((rule) => (
                     <RuleCard key={rule.id} rule={rule} color="red" />
                   ))}
@@ -127,7 +127,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               {/* 2. Semi Rules */}
               <div className={groupedRules.semi.length > 0 ? "block" : "hidden opacity-20 pointer-events-none"}>
                 <CategoryHeader icon={<Scale className="w-4 h-4 text-amber-500" />} title="2. 준규정" subTitle="Conditional" color="amber" />
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {groupedRules.semi.map((rule) => (
                     <RuleCard key={rule.id} rule={rule} color="amber" />
                   ))}
@@ -137,7 +137,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               {/* 3. Optional Rules */}
               <div className={groupedRules.optional.length > 0 ? "block" : "hidden opacity-20 pointer-events-none"}>
                 <CategoryHeader icon={<Zap className="w-4 h-4 text-blue-500" />} title="3. 선택규정" subTitle="Optional" color="blue" />
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {groupedRules.optional.map((rule) => (
                     <RuleCard key={rule.id} rule={rule} color="blue" />
                   ))}
@@ -148,7 +148,7 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
               {groupedRules.field.length > 0 ? (
                 <div>
                   <CategoryHeader icon={<Briefcase className="w-4 h-4 text-emerald-500" />} title="4. 분야규정" subTitle="Field Specific" color="emerald" />
-                  <div className="space-y-3">
+                  <div className="space-y-1">
                     {groupedRules.field.map((rule) => (
                       <RuleCard key={rule.id} rule={rule} color="emerald" />
                     ))}
@@ -163,20 +163,20 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
 
             {/* Bottom Separate Comment (Only if Field rules exist) */}
             {!showCommentInGrid && (
-              <div className="mt-3">
+              <div className="mt-1">
                 <CommentBox comment={comment} fullWidth />
               </div>
             )}
 
             {/* Document Footer */}
-            <div className="mt-16 pt-10 border-t border-gray-100 flex items-center justify-between">
+            <div className="mt-1 pt-2 border-t border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shadow-inner">
                   <User className="w-6 h-6 text-gray-400" />
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none mb-1.5">Authorized Issuer</p>
-                  <p className="text-base font-black text-gray-800">관리자 (Administrator)</p>
+                  <p className="text-xs font-black text-gray-800">관리자 (Administrator)</p>
                 </div>
               </div>
               <div className="relative">
@@ -185,14 +185,14 @@ export function GuidelineResult({ selectedRules, categoryInfo, comment, onBack }
                 </div>
                 <div className="text-right pr-2">
                   <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Approved for Delivery</p>
-                  <div className="text-base font-black text-blue-500 italic tracking-tighter">OFFICIAL</div>
+                  <div className="text-xs font-black text-blue-500 italic tracking-tighter">OFFICIAL</div>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <div className="text-center text-[10px] font-black text-gray-300 uppercase tracking-[1em] pb-12">
+        <div className="text-center text-[10px] font-black text-gray-300 uppercase tracking-[1em] pb-2">
           Integrated Policy Database Management System
         </div>
       </div>
@@ -236,7 +236,7 @@ function RuleCard({ rule, color }: { rule: Regulation, color: string }) {
   };
 
   return (
-    <div className={`p-2 rounded-2xl border ${borderMap[color]} transition-all cursor-default group space-y-3`}>
+    <div className={`p-2 rounded-md border ${borderMap[color]} transition-all cursor-default group space-y-1`}>
       <div className="space-y-1">
         <h3 className="text-xs font-black text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors">
           {rule.title}

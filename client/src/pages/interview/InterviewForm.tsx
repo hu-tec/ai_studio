@@ -207,7 +207,7 @@ export function InterviewForm() {
     <div className="flex gap-2 h-[calc(100vh-60px)]">
       {/* Left: Form */}
       <div className="flex-1 min-w-0 overflow-y-auto">
-        <div className="space-y-1.5 pb-3">
+        <div className="space-y-1.5 pb-1">
           {/* Applicant List Toggle */}
           {applicants.length > 0 && (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -231,7 +231,7 @@ export function InterviewForm() {
                     return (
                       <div
                         key={a.id}
-                        className={`flex items-center justify-between px-3 py-1 hover:bg-blue-50 cursor-pointer transition-colors ${
+                        className={`flex items-center justify-between px-2 py-1 hover:bg-blue-50 cursor-pointer transition-colors ${
                           editingId === a.id ? "bg-indigo-50" : ""
                         }`}
                         onClick={() => handleEdit(a)}

@@ -97,7 +97,7 @@ export function FixedRulesColumn({
             onAddField && (
               <button
                 onClick={() => setIsAdding(true)}
-                className="w-full flex items-center justify-center gap-1 text-[12px] text-gray-400 py-2 hover:bg-[#f4f4f5] hover:text-black transition-colors"
+                className="w-full flex items-center justify-center gap-1 text-[12px] text-gray-400 py-1 hover:bg-[#f4f4f5] hover:text-black transition-colors"
               >
                 +
               </button>
