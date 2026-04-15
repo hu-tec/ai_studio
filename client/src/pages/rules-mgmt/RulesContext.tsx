@@ -64,6 +64,10 @@ interface RulesContextType {
   toggleEditMode: () => void;
   selectedTeam: string | null;
   setSelectedTeam: (team: string | null) => void;
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  allExpanded: boolean;
+  toggleAllExpanded: () => void;
   addRule: (section: SectionName, group: string | null, type: RuleType, text: string, teams?: string[]) => void;
   deleteRule: (section: SectionName, group: string | null, type: RuleType, id: string) => void;
   updateRule: (section: SectionName, group: string | null, type: RuleType, id: string, text: string) => void;
@@ -769,6 +773,9 @@ export function RulesProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<RulesState>(createInitialState);
   const [editMode, setEditMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [allExpanded, setAllExpanded] = useState<boolean>(true);
+  const toggleAllExpanded = useCallback(() => setAllExpanded(v => !v), []);
   const [currentPage, setCurrentPage] = useState<PagePath>("/");
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([
     { id: "fb1", author: "김민수 (개발팀)", text: "코드 리뷰 프로세스에서 긴급 핫픽스 예외 조항이 필요합니다.", date: "2026-03-04" },
@@ -905,6 +912,7 @@ export function RulesProvider({ children }: { children: React.ReactNode }) {
     <RulesContext.Provider
       value={{
         state, editMode, toggleEditMode, selectedTeam, setSelectedTeam,
+        searchQuery, setSearchQuery, allExpanded, toggleAllExpanded,
         addRule, deleteRule, updateRule, updateRuleTeams, addAttachment,
         addGroup, deleteGroup, feedbacks, addFeedback, currentPage, navigateTo,
       }}

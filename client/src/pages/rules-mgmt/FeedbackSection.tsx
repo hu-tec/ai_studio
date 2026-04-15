@@ -18,74 +18,59 @@ export function FeedbackSection() {
   };
 
   return (
-    <section className="border border-[#ddd] rounded-lg bg-white overflow-hidden">
+    <section className="border border-[#ddd] rounded bg-white overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-3 border-b border-[#e8e8e8] bg-[#fafafa]">
-        <h2 className="text-[16px] text-[#111]" style={{ fontWeight: 700 }}>
-          💬 피드백 / 건의사항
-        </h2>
-        <p className="text-[11px] text-[#aaa] mt-0.5" style={{ fontWeight: 400 }}>
-          규정에 대한 의견이나 개선 요청을 남겨주세요
-        </p>
+      <div className="px-2 py-1 border-b border-[#e8e8e8] bg-[#fafafa]">
+        <h2 className="text-[12px] text-[#111] font-semibold">💬 피드백 / 건의사항</h2>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Existing Feedbacks */}
+      <div className="p-1.5 space-y-1.5">
+        {/* Existing Feedbacks — grid 2-col */}
         {feedbacks.length > 0 && (
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {feedbacks.map((fb) => (
-              <div key={fb.id} className="border border-[#eee] rounded-md p-3 bg-[#fafafa]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[12px] text-[#444]" style={{ fontWeight: 600 }}>
-                    💭 {fb.author}
-                  </span>
-                  <span className="text-[10px] text-[#bbb]" style={{ fontWeight: 400 }}>
-                    {fb.date}
-                  </span>
+              <div key={fb.id} className="border border-[#eee] rounded p-1.5 bg-[#fafafa]">
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[10px] text-[#444] font-semibold truncate">💭 {fb.author}</span>
+                  <span className="text-[9px] text-[#bbb]">{fb.date}</span>
                 </div>
-                <p className="text-[12px] text-[#555]" style={{ fontWeight: 400, lineHeight: 1.6 }}>
-                  {fb.text}
-                </p>
+                <p className="text-[10px] text-[#555] leading-snug">{fb.text}</p>
               </div>
             ))}
           </div>
         )}
 
         {/* New Feedback Form */}
-        <div className="border border-[#e0e0e0] rounded-md p-4 bg-[#fdfdfd]">
-          <div className="flex items-center gap-3 mb-3">
-            <label className="text-[12px] text-[#666] shrink-0" style={{ fontWeight: 500 }}>
-              ✍️ 작성자
-            </label>
+        <div className="border border-[#e0e0e0] rounded p-1.5 bg-[#fdfdfd]">
+          <div className="flex items-center gap-1 mb-1">
+            <label className="text-[10px] text-[#666] shrink-0 font-medium">✍️ 작성자</label>
             <input
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="이름 (부서)"
-              className="flex-1 text-[12px] border border-[#ddd] rounded-md px-3 py-1.5 outline-none focus:border-[#999] bg-white"
-              style={{ fontWeight: 400 }}
+              className="flex-1 text-[11px] border border-[#ddd] rounded px-1.5 py-0.5 outline-none focus:border-[#999] bg-white"
             />
           </div>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="규정에 대한 피드백이나 건의사항을 입력해주세요..."
-            rows={3}
-            className="w-full text-[12px] border border-[#ddd] rounded-md px-3 py-2 outline-none focus:border-[#999] bg-white resize-none"
-            style={{ fontWeight: 400, lineHeight: 1.6 }}
+            placeholder="규정에 대한 피드백이나 건의사항…"
+            rows={2}
+            className="w-full text-[11px] border border-[#ddd] rounded px-1.5 py-1 outline-none focus:border-[#999] bg-white resize-none"
+            style={{ lineHeight: 1.5 }}
           />
-          <div className="flex items-center justify-between mt-2.5">
-            <span className="text-[10px] text-[#ccc]" style={{ fontWeight: 400 }}>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[9px] text-[#4caf50] font-medium">
               {submitted ? "✅ 피드백이 제출되었습니다!" : ""}
             </span>
             <button
               onClick={handleSubmit}
               disabled={!author.trim() || !text.trim()}
-              className={`text-[12px] px-4 py-1.5 rounded-md transition-colors ${
+              className={`text-[10px] px-2 py-0.5 rounded transition-colors font-medium ${
                 author.trim() && text.trim()
                   ? "bg-[#333] text-white hover:bg-[#555]"
                   : "bg-[#e8e8e8] text-[#bbb] cursor-not-allowed"
               }`}
-              style={{ fontWeight: 500 }}
             >
               📨 제출
             </button>

@@ -483,8 +483,8 @@ function CPreview({ fd, cats, on, bFields, cFields, hist, pay, fD, fN }: {
 
   return (
     <div className="bg-white border border-border rounded shadow-sm overflow-auto max-h-[calc(90vh-120px)]">
-      <div className="p-6 min-h-[520px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
-        <div className="border-2 border-[#333] p-5">
+      <div className="p-3 min-h-[480px] text-[#1a1a1a]" style={{ fontFamily: "'Noto Serif KR', 'Batang', serif" }}>
+        <div className="border-2 border-[#333] p-3">
           <div className="flex justify-between items-start mb-1">
             <span className="text-[8px] text-[#999] tracking-wider">문서번호 : CRS-____-_____</span>
             <div className="text-right">

@@ -36,29 +36,21 @@ export function SummaryCards() {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-4 gap-1.5">
       {cards.map((card) => (
         <div
           key={card.label}
-          className={`bg-white border border-[#e8e8e8] ${card.accent} border-l-[3px] rounded-lg px-5 py-4`}
+          className={`bg-white border border-[#e8e8e8] ${card.accent} border-l-[3px] rounded px-2 py-1.5`}
         >
-          <div className="flex items-center gap-1.5">
-            <span className="text-[13px]">{card.emoji}</span>
-            <p className="text-[11px] text-[#999]" style={{ fontWeight: 400 }}>
-              {card.label}
-            </p>
+          <div className="flex items-center gap-1">
+            <span className="text-[11px]">{card.emoji}</span>
+            <p className="text-[10px] text-[#999] font-medium">{card.label}</p>
           </div>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-[26px] text-[#222]" style={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {card.value}
-            </span>
-            <span className="text-[12px] text-[#bbb]" style={{ fontWeight: 400 }}>
-              {card.unit}
-            </span>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-[18px] text-[#222] font-bold leading-none">{card.value}</span>
+            <span className="text-[10px] text-[#bbb]">{card.unit}</span>
           </div>
-          <p className="text-[11px] text-[#aaa] mt-1" style={{ fontWeight: 400 }}>
-            {card.sub}
-          </p>
+          <p className="text-[9px] text-[#aaa] mt-0.5 truncate">{card.sub}</p>
         </div>
       ))}
     </div>

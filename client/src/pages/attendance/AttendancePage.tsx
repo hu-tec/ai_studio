@@ -247,7 +247,7 @@ export function AttendancePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-4 font-sans text-[#333] flex flex-col gap-3">
+    <div className="min-h-screen bg-[#F8F9FA] p-2 font-sans text-[#333] flex flex-col gap-2">
       {/* Header & Mode Switcher */}
       <header className="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl shadow-sm border border-gray-200">
         <div className="flex items-center gap-2">

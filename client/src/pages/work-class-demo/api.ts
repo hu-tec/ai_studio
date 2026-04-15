@@ -108,38 +108,44 @@ export async function saveMandalart(m: Partial<TaxonomyMandalart>) {
 }
 
 // ─── Helpers ──────────────────────────────────────────────
+// revision/removed 는 항상 SQL 실제 컬럼에서만 읽는다 (blob 에 stale 값이 남아 있어도 무시 — 이전 버그 원인).
+// 나머지 mutable 필드는 blob → flat fallback 순으로 읽어 버그 수정 이전에 blob 에만 저장된 편집을 복구.
+// 새 서버 경로는 flat 과 blob 양쪽에 같은 값을 쓰므로 순서가 무관.
 function unwrapTaxonomyRow(r: any): TaxonomyNode {
-  const merged = { ...r, ...(typeof r.data === 'object' && r.data !== null ? r.data : {}) };
+  const data = (typeof r.data === 'object' && r.data !== null) ? r.data : {};
+  const pref = (d: any, f: any) => (d !== undefined && d !== null ? d : f);
   return {
     taxonomy_id: r.taxonomy_id,
-    scope: merged.scope, gov: merged.gov, axis: merged.axis, level: merged.level,
-    parent_id: merged.parent_id ?? null,
-    label: merged.label,
-    emoji: merged.emoji ?? null,
-    sort_order: Number(merged.sort_order || 0),
-    source: merged.source || 'user',
-    locked: Number(merged.locked || 0) as 0 | 1,
-    removed: Number(merged.removed || 0) as 0 | 1,
-    revision: Number(merged.revision || 1),
-    created_by: merged.created_by, updated_by: merged.updated_by,
-    data: merged.data, updated_at: r.updated_at,
+    scope: pref(data.scope, r.scope),
+    gov: pref(data.gov, r.gov),
+    axis: pref(data.axis, r.axis),
+    level: pref(data.level, r.level),
+    parent_id: pref(data.parent_id, r.parent_id) ?? null,
+    label: pref(data.label, r.label),
+    emoji: pref(data.emoji, r.emoji) ?? null,
+    sort_order: Number(pref(data.sort_order, r.sort_order) || 0),
+    source: pref(data.source, r.source) || 'user',
+    locked: Number(pref(data.locked, r.locked) || 0) as 0 | 1,
+    removed: Number(r.removed || 0) as 0 | 1,
+    revision: Number(r.revision || 1),
+    created_by: r.created_by, updated_by: r.updated_by,
+    data, updated_at: r.updated_at,
   };
 }
 function unwrapItemRow(r: any) {
-  const merged = { ...r, ...(typeof r.data === 'object' && r.data !== null ? r.data : {}) };
   return {
     item_id: r.item_id,
-    label: merged.label,
-    scope: merged.scope,
-    facets: merged.facets || {},
-    gov_matrix: merged.gov_matrix,
-    mandalart_cell_id: merged.mandalart_cell_id,
-    worklog_task_id: merged.worklog_task_id,
-    note: merged.note,
-    source: merged.source || 'user',
-    locked: Number(merged.locked || 0) as 0 | 1,
-    removed: Number(merged.removed || 0) as 0 | 1,
-    revision: Number(merged.revision || 1),
+    label: r.label,
+    scope: r.scope,
+    facets: r.facets || {},
+    gov_matrix: r.gov_matrix,
+    mandalart_cell_id: r.mandalart_cell_id,
+    worklog_task_id: r.worklog_task_id,
+    note: r.note,
+    source: r.source || 'user',
+    locked: Number(r.locked || 0) as 0 | 1,
+    removed: Number(r.removed || 0) as 0 | 1,
+    revision: Number(r.revision || 1),
   };
 }
 function unwrapMandalartRow(r: any): TaxonomyMandalart {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Paperclip, Trash2 } from "lucide-react";
+import { Paperclip, Trash2, X } from "lucide-react";
 import { useRules, ALL_TEAMS, type RuleItem, type RuleType, type RuleSet, type SectionName } from "./RulesContext";
 
 interface RuleColumnsProps {
@@ -8,7 +8,7 @@ interface RuleColumnsProps {
   ruleSet: RuleSet;
 }
 
-/* ─── Single Rule Card (Form-style) ─── */
+/* ─── Single Rule Card ─── */
 function RuleCard({
   item,
   section,
@@ -21,7 +21,6 @@ function RuleCard({
   type: RuleType;
 }) {
   const { editMode, deleteRule, updateRule, updateRuleTeams, addAttachment } = useRules();
-  const [showTeams, setShowTeams] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -47,90 +46,80 @@ function RuleCard({
     }
   };
 
+  const handleDelete = () => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    deleteRule(section, group, type, item.id);
+  };
+
   return (
-    <div className="border border-[#e0e0e0] rounded-md bg-white hover:shadow-sm transition-shadow">
-      {/* Text Area */}
-      <div className="relative">
+    <div className="border border-[#e0e0e0] rounded bg-white hover:shadow-sm transition-shadow">
+      {/* Text + Action Row */}
+      <div className="flex items-start gap-1 px-1.5 py-1">
         <textarea
           value={item.text}
           onChange={handleTextChange}
           readOnly={!editMode}
           rows={2}
-          className={`w-full px-3 py-2.5 text-[12px] text-[#333] resize-none outline-none rounded-t-md transition-colors ${
+          className={`flex-1 min-w-0 px-1 py-0.5 text-[11px] text-[#333] resize-none outline-none rounded transition-colors ${
             editMode
-              ? "bg-white border-b border-[#e0e0e0] focus:border-[#999] cursor-text"
-              : "bg-[#fafafa] cursor-default"
+              ? "bg-white border border-[#e0e0e0] focus:border-[#666] cursor-text"
+              : "bg-transparent cursor-default"
           }`}
-          style={{ fontWeight: 400, lineHeight: 1.6 }}
+          style={{ fontWeight: 400, lineHeight: 1.45 }}
         />
-        {/* Action Icons */}
-        <div className="absolute top-2 right-2 flex items-center gap-1">
-          {editMode && (
-            <>
-              <button
-                onClick={handleFileSelect}
-                className="p-1 text-[#bbb] hover:text-[#666] hover:bg-[#f0f0f0] rounded transition-colors"
-                title="첨부파일"
-              >
-                <Paperclip size={13} />
-              </button>
-              <button
-                onClick={() => deleteRule(section, group, type, item.id)}
-                className="p-1 text-[#bbb] hover:text-[#e53935] hover:bg-[#fff0f0] rounded transition-colors"
-                title="삭제"
-              >
-                <Trash2 size={13} />
-              </button>
-            </>
-          )}
-          <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
-        </div>
+        {editMode && (
+          <div className="flex flex-col gap-0.5 shrink-0">
+            <button
+              onClick={handleFileSelect}
+              className="p-0.5 text-[#bbb] hover:text-[#666] hover:bg-[#f0f0f0] rounded transition-colors"
+              title="첨부파일"
+            >
+              <Paperclip size={11} />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-0.5 text-[#bbb] hover:text-[#e53935] hover:bg-[#fff0f0] rounded transition-colors"
+              title="삭제 (확인 후)"
+            >
+              <Trash2 size={11} />
+            </button>
+            <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
+          </div>
+        )}
       </div>
 
-      {/* Attachments (if any) */}
+      {/* Attachments (always visible) */}
       {item.attachments.length > 0 && (
-        <div className="px-3 py-1.5 border-b border-[#f0f0f0] flex flex-wrap gap-1">
+        <div className="px-1.5 py-0.5 border-t border-[#f0f0f0] flex flex-wrap gap-0.5">
           {item.attachments.map((a, i) => (
-            <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#f5f5f5] rounded text-[10px] text-[#666]" style={{ fontWeight: 400 }}>
+            <span key={i} className="inline-flex items-center gap-0.5 px-1 py-px bg-[#f5f5f5] rounded text-[9px] text-[#666]">
               📎 {a}
             </span>
           ))}
         </div>
       )}
 
-      {/* Team Checkboxes */}
-      <div className="px-3 py-1.5">
-        <button
-          onClick={() => setShowTeams(!showTeams)}
-          className="text-[10px] text-[#999] hover:text-[#555] transition-colors"
-          style={{ fontWeight: 500 }}
-        >
-          🏷️ 적용 팀 ({item.teams.length}/{ALL_TEAMS.length}) {showTeams ? "▲" : "▼"}
-        </button>
-        {showTeams && (
-          <div className="mt-1.5 flex flex-wrap gap-x-1 gap-y-1">
-            {ALL_TEAMS.map((team) => (
-              <label
-                key={team}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] cursor-pointer transition-colors ${
-                  item.teams.includes(team)
-                    ? "bg-[#e8f0fe] text-[#1a73e8]"
-                    : "bg-[#f5f5f5] text-[#aaa]"
-                } ${editMode ? "hover:bg-[#e0e7ff]" : ""}`}
-                style={{ fontWeight: 400 }}
-              >
-                <input
-                  type="checkbox"
-                  checked={item.teams.includes(team)}
-                  onChange={() => handleTeamToggle(team)}
-                  disabled={!editMode}
-                  className="w-3 h-3 accent-[#1a73e8]"
-                />
-                {team}
-              </label>
-            ))}
-          </div>
-        )}
+      {/* Team Chips — always visible (no hidden toggle) */}
+      <div className="px-1.5 py-1 border-t border-[#f0f0f0] flex flex-wrap gap-0.5 items-center">
+        <span className="text-[9px] text-[#aaa] mr-0.5">팀:</span>
+        {ALL_TEAMS.map((team) => {
+          const active = item.teams.includes(team);
+          return (
+            <button
+              key={team}
+              type="button"
+              onClick={() => editMode && handleTeamToggle(team)}
+              disabled={!editMode}
+              className={`px-1 py-px rounded-full text-[9px] border transition-colors ${
+                active
+                  ? "bg-[#e8f0fe] text-[#1a73e8] border-[#cfe1fc]"
+                  : "bg-white text-[#bbb] border-[#eee] line-through"
+              } ${editMode ? "cursor-pointer hover:border-[#999]" : "cursor-default opacity-80"}`}
+            >
+              {team}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -148,39 +137,39 @@ function ColumnBlock({
   section: SectionName;
   group: string | null;
 }) {
-  const { editMode, addRule, selectedTeam } = useRules();
+  const { editMode, addRule, selectedTeam, searchQuery } = useRules();
   const [adding, setAdding] = useState(false);
   const [newText, setNewText] = useState("");
 
-  // Filter items by selected team
-  const filteredItems = selectedTeam
-    ? items.filter((item) => item.teams.includes(selectedTeam))
-    : items;
+  // Filter items by selected team + search query
+  const q = searchQuery.trim().toLowerCase();
+  const filteredItems = items.filter((item) => {
+    if (selectedTeam && !item.teams.includes(selectedTeam)) return false;
+    if (q && !item.text.toLowerCase().includes(q)) return false;
+    return true;
+  });
 
-  const headerStyles: Record<RuleType, { bg: string; text: string; border: string; label: string; sub: string; emoji: string }> = {
+  const headerStyles: Record<RuleType, { bg: string; text: string; border: string; label: string; sub: string }> = {
     규정: {
       bg: "bg-[#eef0f4]",
       text: "text-[#3a3f4b]",
       border: "border-[#d5d9e2]",
       label: "📋 규정",
-      sub: "고정 (변경금지)",
-      emoji: "🔒",
+      sub: "고정",
     },
     준규정: {
       bg: "bg-[#f0efe8]",
       text: "text-[#5a5540]",
       border: "border-[#ddd8c8]",
       label: "📝 준규정",
-      sub: "준고정 (조건부변경가능)",
-      emoji: "🔑",
+      sub: "준고정",
     },
     선택사항: {
       bg: "bg-[#eef5ee]",
       text: "text-[#3a5a3a]",
       border: "border-[#c8dcc8]",
       label: "✅ 선택사항",
-      sub: "선택고정 (언제든변경가능)",
-      emoji: "✨",
+      sub: "선택",
     },
   };
 
@@ -195,28 +184,20 @@ function ColumnBlock({
   };
 
   return (
-    <div className={`border ${h.border} rounded-lg overflow-hidden flex flex-col`}>
+    <div className={`border ${h.border} rounded overflow-hidden flex flex-col`}>
       {/* Column Header */}
-      <div className={`${h.bg} ${h.text} px-3 py-2.5 flex items-center justify-between border-b ${h.border}`}>
-        <div>
-          <span className="text-[13px]" style={{ fontWeight: 600 }}>
-            {h.label}
-          </span>
-          <span className="text-[10px] ml-1.5 opacity-60" style={{ fontWeight: 400 }}>
-            {h.sub}
-          </span>
+      <div className={`${h.bg} ${h.text} px-1.5 py-1 flex items-center justify-between border-b ${h.border}`}>
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] font-semibold">{h.label}</span>
+          <span className="text-[9px] opacity-60">{h.sub}</span>
         </div>
-        <span className="text-[11px] opacity-50" style={{ fontWeight: 500 }}>
-          {filteredItems.length}건
-        </span>
+        <span className="text-[9px] opacity-70 font-medium">{filteredItems.length}건</span>
       </div>
 
       {/* Items */}
-      <div className="flex-1 bg-[#fafafa] p-2 space-y-2">
+      <div className="flex-1 bg-[#fafafa] p-1 space-y-1">
         {filteredItems.length === 0 && !adding && (
-          <div className="py-6 text-center text-[11px] text-[#ccc]" style={{ fontWeight: 400 }}>
-            등록된 항목이 없습니다
-          </div>
+          <div className="py-2 text-center text-[10px] text-[#ccc]">항목 없음</div>
         )}
         {filteredItems.map((item) => (
           <RuleCard key={item.id} item={item} section={section} group={group} type={type} />
@@ -226,7 +207,7 @@ function ColumnBlock({
         {editMode && (
           <>
             {adding ? (
-              <div className="border border-dashed border-[#ccc] rounded-md p-2 bg-white">
+              <div className="border border-dashed border-[#ccc] rounded p-1 bg-white">
                 <textarea
                   autoFocus
                   value={newText}
@@ -235,23 +216,20 @@ function ColumnBlock({
                     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAdd(); }
                     if (e.key === "Escape") { setNewText(""); setAdding(false); }
                   }}
-                  placeholder="새 항목을 입력하세요... (Enter로 추가, Esc로 취소)"
+                  placeholder="새 항목 (Enter=추가, Esc=취소)"
                   rows={2}
-                  className="w-full text-[12px] text-[#333] border border-[#ddd] rounded px-2 py-1.5 outline-none focus:border-[#999] resize-none bg-white"
-                  style={{ fontWeight: 400, lineHeight: 1.5 }}
+                  className="w-full text-[11px] text-[#333] border border-[#ddd] rounded px-1 py-0.5 outline-none focus:border-[#999] resize-none bg-white"
                 />
-                <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-1 mt-0.5">
                   <button
                     onClick={handleAdd}
-                    className="text-[11px] text-white bg-[#444] px-3 py-1 rounded hover:bg-[#666] transition-colors"
-                    style={{ fontWeight: 500 }}
+                    className="text-[10px] text-white bg-[#444] px-1.5 py-0.5 rounded hover:bg-[#666] transition-colors"
                   >
-                    ✅ 추가
+                    추가
                   </button>
                   <button
                     onClick={() => { setNewText(""); setAdding(false); }}
-                    className="text-[11px] text-[#999] px-2 py-1 rounded hover:bg-[#f0f0f0] transition-colors"
-                    style={{ fontWeight: 500 }}
+                    className="text-[10px] text-[#999] px-1 py-0.5 rounded hover:bg-[#f0f0f0] transition-colors"
                   >
                     취소
                   </button>
@@ -260,10 +238,9 @@ function ColumnBlock({
             ) : (
               <button
                 onClick={() => setAdding(true)}
-                className="w-full text-center py-2 text-[11px] text-[#bbb] hover:text-[#666] border border-dashed border-[#ddd] hover:border-[#aaa] rounded-md bg-white hover:bg-[#fafafa] transition-colors"
-                style={{ fontWeight: 500 }}
+                className="w-full text-center py-1 text-[10px] text-[#bbb] hover:text-[#666] border border-dashed border-[#ddd] hover:border-[#aaa] rounded bg-white hover:bg-[#fafafa] transition-colors"
               >
-                ➕ 새 항목 추가
+                + 새 항목
               </button>
             )}
           </>
@@ -276,7 +253,7 @@ function ColumnBlock({
 export function RuleColumns({ section, group, ruleSet }: RuleColumnsProps) {
   const types: RuleType[] = ["규정", "준규정", "선택사항"];
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-1.5">
       {types.map((type) => (
         <ColumnBlock key={type} type={type} items={ruleSet[type]} section={section} group={group} />
       ))}

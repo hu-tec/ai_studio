@@ -518,6 +518,7 @@ function CommentThread({ postId, comments, onRefresh }: { postId: string; commen
   };
 
   const handleDeleteComment = async (cid: string) => {
+    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
     try {
       await fetch(`/api/work-hub-comments/${cid}`, { method: 'DELETE' });
       onRefresh();

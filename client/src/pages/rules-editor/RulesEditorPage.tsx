@@ -514,6 +514,7 @@ function RulesEditorPage() {
 
   const handleTypeADeleteField = useCallback(
     (fieldId: string) => {
+      if (!window.confirm('정말 삭제하시겠습니까?')) return;
       setRuleSet((prev) => ({
         ...prev,
         typeA: prev.typeA.filter((f) => f.id !== fieldId),

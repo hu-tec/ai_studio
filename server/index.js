@@ -42,12 +42,20 @@ app.use('/api/work-hub', createGenericRouter('work_hub', 'post_id'));
 app.use('/api/work-hub-comments', createGenericRouter('work_hub_comments', 'comment_id'));
 
 // 업무 분류 최종 DB (T9) — Single Source of Truth, soft delete + revision lock
+// work_class_taxonomy/items 는 flat 컬럼 + data blob 구조 → flatColumns 로 컬럼 분리 저장 필수
 app.use('/api/work-class-taxonomy',
-  createGenericRouter('work_class_taxonomy', 'taxonomy_id',
-    { softDelete: true, listFilter: true, revisionLock: true }));
+  createGenericRouter('work_class_taxonomy', 'taxonomy_id', {
+    softDelete: true, listFilter: true, revisionLock: true,
+    flatColumns: ['scope', 'gov', 'axis', 'level', 'parent_id', 'label', 'emoji', 'sort_order', 'source', 'locked', 'created_by', 'updated_by'],
+    hasDataBlob: true,
+  }));
 app.use('/api/work-class-items',
-  createGenericRouter('work_class_items', 'item_id',
-    { softDelete: true, listFilter: true, revisionLock: true }));
+  createGenericRouter('work_class_items', 'item_id', {
+    softDelete: true, listFilter: true, revisionLock: true,
+    flatColumns: ['label', 'scope', 'facets', 'gov_matrix', 'mandalart_cell_id', 'worklog_task_id', 'note', 'source', 'locked', 'created_by', 'updated_by'],
+    jsonFlatColumns: ['facets', 'gov_matrix'],
+    hasDataBlob: false,
+  }));
 app.use('/api/work-class-mandalart',
   createGenericRouter('work_class_mandalart', 'mandalart_id',
     { softDelete: true, listFilter: true, revisionLock: true }));
