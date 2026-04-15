@@ -266,7 +266,7 @@ export default function MeetingFormPage() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-5xl bg-white rounded-lg overflow-hidden flex flex-col md:flex-row shadow-sm min-h-[700px]"
         >
-          <div className="flex-1 p-3border-r border-slate-100 bg-slate-50/30">
+          <div className="flex-1 p-3 border-r border-slate-100 bg-slate-50/30">
             <div className="mb-1">
               <h1 className="text-sm font-black text-slate-800 mb-2">전문가 미팅 신청</h1>
               <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Expert Application Portal</p>
@@ -337,7 +337,7 @@ export default function MeetingFormPage() {
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 shadow-sm rounded-lg p-3space-y-2"
+                      className="absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 shadow-sm rounded-lg p-3 space-y-2"
                     >
                       <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function MeetingFormPage() {
               </button>
             </div>
           </div>
-          <div className="w-full md:w-[320px] bg-slate-800 p-3text-white flex flex-col justify-center">
+          <div className="w-full md:w-[320px] bg-slate-800 p-3 text-white flex flex-col justify-center">
             <div className="space-y-2">
               <div className="w-16 h-16 bg-white/10 rounded-md flex items-center justify-center">
                 <AlertCircle size={32} />
@@ -492,7 +492,7 @@ export default function MeetingFormPage() {
         {/* Main Section (Regulation 1, 2) */}
         <section className="flex-1 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           {/* Dashboard Summary & View Toggle */}
-          <div className="p-2border-b border-slate-100 bg-slate-50/30 flex flex-col gap-1">
+          <div className="p-2 border-b border-slate-100 bg-slate-50/30 flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex items-center bg-slate-200/50 p-1.5 rounded-[1.25rem] border border-slate-200/50">
@@ -569,7 +569,7 @@ export default function MeetingFormPage() {
                           const isTodayDate = isSameDay(day, new Date());
 
                           return (
-                            <div key={day.toISOString()} onClick={() => { setSelectedDate(day); setPeriodType('day'); setCurrentMonth(day); }} className={cn("min-h-[160px] p-2border-r border-b border-slate-100 transition-all flex flex-col gap-1 relative group cursor-pointer", !isCurrentMonth ? "bg-slate-50/30 opacity-40" : "bg-white", isTodayDate && "bg-slate-50/50")}>
+                            <div key={day.toISOString()} onClick={() => { setSelectedDate(day); setPeriodType('day'); setCurrentMonth(day); }} className={cn("min-h-[160px] p-2 border-r border-b border-slate-100 transition-all flex flex-col gap-1 relative group cursor-pointer", !isCurrentMonth ? "bg-slate-50/30 opacity-40" : "bg-white", isTodayDate && "bg-slate-50/50")}>
                               <div className="flex items-center justify-between">
                                 <span className={cn("text-sm font-black w-7 h-7 flex items-center justify-center rounded-md", isTodayDate ? "bg-slate-800 text-white shadow-sm" : "text-slate-600")}>{format(day, 'd')}</span>
                                 {isCurrentMonth && (
@@ -694,7 +694,7 @@ export default function MeetingFormPage() {
         {/* Sidebar (Req Status Area) */}
         <aside className="w-[380px] flex flex-col gap-1">
           {/* Analysis Section */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3flex flex-col h-[350px] shrink-0">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 flex flex-col h-[350px] shrink-0">
             <h2 className="text-sm font-black text-slate-800 flex items-center gap-1 mb-1.5">
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-md"><PieChart size={20} /></div>
               신청 분포 분석
@@ -748,7 +748,7 @@ export default function MeetingFormPage() {
           </div>
 
           {/* Application Status Area */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3flex flex-col flex-1 overflow-hidden relative">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 flex flex-col flex-1 overflow-hidden relative">
             <div className="absolute top-0 right-0 p-1">
               <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
             </div>
@@ -760,7 +760,7 @@ export default function MeetingFormPage() {
             <div className="flex-1 overflow-y-auto space-y-1 pr-2">
               {requests.filter(r => r.status === 'pending').length > 0 ? (
                 requests.filter(r => r.status === 'pending').map((r, i) => (
-                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} key={r.id} className="p-2bg-slate-50 border border-slate-100 rounded-lg space-y-1 hover:shadow-md transition-all">
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} key={r.id} className="p-2 bg-slate-50 border border-slate-100 rounded-lg space-y-1 hover:shadow-md transition-all">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -780,8 +780,8 @@ export default function MeetingFormPage() {
                   </motion.div>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center p-3opacity-40">
-                  <div className="p-2bg-slate-50 rounded-lg mb-1.5">
+                <div className="flex flex-col items-center justify-center h-full text-center p-3 opacity-40">
+                  <div className="p-2 bg-slate-50 rounded-lg mb-1.5">
                     <CheckCircle2 size={32} className="text-slate-300" />
                   </div>
                   <p className="text-sm font-bold text-slate-400">새로운 신청이 없습니다.</p>
@@ -791,8 +791,8 @@ export default function MeetingFormPage() {
 
             {/* Export Section */}
             <div className="mt-2 pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
-              <button className="flex flex-col items-center gap-2 p-2bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100 hover:bg-emerald-100 transition-all"><FileSpreadsheet size={20} /><span className="text-[10px] font-black uppercase">Excel</span></button>
-              <button className="flex flex-col items-center gap-2 p-2bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 transition-all"><FileText size={20} /><span className="text-[10px] font-black uppercase">Word</span></button>
+              <button className="flex flex-col items-center gap-2 p-2 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100 hover:bg-emerald-100 transition-all"><FileSpreadsheet size={20} /><span className="text-[10px] font-black uppercase">Excel</span></button>
+              <button className="flex flex-col items-center gap-2 p-2 bg-blue-50 text-blue-700 rounded-md border border-blue-100 hover:bg-blue-100 transition-all"><FileText size={20} /><span className="text-[10px] font-black uppercase">Word</span></button>
             </div>
           </div>
         </aside>
@@ -838,14 +838,14 @@ export default function MeetingFormPage() {
                   </div>
                 </div>
                 {selectedRequest.note && (
-                  <div className="p-2bg-slate-50 rounded-md border border-slate-100">
+                  <div className="p-2 bg-slate-50 rounded-md border border-slate-100">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">상세 메모</p>
                     <p className="text-sm text-slate-600 leading-relaxed font-bold italic">"{selectedRequest.note}"</p>
                   </div>
                 )}
                 <div className="flex gap-2">
                   <button className="flex-1 bg-slate-800 text-white py-1 rounded-md font-black text-md flex items-center justify-center gap-1 shadow-sm hover:bg-slate-700 transition-all"><Edit size={18} /> 수정하기</button>
-                  <button className="p-2bg-white border border-slate-200 rounded-md text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={20} /></button>
+                  <button className="p-2 bg-white border border-slate-200 rounded-md text-rose-500 hover:bg-rose-50 transition-all"><Trash2 size={20} /></button>
                 </div>
               </div>
             </motion.div>

@@ -442,7 +442,7 @@ export default function OverduePage() {
         {viewLayout === 'dashboard' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-1">
             <div className="lg:col-span-4 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[700px]">
-              <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div className="p-2 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-700 flex items-center gap-2">
                   <User className="w-4 h-4" /> 개인별 현황 리스트
                 </h3>
@@ -502,7 +502,7 @@ export default function OverduePage() {
             </div>
 
             <div className="lg:col-span-8 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div className="p-2 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-700 flex items-center gap-2 text-sm uppercase">
                   {mode === 'add' ? '신규 등록' : mode === 'edit' ? '정보 수정' : '상세 정보'}
                 </h3>
@@ -592,7 +592,7 @@ export default function OverduePage() {
           </div>
         ) : (
           <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mb-1">
-            <div className="p-2border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <div className="p-2 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <h3 className="font-bold text-slate-700 flex items-center gap-2">
                 <List className="w-4 h-4" /> 전체 개인별 채권 현황 목록
               </h3>
@@ -675,7 +675,7 @@ export default function OverduePage() {
 
         {/* Manager Statistics Table */}
         <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden mb-1">
-          <div className="p-2border-b border-slate-100 flex justify-between items-center bg-white">
+          <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-white">
             <h2 className="text-xs font-bold flex items-center gap-2">
               <Settings className="w-4 h-4 text-slate-400" />
               전체 및 현황 통계
@@ -790,7 +790,7 @@ export default function OverduePage() {
 
         {/* Individual Detail Quick Preview Modal */}
         {previewId && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2bg-slate-900/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white w-full max-w-2xl rounded-md shadow-sm overflow-hidden animate-in fade-in zoom-in duration-200">
               <div className="p-2 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div className="flex items-center gap-1">

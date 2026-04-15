@@ -712,7 +712,7 @@ function SchedulePage() {
                     <div className="space-y-1 h-full flex flex-col">
                       {mode === "add" ? (
                         <div className="flex-1 flex flex-col justify-center">
-                          <div className="p-2bg-slate-50 border border-dashed border-slate-200 rounded-md text-center mb-1.5">
+                          <div className="p-2 bg-slate-50 border border-dashed border-slate-200 rounded-md text-center mb-1.5">
                             <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Status</p>
                             <p className="text-xs text-slate-600 font-medium">새로운 정보를 입력 중입니다</p>
                           </div>
@@ -769,7 +769,7 @@ function SchedulePage() {
                 exit={{ opacity: 0, y: -10 }}
                 className="bg-white border border-slate-200 rounded-md overflow-hidden shadow-sm"
               >
-                <div className="p-2border-b border-slate-100 bg-slate-50/30">
+                <div className="p-2 border-b border-slate-100 bg-slate-50/30">
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h3 className="font-black text-slate-800 text-sm tracking-tight">전체 강의 시간표 리스트</h3>
@@ -882,7 +882,7 @@ function SchedulePage() {
         {/* Right Preview Area */}
         <div className="col-span-3 sticky top-6">
           <div className="bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden flex flex-col h-[calc(100vh-120px)]">
-            <div className="p-2bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div className="p-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <h2 className="font-bold text-xs flex items-center gap-1.5 uppercase tracking-wider text-slate-500">
                 <Clock size={14} /> LIVE PREVIEW
               </h2>
@@ -906,8 +906,8 @@ function SchedulePage() {
               </div>
             </div>
 
-            <div className="p-2flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-              <div className="bg-slate-50 rounded-md p-2border border-slate-100">
+            <div className="p-2 flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+              <div className="bg-slate-50 rounded-md p-2 border border-slate-100">
                 <div className="flex items-center gap-1 mb-1.5">
                   <div className="w-12 h-12 bg-white rounded-md shadow-sm border border-slate-100 flex items-center justify-center text-xs relative">
                     <span className="absolute -top-1 -left-1 text-[8px] bg-blue-600 text-white px-1 rounded font-black">{formData.grade}</span>
@@ -993,7 +993,7 @@ function SchedulePage() {
               )}
             </div>
             
-            <div className="p-2bg-slate-900 text-white mt-auto">
+            <div className="p-2 bg-slate-900 text-white mt-auto">
               <div className="text-[9px] opacity-50 mb-1 flex items-center gap-1 uppercase font-bold tracking-widest"><Download size={10} /> Final Report</div>
               <div className="text-xs font-bold tracking-tight">2026년 04월 15일 (수)</div>
             </div>
@@ -1081,7 +1081,7 @@ function ModeTab({ active, onClick, icon, label, desc, activeClass }: {
 
 function SectionContainer({ children, title, icon, className }: { children: React.ReactNode; title: string; icon: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("bg-white border border-slate-200 rounded-md p-2shadow-sm hover:shadow-md transition-all h-full flex flex-col min-h-[220px]", className)}>
+    <div className={cn("bg-white border border-slate-200 rounded-md p-2 shadow-sm hover:shadow-md transition-all h-full flex flex-col min-h-[220px]", className)}>
       <div className="flex items-center gap-2 mb-1 pb-2 border-b border-slate-50">
         <div className="text-slate-500">{icon}</div>
         <h3 className="font-bold text-[11px] tracking-widest text-slate-500 uppercase">{title}</h3>
@@ -1262,7 +1262,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="relative bg-white w-full max-w-2xl rounded-md shadow-sm overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="p-2border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-1">
             <div className={cn(
               "w-10 h-10 rounded-md flex items-center justify-center shadow-sm",
@@ -1283,7 +1283,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
           </button>
         </div>
 
-        <div className="p-3overflow-y-auto custom-scrollbar bg-white">
+        <div className="p-3 overflow-y-auto custom-scrollbar bg-white">
           <div className="mb-2 flex justify-between items-end border-b-2 border-slate-900 pb-2">
             <h4 className="text-sm font-black text-slate-900">
               {totalDays > 30 ? Math.floor(totalDays/7) : 1} Weeks {schedule.selectedDays.length > 5 ? "Weekends" : "Weekdays"} ({schedule.selectedDays.join(", ")})
@@ -1348,7 +1348,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
             </tbody>
           </table>
 
-          <div className="bg-slate-50 rounded-md p-2border border-slate-100">
+          <div className="bg-slate-50 rounded-md p-2 border border-slate-100">
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Calculated Total</p>
@@ -1367,7 +1367,7 @@ function SchedulePreviewModal({ isOpen, onClose, schedule, calculations, type }:
           </div>
         </div>
 
-        <div className="p-2border-t border-slate-100 flex gap-1 bg-slate-50/30">
+        <div className="p-2 border-t border-slate-100 flex gap-1 bg-slate-50/30">
           <button onClick={onClose} className="flex-1 px-2 py-1 rounded-md text-xs font-bold text-slate-500 bg-white border border-slate-200">취소</button>
           <button 
             onClick={() => { alert("다운로드 시작"); onClose(); }}
@@ -1404,7 +1404,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
         exit={{ opacity: 0, scale: 0.9, rotateY: -20 }}
         className="relative bg-white w-full max-w-4xl rounded-[40px] shadow-sm overflow-hidden grid grid-cols-12 max-h-[85vh]"
       >
-        <div className="col-span-8 p-3overflow-y-auto custom-scrollbar">
+        <div className="col-span-8 p-3 overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <div className="w-14 h-14 bg-blue-600 rounded-md flex items-center justify-center shadow-sm shadow-blue-100 text-white relative">
@@ -1452,7 +1452,7 @@ function DetailViewModal({ schedule, onClose, calculations }: {
           </div>
         </div>
 
-        <div className="col-span-4 bg-slate-900 p-3flex flex-col justify-between relative overflow-hidden">
+        <div className="col-span-4 bg-slate-900 p-3 flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full -mr-32 -mt-1 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/10 rounded-full -ml-32 -mb-1 blur-3xl pointer-events-none" />
 
