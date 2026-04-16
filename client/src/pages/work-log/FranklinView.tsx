@@ -181,6 +181,12 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                     style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
                   {/* Priority */}
                   <span className="text-[10px] font-bold w-5 shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
+                  {/* 서브태스크 진행 현황 — A1/B2 라벨 왼쪽 */}
+                  {task.children && task.children.length > 0 && (
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
+                      {task.children.filter(c => c.status === 'done').length}/{task.children.length}
+                    </span>
+                  )}
                   {/* Issue toggle — 메인 row 에 항상 표시 */}
                   <button onClick={e => { e.stopPropagation(); updateTask(task.id, { isIssue: !task.isIssue }); }}
                     onMouseDown={e => e.stopPropagation()}
@@ -228,12 +234,6 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                   <span className={`text-[10px] font-mono shrink-0 ${task.startTime ? 'text-blue-600' : 'text-muted-foreground/40'}`}>
                     {timeLabel}
                   </span>
-                  {/* Sub-task count */}
-                  {task.children && task.children.length > 0 && (
-                    <span className="text-[9px] px-1 py-0.5 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
-                      {task.children.filter(c => c.status === 'done').length}/{task.children.length}
-                    </span>
-                  )}
                   {/* Files indicator */}
                   {task.files && task.files.length > 0 && <Paperclip className="w-3 h-3 text-muted-foreground shrink-0" />}
                   {/* Delete */}

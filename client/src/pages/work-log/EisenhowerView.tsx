@@ -219,6 +219,12 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                                 style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />;
                             })}
                           </div>
+                          {/* 서브태스크 진행 현황 — A1/B2 라벨 왼쪽 */}
+                          {task.children && task.children.length > 0 && (
+                            <span className="text-[8px] px-1 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
+                              {task.children.filter(c => c.status === 'done').length}/{task.children.length}
+                            </span>
+                          )}
                           <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
                           <button onClick={e => { e.stopPropagation(); updateTask(task.id, { isIssue: !task.isIssue }); }}
                             onMouseDown={e => e.stopPropagation()}
@@ -251,11 +257,6 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                             </span>
                           )}
                           {timeLabel && <span className="text-[8px] font-mono text-blue-600 shrink-0">{timeLabel}</span>}
-                          {task.children && task.children.length > 0 && (
-                            <span className="text-[8px] px-1 rounded bg-slate-100 text-slate-500 font-bold shrink-0">
-                              {task.children.filter(c => c.status === 'done').length}/{task.children.length}
-                            </span>
-                          )}
                           <button onClick={() => removeTask(task.id)}
                             className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 text-[9px] shrink-0">✕</button>
                         </div>

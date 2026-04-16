@@ -20,9 +20,13 @@ interface DailyDetailProps {
   employeeId: string;
   onFlushRef?: React.MutableRefObject<(() => void) | null>;
   allLogs?: DailyLog[]; // 이월 누적 계산용 — 같은 직원의 전체 일지
+  onUpdateTaskAnywhere?: (taskId: string, updates: Partial<Task>) => void;
+  onDeleteTaskAnywhere?: (taskId: string) => void;
 }
 
-export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs }: DailyDetailProps) {
+export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs, onUpdateTaskAnywhere, onDeleteTaskAnywhere }: DailyDetailProps) {
+  const [carryEditingId, setCarryEditingId] = useState<string | null>(null);
+  const [carryEditText, setCarryEditText] = useState('');
   const dateStr = format(date, 'yyyy-MM-dd');
   const emp = employees.find(e => e.id === employeeId) || currentEmployee;
 
@@ -918,14 +922,35 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                           const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
                           const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                           const tag = t.status === 'forwarded' ? '이월' : t.queued ? '대기' : taskSlots(t).length === 0 ? '미배정' : '';
+                          const isEditing = carryEditingId === t.id;
                           return (
-                            <div key={`${fromDate}-${t.id}`} className="flex items-center gap-1">
+                            <div key={`${fromDate}-${t.id}`} className="flex items-center gap-1 group/carry">
                               <span className="text-rose-500 font-bold">→</span>
                               <span className="font-bold shrink-0" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
                               <span className="shrink-0" style={{ color: stCfg.color }}>{stCfg.icon}</span>
-                              <span className="flex-1 truncate">{t.task}</span>
+                              {isEditing ? (
+                                <input autoFocus value={carryEditText}
+                                  onChange={e => setCarryEditText(e.target.value)}
+                                  onBlur={() => { if (onUpdateTaskAnywhere) onUpdateTaskAnywhere(t.id, { task: carryEditText.trim() }); setCarryEditingId(null); }}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') { if (onUpdateTaskAnywhere) onUpdateTaskAnywhere(t.id, { task: carryEditText.trim() }); setCarryEditingId(null); }
+                                    if (e.key === 'Escape') setCarryEditingId(null);
+                                  }}
+                                  className="flex-1 px-1 py-0 border border-primary rounded text-[10px] outline-none min-w-0" />
+                              ) : (
+                                <span className="flex-1 truncate cursor-text"
+                                  title="더블클릭→편집"
+                                  onDoubleClick={() => { setCarryEditingId(t.id); setCarryEditText(t.task); }}>
+                                  {t.task}
+                                </span>
+                              )}
                               {!isToday && <span className="text-[8px] px-1 rounded bg-gray-100 text-gray-600 shrink-0 font-mono">{fromDate.slice(5)}</span>}
                               {tag && <span className="text-[8px] px-1 rounded bg-rose-100 text-rose-600 shrink-0">{tag}</span>}
+                              {onDeleteTaskAnywhere && !isEditing && (
+                                <button onClick={() => { if (confirm(`'${t.task}' 삭제하시겠습니까?`)) onDeleteTaskAnywhere(t.id); }}
+                                  title="삭제"
+                                  className="opacity-0 group-hover/carry:opacity-100 text-rose-500 hover:bg-rose-100 rounded w-3 h-3 flex items-center justify-center shrink-0 text-[10px] leading-none">×</button>
+                              )}
                             </div>
                           );
                         })}

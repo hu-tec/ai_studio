@@ -4,7 +4,7 @@ import { DailyDetail } from './DailyDetail';
 import { ListView } from './ListView';
 import { WeeklyView } from './WeeklyView';
 import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI, rolloverPendingTasks, prevDateStr, createEmptyTimeSlots, loadPersistentTypes, DEFAULT_MANDALART_TYPES } from './data';
-import type { DailyLog, PromptTemplate, Employee } from './data';
+import type { DailyLog, PromptTemplate, Employee, Task } from './data';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { PanelLeftClose, PanelLeftOpen, ChevronLeft, ChevronRight, FileText, Settings, Plus, Trash2, Save, Download, FileSpreadsheet, FileCode, ImageIcon, ListFilter, LayoutGrid } from 'lucide-react';
@@ -289,26 +289,108 @@ export function EmployeePage() {
     };
   }, [doFetch]);
 
-  // 자동 이월: 이전 날 forwarded(→) 태스크를 오늘로 복제 (중복 방지)
-  useEffect(() => {
-    if (logs.length === 0) return;
-    const prev = prevDateStr(dateStr);
-    const prevLog = logs.find(l => l.employeeId === activeEmpId && l.date === prev);
-    if (!prevLog || !prevLog.tasks || prevLog.tasks.length === 0) return;
-    const currTasks = currentLog?.tasks || [];
-    const rolled = rolloverPendingTasks(currTasks, prevLog.tasks, prev);
-    if (rolled === currTasks) return;
-    const newLog: DailyLog = currentLog
-      ? { ...currentLog, tasks: rolled }
-      : {
-          date: dateStr, summary: '', detail: '', position: activeEmployee.position,
+  // 자동 이월 로직 제거 — forwarded/미완료 task 는 '다음 날'로 복제되지 않고
+  // WeeklyView 의 '이월 업무' 컬럼에 누적 집계됨 (원 위치 유지).
+
+  // 모든 뷰에서 이월·누적 task 편집/삭제 가능하게 — logs 전체를 스캔해 task.id 매칭
+  const updateTaskAnywhere = useCallback((taskId: string, updates: Partial<DailyLog['tasks'] extends (infer T)[] | undefined ? T : never>) => {
+    setLogs(prev => {
+      const changed: DailyLog[] = [];
+      const next = prev.map(l => {
+        if (!l.tasks) return l;
+        const hasTop = l.tasks.some(t => t.id === taskId);
+        const hasSub = l.tasks.some(t => t.children?.some(c => c.id === taskId));
+        if (!hasTop && !hasSub) return l;
+        const nextTasks = l.tasks.map(t => {
+          if (t.id === taskId) return { ...t, ...updates };
+          if (t.children?.some(c => c.id === taskId)) {
+            return { ...t, children: t.children.map(c => c.id === taskId ? { ...c, ...updates } : c) };
+          }
+          return t;
+        });
+        const nl = { ...l, tasks: nextTasks };
+        changed.push(nl);
+        return nl;
+      });
+      saveLogs(next);
+      for (const l of changed) saveLogToAPI(l).catch(() => {});
+      return next;
+    });
+  }, []);
+
+  // task 를 특정 날짜로 이동 (이월 업무 → 날짜 컬럼 드롭)
+  const moveTaskToDate = useCallback((taskId: string, destDate: string) => {
+    setLogs(prev => {
+      let taskToMove: Task | null = null;
+      // 1) 원본 log 에서 task 제거
+      const step1 = prev.map(l => {
+        if (!l.tasks) return l;
+        const topIdx = l.tasks.findIndex(t => t.id === taskId);
+        if (topIdx >= 0) {
+          taskToMove = l.tasks[topIdx];
+          return { ...l, tasks: l.tasks.filter((_, i) => i !== topIdx) };
+        }
+        for (let i = 0; i < l.tasks.length; i++) {
+          const children = l.tasks[i].children;
+          if (!children) continue;
+          const cIdx = children.findIndex(c => c.id === taskId);
+          if (cIdx >= 0) {
+            taskToMove = children[cIdx];
+            const newChildren = children.filter((_, j) => j !== cIdx);
+            const newTasks = [...l.tasks];
+            newTasks[i] = { ...newTasks[i], children: newChildren };
+            return { ...l, tasks: newTasks };
+          }
+        }
+        return l;
+      });
+      if (!taskToMove) return prev;
+      // 2) 목적 log 에 task 추가 (미배정 상태로)
+      const srcTask = taskToMove as Task;
+      const moved: Task = { ...srcTask, slots: [], startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: undefined, status: 'pending' };
+      const destIdx = step1.findIndex(l => l.date === destDate && l.employeeId === activeEmpId);
+      let step2: DailyLog[];
+      if (destIdx >= 0) {
+        step2 = step1.map((l, i) => i === destIdx ? { ...l, tasks: [...(l.tasks || []), moved] } : l);
+      } else {
+        const newLog: DailyLog = {
+          date: destDate, summary: '', detail: '', position: activeEmployee.position,
           homepageCategories: [], departmentCategories: [],
           timeInterval: '1hour', timeSlots: createEmptyTimeSlots('1hour'),
-          employeeId: activeEmpId, tasks: rolled,
+          employeeId: activeEmpId, tasks: [moved],
         };
-    handleSaveLog(newLog);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateStr, activeEmpId, logs.length]);
+        step2 = [...step1, newLog];
+      }
+      saveLogs(step2);
+      // 변경된 모든 로그 DB 저장
+      for (const l of step2) {
+        const orig = prev.find(p => p.date === l.date && p.employeeId === l.employeeId);
+        if (orig !== l) saveLogToAPI(l).catch(() => {});
+      }
+      return step2;
+    });
+  }, [activeEmpId, activeEmployee.position]);
+
+  const deleteTaskAnywhere = useCallback((taskId: string) => {
+    setLogs(prev => {
+      const changed: DailyLog[] = [];
+      const next = prev.map(l => {
+        if (!l.tasks) return l;
+        const hasTop = l.tasks.some(t => t.id === taskId);
+        const hasSub = l.tasks.some(t => t.children?.some(c => c.id === taskId));
+        if (!hasTop && !hasSub) return l;
+        const nextTasks = l.tasks
+          .filter(t => t.id !== taskId)
+          .map(t => ({ ...t, children: t.children?.filter(c => c.id !== taskId) }));
+        const nl = { ...l, tasks: nextTasks };
+        changed.push(nl);
+        return nl;
+      });
+      saveLogs(next);
+      for (const l of changed) saveLogToAPI(l).catch(() => {});
+      return next;
+    });
+  }, []);
 
   const downloadExcel = () => {
     const data = myLogs.flatMap(log => 
@@ -499,11 +581,14 @@ export function EmployeePage() {
 
       {pageMode === 'today' ? (
         /* Today mode — full width DailyDetail */
-        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} />
+        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} onUpdateTaskAnywhere={updateTaskAnywhere} onDeleteTaskAnywhere={deleteTaskAnywhere} />
       ) : pageMode === 'weekly' ? (
-        /* Weekly mode — 7일 그리드 + 하단 이월 전체 */
+        /* Weekly mode — 7일 + 이월 8번째 컬럼 */
         <WeeklyView date={selectedDate} logs={myLogs}
-          onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }} />
+          onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }}
+          onUpdateTask={updateTaskAnywhere}
+          onDeleteTask={deleteTaskAnywhere}
+          onMoveTaskToDate={moveTaskToDate} />
       ) : pageMode === 'list' ? (
         /* List mode — 전체 날짜 테이블 */
         <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }}
@@ -522,7 +607,7 @@ export function EmployeePage() {
             </div>
           )}
           <div className="flex-1 min-w-0 pl-1">
-            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} />
+            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} onUpdateTaskAnywhere={updateTaskAnywhere} onDeleteTaskAnywhere={deleteTaskAnywhere} />
           </div>
         </div>
       )}
