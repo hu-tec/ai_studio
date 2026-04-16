@@ -104,7 +104,7 @@ function TypeTabChip({ t, isActive, isWorklog, isEditing, editLabel, onSelect, o
   );
 }
 
-function TypeTabBar({ types, activeTypeId, editingTypeId, editingTypeLabel, onActiveTypeChange, onTypesChange, onEditStart, onEditChange, onEditEnd, size }: {
+interface TabBarCommonProps {
   types: MandalartTypeConfig[]; activeTypeId: string;
   editingTypeId: string | null; editingTypeLabel: string;
   onActiveTypeChange: (id: string) => void;
@@ -113,108 +113,136 @@ function TypeTabBar({ types, activeTypeId, editingTypeId, editingTypeLabel, onAc
   onEditChange: (v: string) => void;
   onEditEnd: () => void;
   size: MandalartSize;
-}) {
-  const path = findTypePathInTree(types, activeTypeId);
-  const currentNode = findTypeInTree(types, activeTypeId);
-  const isTopLevel = path && path.length === 1;
-  const topLevelParent = path && path.length > 1 ? path[0] : null;
+}
 
-  const renderTabRow = (items: MandalartTypeConfig[], parentId: string | null, level: number) => {
-    const canAddHere = parentId ? (findTypeInTree(types, parentId)?.allowChildren !== false) : true;
-    return (
-      <div style={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', ...(level > 0 ? { marginLeft: 8, paddingLeft: 8, borderLeft: '2px solid #e2e8f0' } : { marginLeft: 'auto' }) }}>
-        {items.map(t => {
-          const isWorklog = t.id === WORKLOG_MANDALART_ID;
-          const isActive = activeTypeId === t.id || (path?.some(p => p.id === t.id) ?? false);
-          const isDirectActive = activeTypeId === t.id;
-          return (
-            <TypeTabChip key={t.id} t={t}
-              isActive={isDirectActive}
-              isWorklog={isWorklog}
-              isEditing={editingTypeId === t.id}
-              editLabel={editingTypeLabel}
-              onSelect={() => onActiveTypeChange(t.id)}
-              onDoubleClick={() => { if (onTypesChange && !isWorklog) onEditStart(t.id, t.label); }}
-              onDelete={onTypesChange && !isWorklog ? () => {
-                if (!confirm(`'${t.label}' 탭을 삭제하시겠습니까?`)) return;
-                const next = removeTypeFromTree(types, t.id);
-                onTypesChange(next);
-                if (activeTypeId === t.id) {
-                  const fallback = parentId ? parentId : (next[0]?.id || WORKLOG_MANDALART_ID);
-                  onActiveTypeChange(fallback);
-                }
-              } : undefined}
-              onEditChange={onEditChange}
-              onEditEnd={() => {
-                const v = editingTypeLabel.trim();
-                if (v && onTypesChange) onTypesChange(updateTypeInTree(types, editingTypeId!, t => ({ ...t, label: v })));
-                onEditEnd();
-              }}
-            />
-          );
-        })}
-        {onTypesChange && canAddHere && (
-          <button onClick={() => {
-            const newId = `mt-${Date.now()}`;
-            const newType: MandalartTypeConfig = { id: newId, label: '새 탭', size, allowChildren: true };
-            if (parentId) {
-              onTypesChange(addChildType(types, parentId, newType));
-            } else {
-              onTypesChange([...types, newType]);
-            }
-            onActiveTypeChange(newId);
-            onEditStart(newId, '새 탭');
-          }}
-            title="탭 추가"
-            style={{ padding: '3px 6px', borderRadius: 12, border: '1px dashed #cbd5e1',
-              background: '#fff', color: '#94a3b8', fontSize: 10, fontWeight: 600, cursor: 'pointer' }}>
-            +추가
-          </button>
-        )}
-      </div>
-    );
-  };
+function buildTabRow(
+  items: MandalartTypeConfig[],
+  parentId: string | null,
+  p: TabBarCommonProps,
+  path: MandalartTypeConfig[] | null,
+) {
+  const { types, activeTypeId, editingTypeId, editingTypeLabel, onActiveTypeChange, onTypesChange, onEditStart, onEditChange, onEditEnd, size } = p;
+  const parentNode = parentId ? findTypeInTree(types, parentId) : null;
+  const canAddHere = parentId ? (parentNode?.allowChildren !== false) : true;
+  return (
+    <>
+      {items.map(t => {
+        const isWorklog = t.id === WORKLOG_MANDALART_ID;
+        const isDirectActive = activeTypeId === t.id;
+        return (
+          <TypeTabChip key={t.id} t={t}
+            isActive={isDirectActive}
+            isWorklog={isWorklog}
+            isEditing={editingTypeId === t.id}
+            editLabel={editingTypeLabel}
+            onSelect={() => onActiveTypeChange(t.id)}
+            onDoubleClick={() => { if (onTypesChange && !isWorklog) onEditStart(t.id, t.label); }}
+            onDelete={onTypesChange && !isWorklog ? () => {
+              if (!confirm(`'${t.label}' 탭을 삭제하시겠습니까?`)) return;
+              const next = removeTypeFromTree(types, t.id);
+              onTypesChange(next);
+              if (activeTypeId === t.id) {
+                const fallback = parentId ? parentId : (next[0]?.id || WORKLOG_MANDALART_ID);
+                onActiveTypeChange(fallback);
+              }
+            } : undefined}
+            onEditChange={onEditChange}
+            onEditEnd={() => {
+              const v = editingTypeLabel.trim();
+              if (v && onTypesChange) onTypesChange(updateTypeInTree(types, editingTypeId!, t => ({ ...t, label: v })));
+              onEditEnd();
+            }}
+          />
+        );
+      })}
+      {onTypesChange && canAddHere && (
+        <button onClick={() => {
+          const newId = `mt-${Date.now()}`;
+          const label = parentId ? '새 하위' : '새 탭';
+          const newType: MandalartTypeConfig = { id: newId, label, size, allowChildren: true };
+          if (parentId) {
+            onTypesChange(addChildType(types, parentId, newType));
+          } else {
+            onTypesChange([...types, newType]);
+          }
+          onActiveTypeChange(newId);
+          onEditStart(newId, label);
+        }}
+          title={parentId ? '하위 탭 추가' : '탭 추가'}
+          style={{ padding: '3px 6px', borderRadius: 12, border: '1px dashed #cbd5e1',
+            background: '#fff', color: '#94a3b8', fontSize: 10, fontWeight: 600, cursor: 'pointer' }}>
+          +추가
+        </button>
+      )}
+    </>
+  );
+}
+
+// 헤더 내부 top-level 탭 바
+function TopTypeTabs(p: TabBarCommonProps) {
+  const path = findTypePathInTree(p.types, p.activeTypeId);
+  return (
+    <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap', marginLeft: 'auto' }}>
+      {buildTabRow(p.types, null, p, path)}
+    </div>
+  );
+}
+
+// 헤더 아래 독립 행: breadcrumb + current-level siblings + +하위 추가
+function SubTypeNav(p: TabBarCommonProps) {
+  const path = findTypePathInTree(p.types, p.activeTypeId);
+  const currentNode = findTypeInTree(p.types, p.activeTypeId);
+  const hasChildren = !!(currentNode?.children && currentNode.children.length > 0);
+  const canAddChild = !!(currentNode && currentNode.allowChildren !== false && currentNode.id !== WORKLOG_MANDALART_ID && p.onTypesChange);
+  const showBreadcrumb = path && path.length > 1;
+  if (!showBreadcrumb && !hasChildren && !canAddChild) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 0 }}>
-      {/* Top-level tabs */}
-      {renderTabRow(types, null, 0)}
-
-      {/* Breadcrumb (2단 이상 깊이일 때) */}
-      {path && path.length > 1 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: '#64748b', marginLeft: 'auto' }}>
-          {path.map((p, i) => (
-            <span key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {i > 0 && <ChevronRight size={9} style={{ opacity: 0.4 }} />}
-              <button onClick={() => onActiveTypeChange(p.id)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: i === path.length - 1 ? '#3B82F6' : '#94a3b8', fontWeight: i === path.length - 1 ? 700 : 400, fontSize: 10, padding: 0 }}>
-                {p.label}
+    <div style={{
+      display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap',
+      padding: '4px 8px',
+      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8,
+      fontSize: 10,
+    }}>
+      {showBreadcrumb && path && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#64748b' }}>
+          {path.map((pp, i) => (
+            <span key={pp.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {i > 0 && <ChevronRight size={10} style={{ opacity: 0.4 }} />}
+              <button onClick={() => p.onActiveTypeChange(pp.id)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer',
+                  color: i === path.length - 1 ? '#3B82F6' : '#64748b',
+                  fontWeight: i === path.length - 1 ? 700 : 500, fontSize: 10, padding: 0 }}>
+                {pp.label}
               </button>
             </span>
           ))}
         </div>
       )}
-
-      {/* Children of active node (서브탭) */}
-      {currentNode && currentNode.children && currentNode.children.length > 0 && (
-        renderTabRow(currentNode.children, currentNode.id, 1)
+      {hasChildren && (
+        <>
+          <span style={{ color: '#cbd5e1', fontSize: 10 }}>|</span>
+          <span style={{ color: '#94a3b8', fontSize: 9, fontWeight: 600 }}>하위</span>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+            {buildTabRow(currentNode!.children!, currentNode!.id, p, path)}
+          </div>
+        </>
       )}
-
-      {/* Active node has allowChildren but no children yet — show +하위 추가 */}
-      {currentNode && currentNode.allowChildren !== false && currentNode.id !== WORKLOG_MANDALART_ID && (!currentNode.children || currentNode.children.length === 0) && onTypesChange && (
-        <div style={{ display: 'flex', marginLeft: 'auto' }}>
+      {!hasChildren && canAddChild && (
+        <>
+          <span style={{ color: '#cbd5e1', fontSize: 10 }}>|</span>
           <button onClick={() => {
             const newId = `mt-${Date.now()}`;
-            const newType: MandalartTypeConfig = { id: newId, label: '새 하위', size, allowChildren: true };
-            onTypesChange(addChildType(types, currentNode.id, newType));
-            onActiveTypeChange(newId);
-            onEditStart(newId, '새 하위');
+            const newType: MandalartTypeConfig = { id: newId, label: '새 하위', size: p.size, allowChildren: true };
+            p.onTypesChange!(addChildType(p.types, currentNode!.id, newType));
+            p.onActiveTypeChange(newId);
+            p.onEditStart(newId, '새 하위');
           }}
-            style={{ padding: '2px 6px', borderRadius: 8, border: '1px dashed #cbd5e1',
-              background: '#f8fafc', color: '#94a3b8', fontSize: 9, cursor: 'pointer' }}>
+            style={{ padding: '2px 8px', borderRadius: 10, border: '1px dashed #cbd5e1',
+              background: '#fff', color: '#94a3b8', fontSize: 10, fontWeight: 600, cursor: 'pointer' }}>
             +하위 추가
           </button>
-        </div>
+        </>
       )}
     </div>
   );
@@ -498,9 +526,9 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           {fullscreen ? <Minimize2 size={10} /> : <Maximize2 size={10} />}
           {fullscreen ? '닫기' : '전체화면'}
         </button>
-        {/* 타입 탭 (업무일지/규정/미팅 등) — 업무일지만 타임테이블 동기화 + CRUD */}
+        {/* 타입 탭 (업무일지/규정/미팅 등) — top-level만 헤더에 */}
         {types && activeTypeId && onActiveTypeChange && (
-          <TypeTabBar
+          <TopTypeTabs
             types={types} activeTypeId={activeTypeId} editingTypeId={editingTypeId} editingTypeLabel={editingTypeLabel}
             onActiveTypeChange={id => { onActiveTypeChange(id); setDrillId(null); setExpand9x9(false); }}
             onTypesChange={onTypesChange} onEditStart={(id, label) => { setEditingTypeId(id); setEditingTypeLabel(label); }}
@@ -542,6 +570,17 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           </div>
         )}
       </div>
+
+      {/* 서브탭 네비게이션 — 경로 + 현재 노드의 children + +하위 추가 */}
+      {types && activeTypeId && onActiveTypeChange && (
+        <SubTypeNav
+          types={types} activeTypeId={activeTypeId} editingTypeId={editingTypeId} editingTypeLabel={editingTypeLabel}
+          onActiveTypeChange={id => { onActiveTypeChange(id); setDrillId(null); setExpand9x9(false); }}
+          onTypesChange={onTypesChange} onEditStart={(id, label) => { setEditingTypeId(id); setEditingTypeLabel(label); }}
+          onEditChange={setEditingTypeLabel} onEditEnd={() => setEditingTypeId(null)}
+          size={size}
+        />
+      )}
 
       {/* N²×N² 전체 펼치기 뷰: 루트 N×N × 각 셀의 N×N children — 부모 블록 max width로 가로 팽창 방지 */}
       {expand9x9 ? (
