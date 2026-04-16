@@ -754,27 +754,29 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           // 루트 모드에서만 색상 피커 노출 (drill 안 하고, 센터 아닐 때)
           const showColorPicker = !drillId && !center;
 
+          const isCellEditing = editingId === cell.id;
+
           return (
             <div
               key={cell.id}
-              draggable={!center && !!cell.text.trim()}
+              draggable={!center && !isCellEditing && !!cell.text.trim()}
               onDragStart={e => onDragStart(e, cell)}
               onDragEnd={() => setDragCellId(null)}
-              onClick={() => setPopupCellId(cell.id)}
+              onClick={() => { if (!isCellEditing) setEditingId(cell.id); }}
               style={{
                 position: 'relative',
                 aspectRatio: '1 / 1',
                 background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : cellBg,
                 borderRadius: 8,
-                border: `2px solid ${linked ? statusColor : cellBorder}`,
+                border: `2px solid ${isCellEditing ? '#3B82F6' : linked ? statusColor : cellBorder}`,
                 display: 'flex', flexDirection: 'column',
-                cursor: cell.text.trim() && !center ? (drillId ? 'grab' : 'pointer') : 'pointer',
+                cursor: isCellEditing ? 'text' : 'pointer',
                 transition: 'all 0.15s', overflow: 'hidden',
               }}
             >
               {linked && <div style={{ height: 3, background: statusColor, width: '100%' }} />}
-              {/* 우상단 — 링크 있으면 ↗ 아이콘(새 탭), 없으면 드래그 표식 */}
-              {!center && cell.text.trim() && (
+              {/* 우상단 — 링크 있으면 ↗, 없으면 드래그 표식 */}
+              {!center && cell.text.trim() && !isCellEditing && (
                 cell.link ? (
                   <button
                     onClick={e => { e.stopPropagation(); window.open(cell.link, '_blank', 'noopener,noreferrer'); }}
@@ -792,8 +794,8 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                   <div style={{ position: 'absolute', top: 4, right: 4, opacity: 0.3, pointerEvents: 'none' }}><GripVertical size={12} /></div>
                 )
               )}
-              {/* 색상 피커 버튼 + 팝업 */}
-              {showColorPicker && (
+              {/* 좌상 — 색상 피커 */}
+              {showColorPicker && !isCellEditing && (
                 <div style={{ position: 'absolute', top: 2, left: 2, zIndex: 2 }} onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => setColorPickerId(colorPickerId === cell.id ? null : cell.id)}
@@ -821,14 +823,45 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                   )}
                 </div>
               )}
+              {/* 우하 — 상세 편집 팝업 (셀에 내용 있을 때) */}
+              {!center && cell.text.trim() && !isCellEditing && (
+                <button
+                  onClick={e => { e.stopPropagation(); setPopupCellId(cell.id); }}
+                  title="상세 편집 (링크·파일·색상)"
+                  style={{
+                    position: 'absolute', bottom: 3, right: 3, zIndex: 3,
+                    width: 16, height: 16, padding: 0, borderRadius: 3,
+                    background: '#f1f5f9', border: '1px solid #e2e8f0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', opacity: 0.5,
+                  }}>
+                  <FileText size={9} color="#475569" />
+                </button>
+              )}
 
-              {/* 텍스트 (편집은 팝업에서) */}
-              <div style={{ flex: 1, padding: '6px 8px',
+              {/* 텍스트 — 클릭 시 인라인 편집 */}
+              <div style={{ flex: 1, padding: isCellEditing ? '4px 6px' : '6px 8px',
                 fontSize: center ? CENTER_FONT : CELL_FONT, fontWeight: center ? 700 : 400,
                 color: center ? '#fff' : cell.text ? '#1e293b' : '#cbd5e1',
                 lineHeight: 1.4, wordBreak: 'break-word',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                {cell.text || (center ? PERIOD_LABELS[period] : '+')}
+                {isCellEditing ? (
+                  <textarea autoFocus value={cell.text}
+                    onChange={e => updateCell(cell.id, e.target.value)}
+                    onBlur={() => setEditingId(null)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditingId(null); } if (e.key === 'Escape') setEditingId(null); }}
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      width: '100%', height: '100%', border: 'none', outline: 'none',
+                      background: 'transparent', resize: 'none', fontFamily: 'inherit',
+                      fontSize: center ? CENTER_FONT : CELL_FONT,
+                      fontWeight: center ? 700 : 400,
+                      color: center ? '#fff' : '#1e293b',
+                      textAlign: 'center', lineHeight: 1.4,
+                    }} />
+                ) : (
+                  cell.text || (center ? PERIOD_LABELS[period] : '+')
+                )}
               </div>
 
               {/* 상태 + 달성률 (center 제외, 텍스트 있을 때) */}
@@ -903,7 +936,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       {/* 안내 */}
       {!drillId && (
         <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
-          셀 클릭→편집창 | ⊞→하위 분해 | ↗→링크 이동 | ●●●(양)●●(질) 달성률 | 드래그→타임테이블
+          클릭→텍스트 편집 | 📄→상세(링크·파일) | ⊞→하위 분해 | ↗→링크 이동 | 드래그→타임테이블
         </div>
       )}
       </>
