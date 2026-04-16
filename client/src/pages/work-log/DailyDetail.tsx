@@ -70,6 +70,40 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
     try { localStorage.setItem('worklog-period-section-open', periodSectionOpen ? '1' : '0'); } catch {}
   }, [periodSectionOpen]);
 
+  // 타임테이블 폭 (px) — classic 이외 모드에서 드래그 리사이즈 (localStorage)
+  const [timetableWidth, setTimetableWidth] = useState<number>(() => {
+    try {
+      const v = Number(localStorage.getItem('worklog-timetable-width') || '300');
+      return isFinite(v) && v >= 200 && v <= 1200 ? v : 300;
+    } catch { return 300; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('worklog-timetable-width', String(timetableWidth)); } catch {}
+  }, [timetableWidth]);
+  const resizingRef = useRef<{ startX: number; startW: number } | null>(null);
+  const onResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = { startX: e.clientX, startW: timetableWidth };
+    const onMove = (ev: MouseEvent) => {
+      const cur = resizingRef.current;
+      if (!cur) return;
+      const dx = ev.clientX - cur.startX;
+      const next = Math.max(200, Math.min(1200, cur.startW + dx));
+      setTimetableWidth(next);
+    };
+    const onUp = () => {
+      resizingRef.current = null;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [timetableWidth]);
+
   // 타임테이블 드래그 범위 추적 — 여러 슬롯에 걸친 드롭 지원
   const dragSlotRangeRef = useRef<{ firstIdx: number | null; lastIdx: number | null }>({ firstIdx: null, lastIdx: null });
   const [dragRangeHint, setDragRangeHint] = useState<{ lo: number; hi: number } | null>(null);
@@ -1037,11 +1071,11 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
         })()}
 
         {/* ⑥ 타임테이블 (Classic=확장, Franklin/Eisenhower=축소+우측패널) */}
-        <div className="flex gap-1 items-start">
-          {/* Timetable — Classic: 전체너비 확장, 나머지: 300px 축소 */}
+        <div className="flex gap-0 items-stretch">
+          {/* Timetable — Classic: 전체너비 확장, 나머지: 리사이즈 가능 (기본 300px) */}
           <div
-            className="shrink-0 border border-border rounded-lg overflow-hidden transition-all duration-300 ease-in-out"
-            style={{ width: viewMode === 'classic' ? '100%' : '300px' }}
+            className="shrink-0 border border-border rounded-lg overflow-hidden"
+            style={{ width: viewMode === 'classic' ? '100%' : `${timetableWidth}px` }}
           >
             <div className="bg-accent/40 px-2 py-1 border-b border-border flex items-center justify-between">
               <span className="text-[11px] font-semibold">타임테이블</span>
@@ -1253,9 +1287,20 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
             </div>
           </div>
 
+          {/* Splitter — 타임테이블 ↔ 오른쪽 패널 폭 드래그 조절 (Classic 제외) */}
+          {viewMode !== 'classic' && (
+            <div
+              onMouseDown={onResizeStart}
+              title="드래그하여 타임테이블 폭 조절 (더블클릭=기본 300px 복원)"
+              onDoubleClick={() => setTimetableWidth(300)}
+              className="shrink-0 w-1.5 mx-0.5 cursor-col-resize bg-transparent hover:bg-blue-200 active:bg-blue-400 rounded transition-colors self-stretch"
+              style={{ minHeight: 40 }}
+            />
+          )}
+
           {/* Right: Franklin/Eisenhower/Mandalart 패널 (Classic에서는 숨김) */}
           {viewMode !== 'classic' && (
-            <div className="flex-1 min-w-0 transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-right-2">
+            <div className="flex-1 min-w-0">
               {viewMode === 'mandalart' ? (
                 <MandalartView
                   cells={mandalartCells}

@@ -1,5 +1,5 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Maximize2, Minimize2, ExternalLink, Upload, X } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Maximize2, Minimize2, ExternalLink, Upload, X, GripVertical } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { Task, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
 import {
@@ -181,8 +181,15 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                     style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
                   {/* Priority */}
                   <span className="text-[10px] font-bold w-5 shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
-                  {/* Issue badge */}
-                  {task.isIssue && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                  {/* Issue toggle — 메인 row 에 항상 표시 */}
+                  <button onClick={e => { e.stopPropagation(); updateTask(task.id, { isIssue: !task.isIssue }); }}
+                    onMouseDown={e => e.stopPropagation()}
+                    draggable={false}
+                    onDragStart={e => e.preventDefault()}
+                    title={task.isIssue ? '이슈 해제' : '이슈로 표시'}
+                    className={`text-[9px] px-1 py-0.5 rounded border font-bold leading-none shrink-0 ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-transparent border-transparent text-muted-foreground/40 hover:border-amber-200 hover:text-amber-600'}`}>
+                    ⚠
+                  </button>
                   {/* Title — 더블클릭으로 인라인 편집 */}
                   {editingId === task.id ? (
                     <input value={task.task} onChange={e => updateTask(task.id, { task: e.target.value })}
@@ -237,7 +244,7 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                 {/* Expanded detail */}
                 {isExpanded && (
                   <div className="px-2 py-1 bg-accent/5 border-t border-border/30 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                    {/* 시간 + 이슈(compact chip) */}
+                    {/* 시간 (이슈 토글은 메인 row 로 이동) */}
                     <div className="flex items-center gap-1.5 text-[11px]">
                       <span className="text-muted-foreground w-12">시간</span>
                       <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
@@ -245,11 +252,6 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                       <span className="text-[10px] text-muted-foreground">~</span>
                       <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
                         className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[80px]" />
-                      <button
-                        onClick={() => updateTask(task.id, { isIssue: !task.isIssue })}
-                        className={`ml-auto text-[9px] px-1.5 py-0.5 rounded border font-bold leading-none ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-white border-border text-muted-foreground hover:bg-amber-50'}`}>
-                        ⚠ {task.isIssue ? '이슈' : '이슈아님'}
-                      </button>
                     </div>
                     {/* 링크 */}
                     <div className="flex items-center gap-1.5 text-[11px]">
@@ -360,6 +362,13 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                             <span className="text-[8px] font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[task.priority].color }}>
                               {task.priority}{task.number}-{sub.number}
                             </span>
+                            {/* 드래그 핸들 — 타임테이블 배정용 */}
+                            <span draggable
+                              onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'copyMove'; e.dataTransfer.setData('text/plain', sub.id); }}
+                              title="드래그→타임테이블 배정"
+                              className="cursor-grab active:cursor-grabbing shrink-0 text-muted-foreground/40 hover:text-blue-500">
+                              <GripVertical size={10} />
+                            </span>
                             {editingId === sub.id ? (
                               <input value={sub.task}
                                 onChange={e => onTasksChange(updateSubTask(tasks, task.id, sub.id, { task: e.target.value }))}
@@ -373,11 +382,12 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                                 className="flex-1 text-[11px] px-1 py-0.5 border border-primary rounded outline-none" />
                             ) : (
                               <span
-                                draggable
-                                onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'copyMove'; e.dataTransfer.setData('text/plain', sub.id); }}
                                 onDoubleClick={e => { e.stopPropagation(); setEditingId(sub.id); }}
-                                title="더블클릭→편집 · 드래그→타임테이블 배정"
-                                className={`flex-1 text-[11px] cursor-grab active:cursor-grabbing ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                                onMouseDown={e => e.stopPropagation()}
+                                draggable={false}
+                                onDragStart={e => e.preventDefault()}
+                                title="더블클릭→편집"
+                                className={`flex-1 text-[11px] cursor-text ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
                                 {sub.task}
                               </span>
                             )}

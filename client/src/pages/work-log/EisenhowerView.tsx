@@ -1,5 +1,5 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Upload, X, ExternalLink } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Upload, X, ExternalLink, GripVertical } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { Task, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry, MandalartPeriod } from './data';
 import {
@@ -210,7 +210,14 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                             className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 hover:scale-110"
                             style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
                           <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
-                          {task.isIssue && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
+                          <button onClick={e => { e.stopPropagation(); updateTask(task.id, { isIssue: !task.isIssue }); }}
+                            onMouseDown={e => e.stopPropagation()}
+                            draggable={false}
+                            onDragStart={e => e.preventDefault()}
+                            title={task.isIssue ? '이슈 해제' : '이슈로 표시'}
+                            className={`text-[8px] px-1 py-0.5 rounded border font-bold leading-none shrink-0 ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-transparent border-transparent text-muted-foreground/40 hover:border-amber-200 hover:text-amber-600'}`}>
+                            ⚠
+                          </button>
                           {editingId === task.id ? (
                             <input value={task.task}
                               onChange={e => updateTask(task.id, { task: e.target.value })}
@@ -253,13 +260,10 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                         {/* Full expanded detail */}
                         {isExpanded && (
                           <div className="px-2 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
-                            {/* 이슈 chip + 링크 */}
+                            {/* 링크 (이슈 토글은 메인 row 로 이동) */}
                             <div className="flex items-center gap-1.5">
-                              <button onClick={() => updateTask(task.id, { isIssue: !task.isIssue })}
-                                className={`text-[9px] px-1.5 py-0.5 rounded border font-bold leading-none shrink-0 ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-white border-border text-muted-foreground hover:bg-amber-50'}`}>
-                                ⚠ {task.isIssue ? '이슈' : '이슈아님'}
-                              </button>
-                              <input type="url" value={task.link || ''} placeholder="링크 URL"
+                              <span className="text-muted-foreground w-10 shrink-0">링크</span>
+                              <input type="url" value={task.link || ''} placeholder="https://..."
                                 onChange={e => updateTask(task.id, { link: e.target.value || undefined })}
                                 className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none" />
                               {task.link && (
@@ -345,7 +349,31 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                                     <span draggable
                                       onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'copyMove'; e.dataTransfer.setData('text/plain', sub.id); }}
                                       title="드래그→타임테이블 배정"
-                                      className={`flex-1 text-[10px] cursor-grab active:cursor-grabbing ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{sub.task}</span>
+                                      className="cursor-grab active:cursor-grabbing shrink-0 text-muted-foreground/40 hover:text-blue-500">
+                                      <GripVertical size={10} />
+                                    </span>
+                                    {editingId === sub.id ? (
+                                      <input value={sub.task}
+                                        onChange={e => onTasksChange(updateSubTask(tasks, task.id, sub.id, { task: e.target.value }))}
+                                        onBlur={() => setEditingId(null)}
+                                        onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingId(null); }}
+                                        autoFocus
+                                        onMouseDown={e => e.stopPropagation()}
+                                        onClick={e => e.stopPropagation()}
+                                        draggable={false}
+                                        onDragStart={e => e.preventDefault()}
+                                        className="flex-1 text-[10px] px-1 py-0.5 border border-primary rounded outline-none" />
+                                    ) : (
+                                      <span
+                                        onDoubleClick={e => { e.stopPropagation(); setEditingId(sub.id); }}
+                                        onMouseDown={e => e.stopPropagation()}
+                                        draggable={false}
+                                        onDragStart={e => e.preventDefault()}
+                                        title="더블클릭→편집"
+                                        className={`flex-1 text-[10px] cursor-text ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                                        {sub.task}
+                                      </span>
+                                    )}
                                     <div className="flex gap-[1px] shrink-0">
                                       {[1,2,3,4,5].map(v => (
                                         <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}
