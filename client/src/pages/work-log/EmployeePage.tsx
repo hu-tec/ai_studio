@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
 import { ListView } from './ListView';
-import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI, rolloverPendingTasks, prevDateStr, createEmptyTimeSlots } from './data';
+import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI, rolloverPendingTasks, prevDateStr, createEmptyTimeSlots, loadPersistentTypes, DEFAULT_MANDALART_TYPES } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -421,7 +421,8 @@ export function EmployeePage() {
         <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
       ) : pageMode === 'list' ? (
         /* List mode — 전체 날짜 테이블 */
-        <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }} />
+        <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }}
+          mandalartTypes={loadPersistentTypes(activeEmpId) || DEFAULT_MANDALART_TYPES} employeeId={activeEmpId} />
       ) : (
         /* Calendar mode — left calendar + right detail (left 숨기기 가능) */
         <div className="flex gap-0 items-start">

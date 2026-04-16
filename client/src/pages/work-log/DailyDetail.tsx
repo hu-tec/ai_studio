@@ -7,7 +7,7 @@ import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
 import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, resizeMandalartCells, sameMandalartSize, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, resizeMandalartCells, sameMandalartSize, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, isWorklogType, loadPersistentCells, savePersistentCells, loadPersistentTypes, savePersistentTypes, findTypeInTree } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -38,12 +38,22 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [tasks, setTasks] = useState<Task[]>([]);
   // 만다라트: 타입 × 기간 × 크기 독립 저장 — key = `${type}|${period}|${size}`
-  const [mandalartTypes, setMandalartTypes] = useState<MandalartTypeConfig[]>(DEFAULT_MANDALART_TYPES);
+  const [mandalartTypes, setMandalartTypesRaw] = useState<MandalartTypeConfig[]>(DEFAULT_MANDALART_TYPES);
   const [mandalartActiveType, setMandalartActiveType] = useState<string>(WORKLOG_MANDALART_ID);
   const [mandalartActiveSize, setMandalartActiveSize] = useState<MandalartSize>({ rows: 3, cols: 3 });
   const [mandalartCellsByKey, setMandalartCellsByKey] = useState<Record<string, MandalartCell[]>>({});
+  // 추가 블록 persistent cells (날짜 무관)
+  const [persistentCellsByKey, setPersistentCellsByKey] = useState<Record<string, MandalartCell[]>>(() => loadPersistentCells(employeeId));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [period, setPeriod] = useState<MandalartPeriod>('daily');
+  // types 변경 시 persistent storage에도 저장
+  const setMandalartTypes = useCallback((updater: MandalartTypeConfig[] | ((prev: MandalartTypeConfig[]) => MandalartTypeConfig[])) => {
+    setMandalartTypesRaw(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      savePersistentTypes(employeeId, next);
+      return next;
+    });
+  }, [employeeId]);
   const [showStats, setShowStats] = useState(false);
   const [todayListOpen, setTodayListOpen] = useState(true);
   const [todayMemoOpen, setTodayMemoOpen] = useState(true);
@@ -100,16 +110,32 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
   }, [timeSlots]);
 
   const activeSize = mandalartActiveSize;
-  const currentMandalartKey = mandalartKey(mandalartActiveType, period, activeSize);
-  const mandalartCells = mandalartCellsByKey[currentMandalartKey] || [];
+  const activeIsWorklog = isWorklogType(mandalartActiveType);
+  // 추가 블록의 root type 탐색 (서브탭 중 어디든 worklog이 아니면 persistent)
+  const activeRootType = findTypeInTree(mandalartTypes, mandalartActiveType);
+  const activeIsPersistent = !activeIsWorklog && !(activeRootType && activeRootType.id === WORKLOG_MANDALART_ID);
+  const effectivePeriod = activeIsPersistent ? 'always' as MandalartPeriod : period;
+  const currentMandalartKey = mandalartKey(mandalartActiveType, effectivePeriod, activeSize);
+  const mandalartCells = activeIsPersistent
+    ? (persistentCellsByKey[currentMandalartKey] || [])
+    : (mandalartCellsByKey[currentMandalartKey] || []);
   const setMandalartCells = useCallback((cells: MandalartCell[] | ((prev: MandalartCell[]) => MandalartCell[])) => {
+    const isPersistent = !isWorklogType(mandalartActiveType);
+    const effPeriod = isPersistent ? 'always' as MandalartPeriod : period;
+    const key = mandalartKey(mandalartActiveType, effPeriod, activeSize);
+
+    if (isPersistent) {
+      setPersistentCellsByKey(prev => {
+        const newCells = typeof cells === 'function' ? cells(prev[key] || []) : cells;
+        const next = { ...prev, [key]: newCells };
+        savePersistentCells(employeeId, next);
+        return next;
+      });
+      return;
+    }
+
     setMandalartCellsByKey(prev => {
-      const key = mandalartKey(mandalartActiveType, period, activeSize);
       const newCells = typeof cells === 'function' ? cells(prev[key] || []) : cells;
-      // 역방향 동기화: 업무일지 타입만 Task 생성/업데이트
-      if (mandalartActiveType !== WORKLOG_MANDALART_ID) {
-        return { ...prev, [key]: newCells };
-      }
       const centerIdx = mandalartCenterIdx(activeSize);
       setTasks(tasks => {
         let updated = [...tasks];
@@ -205,28 +231,39 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       });
       return { ...prev, [key]: newCells };
     });
-  }, [period, mandalartActiveType, activeSize]);
+  }, [period, mandalartActiveType, activeSize, employeeId]);
 
   // 크기 변경 — 이전 크기의 셀을 2D 좌표 보존 remap하여 새 크기 key에 seed.
   // 새 key 에 이미 작성된 셀(텍스트 있음)은 유지(merge), 빈칸만 remap 결과로 채움.
   const handleMandalartSizeChange = useCallback((newSize: MandalartSize) => {
     if (sameMandalartSize(newSize, mandalartActiveSize)) return;
-    const oldKey = mandalartKey(mandalartActiveType, period, mandalartActiveSize);
-    const newKey = mandalartKey(mandalartActiveType, period, newSize);
-    if (oldKey !== newKey) {
-      setMandalartCellsByKey(prev => {
-        const oldCells = prev[oldKey] || [];
-        if (oldCells.length === 0) return prev;
-        const existingNewCells = prev[newKey] || [];
-        const remapped = resizeMandalartCells(oldCells, mandalartActiveSize, newSize);
-        const newCount = mandalartCellCount(newSize);
-        const merged: MandalartCell[] = Array.from({ length: newCount }, (_, i) => {
-          const existing = existingNewCells[i];
-          if (existing && existing.text?.trim()) return existing;
-          return remapped[i] || { id: `mc-new-${Date.now()}-${i}`, text: '', children: [], achievement: 0 };
-        });
-        return { ...prev, [newKey]: merged };
+    const isPers = !isWorklogType(mandalartActiveType);
+    const effP = isPers ? 'always' as MandalartPeriod : period;
+    const oldKey = mandalartKey(mandalartActiveType, effP, mandalartActiveSize);
+    const newKey = mandalartKey(mandalartActiveType, effP, newSize);
+    const doResize = (prev: Record<string, MandalartCell[]>) => {
+      const oldCells = prev[oldKey] || [];
+      if (oldCells.length === 0) return prev;
+      const existingNewCells = prev[newKey] || [];
+      const remapped = resizeMandalartCells(oldCells, mandalartActiveSize, newSize);
+      const newCount = mandalartCellCount(newSize);
+      const merged: MandalartCell[] = Array.from({ length: newCount }, (_, i) => {
+        const existing = existingNewCells[i];
+        if (existing && existing.text?.trim()) return existing;
+        return remapped[i] || { id: `mc-new-${Date.now()}-${i}`, text: '', children: [], achievement: 0 };
       });
+      return { ...prev, [newKey]: merged };
+    };
+    if (oldKey !== newKey) {
+      if (isPers) {
+        setPersistentCellsByKey(prev => {
+          const next = doResize(prev);
+          savePersistentCells(employeeId, next);
+          return next;
+        });
+      } else {
+        setMandalartCellsByKey(doResize);
+      }
     }
     setMandalartActiveSize(newSize);
   }, [mandalartActiveType, period, mandalartActiveSize]);
@@ -293,14 +330,19 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setViewMode(log.viewMode || 'classic');
       // 기존 태스크에 period 없으면 'daily' 기본값 설정 (마이그레이션)
       setTasks((log.tasks || []).map(t => t.period ? t : { ...t, period: 'daily' }));
-      // 만다라트 타입 목록 로드 — 레거시 size(number) → {rows,cols} 정규화
-      const rawTypes = log.mandalartTypes && log.mandalartTypes.length > 0 ? log.mandalartTypes : DEFAULT_MANDALART_TYPES;
+      // 만다라트 타입 목록 로드 — persistent 우선, 레거시 fallback
+      const persistedTypes = loadPersistentTypes(employeeId);
+      const rawTypes = persistedTypes || (log.mandalartTypes && log.mandalartTypes.length > 0 ? log.mandalartTypes : DEFAULT_MANDALART_TYPES);
       const loadedTypes: MandalartTypeConfig[] = rawTypes.map(t => ({
         ...t,
         size: normalizeMandalartSize((t as any).size),
+        allowChildren: t.allowChildren ?? (t.id !== WORKLOG_MANDALART_ID),
       }));
-      setMandalartTypes(loadedTypes);
+      setMandalartTypesRaw(loadedTypes);
+      if (!persistedTypes) savePersistentTypes(employeeId, loadedTypes);
       setMandalartActiveType(log.mandalartActiveType || WORKLOG_MANDALART_ID);
+      // persistent cells 로드
+      setPersistentCellsByKey(loadPersistentCells(employeeId));
       setMandalartActiveSize(normalizeMandalartSize(log.mandalartActiveSize));
       // 만다라트 데이터 로드 (3-tier 레거시 호환)
       if (log.mandalartCellsByKey) {
@@ -342,10 +384,14 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
       setTomorrowTasks('');
       setViewMode('classic');
       setTasks([]);
-      setMandalartTypes(DEFAULT_MANDALART_TYPES);
+      const persistedTypes = loadPersistentTypes(employeeId);
+      const fallbackTypes = persistedTypes || DEFAULT_MANDALART_TYPES.map(t => ({ ...t, allowChildren: t.allowChildren ?? (t.id !== WORKLOG_MANDALART_ID) }));
+      setMandalartTypesRaw(fallbackTypes);
+      if (!persistedTypes) savePersistentTypes(employeeId, fallbackTypes);
       setMandalartActiveType(WORKLOG_MANDALART_ID);
       setMandalartActiveSize({ rows: 3, cols: 3 });
       setMandalartCellsByKey({});
+      setPersistentCellsByKey(loadPersistentCells(employeeId));
     }
     // Allow auto-save after prop-driven setState batch completes
     requestAnimationFrame(() => { suppressAutoSave.current = false; });

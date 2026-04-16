@@ -81,8 +81,8 @@ export interface MandalartCell {
   files?: { url: string; name: string }[];      // 파일 첨부 (S3 업로드)
 }
 
-// 만다라트 기간 모드
-export type MandalartPeriod = 'daily' | 'weekly' | 'monthly';
+// 만다라트 기간 모드 — 'always' = 날짜 무관 상시 (추가 블록용)
+export type MandalartPeriod = 'daily' | 'weekly' | 'monthly' | 'always';
 
 // 만다라트 한 축 크기 (3~9)
 export type MandalartDim = 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -131,15 +131,17 @@ export interface MandalartTypeConfig {
   id: string;
   label: string;
   size: MandalartSize;
+  children?: MandalartTypeConfig[];
+  allowChildren?: boolean; // false면 하위 추가 불가 (업무일지)
 }
 
 // 고정 타입 id — 이 id 의 만다라트만 Task/타임테이블과 동기화
 export const WORKLOG_MANDALART_ID = 'worklog';
 
 export const DEFAULT_MANDALART_TYPES: MandalartTypeConfig[] = [
-  { id: WORKLOG_MANDALART_ID, label: '업무일지', size: { rows: 3, cols: 3 } },
-  { id: 'regulation',         label: '규정',     size: { rows: 3, cols: 3 } },
-  { id: 'meeting',            label: '미팅',     size: { rows: 3, cols: 3 } },
+  { id: WORKLOG_MANDALART_ID, label: '업무일지', size: { rows: 3, cols: 3 }, allowChildren: false },
+  { id: 'regulation',         label: '규정',     size: { rows: 3, cols: 3 }, allowChildren: true },
+  { id: 'meeting',            label: '미팅',     size: { rows: 3, cols: 3 }, allowChildren: true },
 ];
 
 // R×C 그리드 헬퍼
@@ -808,4 +810,106 @@ export async function saveLogToAPI(log: DailyLog): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// ── Persistent mandalart (날짜 무관 추가 블록) ──
+
+const PERSISTENT_CELLS_KEY = 'mandala-persistent';
+const PERSISTENT_TYPES_KEY = 'mandala-types';
+
+export function loadPersistentCells(employeeId: string): Record<string, MandalartCell[]> {
+  try {
+    const raw = localStorage.getItem(`${PERSISTENT_CELLS_KEY}-${employeeId}`);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+}
+
+export function savePersistentCells(employeeId: string, cells: Record<string, MandalartCell[]>) {
+  localStorage.setItem(`${PERSISTENT_CELLS_KEY}-${employeeId}`, JSON.stringify(cells));
+}
+
+export function loadPersistentTypes(employeeId: string): MandalartTypeConfig[] | null {
+  try {
+    const raw = localStorage.getItem(`${PERSISTENT_TYPES_KEY}-${employeeId}`);
+    if (raw) {
+      const parsed = JSON.parse(raw) as MandalartTypeConfig[];
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return null;
+}
+
+export function savePersistentTypes(employeeId: string, types: MandalartTypeConfig[]) {
+  localStorage.setItem(`${PERSISTENT_TYPES_KEY}-${employeeId}`, JSON.stringify(types));
+}
+
+export function isWorklogType(typeId: string): boolean {
+  return typeId === WORKLOG_MANDALART_ID;
+}
+
+export function findTypeInTree(types: MandalartTypeConfig[], id: string): MandalartTypeConfig | null {
+  for (const t of types) {
+    if (t.id === id) return t;
+    if (t.children) {
+      const found = findTypeInTree(t.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+export function findTypePathInTree(types: MandalartTypeConfig[], id: string): MandalartTypeConfig[] | null {
+  for (const t of types) {
+    if (t.id === id) return [t];
+    if (t.children) {
+      const sub = findTypePathInTree(t.children, id);
+      if (sub) return [t, ...sub];
+    }
+  }
+  return null;
+}
+
+export function findRootType(types: MandalartTypeConfig[], id: string): MandalartTypeConfig | null {
+  for (const t of types) {
+    if (t.id === id) return t;
+    if (t.children) {
+      const found = findTypeInTree(t.children, id);
+      if (found) return t;
+    }
+  }
+  return null;
+}
+
+export function updateTypeInTree(types: MandalartTypeConfig[], id: string, updater: (t: MandalartTypeConfig) => MandalartTypeConfig): MandalartTypeConfig[] {
+  return types.map(t => {
+    if (t.id === id) return updater(t);
+    if (t.children) return { ...t, children: updateTypeInTree(t.children, id, updater) };
+    return t;
+  });
+}
+
+export function addChildType(types: MandalartTypeConfig[], parentId: string, child: MandalartTypeConfig): MandalartTypeConfig[] {
+  return types.map(t => {
+    if (t.id === parentId) return { ...t, children: [...(t.children || []), child] };
+    if (t.children) return { ...t, children: addChildType(t.children, parentId, child) };
+    return t;
+  });
+}
+
+export function removeTypeFromTree(types: MandalartTypeConfig[], id: string): MandalartTypeConfig[] {
+  return types
+    .filter(t => t.id !== id)
+    .map(t => t.children ? { ...t, children: removeTypeFromTree(t.children, id) } : t);
+}
+
+export function collectAllCellKeys(types: MandalartTypeConfig[], prefix?: string): string[] {
+  const keys: string[] = [];
+  for (const t of types) {
+    if (t.id !== WORKLOG_MANDALART_ID) {
+      keys.push(mandalartKey(t.id, 'always', t.size));
+    }
+    if (t.children) keys.push(...collectAllCellKeys(t.children));
+  }
+  return keys;
 }
