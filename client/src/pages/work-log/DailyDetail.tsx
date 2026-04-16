@@ -62,6 +62,13 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
   const [tomorrowMemoOpen, setTomorrowMemoOpen] = useState(true);
   // 주간/월간 뷰에서 날짜 탭 필터: null=전체, 'YYYY-MM-DD' = 해당 일
   const [dateTabFilter, setDateTabFilter] = useState<string | null>(null);
+  // 업무 패널 섹션 전체 접기/펼치기 (localStorage 저장)
+  const [periodSectionOpen, setPeriodSectionOpen] = useState<boolean>(() => {
+    try { return localStorage.getItem('worklog-period-section-open') !== '0'; } catch { return true; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('worklog-period-section-open', periodSectionOpen ? '1' : '0'); } catch {}
+  }, [periodSectionOpen]);
 
   // 타임테이블 드래그 범위 추적 — 여러 슬롯에 걸친 드롭 지원
   const dragSlotRangeRef = useRef<{ firstIdx: number | null; lastIdx: number | null }>({ firstIdx: null, lastIdx: null });
@@ -786,6 +793,22 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
           ) : null;
 
           return (
+            <div className="flex flex-col gap-1">
+              {/* 섹션 전체 접기/펼치기 헤더 */}
+              <button
+                onClick={() => setPeriodSectionOpen(v => !v)}
+                className="flex items-center justify-between w-full px-2 py-1 text-[10px] font-bold rounded border border-border bg-muted/30 hover:bg-muted/60">
+                <span className="flex items-center gap-2">
+                  <span>{periodSectionOpen ? '▼' : '▶'}</span>
+                  <span className="text-blue-600">{curLabel} {assignedAll.length}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-amber-600">{nextLabel}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-rose-600">이월 {carryoverAll.length}</span>
+                </span>
+                <span className="text-[9px] text-muted-foreground font-normal">{periodSectionOpen ? '접기' : '펼치기'}</span>
+              </button>
+              {periodSectionOpen && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {/* Panel 1 — 현재 기간 배정된 업무 */}
               <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
@@ -879,6 +902,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                   <div className="px-2 py-2 text-[10px] text-rose-300 italic text-center">남은 업무 없음 — 만다라트/프랭클린에서 작성 후 타임테이블에 배정하세요</div>
                 )}
               </div>
+            </div>
+              )}
             </div>
           );
         })()}
