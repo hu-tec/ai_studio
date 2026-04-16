@@ -45,7 +45,7 @@ function FilterChip({ active, color, bg, onClick, children }: {
 }
 
 /* ── 업무 설계 규정 탭 ── */
-function DesignRulesTab() {
+export function DesignRulesTab() {
   const [expandedMajor, setExpandedMajor] = useState<Set<string>>(new Set(DESIGN_RULES.map(r => r.id)));
   const [expandedMid, setExpandedMid] = useState<Set<string>>(() => {
     const all = new Set<string>();
@@ -190,7 +190,7 @@ function DesignRulesTab() {
 }
 
 /* ── Claude 작업 규정 탭 ── */
-function ClaudeRulesTab() {
+export function ClaudeRulesTab() {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(CLAUDE_RULES.map(r => r.id)));
   const [levelFilter, setLevelFilter] = useState<Set<RuleLevel>>(new Set(['고정', '준고정', '선택']));
   const [search, setSearch] = useState('');
@@ -272,7 +272,7 @@ function ClaudeRulesTab() {
 }
 
 /* ── 인사규정 탭 (가연님 xlsx 원본 seed) ── */
-function HRRulesTab() {
+export function HRRulesTab() {
   const [section, setSection] = useState<'company' | 'ranks' | 'depts' | 'services'>('company');
   const [expandAll, setExpandAll] = useState(true);
   const [activeGroups, setActiveGroups] = useState<Set<string>>(new Set());

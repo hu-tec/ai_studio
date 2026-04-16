@@ -10,7 +10,7 @@ import {
   DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, canAccessGroup,
 } from './navData';
 import { useAuth } from '@/contexts/AuthContext';
-import { MARKER_COLORS, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
+import { MARKER_COLORS, MARKER_LABELS, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
 
 /* ── 네비 아이템 ── */
 function NavItemRow({
@@ -26,7 +26,7 @@ function NavItemRow({
     e.stopPropagation();
     onCycleMarker(item.code);
   };
-  const nextLabel = !marker ? '#' : marker === '#' ? '$' : '해제';
+  const nextLabel = !marker ? '#' : marker === '#' ? '!' : marker === '!' ? '$' : '해제';
   return (
     <NavLink
       to={item.to}
@@ -213,6 +213,42 @@ export function CategorySidebar() {
         <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #5ee7ff, #4c2fff)', flexShrink: 0 }} />
         {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>사내 Studio</span>}
       </div>
+
+      {/* 마커 범례 */}
+      {!sidebarCollapsed && (
+        <div
+          title="각 페이지 우측 버튼 클릭 시 # → ! → $ → 해제 순환"
+          style={{
+            display: 'flex', gap: 3,
+            padding: '3px 4px',
+            borderBottom: '1px solid #f1f5f9',
+            background: '#fafafa',
+          }}
+        >
+          {(['#', '!', '$'] as PageMarker[]).map(m => {
+            const mc = MARKER_COLORS[m];
+            return (
+              <span
+                key={m}
+                style={{
+                  flex: 1,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 2,
+                  padding: '1px 2px',
+                  border: `1px solid ${mc.border}`,
+                  background: mc.bg,
+                  color: mc.text,
+                  borderRadius: 3,
+                  fontSize: 9, fontWeight: 700,
+                  lineHeight: 1.2,
+                }}
+              >
+                <span style={{ fontFamily: 'ui-monospace, monospace' }}>{m}</span>
+                <span style={{ fontWeight: 600 }}>{MARKER_LABELS[m]}</span>
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       {/* 전체 펼치기/접기 토글 */}
       {!sidebarCollapsed && groups.length > 0 && (

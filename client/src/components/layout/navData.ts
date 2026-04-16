@@ -98,6 +98,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'C7',   to: '/admin-system',    icon: Settings,     label: '관리자통합' },
 
   // ─── D: 규정 ───
+  { code: 'D0',   to: '/rules',        icon: Scale,    label: '규정(통합)' },
   { code: 'D1',   to: '/rules-mgmt',    icon: Scale,    label: '규정관리' },
   { code: 'D1-1', to: '/rules-editor',  icon: FileEdit, label: '규정편집' },
   { code: 'D1-2', to: '/rules-layout',  icon: Scale,    label: '규정 레이아웃' },

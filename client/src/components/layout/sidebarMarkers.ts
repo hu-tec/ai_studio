@@ -1,10 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type PageMarker = '#' | '$';
+export type PageMarker = '#' | '!' | '$';
 
 export const MARKER_COLORS: Record<PageMarker, { border: string; bg: string; text: string }> = {
-  '#': { border: '#ef4444', bg: '#fee2e2', text: '#b91c1c' },
+  '#': { border: '#eab308', bg: '#fef9c3', text: '#854d0e' },
+  '!': { border: '#ef4444', bg: '#fee2e2', text: '#b91c1c' },
   '$': { border: '#10b981', bg: '#d1fae5', text: '#047857' },
+};
+
+export const MARKER_LABELS: Record<PageMarker, string> = {
+  '#': '주요',
+  '!': '이슈',
+  '$': '돈',
 };
 
 const STORAGE_KEY = 'sidebar-page-markers-v1';
@@ -20,7 +27,7 @@ function load(): MarkerMap {
     if (!parsed || typeof parsed !== 'object') return {};
     const cleaned: MarkerMap = {};
     for (const [k, v] of Object.entries(parsed)) {
-      if (v === '#' || v === '$') cleaned[k] = v;
+      if (v === '#' || v === '!' || v === '$') cleaned[k] = v;
     }
     return cleaned;
   } catch {
@@ -39,7 +46,8 @@ function save(map: MarkerMap) {
 
 export function nextMarker(current: PageMarker | undefined): PageMarker | undefined {
   if (!current) return '#';
-  if (current === '#') return '$';
+  if (current === '#') return '!';
+  if (current === '!') return '$';
   return undefined;
 }
 
