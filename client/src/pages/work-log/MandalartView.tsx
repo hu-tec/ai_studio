@@ -225,6 +225,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   const [editingTypeLabel, setEditingTypeLabel] = useState('');
   const [drillId, setDrillId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [dragCellId, setDragCellId] = useState<string | null>(null);
   const [expand9x9, setExpand9x9] = useState(false);
   const [colorPickerId, setColorPickerId] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
@@ -387,6 +388,14 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
   // 9×9 전체 뷰용: 루트 셀 text 변경
   const writeRootCell = (idx: number, text: string) => {
     onCellsChange(root.map((c, i) => i === idx ? { ...c, text } : c));
+  };
+
+  const onDragStart = (e: DragEvent, cell: MandalartCell) => {
+    if (!cell.text.trim()) return;
+    setDragCellId(cell.id);
+    e.dataTransfer.effectAllowed = 'copyMove';
+    // 태스크 ID가 있으면 ID로, 없으면 텍스트로 전달
+    e.dataTransfer.setData('text/plain', cell.taskId || cell.text);
   };
 
   const cellToTask = (cell: MandalartCell) => {
@@ -641,9 +650,12 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
                     const isEditing = editingId === childCell.id;
                     return (
                       <div key={`p-${pIdx}-c-${sIdx}`}
+                        draggable={!!childCell.text.trim()}
+                        onDragStart={e => onDragStart(e, childCell)}
+                        onDragEnd={() => setDragCellId(null)}
                         onClick={e => { e.stopPropagation(); setEditingId(childCell.id); }}
                         style={{
-                          background: '#fff',
+                          background: dragCellId === childCell.id ? '#dbeafe' : '#fff',
                           border: `1px solid ${linked ? statusColor : (parentColorCfg?.border || '#e2e8f0')}`,
                           borderRadius: 3, padding: 2,
                           aspectRatio: '1 / 1',
@@ -747,15 +759,18 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
           return (
             <div
               key={cell.id}
+              draggable={!center && !isCellEditing && !!cell.text.trim()}
+              onDragStart={e => onDragStart(e, cell)}
+              onDragEnd={() => setDragCellId(null)}
               onClick={() => { if (!isCellEditing) setEditingId(cell.id); }}
               style={{
                 position: 'relative',
                 aspectRatio: '1 / 1',
-                background: center ? '#1e293b' : cellBg,
+                background: center ? '#1e293b' : dragCellId === cell.id ? '#dbeafe' : cellBg,
                 borderRadius: 8,
                 border: `2px solid ${isCellEditing ? '#3B82F6' : linked ? statusColor : cellBorder}`,
                 display: 'flex', flexDirection: 'column',
-                cursor: isCellEditing ? 'text' : 'pointer',
+                cursor: isCellEditing ? 'text' : !center && cell.text.trim() ? 'grab' : 'pointer',
                 transition: 'all 0.15s', overflow: 'hidden',
               }}
             >
@@ -921,7 +936,7 @@ export function MandalartView({ cells, tasks, onCellsChange, onTasksChange, onSl
       {/* 안내 */}
       {!drillId && (
         <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
-          클릭→텍스트 편집 | 📄→상세(링크·파일) | ⊞→하위 분해 | ↗→링크 이동
+          클릭→텍스트 편집 | 📄→상세(링크·파일) | ⊞→하위 분해 | ↗→링크 이동 | 드래그→타임테이블
         </div>
       )}
       </>
