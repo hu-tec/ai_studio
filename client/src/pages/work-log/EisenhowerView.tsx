@@ -209,6 +209,16 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                           <button onClick={() => updateTask(task.id, { status: cycleStatus(task.status) })}
                             className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 hover:scale-110"
                             style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
+                          {/* 달성률 5단계 — A1/B2 라벨 바로 왼쪽 */}
+                          <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
+                            {[1,2,3,4,5].map(v => {
+                              const ach = calcTaskAchievement(task);
+                              return <button key={v} onClick={() => updateTask(task.id, { achievement: task.achievement === v ? 0 : v })}
+                                className="w-2 h-2 rounded-full border-none p-0 cursor-pointer"
+                                title={ACH_LABELS[v]}
+                                style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />;
+                            })}
+                          </div>
                           <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
                           <button onClick={e => { e.stopPropagation(); updateTask(task.id, { isIssue: !task.isIssue }); }}
                             onMouseDown={e => e.stopPropagation()}
@@ -240,14 +250,6 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                               {task.task}
                             </span>
                           )}
-                          <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
-                            {[1,2,3,4,5].map(v => {
-                              const ach = calcTaskAchievement(task);
-                              return <button key={v} onClick={() => updateTask(task.id, { achievement: task.achievement === v ? 0 : v })}
-                                className="w-2.5 h-2.5 rounded-full border-none p-0 cursor-pointer"
-                                style={{ background: ach >= v ? ACH_COLORS[v] : '#e2e8f0', opacity: ach >= v ? 1 : 0.3 }} />;
-                            })}
-                          </div>
                           {timeLabel && <span className="text-[8px] font-mono text-blue-600 shrink-0">{timeLabel}</span>}
                           {task.children && task.children.length > 0 && (
                             <span className="text-[8px] px-1 rounded bg-slate-100 text-slate-500 font-bold shrink-0">

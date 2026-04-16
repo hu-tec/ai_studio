@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar } from './Calendar';
 import { DailyDetail } from './DailyDetail';
 import { ListView } from './ListView';
+import { WeeklyView } from './WeeklyView';
 import { loadLogs, saveLogs, getCurrentEmployee, setCurrentEmployee, employees, addEmployee, removeEmployee, loadTemplates, saveTemplates, fetchLogsFromAPI, saveLogToAPI, rolloverPendingTasks, prevDateStr, createEmptyTimeSlots, loadPersistentTypes, DEFAULT_MANDALART_TYPES } from './data';
 import type { DailyLog, PromptTemplate, Employee } from './data';
 import { format } from 'date-fns';
@@ -119,7 +120,7 @@ function PromptTemplateManager() {
 export function EmployeePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [logs, setLogs] = useState<DailyLog[]>([]);
-  const [pageMode, setPageMode] = useState<'today' | 'calendar' | 'list'>('today');
+  const [pageMode, setPageMode] = useState<'today' | 'weekly' | 'calendar' | 'list'>('today');
   const [calendarMode, setCalendarMode] = useState<'monthly' | 'daily'>('monthly');
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const appRef = useRef<HTMLDivElement>(null);
@@ -443,6 +444,10 @@ export function EmployeePage() {
               className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'today' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >오늘</button>
             <button
+              onClick={() => setPageMode('weekly')}
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'weekly' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
+            >주간</button>
+            <button
               onClick={() => setPageMode('calendar')}
               className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${pageMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:bg-white/50'}`}
             >캘린더</button>
@@ -453,7 +458,9 @@ export function EmployeePage() {
           </div>
           {/* 날짜 이동: 이전/다음 + 현재 날짜 표시 (오늘 복귀) */}
           <div className="flex items-center gap-0.5 bg-muted/40 rounded border border-border/60">
-            <button onClick={() => goDay(-1)} title="이전 날" className="px-1 py-1 hover:bg-white rounded-l">
+            <button onClick={() => goDay(pageMode === 'weekly' ? -7 : -1)}
+              title={pageMode === 'weekly' ? '이전 주' : '이전 날'}
+              className="px-1 py-1 hover:bg-white rounded-l">
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button onClick={() => { if (flushRef.current) flushRef.current(); setSelectedDate(new Date()); }}
@@ -461,7 +468,9 @@ export function EmployeePage() {
               title="오늘로 이동">
               {format(selectedDate, 'M.d(EEE)', { locale: ko })}
             </button>
-            <button onClick={() => goDay(1)} title="다음 날" className="px-1 py-1 hover:bg-white rounded-r">
+            <button onClick={() => goDay(pageMode === 'weekly' ? 7 : 1)}
+              title={pageMode === 'weekly' ? '다음 주' : '다음 날'}
+              className="px-1 py-1 hover:bg-white rounded-r">
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -491,6 +500,10 @@ export function EmployeePage() {
       {pageMode === 'today' ? (
         /* Today mode — full width DailyDetail */
         <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} />
+      ) : pageMode === 'weekly' ? (
+        /* Weekly mode — 7일 그리드 + 하단 이월 전체 */
+        <WeeklyView date={selectedDate} logs={myLogs}
+          onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }} />
       ) : pageMode === 'list' ? (
         /* List mode — 전체 날짜 테이블 */
         <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }}
