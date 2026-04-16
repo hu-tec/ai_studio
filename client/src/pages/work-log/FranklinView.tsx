@@ -182,14 +182,25 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                   <span className="text-[10px] font-bold w-5 shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
                   {/* Issue badge */}
                   {task.isIssue && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
-                  {/* Title */}
+                  {/* Title — 더블클릭으로 인라인 편집 */}
                   {editingId === task.id ? (
                     <input value={task.task} onChange={e => updateTask(task.id, { task: e.target.value })}
-                      onBlur={() => setEditingId(null)} onKeyDown={e => e.key === 'Enter' && setEditingId(null)}
-                      autoFocus className="flex-1 text-[12px] px-1 py-0.5 border border-primary rounded outline-none" />
+                      onBlur={() => setEditingId(null)}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingId(null); }}
+                      autoFocus
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
+                      draggable={false}
+                      onDragStart={e => e.preventDefault()}
+                      className="flex-1 text-[12px] px-1 py-0.5 border border-primary rounded outline-none" />
                   ) : (
-                    <span onClick={() => setEditingId(task.id)}
-                      className={`flex-1 text-[12px] cursor-pointer truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                    <span
+                      onDoubleClick={e => { e.stopPropagation(); setEditingId(task.id); }}
+                      onMouseDown={e => e.stopPropagation()}
+                      draggable={false}
+                      onDragStart={e => e.preventDefault()}
+                      title="더블클릭하여 편집"
+                      className={`flex-1 text-[12px] cursor-text truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
                       {task.task}
                     </span>
                   )}
@@ -280,7 +291,28 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                             <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                               className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0"
                               style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
-                            <span className={`flex-1 text-[11px] ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{sub.task}</span>
+                            {editingId === sub.id ? (
+                              <input value={sub.task}
+                                onChange={e => onTasksChange(updateSubTask(tasks, task.id, sub.id, { task: e.target.value }))}
+                                onBlur={() => setEditingId(null)}
+                                onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingId(null); }}
+                                autoFocus
+                                onMouseDown={e => e.stopPropagation()}
+                                onClick={e => e.stopPropagation()}
+                                draggable={false}
+                                onDragStart={e => e.preventDefault()}
+                                className="flex-1 text-[11px] px-1 py-0.5 border border-primary rounded outline-none" />
+                            ) : (
+                              <span
+                                onDoubleClick={e => { e.stopPropagation(); setEditingId(sub.id); }}
+                                onMouseDown={e => e.stopPropagation()}
+                                draggable={false}
+                                onDragStart={e => e.preventDefault()}
+                                title="더블클릭하여 편집"
+                                className={`flex-1 text-[11px] cursor-text ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                                {sub.task}
+                              </span>
+                            )}
                             <div className="flex gap-[1px] shrink-0">
                               {[1,2,3,4,5].map(v => (
                                 <button key={v} onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { achievement: sub.achievement === v ? 0 : v }))}

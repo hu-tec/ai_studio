@@ -23,6 +23,7 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
   const [newText, setNewText] = useState('');
   const [newQuad, setNewQuad] = useState<EisenhowerQuadrant>('q1');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newSubText, setNewSubText] = useState('');
   const toggleExpand = (id: string) => setExpandedIds(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
   const priorities: FranklinPriority[] = ['A', 'B', 'C', 'D'];
@@ -209,7 +210,28 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                             style={{ background: stCfg.bg, color: stCfg.color }}>{stCfg.icon}</button>
                           <span className="text-[9px] font-bold shrink-0" style={{ color: pCfg.color }}>{task.priority}{task.number}</span>
                           {task.isIssue && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
-                          <span className={`flex-1 text-[11px] truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>{task.task}</span>
+                          {editingId === task.id ? (
+                            <input value={task.task}
+                              onChange={e => updateTask(task.id, { task: e.target.value })}
+                              onBlur={() => setEditingId(null)}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingId(null); }}
+                              autoFocus
+                              onMouseDown={e => e.stopPropagation()}
+                              onClick={e => e.stopPropagation()}
+                              draggable={false}
+                              onDragStart={e => e.preventDefault()}
+                              className="flex-1 text-[11px] px-1 py-0.5 border border-primary rounded outline-none" />
+                          ) : (
+                            <span
+                              onDoubleClick={e => { e.stopPropagation(); setEditingId(task.id); }}
+                              onMouseDown={e => e.stopPropagation()}
+                              draggable={false}
+                              onDragStart={e => e.preventDefault()}
+                              title="더블클릭하여 편집"
+                              className={`flex-1 text-[11px] cursor-text truncate ${task.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                              {task.task}
+                            </span>
+                          )}
                           <div className="flex gap-[1px] shrink-0" onClick={e => e.stopPropagation()}>
                             {[1,2,3,4,5].map(v => {
                               const ach = calcTaskAchievement(task);
