@@ -291,6 +291,9 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                             <button onClick={() => onTasksChange(updateSubTask(tasks, task.id, sub.id, { status: cycleStatus(sub.status) }))}
                               className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold shrink-0"
                               style={{ background: subSt.bg, color: subSt.color }}>{subSt.icon}</button>
+                            <span className="text-[8px] font-bold shrink-0" style={{ color: FRANKLIN_PRIORITY_CONFIG[task.priority].color }}>
+                              {task.priority}{task.number}-{sub.number}
+                            </span>
                             {editingId === sub.id ? (
                               <input value={sub.task}
                                 onChange={e => onTasksChange(updateSubTask(tasks, task.id, sub.id, { task: e.target.value }))}
@@ -304,12 +307,11 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
                                 className="flex-1 text-[11px] px-1 py-0.5 border border-primary rounded outline-none" />
                             ) : (
                               <span
+                                draggable
+                                onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'copyMove'; e.dataTransfer.setData('text/plain', sub.id); }}
                                 onDoubleClick={e => { e.stopPropagation(); setEditingId(sub.id); }}
-                                onMouseDown={e => e.stopPropagation()}
-                                draggable={false}
-                                onDragStart={e => e.preventDefault()}
-                                title="더블클릭하여 편집"
-                                className={`flex-1 text-[11px] cursor-text ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
+                                title="더블클릭→편집 · 드래그→타임테이블 배정"
+                                className={`flex-1 text-[11px] cursor-grab active:cursor-grabbing ${sub.status === 'cancelled' ? 'line-through text-muted-foreground/50' : ''}`}>
                                 {sub.task}
                               </span>
                             )}

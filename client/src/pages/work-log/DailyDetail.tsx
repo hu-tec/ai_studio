@@ -1049,13 +1049,21 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
                 const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
                 // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭 (서브태스크 + 다중 range 포함)
-                const allTasksFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
-                const slotTasksWithRange: Array<{ task: Task; rangeIdx: number }> = [];
-                for (const t of allTasksFlat) {
-                  const ranges = taskSlots(t);
+                // 서브태스크는 부모 정보를 보존 → chip 에 A4-1 형식 표시
+                const flatEntries: Array<{ task: Task; label: string }> = [];
+                for (const t of tasks) {
+                  flatEntries.push({ task: t, label: `${t.priority}${t.number}` });
+                  for (const c of (t.children || [])) {
+                    flatEntries.push({ task: c, label: `${t.priority}${t.number}-${c.number}` });
+                  }
+                }
+                const allTasksFlat = flatEntries.map(e => e.task);
+                const slotTasksWithRange: Array<{ task: Task; label: string; rangeIdx: number }> = [];
+                for (const entry of flatEntries) {
+                  const ranges = taskSlots(entry.task);
                   ranges.forEach((r, idx) => {
                     if (r.timeSlotId === slot.id || (slotStart >= r.startTime && slotStart < r.endTime)) {
-                      slotTasksWithRange.push({ task: t, rangeIdx: idx });
+                      slotTasksWithRange.push({ task: entry.task, label: entry.label, rangeIdx: idx });
                     }
                   });
                 }
@@ -1135,7 +1143,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
                       <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1 flex-wrap">
                         <span className="text-[10px] font-mono text-muted-foreground shrink-0">{slot.timeSlot}</span>
-                        {tasksWithRange_.map(({ task: t, rangeIdx }) => (
+                        {tasksWithRange_.map(({ task: t, label, rangeIdx }) => (
                           <span key={`${t.id}-${rangeIdx}`} draggable
                             onDragStart={e => {
                               e.stopPropagation();
@@ -1144,7 +1152,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                               e.dataTransfer.setData('application/x-worklog-range-idx', String(rangeIdx));
                             }}
                             className="text-[8px] font-bold px-1 rounded cursor-grab active:cursor-grabbing inline-flex items-center gap-0.5" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
-                            {t.priority}{t.number}{FRANKLIN_STATUS_CONFIG[t.status].icon}
+                            {label}{FRANKLIN_STATUS_CONFIG[t.status].icon}
                             <button onClick={ev => { ev.stopPropagation(); removeTaskRange(t.id, rangeIdx); }}
                               title="이 시간대 배정 제거"
                               className="ml-0.5 w-2.5 h-2.5 rounded-full bg-white/70 hover:bg-red-500 hover:text-white text-[7px] leading-none flex items-center justify-center">×</button>
@@ -1187,7 +1195,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                         {slotStart}
                       </span>
                       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                        {tasksWithRange_.length > 0 ? tasksWithRange_.map(({ task: t, rangeIdx }) => {
+                        {tasksWithRange_.length > 0 ? tasksWithRange_.map(({ task: t, label, rangeIdx }) => {
                           const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
                           const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                           return (
@@ -1199,7 +1207,7 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                                 e.dataTransfer.setData('application/x-worklog-range-idx', String(rangeIdx));
                               }}
                               className="flex items-center gap-1 rounded px-1 py-0.5 cursor-grab active:cursor-grabbing" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
-                              <span className="text-[9px] font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
+                              <span className="text-[9px] font-bold" style={{ color: pCfg.color }}>{label}</span>
                               <span className="text-[9px]" style={{ color: stCfg.color }}>{stCfg.icon}</span>
                               <span className="text-[10px] truncate flex-1">{t.task}</span>
                               <button onClick={ev => { ev.stopPropagation(); removeTaskRange(t.id, rangeIdx); }}
