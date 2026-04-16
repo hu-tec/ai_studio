@@ -196,6 +196,9 @@ export function EmployeePage() {
     return () => { cancelled = true; };
   }, []);
 
+  const syncingRef = useRef(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+
   const myLogs = logs.filter(l => l.employeeId === activeEmpId);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const currentLog = myLogs.find(l => l.date === dateStr);
@@ -229,21 +232,61 @@ export function EmployeePage() {
     }
   }, []);
 
-  // 수동 재동기화 — DB에서 최신 가져와 logs 갱신 (다른 기기에서 저장한 내용 반영)
-  const refetchLogs = useCallback(async () => {
+  // 내부 fetch 함수 — 자동/수동 둘 다 사용. safeMode=true 면 local dirty 시 merge.
+  const doFetch = useCallback(async (opts?: { manual?: boolean }) => {
+    if (syncingRef.current) return;
+    // 저장 실패 중이면 자동 스킵 (로컬 데이터 덮어쓰기 방지). 수동은 허용.
+    if (!opts?.manual && lastSaveErrorRef.current) return;
+    syncingRef.current = true;
     try {
+      if (flushRef.current) flushRef.current(); // 현재 편집 중인 로그 먼저 저장 트리거
+      // 아주 짧게 대기 → 진행 중인 save POST가 서버에 닿도록
+      await new Promise(r => setTimeout(r, 150));
       const apiLogs = await fetchLogsFromAPI();
       if (apiLogs && apiLogs.length > 0) {
-        setLogs(apiLogs);
-        saveLogs(apiLogs);
-        toast.success(`DB에서 ${apiLogs.length}건 재동기화 완료`);
-      } else {
+        // 병합: 서버에 없는 로컬 로그는 유지 (오프라인/저장실패 상황 보호)
+        setLogs(prev => {
+          const apiMap = new Map<string, DailyLog>();
+          for (const l of apiLogs) apiMap.set(`${l.employeeId}_${l.date}`, l);
+          for (const l of prev) {
+            const key = `${l.employeeId}_${l.date}`;
+            if (!apiMap.has(key)) apiMap.set(key, l);
+          }
+          const merged = Array.from(apiMap.values());
+          saveLogs(merged);
+          return merged;
+        });
+        setLastSyncedAt(new Date());
+        if (opts?.manual) toast.success(`DB 재동기화 완료 (${apiLogs.length}건)`);
+      } else if (opts?.manual) {
         toast.error('DB 로그를 불러오지 못했습니다');
       }
     } catch (e: any) {
-      toast.error(`재동기화 실패: ${e?.message || e}`);
+      if (opts?.manual) toast.error(`재동기화 실패: ${e?.message || e}`);
+    } finally {
+      syncingRef.current = false;
     }
   }, []);
+
+  const refetchLogs = useCallback(() => doFetch({ manual: true }), [doFetch]);
+
+  // 자동 동기화: 30초 주기 + 탭 포커스 시 즉시 + 온라인 복귀 시
+  useEffect(() => {
+    const tick = () => doFetch();
+    const id = window.setInterval(tick, 30000);
+    const onVisible = () => { if (document.visibilityState === 'visible') tick(); };
+    const onFocus = () => tick();
+    const onOnline = () => tick();
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [doFetch]);
 
   // 자동 이월: 이전 날 forwarded(→) 태스크를 오늘로 복제 (중복 방지)
   useEffect(() => {
@@ -341,9 +384,9 @@ export function EmployeePage() {
         <div className="flex items-center gap-1.5">
           <h1 className="text-base font-black text-primary tracking-tight">업무일지</h1>
           <button onClick={refetchLogs}
-            title="DB에서 최신 업무일지 재동기화 (다른 기기에서 저장한 내용 반영)"
-            className="ml-1 px-2 py-0.5 text-[10px] rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100">
-            ↻ 동기화
+            title={`자동 동기화: 30초 주기 + 탭 포커스 시. 마지막: ${lastSyncedAt ? format(lastSyncedAt, 'HH:mm:ss') : '-'}. 클릭하면 즉시 재동기화.`}
+            className="ml-1 px-1.5 py-0.5 text-[9px] rounded border border-blue-200 text-blue-500 bg-blue-50/60 hover:bg-blue-100">
+            ↻ {lastSyncedAt ? format(lastSyncedAt, 'HH:mm') : '동기화'}
           </button>
           {/* 작성자 선택 */}
           <div className="flex items-center gap-1">

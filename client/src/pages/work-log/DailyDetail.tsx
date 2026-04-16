@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, parseISO, startOfMonth, endOfMonth } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Save, FileDown, List, Target, Grid2x2, LayoutGrid, ChevronDown, ChevronUp } from 'lucide-react';
 import { AIDetailModal } from './AIDetailModal';
@@ -60,6 +60,8 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
   const [todayMemoOpen, setTodayMemoOpen] = useState(true);
   const [tomorrowListOpen, setTomorrowListOpen] = useState(true);
   const [tomorrowMemoOpen, setTomorrowMemoOpen] = useState(true);
+  // 주간/월간 뷰에서 날짜 탭 필터: null=전체, 'YYYY-MM-DD' = 해당 일
+  const [dateTabFilter, setDateTabFilter] = useState<string | null>(null);
 
   // 타임테이블 드래그 범위 추적 — 여러 슬롯에 걸친 드롭 지원
   const dragSlotRangeRef = useRef<{ firstIdx: number | null; lastIdx: number | null }>({ firstIdx: null, lastIdx: null });
@@ -693,24 +695,54 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
           };
           const { cur: curLabel, next: nextLabel } = periodLabels[period];
           const inPeriod = (t: Task) => !t.period || t.period === period;
-          // 현재 기간에 배정된 업무 (slots 있음)
-          const assigned = tasks.filter(t => inPeriod(t) && taskSlots(t).length > 0);
+          // 기간별 날짜 범위 (주간: 월~일, 월간: 해당 월 전체)
+          const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+          const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+          const monthStart = startOfMonth(date);
+          const monthEnd = endOfMonth(date);
+          const periodDates: string[] = period === 'weekly'
+            ? eachDayOfInterval({ start: weekStart, end: weekEnd }).map(d => format(d, 'yyyy-MM-dd'))
+            : period === 'monthly'
+              ? eachDayOfInterval({ start: monthStart, end: monthEnd }).map(d => format(d, 'yyyy-MM-dd'))
+              : [dateStr];
+          const showDateTabs = period === 'weekly' || period === 'monthly';
+          const sourceLogs = allLogs && allLogs.length > 0 ? allLogs : (log ? [log] : []);
+
+          // 주간/월간 — 각 일자 로그의 task를 수집 (assigned = 해당 일 slots 배정된 것)
+          type AssignedItem = { task: Task; fromDate: string };
+          const assignedAll: AssignedItem[] = [];
+          if (showDateTabs) {
+            const dateSet = new Set(periodDates);
+            for (const l of sourceLogs) {
+              if (!dateSet.has(l.date)) continue;
+              for (const t of (l.tasks || [])) {
+                if (!inPeriod(t)) continue;
+                if (taskSlots(t).length === 0) continue;
+                assignedAll.push({ task: t, fromDate: l.date });
+              }
+            }
+          } else {
+            for (const t of tasks) {
+              if (!inPeriod(t)) continue;
+              if (taskSlots(t).length === 0) continue;
+              assignedAll.push({ task: t, fromDate: dateStr });
+            }
+          }
+          const assigned = (dateTabFilter && showDateTabs)
+            ? assignedAll.filter(a => a.fromDate === dateTabFilter)
+            : assignedAll;
+
           // 이월 pool: 전체 일지에서 누적 — 완료/취소 제외한 모든 미완료 업무
-          // 오늘 포함 과거 일지 전부 스캔 → 오늘 slots 배정되지 않은 task는 남은 업무로 집계
           type CarryItem = { task: Task; fromDate: string; isToday: boolean };
           const carryMap = new Map<string, CarryItem>();
           const currentTaskIds = new Set(tasks.map(t => t.id));
-          const sourceLogs = allLogs && allLogs.length > 0 ? allLogs : (log ? [log] : []);
           for (const l of sourceLogs) {
             for (const t of (l.tasks || [])) {
               if (t.status === 'done' || t.status === 'cancelled') continue;
               if (!t.task?.trim()) continue;
-              // 오늘 이미 배정됐으면 제외
               if (l.date === dateStr && currentTaskIds.has(t.id) && taskSlots(t).length > 0) continue;
-              // 오늘 task면 slots 비었을 때만 이월로 취급
               const isToday = l.date === dateStr;
               if (isToday && taskSlots(t).length > 0 && t.status !== 'forwarded') continue;
-              // 중복 제거 키 (같은 내용은 한 번만)
               const key = t.rolledFromId || `${t.task.trim()}|${t.priority}`;
               const existing = carryMap.get(key);
               if (!existing || l.date > existing.fromDate) {
@@ -718,8 +750,40 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
               }
             }
           }
-          const carryover = Array.from(carryMap.values()).sort((a, b) => a.fromDate.localeCompare(b.fromDate));
-          const forwardedCount = carryover.filter(c => c.task.status === 'forwarded').length;
+          const carryoverAll = Array.from(carryMap.values()).sort((a, b) => a.fromDate.localeCompare(b.fromDate));
+          const carryover = (dateTabFilter && showDateTabs)
+            ? carryoverAll.filter(c => c.fromDate === dateTabFilter)
+            : carryoverAll;
+          const forwardedCount = carryoverAll.filter(c => c.task.status === 'forwarded').length;
+
+          // 각 일자별 건수 (탭 카운터)
+          const dateCounts = new Map<string, number>();
+          for (const a of assignedAll) dateCounts.set(a.fromDate, (dateCounts.get(a.fromDate) || 0) + 1);
+          const weekDayShort = ['일', '월', '화', '수', '목', '금', '토'];
+          const dateTabs = periodDates.map(d => {
+            const dObj = parseISO(d);
+            const label = period === 'weekly' ? `${weekDayShort[dObj.getDay()]}` : format(dObj, 'd');
+            const sub = period === 'weekly' ? format(dObj, 'M/d') : weekDayShort[dObj.getDay()];
+            return { date: d, label, sub, count: dateCounts.get(d) || 0 };
+          });
+
+          const dateTabBar = showDateTabs ? (
+            <div className="flex gap-0.5 px-1.5 py-1 bg-blue-50/60 border-b border-blue-100 overflow-x-auto">
+              <button onClick={() => setDateTabFilter(null)}
+                className={`px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap shrink-0 ${dateTabFilter === null ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 border border-blue-200 hover:bg-blue-100'}`}>
+                전체({assignedAll.length})
+              </button>
+              {dateTabs.map(t => (
+                <button key={t.date} onClick={() => setDateTabFilter(t.date)}
+                  title={t.date}
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap shrink-0 flex items-center gap-0.5 ${dateTabFilter === t.date ? 'bg-blue-500 text-white' : t.count > 0 ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-white text-gray-400 border border-gray-200'}`}>
+                  <span>{t.label}</span>
+                  <span className="text-[8px] opacity-70">{t.sub}</span>
+                  {t.count > 0 && <span className="text-[8px] px-0.5 rounded bg-blue-600 text-white">{t.count}</span>}
+                </button>
+              ))}
+            </div>
+          ) : null;
 
           return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -727,8 +791,9 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
               <div className="rounded-lg border border-blue-200 bg-blue-50/30 overflow-hidden">
                 <div className="px-2 py-1 bg-blue-100/50 border-b border-blue-200 flex items-center justify-between">
                   <span className="text-[11px] font-bold text-blue-700">{curLabel}</span>
-                  <span className="text-[9px] text-blue-400">{assigned.length}건 배정</span>
+                  <span className="text-[9px] text-blue-400">{assigned.length}건 배정{dateTabFilter ? ` (${dateTabFilter.slice(5)})` : ''}</span>
                 </div>
+                {dateTabBar}
                 {assigned.length > 0 && (
                   <>
                     <button onClick={() => setTodayListOpen(p => !p)} className="w-full px-2 py-0.5 text-[9px] text-blue-500 font-bold bg-blue-50/80 border-b border-blue-100 text-left hover:bg-blue-100/50">
@@ -736,10 +801,14 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs
                     </button>
                     {todayListOpen && (
                       <div className="px-2 py-1 border-b border-blue-100 bg-blue-50/50 text-[10px] space-y-0.5">
-                        {assigned.sort((a,b) => (taskSlots(a)[0]?.startTime||'').localeCompare(taskSlots(b)[0]?.startTime||'')).map(t => {
+                        {assigned.slice().sort((a,b) => {
+                          if (showDateTabs && a.fromDate !== b.fromDate) return a.fromDate.localeCompare(b.fromDate);
+                          return (taskSlots(a.task)[0]?.startTime||'').localeCompare(taskSlots(b.task)[0]?.startTime||'');
+                        }).map(({ task: t, fromDate }) => {
                           const r = taskSlots(t)[0];
                           return (
-                            <div key={t.id} className="flex items-center gap-1">
+                            <div key={`${fromDate}-${t.id}`} className="flex items-center gap-1">
+                              {showDateTabs && !dateTabFilter && <span className="text-[8px] font-mono text-blue-400 shrink-0 bg-white px-0.5 rounded">{fromDate.slice(5)}</span>}
                               <span className="font-mono text-blue-500 shrink-0">{r?.startTime}{r?.endTime ? '~'+r.endTime : ''}</span>
                               <span className={`font-bold shrink-0 ${t.status === 'done' ? 'text-emerald-600' : t.status === 'progress' ? 'text-blue-600' : 'text-gray-400'}`}>
                                 {FRANKLIN_STATUS_CONFIG[t.status].icon}
