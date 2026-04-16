@@ -83,31 +83,62 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     const hi = Math.max(cur.firstIdx, cur.lastIdx);
     setDragRangeHint(prev => (prev && prev.lo === lo && prev.hi === hi) ? prev : { lo, hi });
   }, []);
-  // 드롭 시 startTime/endTime/timeSlotId/loIdx 계산 — 범위 드래그 > duration 보존 > 1-slot 순서
-  const computeDropSpan = useCallback((dropIdx: number, origTask?: Task) => {
+  // 드롭할 슬롯 index 목록 — 범위 드래그 > duration 보존 > 1-slot
+  // 핵심: 범위 드롭 시 개별 슬롯 N개로 분할 (그룹 배정 금지)
+  const computeDropSlotIdxs = useCallback((dropIdx: number, origTask?: Task): number[] => {
     const cur = dragSlotRangeRef.current;
     const hasRange = cur.firstIdx !== null && cur.lastIdx !== null && cur.firstIdx !== cur.lastIdx;
     if (hasRange) {
       const lo = Math.min(cur.firstIdx!, cur.lastIdx!, dropIdx);
       const hi = Math.max(cur.firstIdx!, cur.lastIdx!, dropIdx);
-      const a = timeSlots[lo]; const b = timeSlots[hi];
-      return {
-        loIdx: lo,
-        startTime: a.timeSlot.split('~')[0]?.trim() || '',
-        endTime: b.timeSlot.split('~')[1]?.trim() || '',
-        timeSlotId: a.id,
-      };
+      const idxs: number[] = [];
+      for (let i = lo; i <= hi; i++) idxs.push(i);
+      return idxs;
     }
-    const s = timeSlots[dropIdx];
-    const startTime = s.timeSlot.split('~')[0]?.trim() || '';
-    const slotEnd = s.timeSlot.split('~')[1]?.trim() || '';
-    let endTime = slotEnd;
+    // duration 보존: 원본 task의 length(분) → 필요한 슬롯 수 계산
     if (origTask?.startTime && origTask?.endTime) {
       const dur = timeToMinutes(origTask.endTime) - timeToMinutes(origTask.startTime);
-      if (dur > 0) endTime = minutesToTime(timeToMinutes(startTime) + dur);
+      const dropSlot = timeSlots[dropIdx];
+      const sStart = timeToMinutes(dropSlot?.timeSlot.split('~')[0]?.trim() || '');
+      const sEnd = timeToMinutes(dropSlot?.timeSlot.split('~')[1]?.trim() || '');
+      const slotDur = sEnd - sStart;
+      if (dur > 0 && slotDur > 0) {
+        const count = Math.max(1, Math.round(dur / slotDur));
+        const idxs: number[] = [];
+        for (let i = 0; i < count && dropIdx + i < timeSlots.length; i++) idxs.push(dropIdx + i);
+        return idxs;
+      }
     }
-    return { loIdx: dropIdx, startTime, endTime, timeSlotId: s.id };
+    return [dropIdx];
   }, [timeSlots]);
+
+  // 슬롯 index 목록 → 개별 TaskSlot N개
+  const slotIdxsToRanges = useCallback((idxs: number[]): TaskSlot[] => {
+    const out: TaskSlot[] = [];
+    for (const i of idxs) {
+      const s = timeSlots[i];
+      if (!s) continue;
+      out.push({
+        startTime: s.timeSlot.split('~')[0]?.trim() || '',
+        endTime: s.timeSlot.split('~')[1]?.trim() || '',
+        timeSlotId: s.id,
+      });
+    }
+    return out;
+  }, [timeSlots]);
+
+  // 중복 슬롯 제거 (timeSlotId 우선, 없으면 startTime 키)
+  const dedupeRanges = useCallback((ranges: TaskSlot[]): TaskSlot[] => {
+    const seen = new Set<string>();
+    const out: TaskSlot[] = [];
+    for (const r of ranges) {
+      const k = r.timeSlotId || `${r.startTime}-${r.endTime}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(r);
+    }
+    return out;
+  }, []);
 
   const activeSize = mandalartActiveSize;
   const activeIsWorklog = isWorklogType(mandalartActiveType);
@@ -923,30 +954,40 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                   const srcRangeIdx = isFromTimetable ? parseInt(srcRangeIdxRaw, 10) : -1;
                   if (task) {
                     const curRanges = taskSlots(task);
-                    const origRange = isFromTimetable && srcRangeIdx >= 0 ? curRanges[srcRangeIdx] : undefined;
-                    const dummyTask = origRange ? { ...task, startTime: origRange.startTime, endTime: origRange.endTime } : task;
-                    const span = computeDropSpan(index, dummyTask);
-                    const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
+                    // 타임테이블 내부 MOVE는 단일 슬롯 이동 (range drag 무시)
+                    // 외부 드롭은 범위 드래그 honor → N개 개별 range 생성
+                    let newRanges: TaskSlot[];
+                    if (isFromTimetable && srcRangeIdx >= 0) {
+                      newRanges = slotIdxsToRanges([index]);
+                    } else {
+                      const dropIdxs = computeDropSlotIdxs(index);
+                      newRanges = slotIdxsToRanges(dropIdxs);
+                    }
                     let nextRanges: TaskSlot[];
                     if (isFromTimetable && srcRangeIdx >= 0) {
-                      nextRanges = curRanges.map((r, i) => i === srcRangeIdx ? newRange : r);
+                      // MOVE: 원본 range 제거 + 새 range 1개 추가
+                      nextRanges = [...curRanges.filter((_, i) => i !== srcRangeIdx), ...newRanges];
                     } else {
-                      nextRanges = [...curRanges, newRange];
+                      // ADD: 기존 + 새 N개
+                      nextRanges = [...curRanges, ...newRanges];
                     }
+                    nextRanges = dedupeRanges(nextRanges);
                     applyTaskRanges(task.id, nextRanges, { queued: undefined });
                   } else {
                     const cleaned = droppedText.trim();
                     if (!cleaned || /^(ft-|mc-)/.test(cleaned)) { setDragRangeHint(null); return; }
-                    const span = computeDropSpan(index);
-                    const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
+                    const dropIdxs = computeDropSlotIdxs(index);
+                    const newRanges = slotIdxsToRanges(dropIdxs);
+                    if (newRanges.length === 0) { setDragRangeHint(null); return; }
+                    const first = newRanges[0];
                     const newTask: Task = {
                       id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
                       priority: 'B',
                       number: getNextNumber(tasks, 'B'),
                       task: cleaned, status: 'pending',
                       important: true, urgent: false, period,
-                      slots: [newRange],
-                      startTime: newRange.startTime, endTime: newRange.endTime, timeSlotId: newRange.timeSlotId,
+                      slots: newRanges,
+                      startTime: first.startTime, endTime: first.endTime, timeSlotId: first.timeSlotId,
                     };
                     handleTasksChange([...tasks, newTask]);
                   }
