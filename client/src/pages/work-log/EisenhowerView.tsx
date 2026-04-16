@@ -253,25 +253,10 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                         {isExpanded && (
                           <div className="px-2 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
                             <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground w-10">시간</span>
-                              <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
-                                className="px-1 py-0.5 border border-border rounded text-[10px] bg-background w-[80px]" />
-                              <span>~</span>
-                              <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
-                                className="px-1 py-0.5 border border-border rounded text-[10px] bg-background w-[80px]" />
-                              <label className="flex items-center gap-1 ml-2 cursor-pointer">
+                              <label className="flex items-center gap-1 cursor-pointer">
                                 <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })} className="w-3 h-3 accent-amber-500" />
                                 <span className="text-amber-600 font-bold">⚠이슈</span>
                               </label>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground w-10">우선순위</span>
-                              {priorities.map(p => {
-                                const pc = FRANKLIN_PRIORITY_CONFIG[p];
-                                return <button key={p} onClick={() => { const eis = syncPriorityToEisenhower(p); updateTask(task.id, { priority: p, number: getNextNumber(tasks, p), ...eis }); }}
-                                  className="px-1.5 py-0.5 rounded text-[9px] font-bold"
-                                  style={{ background: task.priority === p ? pc.color : pc.bg, color: task.priority === p ? '#fff' : pc.color }}>{p} {pc.desc}</button>;
-                              })}
                             </div>
                             <div className="flex gap-2">
                               <span className="text-muted-foreground w-10 pt-0.5">메모</span>
