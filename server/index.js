@@ -34,6 +34,7 @@ app.use('/api/outbound-calls', createGenericRouter('outbound_calls', 'call_id'))
 app.use('/api/photos', createGenericRouter('photos', 'photo_id'));
 app.use('/api/schedules', createGenericRouter('schedules', 'schedule_id'));
 app.use('/api/rules', createGenericRouter('rules', 'rule_id'));
+app.use('/api/sidebar-markers', createGenericRouter('sidebar_markers', 'marker_id'));
 app.use('/api/eval-criteria', createGenericRouter('eval_criteria', 'criteria_id'));
 app.use('/api/work-materials', createGenericRouter('work_materials', 'material_id'));
 app.use('/api/company-guidelines', createGenericRouter('company_guidelines', 'guideline_id'));

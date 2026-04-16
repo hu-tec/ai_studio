@@ -135,44 +135,42 @@ export function DesignRulesTab() {
         ))}
       </div>
 
-      {/* 대→중→소 확장 구조 */}
-      <div className="flex flex-col gap-1">
+      {/* 대분류 4단 그리드 — 카드 내부 중분류 2단 + 소분류 2단 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
         {filtered.map(r => (
-          <div key={r.id} className="rounded-md border" style={{ borderColor: r.color + '40' }}>
+          <div key={r.id} className="rounded-md border overflow-hidden" style={{ borderColor: r.color + '40' }}>
             {/* 대분류 헤더 */}
             <button
               onClick={() => toggleMajor(r.id)}
-              className="flex w-full items-center gap-1.5 px-2 py-1 text-left"
+              className="flex w-full items-center gap-1 px-1.5 py-0.5 text-left"
               style={{ background: r.bg }}
             >
-              {expandedMajor.has(r.id) ? <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" style={{ color: r.color }} /> : <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" style={{ color: r.color }} />}
-              <span className="text-[12px] font-bold" style={{ color: r.color }}>{r.major}</span>
-              <span className="text-[10px] text-gray-400">{r.midCategories.length}개 중분류</span>
+              {expandedMajor.has(r.id) ? <ChevronDown className="h-3 w-3 flex-shrink-0" style={{ color: r.color }} /> : <ChevronRight className="h-3 w-3 flex-shrink-0" style={{ color: r.color }} />}
+              <span className="text-[11px] font-bold truncate" style={{ color: r.color }}>{r.major}</span>
+              <span className="ml-auto text-[9px] text-gray-400">{r.midCategories.length}</span>
             </button>
 
             {expandedMajor.has(r.id) && (
-              <div className="flex flex-col gap-px bg-gray-50 px-1 pb-1">
+              <div className="grid grid-cols-1 gap-px bg-gray-50 p-0.5">
                 {r.midCategories.map((mc, mi) => {
                   const midKey = `${r.id}-${mi}`;
                   return (
                     <div key={mi} className="rounded bg-white">
-                      {/* 중분류 헤더 */}
                       <button
                         onClick={() => toggleMid(midKey)}
-                        className="flex w-full items-center gap-1 px-2 py-0.5 text-left hover:bg-gray-50"
+                        className="flex w-full items-center gap-1 px-1 py-0.5 text-left hover:bg-gray-50"
                       >
-                        {expandedMid.has(midKey) ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
-                        <span className="text-[11px] font-semibold text-gray-700">{mc.mid}</span>
-                        <span className="text-[10px] text-gray-400">({mc.items.length})</span>
+                        {expandedMid.has(midKey) ? <ChevronDown className="h-2.5 w-2.5 text-gray-400" /> : <ChevronRight className="h-2.5 w-2.5 text-gray-400" />}
+                        <span className="text-[10px] font-semibold text-gray-700 truncate">{mc.mid}</span>
+                        <span className="ml-auto text-[9px] text-gray-400">{mc.items.length}</span>
                       </button>
 
-                      {/* 소분류 항목 */}
                       {expandedMid.has(midKey) && (
-                        <div className="ml-1.5 border-l border-gray-200 pl-2 pb-1">
+                        <div className="grid grid-cols-2 gap-0.5 px-1 pb-0.5">
                           {mc.items.map((item, si) => (
-                            <div key={si} className="flex gap-1 py-0.5">
-                              <span className="flex-shrink-0 rounded bg-gray-100 px-1 py-px text-[10px] font-semibold text-gray-600">{item.title}</span>
-                              <span className="text-[10px] text-gray-500">{item.content}</span>
+                            <div key={si} className="rounded border border-gray-100 bg-gray-50/50 px-1 py-0.5">
+                              <div className="text-[9px] font-bold text-gray-700 leading-tight truncate" title={item.title}>{item.title}</div>
+                              <div className="text-[9px] text-gray-500 leading-tight">{item.content}</div>
                             </div>
                           ))}
                         </div>
@@ -235,28 +233,27 @@ export function ClaudeRulesTab() {
         </button>
       </div>
 
-      {/* 카테고리별 그룹 */}
+      {/* 카테고리별 그룹 — 각 그룹 내 카드는 4단 */}
       {cats.map(cat => {
         const catRules = filtered.filter(r => r.category === cat);
         if (catRules.length === 0) return null;
         return (
           <div key={cat}>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 py-0.5">{cat}</div>
-            <div className="flex flex-col gap-0.5">
+            <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wider px-1 py-0.5">{cat}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
               {catRules.map(r => (
-                <div key={r.id} className="rounded-md border border-gray-200 bg-white">
-                  <button onClick={() => toggleId(r.id)} className="flex w-full items-center gap-1.5 px-2 py-1 text-left hover:bg-gray-50">
-                    {expandedIds.has(r.id) ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
+                <div key={r.id} className="rounded-md border border-gray-200 bg-white overflow-hidden">
+                  <button onClick={() => toggleId(r.id)} className="flex w-full items-center gap-1 px-1.5 py-0.5 text-left hover:bg-gray-50">
+                    {expandedIds.has(r.id) ? <ChevronDown className="h-2.5 w-2.5 text-gray-400" /> : <ChevronRight className="h-2.5 w-2.5 text-gray-400" />}
                     <LevelBadge level={r.level} />
-                    <span className="text-[11px] font-semibold text-gray-800">{r.title}</span>
-                    <span className="text-[10px] text-gray-400">({r.rules.length})</span>
+                    <span className="text-[10px] font-semibold text-gray-800 truncate flex-1">{r.title}</span>
+                    <span className="text-[9px] text-gray-400">{r.rules.length}</span>
                   </button>
                   {expandedIds.has(r.id) && (
-                    <div className="ml-1.5 border-l border-gray-200 pl-2 pb-1">
+                    <div className="grid grid-cols-1 gap-0.5 px-1 pb-0.5">
                       {r.rules.map((ru, i) => (
-                        <div key={i} className="flex items-start gap-1 py-px">
-                          <span className="mt-0.5 h-1 w-1 flex-shrink-0 rounded-full bg-gray-400" />
-                          <span className="text-[10px] text-gray-600">{ru}</span>
+                        <div key={i} className="rounded border border-gray-100 bg-gray-50/50 px-1 py-0.5 text-[9px] text-gray-700 leading-tight">
+                          {ru}
                         </div>
                       ))}
                     </div>
@@ -364,8 +361,8 @@ export function HRRulesTab() {
         </button>
       </div>
 
-      {/* 그룹 목록 */}
-      <div className="flex flex-col gap-1">
+      {/* 그룹 목록 — 그룹 2단 + 각 그룹 내부 고정·준고정·선택 3단 → 체감 2×3 = 6단 밀도 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
         {groupNames.map(name => {
           const g = groups[name];
           const hits = countHit(g);
@@ -374,40 +371,37 @@ export function HRRulesTab() {
           return (
             <div key={name} className="rounded-md border border-gray-200 bg-white overflow-hidden">
               <button onClick={() => toggleGroup(name)}
-                className="flex w-full items-center gap-1.5 px-2 py-1 text-left hover:bg-gray-50 bg-gradient-to-r from-slate-50 to-white">
-                {isOpen ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
-                <span className="text-[12px] font-bold text-gray-800">{name}</span>
-                <span className="ml-1 text-[10px] text-red-500 font-semibold">고정 {g.fixed.length}</span>
-                <span className="text-[10px] text-amber-500 font-semibold">준고정 {g.semi.length}</span>
-                <span className="text-[10px] text-sky-500 font-semibold">선택 {g.opt.length}</span>
-                {search && <span className="ml-auto text-[10px] text-blue-500 font-bold">{hits}개 일치</span>}
+                className="flex w-full items-center gap-1 px-1.5 py-0.5 text-left hover:bg-gray-50 bg-gradient-to-r from-slate-50 to-white">
+                {isOpen ? <ChevronDown className="h-2.5 w-2.5 text-gray-400" /> : <ChevronRight className="h-2.5 w-2.5 text-gray-400" />}
+                <span className="text-[11px] font-bold text-gray-800 truncate">{name}</span>
+                <span className="ml-1 text-[9px] text-red-500 font-semibold">고 {g.fixed.length}</span>
+                <span className="text-[9px] text-amber-500 font-semibold">준 {g.semi.length}</span>
+                <span className="text-[9px] text-sky-500 font-semibold">선 {g.opt.length}</span>
+                {search && <span className="ml-auto text-[9px] text-blue-500 font-bold">{hits}</span>}
               </button>
               {isOpen && (
-                <div className="grid grid-cols-3 gap-1 p-1 border-t border-gray-100 bg-gray-50/50">
-                  {/* 고정 */}
+                <div className="grid grid-cols-3 gap-0.5 p-0.5 border-t border-gray-100 bg-gray-50/50">
                   <div className="rounded border border-red-200 bg-red-50/50">
-                    <div className="px-1.5 py-0.5 bg-red-100 border-b border-red-200 text-[9px] font-bold text-red-700">고정 ({g.fixed.length})</div>
-                    <ul className="p-1 space-y-0.5">
+                    <div className="px-1 py-px bg-red-100 border-b border-red-200 text-[9px] font-bold text-red-700">고정 ({g.fixed.length})</div>
+                    <ul className="p-0.5 space-y-0.5">
                       {g.fixed.map((s, i) => (matchSearch(s) ? (
-                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                        <li key={i} className="text-[9px] text-gray-700 leading-tight">{s}</li>
                       ) : null))}
                     </ul>
                   </div>
-                  {/* 준고정 */}
                   <div className="rounded border border-amber-200 bg-amber-50/50">
-                    <div className="px-1.5 py-0.5 bg-amber-100 border-b border-amber-200 text-[9px] font-bold text-amber-700">준고정 ({g.semi.length})</div>
-                    <ul className="p-1 space-y-0.5">
+                    <div className="px-1 py-px bg-amber-100 border-b border-amber-200 text-[9px] font-bold text-amber-700">준고정 ({g.semi.length})</div>
+                    <ul className="p-0.5 space-y-0.5">
                       {g.semi.map((s, i) => (matchSearch(s) ? (
-                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                        <li key={i} className="text-[9px] text-gray-700 leading-tight">{s}</li>
                       ) : null))}
                     </ul>
                   </div>
-                  {/* 선택 */}
                   <div className="rounded border border-sky-200 bg-sky-50/50">
-                    <div className="px-1.5 py-0.5 bg-sky-100 border-b border-sky-200 text-[9px] font-bold text-sky-700">선택 ({g.opt.length})</div>
-                    <ul className="p-1 space-y-0.5">
+                    <div className="px-1 py-px bg-sky-100 border-b border-sky-200 text-[9px] font-bold text-sky-700">선택 ({g.opt.length})</div>
+                    <ul className="p-0.5 space-y-0.5">
                       {g.opt.map((s, i) => (matchSearch(s) ? (
-                        <li key={i} className="text-[10px] text-gray-700 leading-snug">{s}</li>
+                        <li key={i} className="text-[9px] text-gray-700 leading-tight">{s}</li>
                       ) : null))}
                     </ul>
                   </div>

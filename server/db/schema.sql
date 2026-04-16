@@ -296,3 +296,11 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(token);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_sessions(user_id);
+
+-- 사이드바 페이지 마커 (공용 — 전 직원 동일 표시)
+CREATE TABLE IF NOT EXISTS sidebar_markers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  marker_id TEXT NOT NULL UNIQUE,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
+);

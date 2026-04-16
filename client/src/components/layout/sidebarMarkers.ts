@@ -14,33 +14,64 @@ export const MARKER_LABELS: Record<PageMarker, string> = {
   '$': '돈',
 };
 
-const STORAGE_KEY = 'sidebar-page-markers-v1';
+/* ── 전 직원 공용 DB 저장 — localStorage 캐시는 오프라인/첫 프레임용 ── */
+const API_URL = '/api/sidebar-markers';
+const MARKER_ID = 'global';
+const CACHE_KEY = 'sidebar-page-markers-cache';
 const EVENT_NAME = 'sidebar-page-markers-changed';
 
 type MarkerMap = Record<string, PageMarker>;
 
-function load(): MarkerMap {
+function sanitize(obj: unknown): MarkerMap {
+  if (!obj || typeof obj !== 'object') return {};
+  const cleaned: MarkerMap = {};
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (v === '#' || v === '!' || v === '$') cleaned[k] = v;
+  }
+  return cleaned;
+}
+
+function loadCache(): MarkerMap {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return {};
-    const cleaned: MarkerMap = {};
-    for (const [k, v] of Object.entries(parsed)) {
-      if (v === '#' || v === '!' || v === '$') cleaned[k] = v;
-    }
-    return cleaned;
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? sanitize(JSON.parse(raw)) : {};
   } catch {
     return {};
   }
 }
 
-function save(map: MarkerMap) {
+function writeCache(map: MarkerMap) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-    window.dispatchEvent(new CustomEvent(EVENT_NAME));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(map));
   } catch {
     /* noop */
+  }
+}
+
+async function fetchFromServer(): Promise<MarkerMap | null> {
+  try {
+    const res = await fetch(`${API_URL}/${encodeURIComponent(MARKER_ID)}`, { credentials: 'include' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const d = json?.data;
+    if (typeof d === 'string') return sanitize(JSON.parse(d));
+    return sanitize(d);
+  } catch {
+    return null;
+  }
+}
+
+async function saveToServer(map: MarkerMap): Promise<boolean> {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ marker_id: MARKER_ID, data: map }),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
@@ -52,16 +83,25 @@ export function nextMarker(current: PageMarker | undefined): PageMarker | undefi
 }
 
 export function useSidebarMarkers() {
-  const [markers, setMarkers] = useState<MarkerMap>(() => load());
+  // 캐시(localStorage)로 즉시 렌더 → 이후 서버 데이터로 갱신 (DB가 진실 소스)
+  const [markers, setMarkers] = useState<MarkerMap>(() => loadCache());
 
   useEffect(() => {
-    const sync = () => setMarkers(load());
-    window.addEventListener(EVENT_NAME, sync);
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEY) sync();
-    });
+    let cancelled = false;
+    const load = async () => {
+      const fromServer = await fetchFromServer();
+      if (cancelled) return;
+      if (fromServer) {
+        setMarkers(fromServer);
+        writeCache(fromServer);
+      }
+    };
+    load();
+    const onChanged = () => setMarkers(loadCache());
+    window.addEventListener(EVENT_NAME, onChanged);
     return () => {
-      window.removeEventListener(EVENT_NAME, sync);
+      cancelled = true;
+      window.removeEventListener(EVENT_NAME, onChanged);
     };
   }, []);
 
@@ -71,7 +111,10 @@ export function useSidebarMarkers() {
       const n = nextMarker(prev[code]);
       if (n) next[code] = n;
       else delete next[code];
-      save(next);
+      // Optimistic: 캐시 즉시 갱신 + 이벤트 + 서버 저장
+      writeCache(next);
+      window.dispatchEvent(new CustomEvent(EVENT_NAME));
+      saveToServer(next);
       return next;
     });
   }, []);
