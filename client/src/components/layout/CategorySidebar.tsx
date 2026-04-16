@@ -10,25 +10,36 @@ import {
   DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, canAccessGroup,
 } from './navData';
 import { useAuth } from '@/contexts/AuthContext';
+import { MARKER_COLORS, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
 
 /* ── 네비 아이템 ── */
 function NavItemRow({
-  item, isActive, memoCount, collapsed,
+  item, isActive, memoCount, collapsed, marker, onCycleMarker,
 }: {
   item: NavItem; isActive: boolean; memoCount: number; collapsed: boolean;
+  marker: PageMarker | undefined;
+  onCycleMarker: (code: string) => void;
 }) {
+  const mc = marker ? MARKER_COLORS[marker] : null;
+  const handleMarkerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCycleMarker(item.code);
+  };
+  const nextLabel = !marker ? '#' : marker === '#' ? '$' : '해제';
   return (
     <NavLink
       to={item.to}
       style={{
         display: 'flex', alignItems: 'center', gap: 4,
-        padding: collapsed ? '6px 14px' : '3px 6px',
+        padding: collapsed ? '5px 13px' : '2px 5px',
         borderRadius: 4, fontSize: 11,
         fontWeight: isActive ? 600 : 400,
         color: isActive ? '#3b82f6' : '#475569',
         background: isActive ? '#eff6ff' : 'transparent',
         textDecoration: 'none',
         transition: 'all 0.15s', whiteSpace: 'nowrap',
+        border: mc ? `1.5px solid ${mc.border}` : '1.5px solid transparent',
       }}
       title={`${item.code} ${item.label}`}
     >
@@ -44,7 +55,7 @@ function NavItemRow({
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {item.label}
           </span>
-{memoCount > 0 && (
+          {memoCount > 0 && (
             <span style={{
               background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 600,
               borderRadius: 9999, padding: '0px 5px', minWidth: 16,
@@ -53,6 +64,23 @@ function NavItemRow({
               {memoCount}
             </span>
           )}
+          <button
+            type="button"
+            onClick={handleMarkerClick}
+            title={`마커: ${marker ?? '없음'} → ${nextLabel}`}
+            aria-label={`페이지 마커 전환 (${marker ?? '없음'})`}
+            style={{
+              flexShrink: 0, width: 14, height: 14, padding: 0, lineHeight: '12px',
+              fontSize: 10, fontWeight: 700, fontFamily: 'ui-monospace, monospace',
+              border: mc ? `1px solid ${mc.border}` : '1px dashed #cbd5e1',
+              background: mc ? mc.bg : 'transparent',
+              color: mc ? mc.text : '#cbd5e1',
+              borderRadius: 3, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {marker ?? '·'}
+          </button>
         </>
       )}
     </NavLink>
@@ -63,6 +91,7 @@ function NavItemRow({
 function GroupSection({
   group, collapsed, location, memoCounts,
   collapsedGroups, toggleGroupCollapse,
+  markers, onCycleMarker,
 }: {
   group: NavGroup;
   collapsed: boolean;
@@ -70,6 +99,8 @@ function GroupSection({
   memoCounts: Record<string, number>;
   collapsedGroups: Set<string>;
   toggleGroupCollapse: (groupId: string) => void;
+  markers: Record<string, PageMarker>;
+  onCycleMarker: (code: string) => void;
 }) {
   const isGroupCollapsed = collapsedGroups.has(group.id);
 
@@ -123,6 +154,8 @@ function GroupSection({
             isActive={isActive}
             memoCount={memoCount}
             collapsed={collapsed}
+            marker={markers[item.code]}
+            onCycleMarker={onCycleMarker}
           />
         );
       })}
@@ -137,6 +170,7 @@ export function CategorySidebar() {
   const location = useLocation();
   const memoCounts = useAllMemoCounts();
   const { user } = useAuth();
+  const { markers, cycleMarker } = useSidebarMarkers();
 
   const groups = DEFAULT_GROUPS.filter(g => {
     if (g.id === 'grp-trash') return user?.tier === 'admin';
@@ -213,6 +247,8 @@ export function CategorySidebar() {
             memoCounts={memoCounts}
             collapsedGroups={collapsedGroups}
             toggleGroupCollapse={toggleGroupCollapse}
+            markers={markers}
+            onCycleMarker={cycleMarker}
           />
         ))}
       </nav>
