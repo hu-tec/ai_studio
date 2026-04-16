@@ -6,8 +6,8 @@ import { AIDetailModal } from './AIDetailModal';
 import { FranklinView } from './FranklinView';
 import { EisenhowerView } from './EisenhowerView';
 import { MandalartView, calcGridAchievement } from './MandalartView';
-import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, MandalartCell, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
-import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, resizeMandalartCells, sameMandalartSize, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, isWorklogType, loadPersistentCells, savePersistentCells, loadPersistentTypes, savePersistentTypes, findTypeInTree } from './data';
+import type { DailyLog, TimeSlotEntry, AIDetail, Position, ViewMode, Task, TaskSlot, MandalartCell, MandalartPeriod, MandalartSize, MandalartTypeConfig } from './data';
+import { homepageCategories, departmentCategories, positions, currentEmployee, employees, createEmptyTimeSlots, createEmptyTasks, syncFranklinToSlots, syncSlotToFranklin, getNextNumber, timeToMinutes, minutesToTime, DEFAULT_MANDALART_TYPES, WORKLOG_MANDALART_ID, mandalartCenterIdx, mandalartCellCount, mandalartChildCount, mandalartKey, normalizeMandalartSize, migrateMandalartKeys, resizeMandalartCells, sameMandalartSize, FRANKLIN_STATUS_CONFIG, FRANKLIN_PRIORITY_CONFIG, isWorklogType, loadPersistentCells, savePersistentCells, loadPersistentTypes, savePersistentTypes, findTypeInTree, taskSlots, withSlots, taskCoversSlot } from './data';
 import { BarChart3 } from 'lucide-react';
 import { exportDailyLogToWord } from './exportWord';
 import { MarkdownField } from './MarkdownField';
@@ -469,6 +469,29 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
     });
   }, []);
 
+  // task의 slots 배열을 업데이트하고 handleTasksChange 호출
+  const applyTaskRanges = useCallback((taskId: string, nextRanges: TaskSlot[], extra?: Partial<Task>) => {
+    const sorted = [...nextRanges].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const newTasks = tasks.map(t => {
+      if (t.id === taskId) return withSlots({ ...t, ...(extra || {}) }, sorted);
+      if (t.children?.some(c => c.id === taskId)) {
+        return { ...t, children: t.children.map(c => c.id === taskId ? withSlots({ ...c, ...(extra || {}) }, sorted) : c) };
+      }
+      return t;
+    });
+    handleTasksChange(newTasks);
+  }, [tasks, handleTasksChange]);
+
+  // 특정 range 제거 (모두 제거되면 slots=[] → 대기함 아님, 그냥 미할당)
+  const removeTaskRange = useCallback((taskId: string, rangeIdx: number) => {
+    const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
+    const target = allFlat.find(t => t.id === taskId);
+    if (!target) return;
+    const cur = taskSlots(target);
+    const next = cur.filter((_, i) => i !== rangeIdx);
+    applyTaskRanges(taskId, next);
+  }, [tasks, applyTaskRanges]);
+
   const updateSlot = (index: number, field: keyof TimeSlotEntry, value: string) => {
     setTimeSlots(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
     // Classic → Franklin 역방향 동기화: 연결된 과업 자동 업데이트
@@ -781,9 +804,10 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
             e.currentTarget.style.background = '';
             const droppedId = e.dataTransfer.getData('text/plain');
             if (!droppedId) return;
+            const clearRanges = (t: Task): Task => withSlots({ ...t, queued: true }, []);
             const newTasks = tasks.map(t => {
-              if (t.id === droppedId) return { ...t, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true };
-              if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? { ...c, startTime: undefined, endTime: undefined, timeSlotId: undefined, queued: true } : c) };
+              if (t.id === droppedId) return clearRanges(t);
+              if (t.children?.some(c => c.id === droppedId)) return { ...t, children: t.children.map(c => c.id === droppedId ? clearRanges(c) : c) };
               return t;
             });
             handleTasksChange(newTasks);
@@ -863,19 +887,25 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
               {timeSlots.map((slot, index) => {
                 const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
                 const slotEnd = slot.timeSlot.split('~')[1]?.trim() || '';
-                // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭 (서브태스크 포함)
+                // 시간 겹침 기반으로 모든 뷰에서 동일하게 태스크 매칭 (서브태스크 + 다중 range 포함)
                 const allTasksFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
-                const slotTasks = allTasksFlat.filter(t => {
-                  if (t.timeSlotId === slot.id) return true;
-                  if (!t.startTime) return false;
-                  const tStart = t.startTime.replace(':','');
-                  const tEnd = (t.endTime || '23:59').replace(':','');
-                  const sStart = slotStart.replace(':','');
-                  return sStart >= tStart && sStart < tEnd;
+                const slotTasksWithRange: Array<{ task: Task; rangeIdx: number }> = [];
+                for (const t of allTasksFlat) {
+                  const ranges = taskSlots(t);
+                  ranges.forEach((r, idx) => {
+                    if (r.timeSlotId === slot.id || (slotStart >= r.startTime && slotStart < r.endTime)) {
+                      slotTasksWithRange.push({ task: t, rangeIdx: idx });
+                    }
+                  });
+                }
+                const seenRK = new Set<string>();
+                const tasksWithRange_ = slotTasksWithRange.filter(({ task, rangeIdx }) => {
+                  const k = `${task.id}:${rangeIdx}`;
+                  if (seenRK.has(k)) return false;
+                  seenRK.add(k);
+                  return true;
                 });
-                // 중복 제거 (timeSlotId + 시간 겹침 둘 다 매칭될 수 있음)
-                const seen = new Set<string>();
-                const tasks_ = slotTasks.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
+                const tasks_ = tasksWithRange_.map(x => x.task);
                 const hasFill = tasks_.length > 0 || slot.title;
 
                 const inDragRange = dragRangeHint && index >= dragRangeHint.lo && index <= dragRangeHint.hi;
@@ -889,36 +919,41 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
+                      const srcRangeIdxRaw = e.dataTransfer.getData('application/x-worklog-range-idx');
                       if (!droppedText) { setDragRangeHint(null); return; }
-                      // top-level + children 모두 검색
                       const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
+                      const isFromTimetable = srcRangeIdxRaw !== '';
+                      const srcRangeIdx = isFromTimetable ? parseInt(srcRangeIdxRaw, 10) : -1;
                       if (task) {
-                        const tid = task.id;
-                        const span = computeDropSpan(index, task);
-                        const newTasks = tasks.map(t => {
-                          if (t.id === tid) return { ...t, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined } : c) };
-                          return t;
-                        });
-                        handleTasksChange(newTasks);
-                        updateSlot(span.loIdx, 'title', task.task);
+                        const curRanges = taskSlots(task);
+                        const origRange = isFromTimetable && srcRangeIdx >= 0 ? curRanges[srcRangeIdx] : undefined;
+                        const dummyTask = origRange ? { ...task, startTime: origRange.startTime, endTime: origRange.endTime } : task;
+                        const span = computeDropSpan(index, dummyTask);
+                        const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
+                        let nextRanges: TaskSlot[];
+                        if (isFromTimetable && srcRangeIdx >= 0) {
+                          nextRanges = curRanges.map((r, i) => i === srcRangeIdx ? newRange : r);
+                        } else {
+                          nextRanges = [...curRanges, newRange];
+                        }
+                        applyTaskRanges(task.id, nextRanges, { queued: undefined });
                       } else {
-                        // 매칭 실패 → 새 태스크 생성 (id 패턴은 무시)
                         const cleaned = droppedText.trim();
                         if (!cleaned || /^(ft-|mc-)/.test(cleaned)) { setDragRangeHint(null); return; }
                         const span = computeDropSpan(index);
+                        const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
                         const newTask: Task = {
                           id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
                           priority: 'B',
                           number: getNextNumber(tasks, 'B'),
                           task: cleaned, status: 'pending',
                           important: true, urgent: false, period,
-                          startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId,
+                          slots: [newRange],
+                          startTime: newRange.startTime, endTime: newRange.endTime, timeSlotId: newRange.timeSlotId,
                         };
                         handleTasksChange([...tasks, newTask]);
-                        updateSlot(span.loIdx, 'title', cleaned);
                       }
                       dragSlotRangeRef.current = { firstIdx: null, lastIdx: null };
                       setDragRangeHint(null);
@@ -926,11 +961,19 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                     <div className="md:grid md:grid-cols-[80px_1fr_1fr_80px_1fr] flex flex-col">
                       <div className="px-2 py-1.5 md:border-r border-border bg-accent/10 flex items-center gap-1 flex-wrap">
                         <span className="text-[10px] font-mono text-muted-foreground shrink-0">{slot.timeSlot}</span>
-                        {tasks_.map(t => (
-                          <span key={t.id} draggable
-                            onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
-                            className="text-[8px] font-bold px-1 rounded cursor-grab active:cursor-grabbing" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
+                        {tasksWithRange_.map(({ task: t, rangeIdx }) => (
+                          <span key={`${t.id}-${rangeIdx}`} draggable
+                            onDragStart={e => {
+                              e.stopPropagation();
+                              e.dataTransfer.effectAllowed = 'move';
+                              e.dataTransfer.setData('text/plain', t.id);
+                              e.dataTransfer.setData('application/x-worklog-range-idx', String(rangeIdx));
+                            }}
+                            className="text-[8px] font-bold px-1 rounded cursor-grab active:cursor-grabbing inline-flex items-center gap-0.5" style={{ background: FRANKLIN_PRIORITY_CONFIG[t.priority].bg, color: FRANKLIN_PRIORITY_CONFIG[t.priority].color }}>
                             {t.priority}{t.number}{FRANKLIN_STATUS_CONFIG[t.status].icon}
+                            <button onClick={ev => { ev.stopPropagation(); removeTaskRange(t.id, rangeIdx); }}
+                              title="이 시간대 배정 제거"
+                              className="ml-0.5 w-2.5 h-2.5 rounded-full bg-white/70 hover:bg-red-500 hover:text-white text-[7px] leading-none flex items-center justify-center">×</button>
                           </span>
                         ))}
                       </div>
@@ -968,35 +1011,41 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                       e.preventDefault();
                       e.currentTarget.style.background = '';
                       const droppedText = e.dataTransfer.getData('text/plain');
+                      const srcRangeIdxRaw = e.dataTransfer.getData('application/x-worklog-range-idx');
                       if (!droppedText) { setDragRangeHint(null); return; }
                       const allFlat = tasks.flatMap(t => [t, ...(t.children || [])]);
                       let task = allFlat.find(t => t.id === droppedText);
                       if (!task) task = allFlat.find(t => t.task === droppedText);
+                      const isFromTimetable = srcRangeIdxRaw !== '';
+                      const srcRangeIdx = isFromTimetable ? parseInt(srcRangeIdxRaw, 10) : -1;
                       if (task) {
-                        const tid = task.id;
-                        const span = computeDropSpan(index, task);
-                        const newTasks = tasks.map(t => {
-                          if (t.id === tid) return { ...t, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined };
-                          if (t.children?.some(c => c.id === tid)) return { ...t, children: t.children.map(c => c.id === tid ? { ...c, startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId, queued: undefined } : c) };
-                          return t;
-                        });
-                        handleTasksChange(newTasks);
-                        updateSlot(span.loIdx, 'title', task.task);
+                        const curRanges = taskSlots(task);
+                        const origRange = isFromTimetable && srcRangeIdx >= 0 ? curRanges[srcRangeIdx] : undefined;
+                        const dummyTask = origRange ? { ...task, startTime: origRange.startTime, endTime: origRange.endTime } : task;
+                        const span = computeDropSpan(index, dummyTask);
+                        const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
+                        let nextRanges: TaskSlot[];
+                        if (isFromTimetable && srcRangeIdx >= 0) {
+                          nextRanges = curRanges.map((r, i) => i === srcRangeIdx ? newRange : r);
+                        } else {
+                          nextRanges = [...curRanges, newRange];
+                        }
+                        applyTaskRanges(task.id, nextRanges, { queued: undefined });
                       } else {
-                        // 매칭 실패 → 새 태스크 생성 후 슬롯에 배정 (id 패턴은 무시)
                         const cleaned = droppedText.trim();
                         if (!cleaned || /^(ft-|mc-)/.test(cleaned)) { setDragRangeHint(null); return; }
                         const span = computeDropSpan(index);
+                        const newRange: TaskSlot = { startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId };
                         const newTask: Task = {
                           id: `ft-d-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
                           priority: 'B',
                           number: getNextNumber(tasks, 'B'),
                           task: cleaned, status: 'pending',
                           important: true, urgent: false, period,
-                          startTime: span.startTime, endTime: span.endTime, timeSlotId: span.timeSlotId,
+                          slots: [newRange],
+                          startTime: newRange.startTime, endTime: newRange.endTime, timeSlotId: newRange.timeSlotId,
                         };
                         handleTasksChange([...tasks, newTask]);
-                        updateSlot(span.loIdx, 'title', cleaned);
                       }
                       dragSlotRangeRef.current = { firstIdx: null, lastIdx: null };
                       setDragRangeHint(null);
@@ -1007,16 +1056,24 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                         {slotStart}
                       </span>
                       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                        {tasks_.length > 0 ? tasks_.map(t => {
+                        {tasksWithRange_.length > 0 ? tasksWithRange_.map(({ task: t, rangeIdx }) => {
                           const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
                           const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                           return (
-                            <div key={t.id} draggable
-                              onDragStart={e => { e.stopPropagation(); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', t.id); }}
+                            <div key={`${t.id}-${rangeIdx}`} draggable
+                              onDragStart={e => {
+                                e.stopPropagation();
+                                e.dataTransfer.effectAllowed = 'move';
+                                e.dataTransfer.setData('text/plain', t.id);
+                                e.dataTransfer.setData('application/x-worklog-range-idx', String(rangeIdx));
+                              }}
                               className="flex items-center gap-1 rounded px-1 py-0.5 cursor-grab active:cursor-grabbing" style={{ background: pCfg.color + '15', borderLeft: `2px solid ${pCfg.color}` }}>
                               <span className="text-[9px] font-bold" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
                               <span className="text-[9px]" style={{ color: stCfg.color }}>{stCfg.icon}</span>
-                              <span className="text-[10px] truncate">{t.task}</span>
+                              <span className="text-[10px] truncate flex-1">{t.task}</span>
+                              <button onClick={ev => { ev.stopPropagation(); removeTaskRange(t.id, rangeIdx); }}
+                                title="이 시간대 배정 제거"
+                                className="w-3 h-3 rounded-full bg-white/70 hover:bg-red-500 hover:text-white text-[8px] leading-none flex items-center justify-center shrink-0">×</button>
                             </div>
                           );
                         }) : slot.title ? (

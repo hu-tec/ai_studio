@@ -260,15 +260,25 @@ export function migrateMandalartKeys(byKey: Record<string, MandalartCell[]>): Re
 export type FranklinPriority = 'A' | 'B' | 'C' | 'D';
 export type FranklinStatus = 'pending' | 'done' | 'progress' | 'forwarded' | 'cancelled';
 
+// 하나의 타임테이블 할당 범위 — task는 여러 개의 비연속 range를 가질 수 있다
+export interface TaskSlot {
+  startTime: string;       // "11:00"
+  endTime: string;         // "12:00"
+  timeSlotId?: string;     // 해당 range의 첫 슬롯 id
+}
+
 export interface Task {
   id: string;
   priority: FranklinPriority;
   number: number;           // A1, A2, B1...
   task: string;
   status: FranklinStatus;
-  timeSlotId?: string;      // Classic 모드: 슬롯 연결
-  startTime?: string;       // Franklin/Eisenhower: "09:00" 자유 시간
-  endTime?: string;         // Franklin/Eisenhower: "14:37"
+  // 다중 할당 (비연속 가능): [{11:00~12:00}, {14:00~15:30}, ...]
+  slots?: TaskSlot[];
+  // 레거시 단일 range — slots[]가 있으면 무시 (로드 시 자동 마이그레이션)
+  timeSlotId?: string;
+  startTime?: string;
+  endTime?: string;
   note?: string;
   files?: string[];         // 첨부 파일 URLs
   isIssue?: boolean;        // ⚠ 이슈 표시
@@ -282,6 +292,35 @@ export interface Task {
   hubPostId?: string;       // 업무 총괄 연결 (work_hub post_id)
   rolledFromDate?: string;  // 이월된 경우 원래 날짜 (YYYY-MM-DD)
   rolledFromId?: string;    // 이월 원본 task id (중복 이월 방지)
+}
+
+// 레거시 startTime/endTime/timeSlotId → slots[] 마이그레이션
+export function taskSlots(t: Task): TaskSlot[] {
+  if (t.slots && t.slots.length > 0) return t.slots;
+  if (t.startTime && t.endTime) {
+    return [{ startTime: t.startTime, endTime: t.endTime, timeSlotId: t.timeSlotId }];
+  }
+  return [];
+}
+
+// slots 배열 변경을 task에 적용 (레거시 필드도 첫 range로 동기화)
+export function withSlots(t: Task, slots: TaskSlot[]): Task {
+  if (slots.length === 0) {
+    return { ...t, slots: undefined, startTime: undefined, endTime: undefined, timeSlotId: undefined };
+  }
+  const first = slots[0];
+  return { ...t, slots, startTime: first.startTime, endTime: first.endTime, timeSlotId: first.timeSlotId };
+}
+
+// 슬롯 시간 문자열(HH:MM)이 TaskSlot 범위에 속하는지
+export function slotCoveredByRange(slotStart: string, r: TaskSlot): boolean {
+  return slotStart >= r.startTime && slotStart < r.endTime;
+}
+
+// task가 특정 타임슬롯을 커버하는지 (timeSlotId 직접 or 시간 겹침)
+export function taskCoversSlot(t: Task, slotId: string, slotStart: string): boolean {
+  const ranges = taskSlots(t);
+  return ranges.some(r => r.timeSlotId === slotId || slotCoveredByRange(slotStart, r));
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';
@@ -345,33 +384,38 @@ export function syncFranklinToSlots(
   slots: TimeSlotEntry[],
   prevTasks?: Task[],
 ): TimeSlotEntry[] {
-  const taskBySlotId = new Map<string, Task>();
-  const collectLinked = (t: Task) => {
-    if (t.timeSlotId) taskBySlotId.set(t.timeSlotId, t);
-    t.children?.forEach(collectLinked);
-  };
-  tasks.forEach(collectLinked);
+  // 슬롯 ID → 해당 슬롯을 커버하는 task들 (timeSlotId 직접 링크 OR 시간 겹침)
+  const coveringNow = new Map<string, Task[]>();
+  const coveringBefore = new Map<string, Task[]>();
 
-  // 이전에 연결되었다가 해제된 슬롯 파악 (top-level + children 모두)
-  const unlinkedSlotIds = new Set<string>();
-  if (prevTasks) {
-    const collectUnlinked = (t: Task) => {
-      if (t.timeSlotId && !taskBySlotId.has(t.timeSlotId)) {
-        unlinkedSlotIds.add(t.timeSlotId);
-      }
-      t.children?.forEach(collectUnlinked);
-    };
-    prevTasks.forEach(collectUnlinked);
-  }
+  const buildCoverage = (taskList: Task[], map: Map<string, Task[]>) => {
+    const flat: Task[] = [];
+    const collect = (t: Task) => { flat.push(t); t.children?.forEach(collect); };
+    taskList.forEach(collect);
+    for (const slot of slots) {
+      const slotStart = slot.timeSlot.split('~')[0]?.trim() || '';
+      const covering = flat.filter(t => taskCoversSlot(t, slot.id, slotStart));
+      if (covering.length > 0) map.set(slot.id, covering);
+    }
+  };
+
+  buildCoverage(tasks, coveringNow);
+  if (prevTasks) buildCoverage(prevTasks, coveringBefore);
 
   return slots.map(slot => {
-    const task = taskBySlotId.get(slot.id);
-    if (task) {
-      return { ...slot, title: task.task, content: task.note || '' };
+    const nowCovering = coveringNow.get(slot.id);
+    const beforeCovering = coveringBefore.get(slot.id);
+
+    if (nowCovering && nowCovering.length > 0) {
+      const t = nowCovering[0];
+      return { ...slot, title: t.task, content: t.note || '' };
     }
-    if (unlinkedSlotIds.has(slot.id)) {
+
+    // 이전엔 task로 덮였다가 이제 아무 task도 안 덮는다 → title/content 클리어
+    if (beforeCovering && beforeCovering.length > 0) {
       return { ...slot, title: '', content: '' };
     }
+
     return slot;
   });
 }
@@ -389,15 +433,20 @@ export function syncSlotToFranklin(
     null;
   if (!patch) return tasks;
 
+  const matches = (t: Task) => {
+    const ranges = taskSlots(t);
+    return ranges.some(r => r.timeSlotId === slotId);
+  };
+
   // top-level 우선 검색
-  const topIdx = tasks.findIndex(t => t.timeSlotId === slotId);
+  const topIdx = tasks.findIndex(matches);
   if (topIdx >= 0) {
     return tasks.map((t, i) => i === topIdx ? { ...t, ...patch } : t);
   }
 
   // 서브태스크 검색
   for (let i = 0; i < tasks.length; i++) {
-    const cIdx = tasks[i].children?.findIndex(c => c.timeSlotId === slotId) ?? -1;
+    const cIdx = tasks[i].children?.findIndex(matches) ?? -1;
     if (cIdx >= 0) {
       return tasks.map((t, ti) => ti === i
         ? { ...t, children: t.children!.map((c, ci) => ci === cIdx ? { ...c, ...patch } : c) }
