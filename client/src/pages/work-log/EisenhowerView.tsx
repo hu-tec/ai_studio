@@ -1,5 +1,5 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Upload, X, ExternalLink } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { Task, FranklinPriority, EisenhowerQuadrant, TimeSlotEntry, MandalartPeriod } from './data';
 import {
@@ -7,6 +7,7 @@ import {
   getQuadrant, setQuadrant, getNextNumber, cycleStatus, syncPriorityToEisenhower,
   ACH_COLORS, ACH_LABELS, calcTaskAchievement,
   addSubTask, updateSubTask, removeSubTask,
+  taskFileObjs, uploadTaskFile,
 } from './data';
 
 interface EisenhowerViewProps {
@@ -252,11 +253,73 @@ export function EisenhowerView({ tasks, timeSlots, onTasksChange, onSlotTitleCha
                         {/* Full expanded detail */}
                         {isExpanded && (
                           <div className="px-2 py-1.5 bg-accent/5 border-t border-border/30 space-y-1.5 text-[10px]">
-                            <div className="flex items-center gap-2">
-                              <label className="flex items-center gap-1 cursor-pointer">
-                                <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })} className="w-3 h-3 accent-amber-500" />
-                                <span className="text-amber-600 font-bold">⚠이슈</span>
-                              </label>
+                            {/* 이슈 chip + 링크 */}
+                            <div className="flex items-center gap-1.5">
+                              <button onClick={() => updateTask(task.id, { isIssue: !task.isIssue })}
+                                className={`text-[9px] px-1.5 py-0.5 rounded border font-bold leading-none shrink-0 ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-white border-border text-muted-foreground hover:bg-amber-50'}`}>
+                                ⚠ {task.isIssue ? '이슈' : '이슈아님'}
+                              </button>
+                              <input type="url" value={task.link || ''} placeholder="링크 URL"
+                                onChange={e => updateTask(task.id, { link: e.target.value || undefined })}
+                                className="flex-1 px-1.5 py-0.5 border border-border rounded text-[10px] bg-background outline-none" />
+                              {task.link && (
+                                <button onClick={() => window.open(task.link, '_blank', 'noopener,noreferrer')}
+                                  className="px-1 py-0.5 text-[9px] rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 flex items-center gap-0.5 shrink-0">
+                                  <ExternalLink size={9} /> 열기
+                                </button>
+                              )}
+                            </div>
+                            {/* 파일 첨부 + 이미지 paste */}
+                            <div
+                              onPaste={async e => {
+                                const files = Array.from(e.clipboardData.files);
+                                if (files.length === 0) return;
+                                e.preventDefault();
+                                const existing = taskFileObjs(task);
+                                const uploaded: { url: string; name: string }[] = [];
+                                for (const f of files) {
+                                  const r = await uploadTaskFile(f, 'worklog-task');
+                                  if (r) uploaded.push(r);
+                                }
+                                if (uploaded.length > 0) updateTask(task.id, { files: [...existing, ...uploaded] });
+                              }}
+                              className="flex items-start gap-1.5">
+                              <span className="text-muted-foreground w-10 pt-0.5">파일</span>
+                              <div className="flex-1 flex flex-wrap items-center gap-1">
+                                {taskFileObjs(task).map((f, i) => {
+                                  const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name) || /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(f.url);
+                                  return (
+                                    <div key={i} className="inline-flex items-center gap-1 px-1 py-0.5 bg-slate-50 border border-border rounded text-[9px]">
+                                      {isImg && <img src={f.url} alt={f.name} className="w-4 h-4 object-cover rounded" />}
+                                      <Paperclip className="w-2.5 h-2.5 text-muted-foreground" />
+                                      <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[110px]">{f.name}</a>
+                                      <button onClick={() => {
+                                        const next = taskFileObjs(task).filter((_, j) => j !== i);
+                                        updateTask(task.id, { files: next.length ? next : undefined });
+                                      }} className="text-rose-500 hover:bg-rose-50 rounded w-3 h-3 flex items-center justify-center">
+                                        <X size={8} />
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                                <label className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded border border-dashed border-border text-[9px] text-muted-foreground cursor-pointer hover:bg-accent/20">
+                                  <Upload size={9} /> 업로드
+                                  <input type="file" multiple className="hidden"
+                                    onChange={async e => {
+                                      const files = Array.from(e.target.files || []);
+                                      if (files.length === 0) return;
+                                      const existing = taskFileObjs(task);
+                                      const uploaded: { url: string; name: string }[] = [];
+                                      for (const f of files) {
+                                        const r = await uploadTaskFile(f, 'worklog-task');
+                                        if (r) uploaded.push(r);
+                                      }
+                                      if (uploaded.length > 0) updateTask(task.id, { files: [...existing, ...uploaded] });
+                                      (e.target as HTMLInputElement).value = '';
+                                    }} />
+                                </label>
+                                <span className="text-[8px] text-muted-foreground/60 italic">이미지 Ctrl+V OK</span>
+                              </div>
                             </div>
                             <div className="flex gap-2">
                               <span className="text-muted-foreground w-10 pt-0.5">메모</span>

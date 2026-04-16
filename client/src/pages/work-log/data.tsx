@@ -280,7 +280,8 @@ export interface Task {
   startTime?: string;
   endTime?: string;
   note?: string;
-  files?: string[];         // 첨부 파일 URLs
+  link?: string;            // 대표 링크
+  files?: Array<{ url: string; name: string } | string>; // 첨부 파일 (object or legacy URL string)
   isIssue?: boolean;        // ⚠ 이슈 표시
   urgent?: boolean;         // 아이젠하워: 긴급
   important?: boolean;      // 아이젠하워: 중요
@@ -321,6 +322,33 @@ export function slotCoveredByRange(slotStart: string, r: TaskSlot): boolean {
 export function taskCoversSlot(t: Task, slotId: string, slotStart: string): boolean {
   const ranges = taskSlots(t);
   return ranges.some(r => r.timeSlotId === slotId || slotCoveredByRange(slotStart, r));
+}
+
+// task.files 를 {url, name} 객체 배열로 정규화 (레거시 string URL 호환)
+export function taskFileObjs(t: Task): Array<{ url: string; name: string }> {
+  if (!t.files) return [];
+  return t.files.map(f =>
+    typeof f === 'string'
+      ? { url: f, name: f.split('/').pop() || 'file' }
+      : f
+  );
+}
+
+// 파일 업로드 — /api/upload 엔드포인트로 multipart POST
+export async function uploadTaskFile(file: File, category = 'worklog-task'): Promise<{ url: string; name: string } | null> {
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', category);
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success && data.s3_url) {
+      return { url: data.s3_url, name: data.original_name || file.name || 'file' };
+    }
+  } catch (e) {
+    console.error('uploadTaskFile failed', e);
+  }
+  return null;
 }
 
 export type EisenhowerQuadrant = 'q1' | 'q2' | 'q3' | 'q4';

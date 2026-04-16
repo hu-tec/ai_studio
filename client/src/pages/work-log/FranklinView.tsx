@@ -1,5 +1,5 @@
 import { useState, DragEvent } from 'react';
-import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Maximize2, Minimize2 } from 'lucide-react';
+import { Plus, ChevronDown, ChevronRight, AlertTriangle, Paperclip, Maximize2, Minimize2, ExternalLink, Upload, X } from 'lucide-react';
 import { MarkdownField } from './MarkdownField';
 import type { Task, FranklinPriority, TimeSlotEntry, MandalartPeriod } from './data';
 import {
@@ -7,6 +7,7 @@ import {
   getNextNumber, cycleStatus, syncPriorityToEisenhower,
   getTimelinePosition, ACH_COLORS, ACH_LABELS,
   addSubTask, updateSubTask, removeSubTask, calcTaskAchievement,
+  taskFileObjs, uploadTaskFile,
 } from './data';
 
 interface FranklinViewProps {
@@ -235,20 +236,85 @@ export function FranklinView({ tasks, timeSlots, timeInterval, onTasksChange, pe
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="px-2 py-1 bg-accent/5 border-t border-border/30 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                    {/* Time range edit */}
-                    <div className="flex items-center gap-2 text-[11px]">
+                  <div className="px-2 py-1 bg-accent/5 border-t border-border/30 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {/* 시간 + 이슈(compact chip) */}
+                    <div className="flex items-center gap-1.5 text-[11px]">
                       <span className="text-muted-foreground w-12">시간</span>
                       <input type="time" value={task.startTime || ''} onChange={e => updateTask(task.id, { startTime: e.target.value })}
-                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[90px]" />
-                      <span>~</span>
+                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[80px]" />
+                      <span className="text-[10px] text-muted-foreground">~</span>
                       <input type="time" value={task.endTime || ''} onChange={e => updateTask(task.id, { endTime: e.target.value })}
-                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[90px]" />
-                      <label className="flex items-center gap-1 ml-1.5 cursor-pointer">
-                        <input type="checkbox" checked={task.isIssue || false} onChange={e => updateTask(task.id, { isIssue: e.target.checked })}
-                          className="w-3 h-3 accent-amber-500" />
-                        <span className="text-amber-600 text-[10px] font-bold">⚠ 이슈</span>
-                      </label>
+                        className="px-1 py-0.5 border border-border rounded text-[11px] bg-background w-[80px]" />
+                      <button
+                        onClick={() => updateTask(task.id, { isIssue: !task.isIssue })}
+                        className={`ml-auto text-[9px] px-1.5 py-0.5 rounded border font-bold leading-none ${task.isIssue ? 'bg-amber-100 border-amber-400 text-amber-700' : 'bg-white border-border text-muted-foreground hover:bg-amber-50'}`}>
+                        ⚠ {task.isIssue ? '이슈' : '이슈아님'}
+                      </button>
+                    </div>
+                    {/* 링크 */}
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="text-muted-foreground w-12">링크</span>
+                      <input type="url" value={task.link || ''} placeholder="https://..."
+                        onChange={e => updateTask(task.id, { link: e.target.value || undefined })}
+                        className="flex-1 px-1.5 py-0.5 border border-border rounded text-[11px] bg-background outline-none" />
+                      {task.link && (
+                        <button onClick={() => window.open(task.link, '_blank', 'noopener,noreferrer')}
+                          className="px-1.5 py-0.5 text-[10px] rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 flex items-center gap-0.5">
+                          <ExternalLink size={10} /> 열기
+                        </button>
+                      )}
+                    </div>
+                    {/* 파일 첨부 — 업로드 + 이미지 paste 지원 */}
+                    <div
+                      onPaste={async e => {
+                        const files = Array.from(e.clipboardData.files);
+                        if (files.length === 0) return;
+                        e.preventDefault();
+                        const existing = taskFileObjs(task);
+                        const uploaded: { url: string; name: string }[] = [];
+                        for (const f of files) {
+                          const r = await uploadTaskFile(f, 'worklog-task');
+                          if (r) uploaded.push(r);
+                        }
+                        if (uploaded.length > 0) updateTask(task.id, { files: [...existing, ...uploaded] });
+                      }}
+                      className="flex items-start gap-1.5 text-[11px]">
+                      <span className="text-muted-foreground w-12 pt-1">파일</span>
+                      <div className="flex-1 flex flex-wrap items-center gap-1">
+                        {taskFileObjs(task).map((f, i) => {
+                          const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name) || /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(f.url);
+                          return (
+                            <div key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 border border-border rounded text-[10px]">
+                              {isImg && <img src={f.url} alt={f.name} className="w-5 h-5 object-cover rounded" />}
+                              <Paperclip className="w-3 h-3 text-muted-foreground" />
+                              <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[140px]">{f.name}</a>
+                              <button onClick={() => {
+                                const next = taskFileObjs(task).filter((_, j) => j !== i);
+                                updateTask(task.id, { files: next.length ? next : undefined });
+                              }} className="text-rose-500 hover:bg-rose-50 rounded w-3.5 h-3.5 flex items-center justify-center">
+                                <X size={9} />
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <label className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-border text-[10px] text-muted-foreground cursor-pointer hover:bg-accent/20">
+                          <Upload size={10} /> 업로드
+                          <input type="file" multiple className="hidden"
+                            onChange={async e => {
+                              const files = Array.from(e.target.files || []);
+                              if (files.length === 0) return;
+                              const existing = taskFileObjs(task);
+                              const uploaded: { url: string; name: string }[] = [];
+                              for (const f of files) {
+                                const r = await uploadTaskFile(f, 'worklog-task');
+                                if (r) uploaded.push(r);
+                              }
+                              if (uploaded.length > 0) updateTask(task.id, { files: [...existing, ...uploaded] });
+                              (e.target as HTMLInputElement).value = '';
+                            }} />
+                        </label>
+                        <span className="text-[9px] text-muted-foreground/60 italic">여기에 이미지 Ctrl+V 붙여넣기 OK</span>
+                      </div>
                     </div>
                     {/* Priority change */}
                     <div className="flex items-center gap-2 text-[11px]">
