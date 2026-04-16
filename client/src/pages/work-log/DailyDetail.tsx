@@ -19,9 +19,10 @@ interface DailyDetailProps {
   onSave: (log: DailyLog) => void;
   employeeId: string;
   onFlushRef?: React.MutableRefObject<(() => void) | null>;
+  allLogs?: DailyLog[]; // 이월 누적 계산용 — 같은 직원의 전체 일지
 }
 
-export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: DailyDetailProps) {
+export function DailyDetail({ date, log, onSave, employeeId, onFlushRef, allLogs }: DailyDetailProps) {
   const dateStr = format(date, 'yyyy-MM-dd');
   const emp = employees.find(e => e.id === employeeId) || currentEmployee;
 
@@ -694,11 +695,31 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
           const inPeriod = (t: Task) => !t.period || t.period === period;
           // 현재 기간에 배정된 업무 (slots 있음)
           const assigned = tasks.filter(t => inPeriod(t) && taskSlots(t).length > 0);
-          // 이월 pool: 남은 업무 — 완료/취소 제외 + (slots 없음 OR forwarded OR queued OR 이전일에서 이월)
-          const carryover = tasks.filter(t => t.status !== 'done' && t.status !== 'cancelled'
-            && (taskSlots(t).length === 0 || t.status === 'forwarded' || t.queued || !!t.rolledFromDate));
-          // forwarded count (기존 호환)
-          const forwardedCount = tasks.filter(t => t.status === 'forwarded').length;
+          // 이월 pool: 전체 일지에서 누적 — 완료/취소 제외한 모든 미완료 업무
+          // 오늘 포함 과거 일지 전부 스캔 → 오늘 slots 배정되지 않은 task는 남은 업무로 집계
+          type CarryItem = { task: Task; fromDate: string; isToday: boolean };
+          const carryMap = new Map<string, CarryItem>();
+          const currentTaskIds = new Set(tasks.map(t => t.id));
+          const sourceLogs = allLogs && allLogs.length > 0 ? allLogs : (log ? [log] : []);
+          for (const l of sourceLogs) {
+            for (const t of (l.tasks || [])) {
+              if (t.status === 'done' || t.status === 'cancelled') continue;
+              if (!t.task?.trim()) continue;
+              // 오늘 이미 배정됐으면 제외
+              if (l.date === dateStr && currentTaskIds.has(t.id) && taskSlots(t).length > 0) continue;
+              // 오늘 task면 slots 비었을 때만 이월로 취급
+              const isToday = l.date === dateStr;
+              if (isToday && taskSlots(t).length > 0 && t.status !== 'forwarded') continue;
+              // 중복 제거 키 (같은 내용은 한 번만)
+              const key = t.rolledFromId || `${t.task.trim()}|${t.priority}`;
+              const existing = carryMap.get(key);
+              if (!existing || l.date > existing.fromDate) {
+                carryMap.set(key, { task: t, fromDate: l.date, isToday });
+              }
+            }
+          }
+          const carryover = Array.from(carryMap.values()).sort((a, b) => a.fromDate.localeCompare(b.fromDate));
+          const forwardedCount = carryover.filter(c => c.task.status === 'forwarded').length;
 
           return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -767,16 +788,17 @@ export function DailyDetail({ date, log, onSave, employeeId, onFlushRef }: Daily
                     </button>
                     {tomorrowListOpen && (
                       <div className="px-2 py-1 bg-rose-50/50 text-[10px] space-y-0.5">
-                        {carryover.map(t => {
+                        {carryover.map(({ task: t, fromDate, isToday }) => {
                           const pCfg = FRANKLIN_PRIORITY_CONFIG[t.priority];
                           const stCfg = FRANKLIN_STATUS_CONFIG[t.status];
                           const tag = t.status === 'forwarded' ? '이월' : t.queued ? '대기' : taskSlots(t).length === 0 ? '미배정' : '';
                           return (
-                            <div key={t.id} className="flex items-center gap-1">
+                            <div key={`${fromDate}-${t.id}`} className="flex items-center gap-1">
                               <span className="text-rose-500 font-bold">→</span>
                               <span className="font-bold shrink-0" style={{ color: pCfg.color }}>{t.priority}{t.number}</span>
                               <span className="shrink-0" style={{ color: stCfg.color }}>{stCfg.icon}</span>
                               <span className="flex-1 truncate">{t.task}</span>
+                              {!isToday && <span className="text-[8px] px-1 rounded bg-gray-100 text-gray-600 shrink-0 font-mono">{fromDate.slice(5)}</span>}
                               {tag && <span className="text-[8px] px-1 rounded bg-rose-100 text-rose-600 shrink-0">{tag}</span>}
                             </div>
                           );

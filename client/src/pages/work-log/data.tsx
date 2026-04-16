@@ -847,7 +847,16 @@ export async function fetchLogsFromAPI(): Promise<DailyLog[] | null> {
   }
 }
 
-export async function saveLogToAPI(log: DailyLog): Promise<boolean> {
+export interface SaveResult {
+  ok: boolean;
+  reason?: string; // 실패 사유 (UI/로그용)
+  status?: number;
+}
+
+export async function saveLogToAPI(log: DailyLog): Promise<SaveResult> {
+  // 클라에서 필수 필드 검증 — 서버 400 응답 유발을 사전 차단
+  if (!log.employeeId) return { ok: false, reason: 'employeeId 누락 (로컬 저장만)' };
+  if (!log.date) return { ok: false, reason: 'date 누락 (로컬 저장만)' };
   try {
     const key = `${log.employeeId}_${log.date}`;
     const res = await fetch(`/api/worklogs/${key}`, {
@@ -855,9 +864,15 @@ export async function saveLogToAPI(log: DailyLog): Promise<boolean> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: log }),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (res.ok) return { ok: true };
+    let reason = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.error) reason = `${res.status}: ${body.error}`;
+    } catch {}
+    return { ok: false, reason, status: res.status };
+  } catch (err: any) {
+    return { ok: false, reason: `네트워크 오류: ${err?.message || err}` };
   }
 }
 

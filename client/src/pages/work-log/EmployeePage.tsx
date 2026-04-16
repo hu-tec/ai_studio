@@ -200,6 +200,7 @@ export function EmployeePage() {
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const currentLog = myLogs.find(l => l.date === dateStr);
 
+  const lastSaveErrorRef = useRef<string | null>(null);
   const handleSaveLog = useCallback(async (log: DailyLog) => {
     setLogs(prev => {
       const existing = prev.findIndex(
@@ -215,9 +216,32 @@ export function EmployeePage() {
       saveLogs(updated);
       return updated;
     });
-    const ok = await saveLogToAPI(log);
-    if (!ok) {
-      toast.error('서버 저장 실패 — 로컬에만 저장되었습니다.');
+    const result = await saveLogToAPI(log);
+    if (result.ok) {
+      lastSaveErrorRef.current = null;
+    } else {
+      console.error('[worklog save failed]', result.reason, 'key:', `${log.employeeId}_${log.date}`, 'status:', result.status);
+      // 같은 에러 연속이면 토스트 한 번만 (스팸 방지)
+      if (lastSaveErrorRef.current !== result.reason) {
+        lastSaveErrorRef.current = result.reason || null;
+        toast.error(`서버 저장 실패 (${result.reason}) — 로컬만 저장됨. 새로고침 전 다시 저장 시도됩니다.`);
+      }
+    }
+  }, []);
+
+  // 수동 재동기화 — DB에서 최신 가져와 logs 갱신 (다른 기기에서 저장한 내용 반영)
+  const refetchLogs = useCallback(async () => {
+    try {
+      const apiLogs = await fetchLogsFromAPI();
+      if (apiLogs && apiLogs.length > 0) {
+        setLogs(apiLogs);
+        saveLogs(apiLogs);
+        toast.success(`DB에서 ${apiLogs.length}건 재동기화 완료`);
+      } else {
+        toast.error('DB 로그를 불러오지 못했습니다');
+      }
+    } catch (e: any) {
+      toast.error(`재동기화 실패: ${e?.message || e}`);
     }
   }, []);
 
@@ -316,6 +340,11 @@ export function EmployeePage() {
       <div className="flex items-center justify-between mb-1 px-2">
         <div className="flex items-center gap-1.5">
           <h1 className="text-base font-black text-primary tracking-tight">업무일지</h1>
+          <button onClick={refetchLogs}
+            title="DB에서 최신 업무일지 재동기화 (다른 기기에서 저장한 내용 반영)"
+            className="ml-1 px-2 py-0.5 text-[10px] rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100">
+            ↻ 동기화
+          </button>
           {/* 작성자 선택 */}
           <div className="flex items-center gap-1">
             {employees.map(emp => (
@@ -418,7 +447,7 @@ export function EmployeePage() {
 
       {pageMode === 'today' ? (
         /* Today mode — full width DailyDetail */
-        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
+        <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} />
       ) : pageMode === 'list' ? (
         /* List mode — 전체 날짜 테이블 */
         <ListView logs={myLogs} onSelectDate={(d) => { setSelectedDate(d); setPageMode('today'); }}
@@ -437,7 +466,7 @@ export function EmployeePage() {
             </div>
           )}
           <div className="flex-1 min-w-0 pl-1">
-            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} />
+            <DailyDetail date={selectedDate} log={currentLog} onSave={handleSaveLog} employeeId={activeEmpId} onFlushRef={flushRef} allLogs={myLogs} />
           </div>
         </div>
       )}
