@@ -76,7 +76,7 @@ function seedPhotosIfEmpty() {
   }
 
   const insert = db.prepare(
-    'INSERT INTO photos (photo_id, data, updated_at) VALUES (?, ?, datetime("now"))'
+    "INSERT INTO photos (photo_id, data, updated_at) VALUES (?, ?, datetime('now'))"
   );
   const tx = db.transaction((items) => {
     for (const it of items) {
