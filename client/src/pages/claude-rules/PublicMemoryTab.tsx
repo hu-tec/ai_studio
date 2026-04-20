@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Folder, FileText, Brain } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Folder, FileText, Brain, FolderTree, X } from 'lucide-react';
 import { MEMORY_FILES } from './memoryData';
 
 /* ── 등급/타입 스타일 ── */
@@ -32,25 +32,38 @@ function FilterChip({ active, color, bg, onClick, children }: {
   );
 }
 
-/* ── 작은 바 차트 (세로) ── */
-function MiniBarChart({ data, title }: { data: { label: string; value: number; color: string }[]; title: string }) {
-  const max = Math.max(...data.map(d => d.value), 1);
+/* ── 가로 스택 바 차트 (비율 기반) ── */
+function StackedBar({ data, title }: { data: { label: string; value: number; color: string }[]; title: string }) {
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
   return (
-    <div className="rounded-md border border-gray-200 bg-white p-1">
-      <div className="text-[9px] font-bold text-gray-500 px-1 pb-0.5 flex items-center justify-between">
+    <div className="rounded-md border border-gray-200 bg-white px-1.5 py-1">
+      <div className="text-[9px] font-bold text-gray-500 pb-0.5 flex items-center justify-between">
         <span>{title}</span>
-        <span className="text-gray-400">총 {data.reduce((s, d) => s + d.value, 0)}개</span>
+        <span className="text-gray-400">총 {total}개</span>
       </div>
-      <div className="flex items-end gap-0.5 h-16 px-1">
-        {data.map(d => (
-          <div key={d.label} className="flex-1 flex flex-col items-center gap-px" title={`${d.label}: ${d.value}`}>
-            <span className="text-[8px] font-bold" style={{ color: d.color }}>{d.value}</span>
+      <div className="flex h-3.5 w-full overflow-hidden rounded border border-gray-100">
+        {data.map(d => {
+          const pct = (d.value / total) * 100;
+          if (d.value === 0) return null;
+          return (
             <div
-              className="w-full rounded-t"
-              style={{ height: `${(d.value / max) * 100}%`, background: d.color, minHeight: 2 }}
-            />
-            <span className="text-[8px] text-gray-500 truncate w-full text-center" title={d.label}>{d.label}</span>
-          </div>
+              key={d.label}
+              className="flex items-center justify-center text-[9px] font-bold text-white leading-none"
+              style={{ width: `${pct}%`, background: d.color, minWidth: 14 }}
+              title={`${d.label}: ${d.value} (${pct.toFixed(0)}%)`}
+            >
+              {pct >= 6 ? d.value : ''}
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex flex-wrap gap-x-1.5 gap-y-0 mt-0.5 text-[9px]">
+        {data.map(d => (
+          <span key={d.label} className="inline-flex items-center gap-0.5">
+            <span className="h-1.5 w-1.5 rounded-sm" style={{ background: d.color }} />
+            <span className="font-semibold" style={{ color: d.color }}>{d.label}</span>
+            <span className="text-gray-500">{d.value}</span>
+          </span>
         ))}
       </div>
     </div>
@@ -89,6 +102,7 @@ export function PublicMemoryTab() {
   const [gradeFilter, setGradeFilter] = useState<Set<string>>(new Set());
   const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [showTree, setShowTree] = useState(false);
 
   const allGrades = useMemo(() => {
     const order = ['🚨최고정🚨', '고정', '준고정', '선택', '참조', '-'];
@@ -153,16 +167,14 @@ export function PublicMemoryTab() {
         </span>
       </div>
 
-      {/* 📊 통계 + 차트 — 3단 */}
-      <div className="grid grid-cols-3 gap-1">
-        {/* 전체 카운트 카드 */}
-        <div className="rounded-md border border-indigo-200 bg-indigo-50 p-1.5 flex flex-col justify-center items-center">
-          <div className="text-[9px] font-bold text-indigo-500">총 파일 수</div>
-          <div className="text-2xl font-extrabold text-indigo-700 leading-none my-0.5">{MEMORY_FILES.length}</div>
-          <div className="text-[9px] text-indigo-600">등급 {allGrades.length}종 · 타입 {allTypes.length}종</div>
+      {/* 📊 통계 + 차트 — 인라인 카운트 + 2 차트 */}
+      <div className="grid grid-cols-[auto_1fr_1fr] gap-1 items-stretch">
+        <div className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-1 flex items-center gap-2 whitespace-nowrap">
+          <span className="text-[9px] font-bold text-indigo-500">총 파일 수</span>
+          <span className="text-xl font-extrabold text-indigo-700 leading-none">{MEMORY_FILES.length}</span>
+          <span className="text-[9px] text-indigo-600">등급 {allGrades.length}종 · 타입 {allTypes.length}종</span>
         </div>
-        {/* 등급별 차트 */}
-        <MiniBarChart
+        <StackedBar
           title="🏷️ 등급별 분포"
           data={allGrades.map(g => ({
             label: g.replace(/🚨/g, ''),
@@ -170,8 +182,7 @@ export function PublicMemoryTab() {
             color: GRADE_STYLE[g]?.bar || '#9ca3af',
           }))}
         />
-        {/* 타입별 차트 */}
-        <MiniBarChart
+        <StackedBar
           title="📦 타입별 분포"
           data={allTypes.map(t => ({
             label: t,
@@ -181,58 +192,81 @@ export function PublicMemoryTab() {
         />
       </div>
 
-      {/* 📁 파일 구조 트리 + 검색/필터 — 2단 */}
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(200px,250px)_1fr] gap-1">
-        <FileStructureTree byType={typeCount} />
+      {/* 🔍 필터 + 검색 — 한 줄 (등급·타입·검색·파일구조·펼치기·결과) */}
+      <div className="flex items-center gap-x-1.5 gap-y-1 flex-wrap">
+        <button
+          onClick={() => setShowTree(true)}
+          className="flex items-center gap-0.5 rounded-md border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-100 whitespace-nowrap"
+          title="~/.claude/memory/ 파일 구조를 팝업으로 표시"
+        >
+          <FolderTree className="h-3 w-3" /> 파일 구조 보기
+        </button>
+        <span className="text-[9px] font-bold text-gray-500">🏷️</span>
+        {allGrades.map(g => (
+          <FilterChip
+            key={g}
+            active={effGrades.has(g)}
+            color={GRADE_STYLE[g]?.bar || '#6b7280'}
+            bg={GRADE_STYLE[g]?.bg.replace('bg-', '') === '' ? '#fff' : '#fef2f2'}
+            onClick={() => toggleGrade(g)}
+          >{g} ({gradeCount[g] || 0})</FilterChip>
+        ))}
+        <span className="text-[9px] font-bold text-gray-500">📦</span>
+        {allTypes.map(t => (
+          <FilterChip
+            key={t}
+            active={effTypes.has(t)}
+            color={TYPE_STYLE[t]?.bar || '#6b7280'}
+            bg={'#fff'}
+            onClick={() => toggleType(t)}
+          >{TYPE_STYLE[t]?.emoji} {t} ({typeCount[t] || 0})</FilterChip>
+        ))}
+        <div className="relative">
+          <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="파일·내용 검색..."
+            className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none"
+          />
+        </div>
+        <button
+          onClick={toggleAll}
+          className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 whitespace-nowrap"
+        >
+          {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
+          {allExpanded ? '전체 접기' : '전체 펼치기'}
+        </button>
+        <span className="text-[9px] text-gray-500 ml-auto">
+          검색 결과: <b className="text-gray-700">{filtered.length}</b> / {MEMORY_FILES.length}개
+        </span>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          {/* 필터 */}
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[9px] font-bold text-gray-500">🏷️ 등급:</span>
-            {allGrades.map(g => (
-              <FilterChip
-                key={g}
-                active={effGrades.has(g)}
-                color={GRADE_STYLE[g]?.bar || '#6b7280'}
-                bg={GRADE_STYLE[g]?.bg.replace('bg-', '') === '' ? '#fff' : '#fef2f2'}
-                onClick={() => toggleGrade(g)}
-              >{g} ({gradeCount[g] || 0})</FilterChip>
-            ))}
-          </div>
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[9px] font-bold text-gray-500">📦 타입:</span>
-            {allTypes.map(t => (
-              <FilterChip
-                key={t}
-                active={effTypes.has(t)}
-                color={TYPE_STYLE[t]?.bar || '#6b7280'}
-                bg={'#fff'}
-                onClick={() => toggleType(t)}
-              >{TYPE_STYLE[t]?.emoji} {t} ({typeCount[t] || 0})</FilterChip>
-            ))}
-            <div className="flex-1" />
-            <div className="relative">
-              <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="파일·내용 검색..."
-                className="rounded-md border border-gray-300 py-0.5 pl-5 pr-2 text-[11px] w-44 focus:border-blue-400 focus:outline-none"
-              />
+      {/* 📁 파일 구조 팝업 */}
+      {showTree && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+          onClick={() => setShowTree(false)}
+        >
+          <div
+            className="rounded-lg bg-white shadow-xl border border-gray-200 p-2 min-w-[320px] max-w-[90vw]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-1 mb-1">
+              <FolderTree className="h-3.5 w-3.5 text-indigo-600" />
+              <span className="text-[11px] font-bold text-gray-800">파일 구조</span>
+              <button
+                onClick={() => setShowTree(false)}
+                className="ml-auto rounded hover:bg-gray-100 p-0.5 text-gray-500"
+                aria-label="닫기"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
-            <button
-              onClick={toggleAll}
-              className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 whitespace-nowrap"
-            >
-              {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
-              {allExpanded ? '전체 접기' : '전체 펼치기'}
-            </button>
-          </div>
-          <div className="text-[9px] text-gray-500 px-0.5">
-            검색 결과: <b className="text-gray-700">{filtered.length}</b> / {MEMORY_FILES.length}개
+            <FileStructureTree byType={typeCount} />
           </div>
         </div>
-      </div>
+      )}
 
       {/* 📋 메인 테이블 */}
       <div className="rounded-md border border-gray-200 bg-white overflow-hidden">
