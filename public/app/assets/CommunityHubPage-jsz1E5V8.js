@@ -1,0 +1,1 @@
+import{bz as e,j as r}from"./index-iw-9YlAs.js";import{C as a}from"./CategoryHubLayout-ixGt1bt9.js";function i(){const t=e.filter(o=>/^G\d+$/.test(o.code));return r.jsx(a,{title:"커뮤니티",category:"커뮤니티",tabs:t})}export{i as default};
