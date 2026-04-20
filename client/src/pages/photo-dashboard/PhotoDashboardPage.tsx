@@ -256,6 +256,35 @@ export function PhotoDashboardPage() {
     a.click();
     document.body.removeChild(a);
   };
+
+  const handleDownloadSelected = async () => {
+    const targets = items.filter(it => selectedIds.has(it.id) && it.fileUrl);
+    if (targets.length === 0) { toast.error('선택 항목에 다운로드 가능한 파일이 없습니다.'); return; }
+    const files = targets.map(it => ({ url: it.fileUrl!, name: it.fileName || `${it.title}.pdf` }));
+    const zipName = `사진모음_선택_${targets.length}개_${new Date().toISOString().slice(0,10)}.zip`;
+    toast.info(`${targets.length}개 파일 ZIP 생성 중...`);
+    try {
+      const res = await fetch('/api/upload/download-zip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files, zipName }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = zipName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      const skipped = selectedIds.size - targets.length;
+      toast.success(`ZIP 다운로드 완료 (${targets.length}개${skipped > 0 ? `, 파일 없음 ${skipped}개 제외` : ''})`);
+    } catch (e: any) {
+      toast.error(`일괄 다운로드 실패: ${e.message}`);
+    }
+  };
   const [mode, setMode] = useState<Mode>('VIEW');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'ALL'>('ALL');
@@ -589,8 +618,17 @@ export function PhotoDashboardPage() {
           />
         </div>
         
+        {selectedIds.size > 0 && (
+          <button
+            onClick={handleDownloadSelected}
+            className="flex items-center gap-2 px-2 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-md text-sm font-bold hover:bg-blue-100 transition-colors"
+          >
+            <Download size={16} /> {selectedIds.size}개 다운로드(ZIP)
+          </button>
+        )}
+
         {selectedIds.size > 0 && mode === 'DELETE' && (
-          <button 
+          <button
             onClick={handleDeleteSelected}
             className="flex items-center gap-2 px-2 py-1 bg-red-50 text-red-600 border border-red-100 rounded-md text-sm font-bold hover:bg-red-100 transition-colors"
           >
@@ -848,6 +886,29 @@ export function PhotoDashboardPage() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 pr-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDownload(item); }}
+                      disabled={!item.fileUrl}
+                      title={item.fileUrl ? `다운로드: ${item.fileName || item.title}` : '파일 미등록'}
+                      className={`p-2 rounded-md transition-all ${item.fileUrl ? 'text-slate-500 hover:text-blue-600 hover:bg-blue-50' : 'text-slate-200 cursor-not-allowed'}`}
+                    >
+                      <Download size={18} />
+                    </button>
+                    {mode === 'EDIT' && (
+                      <label onClick={(e) => e.stopPropagation()} className="cursor-pointer p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all" title={item.fileUrl ? 'PDF 교체' : 'PDF 업로드'}>
+                        <Edit3 size={18} />
+                        <input
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleUploadPdf(item.id, f);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                    )}
                     <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-all">
                       <ChevronRight size={18} />
                     </button>

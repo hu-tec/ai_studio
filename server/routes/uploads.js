@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const archiver = require('archiver');
 const upload = require('../middleware/upload');
 const { uploadToS3, makeS3Key, getS3Object } = require('../utils/s3');
+
+const ALLOWED_S3_HOSTS = ['work-studio-uploads.s3.ap-northeast-2.amazonaws.com'];
 
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads');
 
@@ -76,6 +79,59 @@ router.get('/download', async (req, res) => {
   } catch (err) {
     console.error('Download proxy error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/upload/download-zip
+// body: { files: [{ url, name }], zipName?: string }
+// 선택된 S3 객체들을 ZIP으로 묶어 스트리밍
+router.post('/download-zip', async (req, res) => {
+  try {
+    const { files, zipName } = req.body || {};
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ error: 'files array required' });
+    }
+
+    const keys = [];
+    for (const [i, f] of files.entries()) {
+      if (!f || typeof f.url !== 'string') return res.status(400).json({ error: `files[${i}].url missing` });
+      let u;
+      try { u = new URL(f.url); } catch { return res.status(400).json({ error: `files[${i}].url invalid` }); }
+      if (!ALLOWED_S3_HOSTS.includes(u.host)) return res.status(403).json({ error: `files[${i}] host not allowed` });
+      const key = decodeURIComponent(u.pathname.replace(/^\//, ''));
+      const rawName = (typeof f.name === 'string' && f.name) ? f.name : path.basename(key);
+      const safeName = rawName.replace(/[\/\\:*?"<>|]/g, '_');
+      keys.push({ key, name: safeName });
+    }
+
+    const outName = (typeof zipName === 'string' && zipName) ? zipName : `photo-docs_${new Date().toISOString().slice(0,10)}.zip`;
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(outName)}"`);
+
+    const archive = archiver('zip', { zlib: { level: 6 } });
+    archive.on('error', (err) => {
+      console.error('Archive error:', err);
+      if (!res.headersSent) res.status(500).end();
+      else res.end();
+    });
+    archive.pipe(res);
+
+    const pad = String(keys.length).length;
+    for (const [i, entry] of keys.entries()) {
+      try {
+        const obj = await getS3Object(entry.key);
+        const prefix = String(i + 1).padStart(pad, '0');
+        archive.append(obj.body, { name: `${prefix}_${entry.name}` });
+      } catch (err) {
+        console.warn(`Skip ${entry.key}:`, err.message);
+        archive.append(`Failed to fetch: ${entry.key}\n${err.message}`, { name: `ERROR_${entry.name}.txt` });
+      }
+    }
+    await archive.finalize();
+  } catch (err) {
+    console.error('Download-zip error:', err);
+    if (!res.headersSent) res.status(500).json({ error: err.message });
+    else res.end();
   }
 });
 
