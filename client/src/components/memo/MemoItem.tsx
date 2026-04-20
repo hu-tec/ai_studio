@@ -15,6 +15,17 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('ko-KR');
 }
 
+function timeAbs(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return sameYear ? `${m}/${day} ${hh}:${mm}` : `${d.getFullYear().toString().slice(2)}/${m}/${day} ${hh}:${mm}`;
+}
+
 function scrollToTarget(selector: string) {
   try {
     const el = document.querySelector(selector);
@@ -236,9 +247,9 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
         ? 'border-amber-300 bg-amber-50/40 ring-1 ring-amber-200'
         : 'border-slate-200 bg-white'
     }`}>
-      {/* 헤더: 작성자 + 시간 + 편집/삭제 */}
+      {/* 헤더: 작성자 + 시간 + 분류 + 편집/삭제 */}
       <div className="mb-1 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {item.isPinned && (
             <Pin size={11} className="text-amber-500 fill-amber-400" />
           )}
@@ -248,7 +259,14 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
           {item.toName && (
             <span className="text-[10px] text-purple-500 font-medium">→ {item.toName}</span>
           )}
-          <span className="text-[10px] text-slate-400">{timeAgo(item.created_at)}</span>
+          <span className="text-[10px] text-slate-400 tabular-nums" title={timeAgo(item.created_at)}>
+            {timeAbs(item.created_at)}
+          </span>
+          {cat && (
+            <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${cat.color}`}>
+              {cat.label}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-0.5">
           <button
@@ -271,29 +289,25 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
         </div>
       </div>
 
-      {/* 분류 + 하위분류 뱃지 */}
-      <div className="mb-1 flex items-center gap-1 flex-wrap">
-        {cat && (
-          <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${cat.color}`}>
-            {cat.label}
-          </span>
-        )}
-        {item.subCategory && (
-          <span className="inline-block rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 border border-blue-200">
-            {item.subCategory}
-          </span>
-        )}
-        {/* 대상 뱃지 */}
-        {item.target && (
-          <button
-            onClick={() => scrollToTarget(item.target!.selector)}
-            className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Crosshair size={10} />
-            <span className="max-w-[150px] truncate">{item.target.label}</span>
-          </button>
-        )}
-      </div>
+      {/* 하위분류 + 대상 뱃지 (둘 다 없으면 숨김) */}
+      {(item.subCategory || item.target) && (
+        <div className="mb-1 flex items-center gap-1 flex-wrap">
+          {item.subCategory && (
+            <span className="inline-block rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 border border-blue-200">
+              {item.subCategory}
+            </span>
+          )}
+          {item.target && (
+            <button
+              onClick={() => scrollToTarget(item.target!.selector)}
+              className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600 hover:bg-blue-100 transition-colors"
+            >
+              <Crosshair size={10} />
+              <span className="max-w-[150px] truncate">{item.target.label}</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 텍스트 */}
       {item.text && (
