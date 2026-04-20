@@ -53,6 +53,7 @@ export const router = createBrowserRouter(
         { path: 'attendance-b', element: lazyPage(() => import('./pages/attendance/AttendancePageB')) },
         { path: 'meetings', element: lazyPage(() => import('./pages/meetings/MeetingsPage')) },
         { path: 'outbound-calls', element: lazyPage(() => import('./pages/outbound-calls/OutboundCallsPage')) },
+        { path: 'outbound-calls-v2', element: lazyPage(() => import('./pages/outbound-calls-v2/OutboundCallsV2Page')) },
         { path: 'photo-dashboard', element: lazyPage(() => import('./pages/photo-dashboard/PhotoDashboardPage')) },
         { path: 'schedule', element: lazyPage(() => import('./pages/schedule/SchedulePage')) },
         { path: 'rules', element: lazyPage(() => import('./pages/rules/RulesPage')) },

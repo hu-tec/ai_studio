@@ -92,6 +92,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'C1',   to: '/meetings',        icon: Calendar,     label: '미팅 관리' },
   { code: 'C1-1', to: '/meeting-form',    icon: Calendar,     label: '미팅신폼' },
   { code: 'C2',   to: '/outbound-calls',  icon: Phone,        label: '거래처 아웃콜' },
+  { code: 'C2-1', to: '/outbound-calls-v2', icon: Phone,      label: '거래처 아웃콜 v2 🆕' },
   { code: 'C3',   to: '/photo-dashboard', icon: Image,        label: '사진모음' },
   { code: 'C4',   to: '/schedule',        icon: CalendarClock, label: '강의시간표' },
   { code: 'C5',   to: '/overdue',         icon: FileText,     label: '미수금관리' },
