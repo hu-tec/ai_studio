@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 let s3;
 
@@ -115,4 +115,12 @@ function makeS3Key(formType, originalName) {
   return `uploads/${formType}/${date}/${timestamp}_${safeName}`;
 }
 
-module.exports = { uploadToS3, listS3Objects, listAllS3Objects, deleteS3Object, makeS3Key };
+async function getS3Object(key) {
+  const client = getS3Client();
+  const bucket = getBucket();
+  if (!bucket) throw new Error('S3 not configured');
+  const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  return { body: res.Body, contentType: res.ContentType, contentLength: res.ContentLength };
+}
+
+module.exports = { uploadToS3, listS3Objects, listAllS3Objects, deleteS3Object, makeS3Key, getS3Object };

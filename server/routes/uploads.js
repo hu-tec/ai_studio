@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const upload = require('../middleware/upload');
-const { uploadToS3, makeS3Key } = require('../utils/s3');
+const { uploadToS3, makeS3Key, getS3Object } = require('../utils/s3');
 
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads');
 
@@ -49,7 +49,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 });
 
 // GET /api/upload/download?url=<s3_url>&name=<filename>
-// S3 파일을 서버가 받아 Content-Disposition: attachment로 스트리밍(CORS/뷰어 열림 회피)
+// S3 객체를 IAM 인증으로 읽어 Content-Disposition: attachment로 스트리밍
 router.get('/download', async (req, res) => {
   try {
     const { url, name } = req.query;
@@ -59,23 +59,20 @@ router.get('/download', async (req, res) => {
     try { u = new URL(url); } catch { return res.status(400).json({ error: 'invalid url' }); }
     if (!allowedHosts.includes(u.host)) return res.status(403).json({ error: 'host not allowed' });
 
-    const upstream = await fetch(url);
-    if (!upstream.ok) return res.status(upstream.status).send(await upstream.text());
+    const key = decodeURIComponent(u.pathname.replace(/^\//, ''));
+    const obj = await getS3Object(key);
 
-    const fileName = (typeof name === 'string' && name) ? name : path.basename(u.pathname);
-    const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
-    res.setHeader('Content-Type', contentType);
+    const fileName = (typeof name === 'string' && name) ? name : path.basename(key);
+    res.setHeader('Content-Type', obj.contentType || 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-    const len = upstream.headers.get('content-length');
-    if (len) res.setHeader('Content-Length', len);
+    if (obj.contentLength) res.setHeader('Content-Length', String(obj.contentLength));
 
-    const reader = upstream.body.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      res.write(Buffer.from(value));
-    }
-    res.end();
+    // obj.body is a Node.js Readable stream (from AWS SDK v3)
+    obj.body.pipe(res);
+    obj.body.on('error', (err) => {
+      console.error('S3 stream error:', err);
+      if (!res.headersSent) res.status(500).end();
+    });
   } catch (err) {
     console.error('Download proxy error:', err);
     res.status(500).json({ error: err.message });
