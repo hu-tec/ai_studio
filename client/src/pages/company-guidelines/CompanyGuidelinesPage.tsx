@@ -9,6 +9,8 @@ import { EisenhowerView } from '../work-log/EisenhowerView';
 import { MandalartView } from '../work-log/MandalartView';
 import type { Task, TimeSlotEntry, MandalartCell as WLMandalartCell } from '../work-log/data';
 import { createEmptyTimeSlots } from '../work-log/data';
+import { FilterChip, type ChipTone } from '../../components/filter/FilterChip';
+import { FilterCell } from '../../components/filter/FilterCell';
 
 /* ══════════════════════════════════════════════════════════════
    Types  (업무자료 분류 + 업무일지 Franklin/Eisenhower/Mandalart)
@@ -193,29 +195,47 @@ function DynFilter({ label, items, defaults, value, onChange, customKey, custom,
     else onChange([...value, item]);
   };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
-      <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>{label}</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-        <button onClick={() => onChange([])} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: allSelected ? '#3B82F6' : '#e2e8f0', background: allSelected ? '#EFF6FF' : '#fff', color: allSelected ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: allSelected ? 600 : 400 }}>전체</button>
-        {items.map(item => {
-          const sel = value.includes(item);
-          return (
-            <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-              <button onClick={() => toggle(item)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: sel ? '#3B82F6' : '#e2e8f0', background: sel ? '#EFF6FF' : '#fff', color: sel ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: sel ? 600 : 400 }}>{item}</button>
-              {!defaults.includes(item) && <button onClick={() => { updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item)); if (sel) onChange(value.filter(v => v !== item)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 10, padding: 0, lineHeight: 1 }}>✕</button>}
-            </span>
-          );
-        })}
-        {adding ? (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-            <input ref={inputRef} autoFocus placeholder="새 항목" onKeyDown={e => { if (e.key === 'Enter') { const v = inputRef.current?.value.trim(); if (v && !items.includes(v)) updateCustom(customKey, [...(custom[customKey] || []), v]); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} style={{ width: 70, padding: '1px 6px', fontSize: 11, border: '1px solid #3B82F6', borderRadius: 10, outline: 'none' }} />
-            <button onClick={() => setAdding(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 10 }}>취소</button>
-          </span>
-        ) : (
-          <button onClick={() => setAdding(true)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px dashed #cbd5e1', background: '#fff', color: '#94a3b8', fontSize: 11, cursor: 'pointer' }}>+ 추가</button>
-        )}
-      </div>
-    </div>
+    <FilterCell label={label}>
+      <FilterChip selected={allSelected} onClick={() => onChange([])}>전체</FilterChip>
+      {items.map(item => {
+        const sel = value.includes(item);
+        const isCustom = !defaults.includes(item);
+        return (
+          <FilterChip
+            key={item}
+            selected={sel}
+            onClick={() => toggle(item)}
+            onRemove={isCustom ? () => {
+              updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item));
+              if (sel) onChange(value.filter(v => v !== item));
+            } : undefined}
+          >
+            {item}
+          </FilterChip>
+        );
+      })}
+      {adding ? (
+        <span className="inline-flex items-center gap-1">
+          <input
+            ref={inputRef}
+            autoFocus
+            placeholder="새 항목"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                const v = inputRef.current?.value.trim();
+                if (v && !items.includes(v)) updateCustom(customKey, [...(custom[customKey] || []), v]);
+                setAdding(false);
+              }
+              if (e.key === 'Escape') setAdding(false);
+            }}
+            className="text-h4 w-20 px-1.5 py-0.5 border border-blue-400 rounded-full outline-none"
+          />
+          <button onClick={() => setAdding(false)} className="text-meta text-slate-400 hover:text-slate-600">취소</button>
+        </span>
+      ) : (
+        <FilterChip tone="dashed" onClick={() => setAdding(true)}>+ 추가</FilterChip>
+      )}
+    </FilterCell>
   );
 }
 
@@ -879,60 +899,70 @@ export default function CompanyGuidelinesPage() {
   return (
     <div style={{ maxWidth: 1800, margin: '0 auto', padding: '24px 32px' }}>
       {/* T9 SoT 배너 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, marginBottom: 12, fontSize: 11, color: '#92400E' }}>
+      <div className="flex items-center gap-2 px-3 py-1.5 mb-3 text-meta text-amber-800 bg-amber-50 border border-amber-200 rounded-md">
         <span>⚠</span>
-        <span>카테고리 축(분류별·교육별·급수별·업무별·부서별·직급별·…)의 정의/추가/삭제는 <a href="/app/work-class-demo" style={{ color: '#1d4ed8', fontWeight: 700 }}>업무 분류(최종DB) — T9</a> 페이지에서만 합니다. 이 페이지는 지침/항목 작성 전용 (축 자체는 read-only).</span>
+        <span>카테고리 축(분류별·교육별·급수별·업무별·부서별·직급별·…)의 정의/추가/삭제는 <a href="/app/work-class-demo" className="text-blue-700 font-bold">업무 분류(최종DB) — T9</a> 페이지에서만 합니다. 이 페이지는 지침/항목 작성 전용 (축 자체는 read-only).</span>
       </div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1e293b', margin: 0, lineHeight: 1.3 }}>사내업무지침(통합-new)</h1>
-          <span style={{ fontSize: 12, color: '#94a3b8' }}>자동저장</span>
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-h1 text-slate-800 m-0">사내업무지침(통합-new)</h1>
+          <span className="text-h3 text-slate-400">자동저장</span>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="flex items-center gap-2">
           {anyFilterActive && (
-            <button onClick={resetFilters} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#EF4444' }}><X size={14} />필터 초기화</button>
+            <button onClick={resetFilters} className="flex items-center gap-1 text-h4 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-md cursor-pointer hover:bg-rose-100"><X size={14} />필터 초기화</button>
           )}
-          <button onClick={() => setExpandAll(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 13, cursor: 'pointer', color: '#475569' }}>
+          <button onClick={() => setExpandAll(p => !p)} className="flex items-center gap-1 text-h4 px-3 py-1.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-md cursor-pointer hover:bg-slate-200">
             {expandAll ? '전체 접기' : '전체 펼치기'}
           </button>
-          <button onClick={() => { setEditingItem(null); setShowForm(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: '#3B82F6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}><Plus size={16} />새 지침</button>
+          <button onClick={() => { setEditingItem(null); setShowForm(true); }} className="flex items-center gap-1.5 text-h2 px-4 py-1.5 bg-blue-500 text-white border-0 rounded-md cursor-pointer hover:bg-blue-600"><Plus size={16} />새 지침</button>
         </div>
       </div>
 
       {/* 탭 선택 */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
+      <div className="flex gap-0.5 mb-3">
         {(['프롬프트', '업무지침', '사내규정'] as GuidelineTab[]).map(tab => (
-          <button key={tab} onClick={() => { setActiveTab(tab); resetFilters(); }}
-            style={{ padding: '8px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', border: `1px solid ${activeTab === tab ? '#1e293b' : '#e2e8f0'}`, background: activeTab === tab ? '#1e293b' : '#fff', color: activeTab === tab ? '#fff' : '#64748b', transition: 'all 0.15s' }}>
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(tab); resetFilters(); }}
+            className={`text-h2 px-5 py-1.5 rounded-md border cursor-pointer transition-colors ${activeTab === tab ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}
+          >
             {tab}
           </button>
         ))}
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-        <div style={{ position: 'relative', maxWidth: 360 }}>
-          <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
-          <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{ width: '100%', padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none', background: '#fff' }} />
+      <div className="flex flex-col gap-1.5 mb-3">
+        <div className="relative max-w-[360px]">
+          <Search size={16} className="absolute left-2.5 top-2.5 text-slate-400" />
+          <input
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            placeholder="제목, 내용, 작성자, 비고 검색..."
+            className="text-h2 w-full pl-8 pr-3 py-1.5 border border-slate-200 rounded-md outline-none bg-white focus:border-blue-400"
+          />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, alignItems: 'start' }}>
-          {/* 규정 유형 필터 (공통) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
-            <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>유형</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-              <button onClick={() => setFilterRuleType('전체')} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterRuleType === '전체' ? '#3B82F6' : '#e2e8f0', background: filterRuleType === '전체' ? '#EFF6FF' : '#fff', color: filterRuleType === '전체' ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterRuleType === '전체' ? 600 : 400 }}>전체</button>
-              {(['규정', '준규정', '선택규정'] as RuleType[]).map(rt => {
-                const c = RULE_COLORS[rt];
-                return (
-                  <button key={rt} onClick={() => setFilterRuleType(filterRuleType === rt ? '전체' : rt)}
-                    style={{ padding: '1px 7px', borderRadius: 10, border: `1px solid ${filterRuleType === rt ? c.color : c.border}`, background: filterRuleType === rt ? c.color : c.bg, color: filterRuleType === rt ? '#fff' : c.color, fontSize: 11, cursor: 'pointer', fontWeight: filterRuleType === rt ? 600 : 400 }}>
-                    {rt}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        <div className="grid grid-cols-4 gap-1.5 items-start">
+          {/* 규정 유형 필터 (공통) — 싱글선택 */}
+          <FilterCell label="유형">
+            <FilterChip variant="single" selected={filterRuleType === '전체'} onClick={() => setFilterRuleType('전체')}>전체</FilterChip>
+            {(['규정', '준규정', '선택규정'] as RuleType[]).map(rt => {
+              const tone: ChipTone = rt === '규정' ? 'regulation' : rt === '준규정' ? 'semi' : 'optional';
+              return (
+                <FilterChip
+                  key={rt}
+                  variant="single"
+                  tone={tone}
+                  selected={filterRuleType === rt}
+                  onClick={() => setFilterRuleType(filterRuleType === rt ? '전체' : rt)}
+                >
+                  {rt}
+                </FilterChip>
+              );
+            })}
+          </FilterCell>
           {/* 업무지침 탭 필터 */}
           {activeTab === '업무지침' && (<>
             <DynFilter label="분류별" items={[...WORK_CAT1, ...(custom['wc1'] || [])]} defaults={WORK_CAT1} value={fWorkCat1} onChange={setFWorkCat1} customKey="wc1" custom={custom} updateCustom={updateCustom} />
@@ -948,35 +978,35 @@ export default function CompanyGuidelinesPage() {
             <DynFilter label="직급별" items={[...COMPANY_POS, ...(custom['cp'] || [])]} defaults={COMPANY_POS} value={fCompPos} onChange={setFCompPos} customKey="cp" custom={custom} updateCustom={updateCustom} />
             <DynFilter label="계약" items={[...COMPANY_CONTRACT, ...(custom['cc'] || [])]} defaults={COMPANY_CONTRACT} value={fCompContract} onChange={setFCompContract} customKey="cc" custom={custom} updateCustom={updateCustom} />
           </>)}
-          {/* 작성자 필터 (공통) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
-            <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>작성자</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-              <button onClick={() => setFilterAuthor('전체')} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterAuthor === '전체' ? '#3B82F6' : '#e2e8f0', background: filterAuthor === '전체' ? '#EFF6FF' : '#fff', color: filterAuthor === '전체' ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterAuthor === '전체' ? 600 : 400 }}>전체</button>
-              {allAuthors.map(a => (
-                <button key={a} onClick={() => setFilterAuthor(a)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterAuthor === a ? '#3B82F6' : '#e2e8f0', background: filterAuthor === a ? '#EFF6FF' : '#fff', color: filterAuthor === a ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterAuthor === a ? 600 : 400 }}>{a}</button>
-              ))}
-            </div>
-          </div>
+          {/* 작성자 필터 (공통) — 싱글선택 */}
+          <FilterCell label="작성자">
+            <FilterChip variant="single" selected={filterAuthor === '전체'} onClick={() => setFilterAuthor('전체')}>전체</FilterChip>
+            {allAuthors.map(a => (
+              <FilterChip key={a} variant="single" selected={filterAuthor === a} onClick={() => setFilterAuthor(a)}>{a}</FilterChip>
+            ))}
+          </FilterCell>
         </div>
       </div>
 
       {/* View Mode Toggle (업무일지 패턴) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 2 }}>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="flex gap-0.5">
           {([
             { mode: 'classic' as ViewMode, icon: List, label: 'Classic' },
             { mode: 'franklin' as ViewMode, icon: Target, label: 'Franklin' },
             { mode: 'eisenhower' as ViewMode, icon: Grid2x2, label: 'Eisenhower' },
             { mode: 'mandalart' as ViewMode, icon: LayoutGrid, label: 'Mandalart' },
           ]).map(({ mode, icon: Icon, label }) => (
-            <button key={mode} onClick={() => setViewMode(mode)}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 'none', transition: 'all 0.15s', background: viewMode === mode ? '#1e293b' : '#f1f5f9', color: viewMode === mode ? '#fff' : '#64748b' }}>
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`flex items-center gap-1 text-h3 px-3 py-1 rounded cursor-pointer border-0 transition-colors ${viewMode === mode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+            >
               <Icon size={14} />{label}
             </button>
           ))}
         </div>
-        <span style={{ fontSize: 11, color: '#94a3b8' }}>
+        <span className="text-h4 text-slate-400">
           {filtered.length}건{anyFilterActive ? ` (전체 ${items.length}건)` : ''}
         </span>
       </div>
