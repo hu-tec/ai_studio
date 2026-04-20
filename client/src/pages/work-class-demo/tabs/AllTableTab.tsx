@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   RefreshCw, X, Search, Layers3, Grid3x3, Package,
-  Focus, Shield, Compass, ListTree, CornerDownRight, Tag, Tags, Sprout, Lock, History, Trash2,
+  Focus, Shield, Compass, ListTree, CornerDownRight, Tag, Tags, Sprout, Lock, Trash2,
   ArrowDown, ArrowRight, Ruler,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -345,7 +345,7 @@ export default function AllTableTab() {
       <div className="text-[10px] text-slate-500 px-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600 space-y-0.5">
         <div><b>더블클릭</b> = 이름 수정 · hover → <b>×</b> = 삭제 · 필터 칩 = 멀티 선택(OR) · 신규 추가는 개별 편집 탭 사용</div>
         <div className="text-slate-400">
-          <b>용어</b> — 렌즈(scope)=적용 범위 · 거버넌스(gov)=규정축 · 축(axis)=분류 축 · 계층(level)=대/중/소/flat · 출처(src)=seed/user/migration · 수정(rev)=편집 횟수(낙관적 잠금)
+          <b>용어</b> — 렌즈(scope)=적용 범위 · 거버넌스(gov)=규정축 · 축(axis)=분류 축 · 계층(level)=대/중/소/flat · 출처(src)=seed/user/migration
         </div>
       </div>
     </div>
@@ -424,13 +424,12 @@ function TaxonomyTable(props: {
             <Th icon={Tag}              title="label · 분류 이름">이름</Th>
             <Th icon={Sprout}           title="source · seed / user / migration">출처</Th>
             <Th icon={Lock}             title="잠김(seed 기본 고정)" className="w-4" noLabel />
-            <Th icon={History}          title="revision · 수정 횟수 (낙관적 잠금 카운터)" className="w-8">수정</Th>
             <Th icon={Trash2}           title="삭제" className="w-4" noLabel />
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td colSpan={10} className="text-center text-[10px] text-slate-400 py-3">노드 없음</td></tr>
+            <tr><td colSpan={9} className="text-center text-[10px] text-slate-400 py-3">노드 없음</td></tr>
           ) : rows.map((n) => {
             const isEditing = editingId === n.taxonomy_id;
             return (
@@ -465,7 +464,6 @@ function TaxonomyTable(props: {
                 </Td>
                 <Td className="text-slate-500">{n.source}</Td>
                 <Td>{n.locked ? '🔒' : ''}</Td>
-                <Td className="tabular-nums text-slate-500">{n.revision}</Td>
                 <Td>
                   <button
                     onClick={() => onDelete(n)}
@@ -498,13 +496,12 @@ function ItemsTable({ rows, taxMap, onDelete }: {
             <Th icon={Focus}   title="scope · 적용 렌즈">렌즈</Th>
             <Th icon={Tags}    title="facets · 축별 분류값 (axis: label)">분류값</Th>
             <Th icon={Sprout}  title="source">출처</Th>
-            <Th icon={History} title="revision · 수정 횟수" className="w-8">수정</Th>
             <Th icon={Trash2}  title="삭제" className="w-4" noLabel />
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td colSpan={6} className="text-center text-[10px] text-slate-400 py-3">아이템 없음</td></tr>
+            <tr><td colSpan={5} className="text-center text-[10px] text-slate-400 py-3">아이템 없음</td></tr>
           ) : rows.map((it) => (
             <tr key={it.item_id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800">
               <Td className="font-medium">{it.label}</Td>
@@ -522,7 +519,6 @@ function ItemsTable({ rows, taxMap, onDelete }: {
                 </div>
               </Td>
               <Td className="text-slate-500">{it.source}</Td>
-              <Td className="tabular-nums text-slate-500">{it.revision}</Td>
               <Td>
                 <button
                   onClick={() => onDelete(it.item_id, it.label)}
