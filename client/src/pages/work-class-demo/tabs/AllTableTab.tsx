@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, X, Search, Layers3, Grid3x3, Package } from 'lucide-react';
+import {
+  RefreshCw, X, Search, Layers3, Grid3x3, Package,
+  Focus, Shield, Compass, ListTree, CornerDownRight, Tag, Tags, Sprout, Lock, History, Trash2,
+  ArrowDown, ArrowRight, Ruler,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import {
   fetchAllTaxonomy, fetchItems,
@@ -280,10 +284,10 @@ export default function AllTableTab() {
 
       {/* 필터 바 */}
       <div className="border border-slate-200 dark:border-slate-700 rounded p-1 space-y-0.5 bg-slate-50/50 dark:bg-slate-900/40">
-        <FilterRow label="scope" values={SCOPES as any}  active={fScope} onToggle={(v) => toggleSet(fScope, setFScope, v)} />
-        <FilterRow label="gov"   values={GOVS as any}    active={fGov}   onToggle={(v) => toggleSet(fGov, setFGov, v)} />
-        <FilterRow label="axis"  values={ALL_AXES}       active={fAxis}  onToggle={(v) => toggleSet(fAxis, setFAxis, v)} />
-        <FilterRow label="level" values={LEVELS as any}  active={fLevel} onToggle={(v) => toggleSet(fLevel, setFLevel, v)} />
+        <FilterRow icon={Focus}    label="렌즈"     sub="scope" values={SCOPES as any}  active={fScope} onToggle={(v) => toggleSet(fScope, setFScope, v)} />
+        <FilterRow icon={Shield}   label="거버넌스" sub="gov"   values={GOVS as any}    active={fGov}   onToggle={(v) => toggleSet(fGov, setFGov, v)} />
+        <FilterRow icon={Compass}  label="축"       sub="axis"  values={ALL_AXES}       active={fAxis}  onToggle={(v) => toggleSet(fAxis, setFAxis, v)} />
+        <FilterRow icon={ListTree} label="계층"     sub="level" values={LEVELS as any}  active={fLevel} onToggle={(v) => toggleSet(fLevel, setFLevel, v)} />
         <div className="flex items-center gap-1 pt-0.5">
           <span className="text-[10px] font-bold text-slate-500 min-w-[40px]">검색</span>
           <div className="relative flex-1">
@@ -338,22 +342,31 @@ export default function AllTableTab() {
         <MandalartTable rows={mandalartRows} />
       )}
 
-      <div className="text-[10px] text-slate-500 px-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600">
-        <b>더블클릭</b> = 이름 수정 · hover → <b>X</b> = 삭제 · 필터 칩 = 멀티 선택 (OR 결합) · 신규 추가는 개별 편집 탭 사용
+      <div className="text-[10px] text-slate-500 px-1 pt-1 border-t border-dashed border-slate-300 dark:border-slate-600 space-y-0.5">
+        <div><b>더블클릭</b> = 이름 수정 · hover → <b>×</b> = 삭제 · 필터 칩 = 멀티 선택(OR) · 신규 추가는 개별 편집 탭 사용</div>
+        <div className="text-slate-400">
+          <b>용어</b> — 렌즈(scope)=적용 범위 · 거버넌스(gov)=규정축 · 축(axis)=분류 축 · 계층(level)=대/중/소/flat · 출처(src)=seed/user/migration · 수정(rev)=편집 횟수(낙관적 잠금)
+        </div>
       </div>
     </div>
   );
 }
 
-function FilterRow({ label, values, active, onToggle }: {
+function FilterRow({ icon: Icon, label, sub, values, active, onToggle }: {
+  icon: any;
   label: string;
+  sub?: string;
   values: string[];
   active: Set<string>;
   onToggle: (v: string) => void;
 }) {
   return (
     <div className="flex items-start gap-1">
-      <span className="text-[10px] font-bold text-slate-500 min-w-[40px] pt-0.5">{label}</span>
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-500 min-w-[70px] pt-0.5" title={sub}>
+        <Icon className="h-2.5 w-2.5" />
+        {label}
+        {sub && <span className="text-[9px] font-normal text-slate-400">({sub})</span>}
+      </span>
       <div className="flex-1 flex flex-wrap gap-0.5">
         {values.map((v) => {
           const on = active.has(v);
@@ -403,9 +416,16 @@ function TaxonomyTable(props: {
       <table className="w-full text-[10px] border-collapse">
         <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10">
           <tr className="text-slate-600 dark:text-slate-300">
-            <Th>scope</Th><Th>gov</Th><Th>axis</Th><Th>level</Th>
-            <Th>부모 경로</Th><Th>label</Th>
-            <Th>src</Th><Th className="w-4">🔒</Th><Th className="w-6">rev</Th><Th className="w-4">×</Th>
+            <Th icon={Focus}            title="scope · 적용 렌즈">렌즈</Th>
+            <Th icon={Shield}           title="gov · 거버넌스(규정축)">거버넌스</Th>
+            <Th icon={Compass}          title="axis · 분류 축">축</Th>
+            <Th icon={ListTree}         title="level · 대/중/소/flat">계층</Th>
+            <Th icon={CornerDownRight}  title="부모 → 본 노드 경로">상위 경로</Th>
+            <Th icon={Tag}              title="label · 분류 이름">이름</Th>
+            <Th icon={Sprout}           title="source · seed / user / migration">출처</Th>
+            <Th icon={Lock}             title="잠김(seed 기본 고정)" className="w-4" noLabel />
+            <Th icon={History}          title="revision · 수정 횟수 (낙관적 잠금 카운터)" className="w-8">수정</Th>
+            <Th icon={Trash2}           title="삭제" className="w-4" noLabel />
           </tr>
         </thead>
         <tbody>
@@ -474,7 +494,12 @@ function ItemsTable({ rows, taxMap, onDelete }: {
       <table className="w-full text-[10px] border-collapse">
         <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10">
           <tr className="text-slate-600 dark:text-slate-300">
-            <Th>label</Th><Th>scope</Th><Th>facets</Th><Th>src</Th><Th className="w-6">rev</Th><Th className="w-4">×</Th>
+            <Th icon={Tag}     title="label · 아이템 이름">이름</Th>
+            <Th icon={Focus}   title="scope · 적용 렌즈">렌즈</Th>
+            <Th icon={Tags}    title="facets · 축별 분류값 (axis: label)">분류값</Th>
+            <Th icon={Sprout}  title="source">출처</Th>
+            <Th icon={History} title="revision · 수정 횟수" className="w-8">수정</Th>
+            <Th icon={Trash2}  title="삭제" className="w-4" noLabel />
           </tr>
         </thead>
         <tbody>
@@ -521,9 +546,14 @@ function MandalartTable({ rows }: { rows: any[] }) {
       <table className="w-full text-[10px] border-collapse">
         <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800 z-10">
           <tr className="text-slate-600 dark:text-slate-300">
-            <Th>scope</Th><Th>gov</Th><Th>size</Th>
-            <Th className="w-8">r</Th><Th className="w-8">c</Th>
-            <Th>label</Th><Th>axis</Th><Th>level</Th>
+            <Th icon={Focus}       title="scope · 적용 렌즈">렌즈</Th>
+            <Th icon={Shield}      title="gov · 거버넌스">거버넌스</Th>
+            <Th icon={Ruler}       title="만다라트 크기 (rows×cols)">크기</Th>
+            <Th icon={ArrowDown}   title="행 index" className="w-8">행</Th>
+            <Th icon={ArrowRight}  title="열 index" className="w-8">열</Th>
+            <Th icon={Tag}         title="label · 셀 라벨">이름</Th>
+            <Th icon={Compass}     title="axis · 분류 축">축</Th>
+            <Th icon={ListTree}    title="level · 계층">계층</Th>
           </tr>
         </thead>
         <tbody>
@@ -547,10 +577,22 @@ function MandalartTable({ rows }: { rows: any[] }) {
   );
 }
 
-function Th({ children, className }: { children: any; className?: string }) {
+function Th({ children, className, icon: Icon, title, noLabel }: {
+  children?: any;
+  className?: string;
+  icon?: any;
+  title?: string;
+  noLabel?: boolean;
+}) {
   return (
-    <th className={`text-left font-bold px-1 py-0.5 border-b border-slate-300 dark:border-slate-600 whitespace-nowrap ${className || ''}`}>
-      {children}
+    <th
+      className={`text-left font-bold px-1 py-0.5 border-b border-slate-300 dark:border-slate-600 whitespace-nowrap ${className || ''}`}
+      title={title}
+    >
+      <span className="inline-flex items-center gap-0.5">
+        {Icon && <Icon className="h-2.5 w-2.5 opacity-80" />}
+        {!noLabel && children}
+      </span>
     </th>
   );
 }
