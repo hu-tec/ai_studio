@@ -13,6 +13,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Initialize database
 initDB();
 
+// Seed photos table on first boot (idempotent — skips if non-empty)
+try {
+  const { seedPhotosIfEmpty } = require('./db/seed-photos');
+  seedPhotosIfEmpty();
+} catch (e) {
+  console.error('[seed-photos] failed:', e.message);
+}
+
 // Serve static HTML files
 app.use(express.static(path.join(__dirname, '..', 'public')));
 

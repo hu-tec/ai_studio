@@ -122,40 +122,24 @@ interface PhotoItem {
   fileSize?: number;
 }
 
-const S3_DOC_BASE = 'https://work-studio-uploads.s3.ap-northeast-2.amazonaws.com/photo-docs/2026';
-const PDF_MAP: Record<string, string> = {
-  '1': 'agreement-1-p01.pdf',
-  '2': 'agreement-1-p02.pdf',
-  '3': 'agreement-1-p03.pdf',
-  '4': 'agreement-1-p04.pdf',
-  '5': 'agreement-1-p05.pdf',
-  '6': 'agreement-1-p06.pdf',
-  '7': 'agreement-1-p07.pdf',
-  '8': 'agreement-2-p01.pdf',
-  '10': 'agreement-2-p02.pdf',
-  '11': 'agreement-2-p03.pdf',
-  '16': 'agreement-2-p04.pdf',
-  '17': 'agreement-2-p05.pdf',
-  '18': 'agreement-2-p06.pdf',
-  '20': 'agreement-2-p07.pdf',
-  '22': 'agreement-2-p08.pdf',
-  '23': 'agreement-2-p09.pdf',
-  '25': 'agreement-2-p10.pdf',
-  '26': 'agreement-2-p11.pdf',
-  '21': 'patent-cert-p01.pdf',
-  '30': 'patent-cert-p02.pdf',
-  '9': 'patent-cert-p03.pdf',
-  '13': 'patent-cert-p04.pdf',
-  '14': 'patent-cert-p05.pdf',
-  '15': 'patent-cert-p06.pdf',
+// 썸네일은 figma:asset 빌드 해시가 번들마다 바뀌므로 DB 아닌 코드에 유지.
+// 메타(title/category/date/fileUrl)는 서버 DB가 단일 진실 원천.
+const THUMBNAIL_MAP: Record<string, string> = {
+  '1': img1, '2': img2, '3': img3, '4': img4, '5': img5,
+  '6': img6, '7': img7, '8': img8, '9': img9, '10': img10,
+  '11': img11, '12': img12, '13': img13, '14': img14, '15': img15,
+  '16': img16, '17': img17, '18': img18, '19': img19, '20': img20,
+  '21': img21, '22': img22, '23': img23, '24': img24, '25': img25,
+  '26': img26, '27': img27, '28': img28, '29': img29, '30': img30,
+  '31': img31, '32': img32, '33': img33,
 };
-function applyPdfMap(item: PhotoItem): PhotoItem {
-  const f = PDF_MAP[item.id];
-  if (!f || item.fileUrl) return item;
-  return { ...item, fileUrl: `${S3_DOC_BASE}/${f}`, fileName: `${item.title}.pdf` };
+const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1695041712957-45634f4fa759?q=80&w=400';
+function applyThumbnail(item: PhotoItem): PhotoItem {
+  const thumb = THUMBNAIL_MAP[item.id] || item.url || FALLBACK_THUMB;
+  return { ...item, url: thumb };
 }
 
-// --- Mock Data ---
+// --- Categories (UI용 상수; 실 데이터는 DB) ---
 const CATEGORIES: { label: Category; emoji: string; color: string }[] = [
   { label: '협약서', emoji: '🤝', color: 'blue' },
   { label: '특허출원', emoji: '💡', color: 'amber' },
@@ -163,50 +147,15 @@ const CATEGORIES: { label: Category; emoji: string; color: string }[] = [
   { label: '기타', emoji: '📁', color: 'slate' },
 ];
 
-const INITIAL_DATA: PhotoItem[] = [
-  { id: '1', title: '국제통번역사절단협회 협약서', category: '협약서', url: img1, date: '2018-09-18' },
-  { id: '2', title: '신한대학교 산학협력협약서', category: '협약서', url: img2, date: '2021-08-10' },
-  { id: '3', title: '연세대학교 언어연구교육원 협약서', category: '협약서', url: img3, date: '2018-08-03' },
-  { id: '4', title: 'Babe Cosmetics Inc MOU', category: '협약서', url: img4, date: '2022-05-01' },
-  { id: '5', title: 'IAE Edu Net MOU', category: '협약서', url: img5, date: '2021-08-01' },
-  { id: '6', title: '와이즈에스티글로벌 협약서', category: '협약서', url: img6, date: '2019-02-18' },
-  { id: '7', title: 'Juillet Beauty Centre MOU', category: '협약서', url: img7, date: '2021-08-01' },
-  { id: '8', title: 'Global Partners MOU (Green)', category: '협약서', url: img8, date: '2021-09-01' },
-  { id: '9', title: '민간자격등록증 (인공지능 언어전문가)', category: '증명서', url: img9, date: '2021-09-08' },
-  { id: '10', title: '휴텍씨-국제통번역사절단협회 교육협약', category: '협약서', url: img10, date: '2018-09-18' },
-  { id: '11', title: '휴텍씨-국제통번역사절단협회 전략적업무제휴', category: '협약서', url: img11, date: '2018-09-18' },
-  { id: '12', title: '법무부 번역문 인증사무지침 설명자료', category: '기타', url: img12, date: '2013-10-11' },
-  { id: '13', title: '벤처기업확인서 (혁신성장유형)', category: '증명서', url: img13, date: '2022-07-13' },
-  { id: '14', title: '수출수입실적의 확인 및 증명서 (캐나다)', category: '증명서', url: img14, date: '2022-04-26' },
-  { id: '15', title: '수출수입실적의 확인 및 증명서 (홍콩)', category: '증명서', url: img15, date: '2022-04-14' },
-  { id: '16', title: '국제통번역사절단협회-시스트란 협약서', category: '협약서', url: img16, date: '2020-06-04' },
-  { id: '17', title: '휴텍씨-시스트란 전략적업무제휴 협약서', category: '협약서', url: img17, date: '2020-05-18' },
-  { id: '18', title: '국제통번역사절단협회-엑스와이씨비 협약서', category: '협약서', url: img18, date: '2022-07-14' },
-  { id: '19', title: '여성기업 확인서 (서울지방중소벤처기업청)', category: '증명서', url: img19, date: '2021-07-15' },
-  { id: '20', title: '여성친화기업 협약서 (서초여성새로일하기센터)', category: '협약서', url: img20, date: '2021-06-16' },
-  { id: '21', title: '특허증 (통역서비스 제공 시스템)', category: '특허출원', url: img21, date: '2023-04-24' },
-  { id: '22', title: '트위그팜 전략적 업무제휴 협약서', category: '협약서', url: img22, date: '2022-05-02' },
-  { id: '23', title: '여성친화기업 협약서 (서초새일센터)', category: '협약서', url: img23, date: '2021-06-16' },
-  { id: '24', title: '연구개발전담부서 인정서 (과학기술정보통신부)', category: '증명서', url: img24, date: '2021-10-22' },
-  { id: '25', title: '와이즈에스티글로벌 협약서 (업무제휴)', category: '협약서', url: img25, date: '2019-04-15' },
-  { id: '26', title: '이즈커뮤니케이션즈 전략적 업무제휴 협약서', category: '협약서', url: img26, date: '2018-09-18' },
-  { id: '27', title: '중소기업 확인서 (소기업/소상공인)', category: '증명서', url: img27, date: '2022-03-31' },
-  { id: '28', title: '창업기업 확인서 (중소벤처기업부)', category: '증명서', url: img28, date: '2022-03-03' },
-  { id: '29', title: '출원사실증명원 (특허 출원 증명)', category: '증명서', url: img29, date: '2021-09-30' },
-  { id: '30', title: '특허증 (번역서비스 제공 시스템)', category: '특허출원', url: img30, date: '2023-04-24' },
-  { id: '31', title: '휴텍씨-한국정보통신윤리지도자협회 협약서', category: '협약서', url: img31, date: '2022-06-20' },
-  { id: '32', title: '출원사실증명원 (LLM 프롬프팅 최적화)', category: '증명서', url: img32, date: '2024-02-28' },
-  { id: '33', title: '출원사실증명원 (본-프롬프팅 최적화)', category: '증명서', url: img33, date: '2024-02-28' },
-];
-
-const MOCK_ITEMS: PhotoItem[] = INITIAL_DATA.map(applyPdfMap);
-
 // --- API helpers ---
 function savePhotoToServer(id: string, data: any) {
+  // 번들 해시가 포함된 썸네일 URL은 DB에 저장하지 않음(빌드마다 바뀜).
+  // THUMBNAIL_MAP에 있는 id면 url을 비워서 저장 → 클라이언트가 매번 lookup.
+  const persistData = THUMBNAIL_MAP[id] !== undefined ? { ...data, url: '' } : data;
   fetch('/api/photos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ photo_id: id, data })
+    body: JSON.stringify({ photo_id: id, data: persistData })
   }).catch(() => {});
 }
 
@@ -215,29 +164,23 @@ function deletePhotoFromServer(id: string) {
 }
 
 export function PhotoDashboardPage() {
-  const [items, setItems] = useState<PhotoItem[]>(MOCK_ITEMS);
+  const [items, setItems] = useState<PhotoItem[]>([]);
+  const [loadState, setLoadState] = useState<'loading' | 'ok' | 'error'>('loading');
 
-  // Load from API on mount
-  // 규칙: MOCK_ITEMS를 기본값으로 두고 DB rows로 override·append.
-  // (이유) 사용자가 기존 MOCK 항목 1개만 편집하면 DB에 1행만 생기므로,
-  //        "DB가 있으면 DB만 표시" 방식은 나머지 MOCK 항목을 숨겨버린다.
+  // DB 단일 진실 원천 — 서버 부팅 시 자동 시드, 이후 모든 CRUD가 DB 경유.
   useEffect(() => {
     fetch('/api/photos').then(r => r.json()).then((rows: any[]) => {
-      const overrides = new Map<string, PhotoItem>();
-      (rows || []).forEach((r: any) => {
-        if (r && r.data && r.photo_id) overrides.set(String(r.photo_id), r.data as PhotoItem);
-      });
-      const mockIds = new Set(MOCK_ITEMS.map(i => i.id));
-      const merged: PhotoItem[] = MOCK_ITEMS.map(m => {
-        const ov = overrides.get(m.id);
-        return ov ? { ...m, ...ov } : m;
-      });
-      // DB에만 있는(=사용자가 ADD로 추가한) 항목은 앞쪽에 prepend
-      for (const [id, data] of overrides) {
-        if (!mockIds.has(id)) merged.unshift(data);
-      }
-      setItems(merged.map(applyPdfMap));
-    }).catch(() => {}); // silent fallback to MOCK (이미 초기값)
+      const loaded: PhotoItem[] = (rows || [])
+        .map((r: any) => (r && r.data) ? r.data as PhotoItem : null)
+        .filter((x): x is PhotoItem => !!x)
+        .map(applyThumbnail);
+      setItems(loaded);
+      setLoadState('ok');
+    }).catch((e) => {
+      console.error('photos load failed:', e);
+      setLoadState('error');
+      toast.error('사진 목록 로드 실패 — 새로고침하거나 서버를 확인하세요.');
+    });
   }, []);
 
   // Upload a PDF for a specific item (replace / set)
