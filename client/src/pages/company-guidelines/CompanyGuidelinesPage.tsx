@@ -193,26 +193,28 @@ function DynFilter({ label, items, defaults, value, onChange, customKey, custom,
     else onChange([...value, item]);
   };
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>{label}</span>
-      <button onClick={() => onChange([])} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: allSelected ? '#3B82F6' : '#e2e8f0', background: allSelected ? '#EFF6FF' : '#fff', color: allSelected ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: allSelected ? 600 : 400 }}>전체</button>
-      {items.map(item => {
-        const sel = value.includes(item);
-        return (
-          <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-            <button onClick={() => toggle(item)} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: sel ? '#3B82F6' : '#e2e8f0', background: sel ? '#EFF6FF' : '#fff', color: sel ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: sel ? 600 : 400 }}>{item}</button>
-            {!defaults.includes(item) && <button onClick={() => { updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item)); if (sel) onChange(value.filter(v => v !== item)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 11, padding: 0, lineHeight: 1 }}>✕</button>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
+      <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>{label}</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+        <button onClick={() => onChange([])} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: allSelected ? '#3B82F6' : '#e2e8f0', background: allSelected ? '#EFF6FF' : '#fff', color: allSelected ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: allSelected ? 600 : 400 }}>전체</button>
+        {items.map(item => {
+          const sel = value.includes(item);
+          return (
+            <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+              <button onClick={() => toggle(item)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: sel ? '#3B82F6' : '#e2e8f0', background: sel ? '#EFF6FF' : '#fff', color: sel ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: sel ? 600 : 400 }}>{item}</button>
+              {!defaults.includes(item) && <button onClick={() => { updateCustom(customKey, (custom[customKey] || []).filter(x => x !== item)); if (sel) onChange(value.filter(v => v !== item)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 10, padding: 0, lineHeight: 1 }}>✕</button>}
+            </span>
+          );
+        })}
+        {adding ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            <input ref={inputRef} autoFocus placeholder="새 항목" onKeyDown={e => { if (e.key === 'Enter') { const v = inputRef.current?.value.trim(); if (v && !items.includes(v)) updateCustom(customKey, [...(custom[customKey] || []), v]); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} style={{ width: 70, padding: '1px 6px', fontSize: 11, border: '1px solid #3B82F6', borderRadius: 10, outline: 'none' }} />
+            <button onClick={() => setAdding(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 10 }}>취소</button>
           </span>
-        );
-      })}
-      {adding ? (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <input ref={inputRef} autoFocus placeholder="새 항목" onKeyDown={e => { if (e.key === 'Enter') { const v = inputRef.current?.value.trim(); if (v && !items.includes(v)) updateCustom(customKey, [...(custom[customKey] || []), v]); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} style={{ width: 80, padding: '3px 8px', fontSize: 12, border: '1px solid #3B82F6', borderRadius: 12, outline: 'none' }} />
-          <button onClick={() => setAdding(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 11 }}>취소</button>
-        </span>
-      ) : (
-        <button onClick={() => setAdding(true)} style={{ padding: '3px 10px', borderRadius: 16, border: '1px dashed #cbd5e1', background: '#fff', color: '#94a3b8', fontSize: 12, cursor: 'pointer' }}>+ 추가</button>
-      )}
+        ) : (
+          <button onClick={() => setAdding(true)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px dashed #cbd5e1', background: '#fff', color: '#94a3b8', fontSize: 11, cursor: 'pointer' }}>+ 추가</button>
+        )}
+      </div>
     </div>
   );
 }
@@ -909,47 +911,53 @@ export default function CompanyGuidelinesPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
         <div style={{ position: 'relative', maxWidth: 360 }}>
           <Search size={16} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
           <input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="제목, 내용, 작성자, 비고 검색..." style={{ width: '100%', padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, outline: 'none', background: '#fff' }} />
         </div>
-        {/* 규정 유형 필터 (공통) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>유형</span>
-          <button onClick={() => setFilterRuleType('전체')} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: filterRuleType === '전체' ? '#3B82F6' : '#e2e8f0', background: filterRuleType === '전체' ? '#EFF6FF' : '#fff', color: filterRuleType === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: filterRuleType === '전체' ? 600 : 400 }}>전체</button>
-          {(['규정', '준규정', '선택규정'] as RuleType[]).map(rt => {
-            const c = RULE_COLORS[rt];
-            return (
-              <button key={rt} onClick={() => setFilterRuleType(filterRuleType === rt ? '전체' : rt)}
-                style={{ padding: '4px 12px', borderRadius: 16, border: `1px solid ${filterRuleType === rt ? c.color : c.border}`, background: filterRuleType === rt ? c.color : c.bg, color: filterRuleType === rt ? '#fff' : c.color, fontSize: 13, cursor: 'pointer', fontWeight: filterRuleType === rt ? 600 : 400 }}>
-                {rt}
-              </button>
-            );
-          })}
-        </div>
-        {/* 업무지침 탭 필터 */}
-        {activeTab === '업무지침' && (<>
-          <DynFilter label="분류별" items={[...WORK_CAT1, ...(custom['wc1'] || [])]} defaults={WORK_CAT1} value={fWorkCat1} onChange={setFWorkCat1} customKey="wc1" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="교육별" items={[...WORK_CAT2, ...(custom['wc2'] || [])]} defaults={WORK_CAT2} value={fWorkCat2} onChange={setFWorkCat2} customKey="wc2" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="급수별" items={[...WORK_CAT3, ...(custom['wc3'] || [])]} defaults={WORK_CAT3} value={fWorkCat3} onChange={setFWorkCat3} customKey="wc3" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="세부급수" items={[...WORK_CAT4, ...(custom['wc4'] || [])]} defaults={WORK_CAT4} value={fWorkCat4} onChange={setFWorkCat4} customKey="wc4" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="DB별" items={[...WORK_DB, ...(custom['wdb'] || [])]} defaults={WORK_DB} value={fWorkDb} onChange={setFWorkDb} customKey="wdb" custom={custom} updateCustom={updateCustom} />
-        </>)}
-        {/* 사내규정 탭 필터 */}
-        {activeTab === '사내규정' && (<>
-          <DynFilter label="업무별" items={[...COMPANY_WORK, ...(custom['cw'] || [])]} defaults={COMPANY_WORK} value={fCompWork} onChange={setFCompWork} customKey="cw" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="부서별" items={[...COMPANY_DEPT, ...(custom['cd'] || [])]} defaults={COMPANY_DEPT} value={fCompDept} onChange={setFCompDept} customKey="cd" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="직급별" items={[...COMPANY_POS, ...(custom['cp'] || [])]} defaults={COMPANY_POS} value={fCompPos} onChange={setFCompPos} customKey="cp" custom={custom} updateCustom={updateCustom} />
-          <DynFilter label="계약" items={[...COMPANY_CONTRACT, ...(custom['cc'] || [])]} defaults={COMPANY_CONTRACT} value={fCompContract} onChange={setFCompContract} customKey="cc" custom={custom} updateCustom={updateCustom} />
-        </>)}
-        {/* 작성자 필터 (공통) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, minWidth: 48 }}>작성자</span>
-          <button onClick={() => setFilterAuthor('전체')} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: filterAuthor === '전체' ? '#3B82F6' : '#e2e8f0', background: filterAuthor === '전체' ? '#EFF6FF' : '#fff', color: filterAuthor === '전체' ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: filterAuthor === '전체' ? 600 : 400 }}>전체</button>
-          {allAuthors.map(a => (
-            <button key={a} onClick={() => setFilterAuthor(a)} style={{ padding: '4px 12px', borderRadius: 16, border: '1px solid', borderColor: filterAuthor === a ? '#3B82F6' : '#e2e8f0', background: filterAuthor === a ? '#EFF6FF' : '#fff', color: filterAuthor === a ? '#3B82F6' : '#64748b', fontSize: 13, cursor: 'pointer', fontWeight: filterAuthor === a ? 600 : 400 }}>{a}</button>
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, alignItems: 'start' }}>
+          {/* 규정 유형 필터 (공통) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
+            <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>유형</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              <button onClick={() => setFilterRuleType('전체')} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterRuleType === '전체' ? '#3B82F6' : '#e2e8f0', background: filterRuleType === '전체' ? '#EFF6FF' : '#fff', color: filterRuleType === '전체' ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterRuleType === '전체' ? 600 : 400 }}>전체</button>
+              {(['규정', '준규정', '선택규정'] as RuleType[]).map(rt => {
+                const c = RULE_COLORS[rt];
+                return (
+                  <button key={rt} onClick={() => setFilterRuleType(filterRuleType === rt ? '전체' : rt)}
+                    style={{ padding: '1px 7px', borderRadius: 10, border: `1px solid ${filterRuleType === rt ? c.color : c.border}`, background: filterRuleType === rt ? c.color : c.bg, color: filterRuleType === rt ? '#fff' : c.color, fontSize: 11, cursor: 'pointer', fontWeight: filterRuleType === rt ? 600 : 400 }}>
+                    {rt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {/* 업무지침 탭 필터 */}
+          {activeTab === '업무지침' && (<>
+            <DynFilter label="분류별" items={[...WORK_CAT1, ...(custom['wc1'] || [])]} defaults={WORK_CAT1} value={fWorkCat1} onChange={setFWorkCat1} customKey="wc1" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="교육별" items={[...WORK_CAT2, ...(custom['wc2'] || [])]} defaults={WORK_CAT2} value={fWorkCat2} onChange={setFWorkCat2} customKey="wc2" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="급수별" items={[...WORK_CAT3, ...(custom['wc3'] || [])]} defaults={WORK_CAT3} value={fWorkCat3} onChange={setFWorkCat3} customKey="wc3" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="세부급수" items={[...WORK_CAT4, ...(custom['wc4'] || [])]} defaults={WORK_CAT4} value={fWorkCat4} onChange={setFWorkCat4} customKey="wc4" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="DB별" items={[...WORK_DB, ...(custom['wdb'] || [])]} defaults={WORK_DB} value={fWorkDb} onChange={setFWorkDb} customKey="wdb" custom={custom} updateCustom={updateCustom} />
+          </>)}
+          {/* 사내규정 탭 필터 */}
+          {activeTab === '사내규정' && (<>
+            <DynFilter label="업무별" items={[...COMPANY_WORK, ...(custom['cw'] || [])]} defaults={COMPANY_WORK} value={fCompWork} onChange={setFCompWork} customKey="cw" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="부서별" items={[...COMPANY_DEPT, ...(custom['cd'] || [])]} defaults={COMPANY_DEPT} value={fCompDept} onChange={setFCompDept} customKey="cd" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="직급별" items={[...COMPANY_POS, ...(custom['cp'] || [])]} defaults={COMPANY_POS} value={fCompPos} onChange={setFCompPos} customKey="cp" custom={custom} updateCustom={updateCustom} />
+            <DynFilter label="계약" items={[...COMPANY_CONTRACT, ...(custom['cc'] || [])]} defaults={COMPANY_CONTRACT} value={fCompContract} onChange={setFCompContract} customKey="cc" custom={custom} updateCustom={updateCustom} />
+          </>)}
+          {/* 작성자 필터 (공통) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, border: '1px solid #eef2f7', borderRadius: 6, padding: '4px 6px', background: '#fafbfc' }}>
+            <span style={{ fontSize: 11, color: '#475569', fontWeight: 700 }}>작성자</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              <button onClick={() => setFilterAuthor('전체')} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterAuthor === '전체' ? '#3B82F6' : '#e2e8f0', background: filterAuthor === '전체' ? '#EFF6FF' : '#fff', color: filterAuthor === '전체' ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterAuthor === '전체' ? 600 : 400 }}>전체</button>
+              {allAuthors.map(a => (
+                <button key={a} onClick={() => setFilterAuthor(a)} style={{ padding: '1px 7px', borderRadius: 10, border: '1px solid', borderColor: filterAuthor === a ? '#3B82F6' : '#e2e8f0', background: filterAuthor === a ? '#EFF6FF' : '#fff', color: filterAuthor === a ? '#3B82F6' : '#64748b', fontSize: 11, cursor: 'pointer', fontWeight: filterAuthor === a ? 600 : 400 }}>{a}</button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
