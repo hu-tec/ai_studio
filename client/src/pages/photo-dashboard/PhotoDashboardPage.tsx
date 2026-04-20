@@ -218,15 +218,26 @@ export function PhotoDashboardPage() {
   const [items, setItems] = useState<PhotoItem[]>(MOCK_ITEMS);
 
   // Load from API on mount
+  // 규칙: MOCK_ITEMS를 기본값으로 두고 DB rows로 override·append.
+  // (이유) 사용자가 기존 MOCK 항목 1개만 편집하면 DB에 1행만 생기므로,
+  //        "DB가 있으면 DB만 표시" 방식은 나머지 MOCK 항목을 숨겨버린다.
   useEffect(() => {
     fetch('/api/photos').then(r => r.json()).then((rows: any[]) => {
-      if (rows.length > 0) {
-        const loaded = rows.map((r: any) => r.data).filter(Boolean).map(applyPdfMap);
-        if (loaded.length > 0) {
-          setItems(loaded as PhotoItem[]);
-        }
+      const overrides = new Map<string, PhotoItem>();
+      (rows || []).forEach((r: any) => {
+        if (r && r.data && r.photo_id) overrides.set(String(r.photo_id), r.data as PhotoItem);
+      });
+      const mockIds = new Set(MOCK_ITEMS.map(i => i.id));
+      const merged: PhotoItem[] = MOCK_ITEMS.map(m => {
+        const ov = overrides.get(m.id);
+        return ov ? { ...m, ...ov } : m;
+      });
+      // DB에만 있는(=사용자가 ADD로 추가한) 항목은 앞쪽에 prepend
+      for (const [id, data] of overrides) {
+        if (!mockIds.has(id)) merged.unshift(data);
       }
-    }).catch(() => {}); // silent fallback to mock (photos have embedded image refs)
+      setItems(merged.map(applyPdfMap));
+    }).catch(() => {}); // silent fallback to MOCK (이미 초기값)
   }, []);
 
   // Upload a PDF for a specific item (replace / set)
