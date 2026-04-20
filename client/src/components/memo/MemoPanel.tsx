@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { StickyNote, MessageSquare, ArrowUpDown } from 'lucide-react';
+import { StickyNote, MessageSquare, ArrowUpDown, LayoutGrid, List, Pin, PinOff, Crosshair, Pencil, Trash2, Paperclip } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -11,15 +11,29 @@ import { useMemos } from './useMemos';
 import { MemoItem } from './MemoItem';
 import { MemoInput } from './MemoInput';
 import { ElementTargetOverlay } from './ElementTargetOverlay';
-import { MEMO_CATEGORIES, type MemoTarget, type MemoCategory } from './memoTypes';
+import { MEMO_CATEGORIES, type MemoTarget, type MemoCategory, type MemoItemData } from './memoTypes';
 
 type SortMode = 'newest' | 'oldest' | 'category';
+type ViewMode = 'card' | 'table';
 
 const SORT_OPTIONS: { key: SortMode; label: string }[] = [
   { key: 'newest', label: '최신순' },
   { key: 'oldest', label: '오래된순' },
   { key: 'category', label: '분류별' },
 ];
+
+const VIEW_KEY = 'memo_view_mode';
+
+function timeShort(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return sameYear ? `${m}/${day} ${hh}:${mm}` : `${d.getFullYear().toString().slice(2)}/${m}/${day}`;
+}
 
 export function MemoPanel() {
   const { items, loading, addMemo, updateMemo, deleteMemo, pageKey } = useMemos();
@@ -29,9 +43,15 @@ export function MemoPanel() {
   const [targetingFor, setTargetingFor] = useState<string>('new');
   const [filterCategory, setFilterCategory] = useState<MemoCategory | 'all'>('all');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
+  const [viewMode, setViewMode] = useState<ViewMode>(() => (localStorage.getItem(VIEW_KEY) as ViewMode) || 'card');
   const [hidden, setHidden] = useState(() => localStorage.getItem('memo-btn-hidden') === '1');
 
-  // 필터 + 정렬 적용
+  const changeViewMode = (m: ViewMode) => {
+    setViewMode(m);
+    localStorage.setItem(VIEW_KEY, m);
+  };
+
+  // 필터 + 정렬 + 핀 우선 적용
   const filteredItems = useMemo(() => {
     let result = filterCategory === 'all'
       ? items
@@ -45,7 +65,10 @@ export function MemoPanel() {
         order.indexOf(a.category || 'memo') - order.indexOf(b.category || 'memo')
       );
     }
-    return result;
+    // 핀 고정 항목 항상 최상단
+    const pinned = result.filter((m) => m.isPinned);
+    const rest = result.filter((m) => !m.isPinned);
+    return [...pinned, ...rest];
   }, [items, filterCategory, sortMode]);
 
   const handleStartTargeting = useCallback(() => {
@@ -168,19 +191,47 @@ export function MemoPanel() {
                 })}
               </div>
 
-              {/* 정렬 */}
-              <button
-                onClick={cycleSortMode}
-                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <ArrowUpDown size={11} />
-                {currentSortLabel}
-              </button>
+              {/* 정렬 + 뷰 토글 */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={cycleSortMode}
+                  className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <ArrowUpDown size={11} />
+                  {currentSortLabel}
+                </button>
+                <div className="inline-flex items-center gap-0.5">
+                  <button
+                    onClick={() => changeViewMode('card')}
+                    className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
+                      viewMode === 'card'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
+                    }`}
+                    title="카드 뷰"
+                  >
+                    <LayoutGrid size={10} />
+                    카드
+                  </button>
+                  <button
+                    onClick={() => changeViewMode('table')}
+                    className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
+                      viewMode === 'table'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
+                    }`}
+                    title="테이블(리스트) 뷰"
+                  >
+                    <List size={10} />
+                    표
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
           {/* 메모 리스트 */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          <div className={`flex-1 overflow-y-auto ${viewMode === 'card' ? 'p-3 space-y-2' : 'p-2'}`}>
             {loading ? (
               <div className="flex items-center justify-center py-12 text-sm text-slate-400">
                 불러오는 중...
@@ -195,7 +246,7 @@ export function MemoPanel() {
               <div className="flex items-center justify-center py-8 text-sm text-slate-400">
                 해당 분류의 메모가 없습니다
               </div>
-            ) : (
+            ) : viewMode === 'card' ? (
               filteredItems.map((item) => (
                 <MemoItem
                   key={item.id}
@@ -205,6 +256,13 @@ export function MemoPanel() {
                   onStartTargeting={handleEditTargeting}
                 />
               ))
+            ) : (
+              <MemoTable
+                items={filteredItems}
+                onUpdate={updateMemo}
+                onDelete={deleteMemo}
+                onSwitchToCard={() => changeViewMode('card')}
+              />
             )}
           </div>
 
@@ -226,5 +284,130 @@ export function MemoPanel() {
         />
       )}
     </>
+  );
+}
+
+interface MemoTableProps {
+  items: MemoItemData[];
+  onUpdate: (id: string, updates: Partial<Omit<MemoItemData, 'id' | 'created_at'>>) => void;
+  onDelete: (id: string) => void;
+  onSwitchToCard: () => void;
+}
+
+function MemoTable({ items, onUpdate, onDelete, onSwitchToCard }: MemoTableProps) {
+  const scrollToTarget = (selector: string) => {
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      (el as HTMLElement).style.outline = '3px solid #3b82f6';
+      (el as HTMLElement).style.outlineOffset = '2px';
+      setTimeout(() => {
+        (el as HTMLElement).style.outline = '';
+        (el as HTMLElement).style.outlineOffset = '';
+      }, 2000);
+    } catch { /* invalid selector */ }
+  };
+
+  return (
+    <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+      {/* 헤더 */}
+      <div className="grid grid-cols-[22px_48px_46px_1fr_62px_58px] items-center gap-1 border-b border-slate-200 bg-slate-50 px-1.5 py-1 text-[10px] font-semibold text-slate-500">
+        <span></span>
+        <span>시간</span>
+        <span>분류</span>
+        <span>내용</span>
+        <span>작성/대상</span>
+        <span className="text-right">작업</span>
+      </div>
+      {/* 행 */}
+      <div className="divide-y divide-slate-100">
+        {items.map((item) => {
+          const cat = MEMO_CATEGORIES.find((c) => c.key === (item.category || 'memo'));
+          return (
+            <div
+              key={item.id}
+              className={`grid grid-cols-[22px_48px_46px_1fr_62px_58px] items-center gap-1 px-1.5 py-1 text-[11px] hover:bg-slate-50 ${
+                item.isPinned ? 'bg-amber-50/40' : ''
+              }`}
+            >
+              <button
+                onClick={() => onUpdate(item.id, { isPinned: !item.isPinned })}
+                className={`rounded p-0.5 transition-colors ${
+                  item.isPinned ? 'text-amber-500' : 'text-slate-300 hover:text-amber-500'
+                }`}
+                title={item.isPinned ? '핀 해제' : '상단 핀 고정'}
+              >
+                {item.isPinned ? <Pin size={11} className="fill-amber-400" /> : <Pin size={11} />}
+              </button>
+              <span className="text-[10px] text-slate-500 tabular-nums">{timeShort(item.created_at)}</span>
+              <span className={`inline-block rounded-full px-1 py-0.5 text-center text-[9px] font-medium ${cat?.color || 'bg-slate-100 text-slate-600'}`}>
+                {cat?.label || '메모'}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-slate-700" title={item.text}>
+                  {item.subCategory && (
+                    <span className="mr-1 rounded bg-blue-50 px-1 text-[9px] text-blue-600">{item.subCategory}</span>
+                  )}
+                  {item.text || <span className="text-slate-300">(내용 없음)</span>}
+                </p>
+                <div className="flex items-center gap-1 text-[9px] text-slate-400">
+                  {item.target && (
+                    <button
+                      onClick={() => scrollToTarget(item.target!.selector)}
+                      className="inline-flex items-center gap-0.5 text-blue-500 hover:text-blue-600"
+                      title={item.target.label}
+                    >
+                      <Crosshair size={9} />
+                      <span className="max-w-[90px] truncate">{item.target.label}</span>
+                    </button>
+                  )}
+                  {item.attachments.length > 0 && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Paperclip size={9} />
+                      {item.attachments.length}
+                    </span>
+                  )}
+                  {(item.replies?.length || 0) > 0 && (
+                    <span>💬 {item.replies!.length}</span>
+                  )}
+                </div>
+              </div>
+              <div className="min-w-0 text-[10px]">
+                {item.author && <div className="truncate font-medium text-slate-700">{item.author}</div>}
+                {item.toName && <div className="truncate text-purple-500">→ {item.toName}</div>}
+              </div>
+              <div className="flex items-center justify-end gap-0.5">
+                <button
+                  onClick={() => onUpdate(item.id, { isPinned: !item.isPinned })}
+                  className={`rounded p-0.5 transition-colors ${
+                    item.isPinned
+                      ? 'text-amber-500 hover:bg-amber-100'
+                      : 'text-slate-300 hover:bg-amber-50 hover:text-amber-500'
+                  }`}
+                  title={item.isPinned ? '핀 해제' : '상단 핀 고정'}
+                >
+                  {item.isPinned ? <PinOff size={11} /> : <Pin size={11} />}
+                </button>
+                <button
+                  onClick={onSwitchToCard}
+                  className="rounded p-0.5 text-slate-300 hover:bg-blue-50 hover:text-blue-500 transition-colors"
+                  title="편집 (카드 뷰로 전환)"
+                >
+                  <Pencil size={11} />
+                </button>
+                <button
+                  onClick={() => { if (confirm('정말 삭제하시겠습니까?')) onDelete(item.id); }}
+                  className="rounded p-0.5 text-slate-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  title="삭제"
+                >
+                  <Trash2 size={11} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

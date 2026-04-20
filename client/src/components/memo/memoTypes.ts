@@ -11,6 +11,7 @@ export interface MemoTarget {
 }
 
 export const MEMO_CATEGORIES = [
+  { key: 'notice', label: '공지', color: 'bg-indigo-100 text-indigo-700' },
   { key: 'memo', label: '메모', color: 'bg-slate-100 text-slate-600' },
   { key: 'issue', label: '이슈', color: 'bg-red-50 text-red-600' },
   { key: 'improve', label: '개선', color: 'bg-amber-50 text-amber-600' },
@@ -22,6 +23,7 @@ export type MemoCategory = (typeof MEMO_CATEGORIES)[number]['key'];
 
 /** 분류별 하위 메뉴 */
 export const MEMO_SUB_CATEGORIES: Record<MemoCategory, string[]> = {
+  notice: ['일반', '중요', '긴급', '안내', '행사'],
   memo: ['일반', '회의', '아이디어', '일정'],
   issue: ['버그', '장애', '긴급', '보류'],
   improve: ['UI', '기능', '성능', '프로세스'],
@@ -50,6 +52,7 @@ export interface MemoItemData {
   target: MemoTarget | null;
   created_at: string;
   replies?: MemoReply[];
+  isPinned?: boolean;
 }
 
 export interface PageMemoData {

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Trash2, Crosshair, Paperclip, ExternalLink, Pencil, Check, X, Loader2, MessageCircle, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Crosshair, Paperclip, ExternalLink, Pencil, Check, X, Loader2, MessageCircle, Send, ChevronDown, ChevronUp, Pin, PinOff } from 'lucide-react';
 import { api } from '@/api/api';
 import { MEMO_CATEGORIES, MEMO_SUB_CATEGORIES, MEMO_EMPLOYEES, type MemoItemData, type MemoAttachment, type MemoTarget, type MemoCategory, type MemoReply } from './memoTypes';
 
@@ -231,10 +231,17 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
   const cat = MEMO_CATEGORIES.find((c) => c.key === (item.category || 'memo'));
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-2 text-sm">
+    <div className={`rounded-lg border p-2 text-sm ${
+      item.isPinned
+        ? 'border-amber-300 bg-amber-50/40 ring-1 ring-amber-200'
+        : 'border-slate-200 bg-white'
+    }`}>
       {/* 헤더: 작성자 + 시간 + 편집/삭제 */}
       <div className="mb-1 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
+          {item.isPinned && (
+            <Pin size={11} className="text-amber-500 fill-amber-400" />
+          )}
           {item.author && (
             <span className="text-[11px] font-semibold text-slate-700">{item.author}</span>
           )}
@@ -244,6 +251,17 @@ export function MemoItem({ item, onUpdate, onDelete, onStartTargeting }: Props) 
           <span className="text-[10px] text-slate-400">{timeAgo(item.created_at)}</span>
         </div>
         <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => onUpdate(item.id, { isPinned: !item.isPinned })}
+            className={`rounded p-0.5 transition-colors ${
+              item.isPinned
+                ? 'text-amber-500 hover:bg-amber-100'
+                : 'text-slate-300 hover:bg-amber-50 hover:text-amber-500'
+            }`}
+            title={item.isPinned ? '핀 해제' : '상단 핀 고정'}
+          >
+            {item.isPinned ? <PinOff size={12} /> : <Pin size={12} />}
+          </button>
           <button onClick={startEdit} className="rounded p-0.5 text-slate-300 hover:bg-blue-50 hover:text-blue-500 transition-colors" title="편집">
             <Pencil size={12} />
           </button>
