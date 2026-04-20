@@ -14,6 +14,12 @@ export const MARKER_LABELS: Record<PageMarker, string> = {
   '$': '돈',
 };
 
+export const MARKER_ORDER: Record<PageMarker, number> = {
+  '#': 0,
+  '!': 1,
+  '$': 2,
+};
+
 /* ── 전 직원 공용 DB 저장 — localStorage 캐시는 오프라인/첫 프레임용 ── */
 const API_URL = '/api/sidebar-markers';
 const MARKER_ID = 'global';

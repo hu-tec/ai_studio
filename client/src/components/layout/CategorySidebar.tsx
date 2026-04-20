@@ -10,7 +10,7 @@ import {
   DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, canAccessGroup,
 } from './navData';
 import { useAuth } from '@/contexts/AuthContext';
-import { MARKER_COLORS, MARKER_LABELS, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
+import { MARKER_COLORS, MARKER_LABELS, MARKER_ORDER, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
 
 /* ── 네비 아이템 ── */
 function NavItemRow({
@@ -143,22 +143,30 @@ function GroupSection({
         );
       })()}
 
-      {/* 아이템 목록 */}
-      {!isGroupCollapsed && group.items.map(item => {
-        const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
-        const memoCount = memoCounts[toPageKey(item.to)] || 0;
-        return (
-          <NavItemRow
-            key={item.code}
-            item={item}
-            isActive={isActive}
-            memoCount={memoCount}
-            collapsed={collapsed}
-            marker={markers[item.code]}
-            onCycleMarker={onCycleMarker}
-          />
-        );
-      })}
+      {/* 아이템 목록 — 마커 있는 항목을 # → ! → $ 순으로 섹션 상단 고정 */}
+      {!isGroupCollapsed && [...group.items]
+        .sort((a, b) => {
+          const ma = markers[a.code];
+          const mb = markers[b.code];
+          const pa = ma ? MARKER_ORDER[ma] : 99;
+          const pb = mb ? MARKER_ORDER[mb] : 99;
+          return pa - pb;
+        })
+        .map(item => {
+          const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+          const memoCount = memoCounts[toPageKey(item.to)] || 0;
+          return (
+            <NavItemRow
+              key={item.code}
+              item={item}
+              isActive={isActive}
+              memoCount={memoCount}
+              collapsed={collapsed}
+              marker={markers[item.code]}
+              onCycleMarker={onCycleMarker}
+            />
+          );
+        })}
     </div>
   );
 }
