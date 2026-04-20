@@ -103,7 +103,8 @@ export function MemoInput({ onSubmit, onStartTargeting, pendingTarget, onClearTa
       </div>
 
       {/* 분류 선택 */}
-      <div className="flex flex-wrap gap-1">
+      <div className="flex items-center gap-1 flex-wrap">
+        <span className="text-[10px] text-slate-400 font-medium mr-0.5">분류</span>
         {MEMO_CATEGORIES.map((cat) => (
           <button
             key={cat.key}
