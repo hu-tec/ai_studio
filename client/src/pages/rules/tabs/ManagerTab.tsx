@@ -25,6 +25,7 @@ export function ManagerTab() {
   const [bucket, setBucket] = useState<Bucket>('company');
   const [group, setGroup] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState<Set<string>>(new Set());
+  const [showTeamChips, setShowTeamChips] = useState(false);
 
   // 탭 바뀌면 그룹 초기화
   const groupNames = useMemo(() => {
@@ -99,7 +100,19 @@ export function ManagerTab() {
         >
           <ExternalLink size={10} /> eval-criteria (D2)
         </NavLink>
-        <span className="ml-auto text-meta text-gray-500">총 <b>{grandTotal}</b>건 규정/준규정/선택</span>
+        <button
+          onClick={() => setShowTeamChips((v) => !v)}
+          className="ml-auto rounded-md border px-2 py-0.5 text-meta font-semibold transition-colors"
+          style={
+            showTeamChips
+              ? { background: '#2563eb', color: '#fff', borderColor: '#2563eb' }
+              : { background: '#fff', color: '#6b7280', borderColor: '#d1d5db' }
+          }
+          title="각 규정 항목 아래의 팀 칩 표시 여부"
+        >
+          {showTeamChips ? '👁️ 팀칩 보이기' : '🙈 팀칩 숨기기'}
+        </button>
+        <span className="text-meta text-gray-500">총 <b>{grandTotal}</b>건 규정/준규정/선택</span>
       </div>
 
       {/* 세로 1단: 가로 4열 요약 */}
@@ -193,7 +206,7 @@ export function ManagerTab() {
                         <span className="mt-0.5 h-1 w-1 rounded-full flex-shrink-0" style={{ background: color }} />
                         <span className="flex-1">{it.text}</span>
                       </div>
-                      {it.teams.length > 0 && (
+                      {showTeamChips && it.teams.length > 0 && (
                         <div className="flex flex-wrap gap-0.5 mt-0.5 pl-2">
                           {it.teams.map((t) => (
                             <span key={t} className="rounded-full bg-gray-100 px-1 py-px text-meta text-gray-600">
