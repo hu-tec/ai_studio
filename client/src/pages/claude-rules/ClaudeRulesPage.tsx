@@ -166,7 +166,7 @@ export function DesignRulesTab() {
                       </button>
 
                       {expandedMid.has(midKey) && (
-                        <div className="grid grid-cols-2 gap-0.5 px-1 pb-0.5">
+                        <div className="flex flex-col gap-0.5 px-1 pb-0.5">
                           {mc.items.map((item, si) => (
                             <div key={si} className="rounded border border-gray-100 bg-gray-50/50 px-1 py-0.5">
                               <div className="text-[9px] font-bold text-gray-700 leading-tight truncate" title={item.title}>{item.title}</div>
