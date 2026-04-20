@@ -231,8 +231,8 @@ export function GuidelinesPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-black text-white px-2 py-1.5 border-b border-gray-700">
-        <h1 className="tracking-tight">사내 업무지침 DB</h1>
-        <p className="text-gray-400 mt-1">Company Guideline Dashboard — 전사 업무 규정 관리 시스템</p>
+        <h1 className="text-h1 tracking-tight">사내 업무지침 DB</h1>
+        <p className="text-meta text-gray-400 mt-0.5">Company Guideline Dashboard — 전사 업무 규정 관리 시스템</p>
       </header>
 
       <main className="px-2 py-1 space-y-2">
@@ -255,7 +255,7 @@ export function GuidelinesPage() {
               return (
                 <div key={dept}>
                   <div className="bg-gray-700 text-white px-2 py-1 mb-0">
-                    <h3>{dept}</h3>
+                    <h3 className="text-h3">{dept}</h3>
                   </div>
                   <GuidelineGrid
                     regulations={deptData[dept].regulations}
@@ -278,7 +278,7 @@ export function GuidelinesPage() {
               return (
                 <div key={rank}>
                   <div className="bg-gray-700 text-white px-2 py-1 mb-0">
-                    <h3>{rank}</h3>
+                    <h3 className="text-h3">{rank}</h3>
                   </div>
                   <GuidelineGrid
                     regulations={rankData[rank].regulations}

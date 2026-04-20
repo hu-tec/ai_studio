@@ -569,14 +569,14 @@ export function PhotoDashboardPage() {
                   }`}
                 >
                   {/* Image Preview Area - Clickable for popup */}
-                  <div 
-                    className="relative aspect-video overflow-hidden bg-slate-100 cursor-zoom-in"
+                  <div
+                    className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-zoom-in flex items-center justify-center"
                     onClick={() => setPreviewItem(item)}
                   >
-                    <ImageWithFallback 
-                      src={item.url} 
+                    <ImageWithFallback
+                      src={item.url}
                       alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                     <div 
                       className="absolute top-3 left-3 flex items-center gap-2 z-10" 

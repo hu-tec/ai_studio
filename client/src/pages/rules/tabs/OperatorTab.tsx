@@ -31,9 +31,9 @@ function Card({ title, icon, color, children }: {
     <div className="rounded border border-gray-200 bg-white overflow-hidden">
       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 border-b border-gray-200">
         <span style={{ color }}>{icon}</span>
-        <span className="text-[10px] font-bold" style={{ color }}>{title}</span>
+        <span className="text-meta font-bold" style={{ color }}>{title}</span>
       </div>
-      <div className="p-1.5 text-[10px] text-gray-700">{children}</div>
+      <div className="p-1.5 text-meta text-gray-700">{children}</div>
     </div>
   );
 }
@@ -78,13 +78,13 @@ export function OperatorTab() {
             <div className="flex justify-between"><span className="text-amber-500">준고정</span><b>{tierCount.claudeSemi}</b></div>
             <div className="flex justify-between"><span className="text-sky-500">선택</span><b>{tierCount.claudeOpt}</b></div>
           </div>
-          <div className="mt-1 text-[9px] text-gray-400 truncate">
+          <div className="mt-1 text-meta text-gray-400 truncate">
             { user?.name ?? '—' } / { user?.email ?? '미로그인' }
           </div>
         </Card>
 
         <Card title="최근 변경(3일)" icon={<Bell size={11} />} color="#059669">
-          <div className="text-gray-400 text-[10px]">
+          <div className="text-gray-400 text-meta">
             변경 이력 API 미연결 — 추후 `/api/rules/history` 로 표시.
           </div>
         </Card>
@@ -100,7 +100,7 @@ export function OperatorTab() {
               <button
                 key={v.id}
                 onClick={() => setView(v.id)}
-                className={`flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold transition-colors ${
+                className={`flex items-center gap-1 rounded px-1.5 py-0.5 text-meta font-semibold transition-colors ${
                   active ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
@@ -115,7 +115,7 @@ export function OperatorTab() {
             <button
               key={s.id}
               onClick={() => setSub(s.id)}
-              className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+              className={`rounded-md border px-2 py-0.5 text-meta font-semibold transition-colors ${
                 sub === s.id
                   ? 'border-blue-500 bg-blue-500 text-white'
                   : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
@@ -151,7 +151,7 @@ function MyWorkList({ tier }: { tier: string | undefined }) {
 
   if (!tier) {
     return (
-      <div className="rounded border border-amber-200 bg-amber-50 p-2 text-[10px] text-amber-700">
+      <div className="rounded border border-amber-200 bg-amber-50 p-2 text-meta text-amber-700">
         로그인 후 tier에 해당하는 규정을 표시합니다.
       </div>
     );
@@ -160,8 +160,8 @@ function MyWorkList({ tier }: { tier: string | undefined }) {
   return (
     <div className="grid grid-cols-4 gap-1.5">
       <div className="rounded border border-gray-200 bg-white p-1.5">
-        <div className="text-[10px] font-bold text-gray-700 mb-1">직급 공통 (전원)</div>
-        <div className="space-y-0.5 text-[10px]">
+        <div className="text-meta font-bold text-gray-700 mb-1">직급 공통 (전원)</div>
+        <div className="space-y-0.5 text-meta">
           <div><b className="text-red-500">고정</b> {company.fixed.length}</div>
           <div><b className="text-amber-500">준고정</b> {company.semi.length}</div>
           <div><b className="text-sky-500">선택</b> {company.opt.length}</div>
@@ -174,7 +174,7 @@ function MyWorkList({ tier }: { tier: string | undefined }) {
           <MyRuleCol title="선택" color="sky" items={match.opt} />
         </>
       ) : (
-        <div className="col-span-3 rounded border border-gray-200 bg-white p-1.5 text-[10px] text-gray-500">
+        <div className="col-span-3 rounded border border-gray-200 bg-white p-1.5 text-meta text-gray-500">
           tier "{tier}" 에 해당하는 가연 xlsx 시드 없음. 매핑 기획 필요.
         </div>
       )}
@@ -190,8 +190,8 @@ function MyRuleCol({ title, color, items }: { title: string; color: 'red' | 'amb
   }[color];
   return (
     <div className={`rounded border ${cls} p-1`}>
-      <div className="text-[10px] font-bold mb-0.5">{title} ({items.length})</div>
-      <ul className="space-y-0.5 text-[9px] text-gray-700 leading-tight">
+      <div className="text-meta font-bold mb-0.5">{title} ({items.length})</div>
+      <ul className="space-y-0.5 text-meta text-gray-700 leading-tight">
         {items.map((s, i) => <li key={i}>• {s}</li>)}
       </ul>
     </div>
@@ -248,18 +248,18 @@ function FranklinView({ sub }: { sub: SubTab }) {
         return (
           <div key={q.key} className="rounded-md border overflow-hidden" style={{ borderColor: q.color + '40', background: q.bg }}>
             <div className="flex items-center gap-1 px-1.5 py-0.5 border-b" style={{ borderColor: q.color + '33' }}>
-              <span className="text-[11px] font-bold" style={{ color: q.color }}>{q.label}</span>
-              <span className="text-[9px] text-gray-500">({q.desc})</span>
-              <span className="ml-auto text-[10px] font-bold" style={{ color: q.color }}>{list.length}</span>
+              <span className="text-h4 font-bold" style={{ color: q.color }}>{q.label}</span>
+              <span className="text-meta text-gray-500">({q.desc})</span>
+              <span className="ml-auto text-meta font-bold" style={{ color: q.color }}>{list.length}</span>
             </div>
             <ul className="p-1 space-y-0.5 max-h-[60vh] overflow-y-auto">
               {list.length === 0 ? (
-                <li className="text-[10px] text-gray-400 text-center py-1">항목 없음</li>
+                <li className="text-meta text-gray-400 text-center py-1">항목 없음</li>
               ) : (
                 list.map((it) => (
                   <li key={it.id} className="rounded bg-white border border-gray-200 px-1 py-0.5">
-                    <div className="text-[9px] font-bold text-gray-800 truncate" title={it.title}>{it.title}</div>
-                    <div className="text-[9px] text-gray-600 leading-tight">{it.body}</div>
+                    <div className="text-meta font-bold text-gray-800 truncate" title={it.title}>{it.title}</div>
+                    <div className="text-meta text-gray-600 leading-tight">{it.body}</div>
                   </li>
                 ))
               )}
@@ -322,14 +322,14 @@ function MandalartView({ sub }: { sub: SubTab }) {
   }, [sub]);
 
   if (cells.length === 0) {
-    return <div className="rounded border border-gray-200 bg-white p-2 text-[10px] text-gray-500">표시할 대분류 없음.</div>;
+    return <div className="rounded border border-gray-200 bg-white p-2 text-meta text-gray-500">표시할 대분류 없음.</div>;
   }
 
   return (
     <div className="grid grid-cols-2 gap-1.5">
       {cells.map((cell) => (
         <div key={cell.id} className="rounded border overflow-hidden" style={{ borderColor: cell.color + '40' }}>
-          <div className="px-1.5 py-0.5 border-b text-[10px] font-bold truncate" style={{ color: cell.color, background: cell.bg, borderColor: cell.color + '33' }}>
+          <div className="px-1.5 py-0.5 border-b text-meta font-bold truncate" style={{ color: cell.color, background: cell.bg, borderColor: cell.color + '33' }}>
             🎯 {cell.center}
           </div>
           <div className="grid grid-cols-3 gap-0.5 p-0.5" style={{ background: cell.bg + '30' }}>
@@ -338,7 +338,7 @@ function MandalartView({ sub }: { sub: SubTab }) {
               if (isCenter) {
                 return (
                   <div key={i} className="aspect-square rounded flex items-center justify-center text-center p-1" style={{ background: cell.color, color: '#fff' }}>
-                    <span className="text-[10px] font-bold leading-tight">{cell.center}</span>
+                    <span className="text-meta font-bold leading-tight">{cell.center}</span>
                   </div>
                 );
               }
@@ -349,10 +349,10 @@ function MandalartView({ sub }: { sub: SubTab }) {
               }
               return (
                 <div key={i} className="aspect-square rounded border border-gray-200 bg-white p-0.5 overflow-hidden">
-                  <div className="text-[9px] font-bold text-gray-800 leading-tight truncate" title={item.title}>{item.title}</div>
+                  <div className="text-meta font-bold text-gray-800 leading-tight truncate" title={item.title}>{item.title}</div>
                   <ul className="mt-0.5 space-y-px">
                     {item.details.slice(0, 3).map((d, di) => (
-                      <li key={di} className="text-[8px] text-gray-500 leading-tight truncate" title={d}>• {d}</li>
+                      <li key={di} className="text-meta text-gray-500 leading-tight truncate" title={d}>• {d}</li>
                     ))}
                   </ul>
                 </div>

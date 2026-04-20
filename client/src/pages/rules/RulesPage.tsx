@@ -24,13 +24,13 @@ function RulesLayout() {
         className="rounded border-l-4 px-2 py-1 flex items-center gap-2"
         style={{ borderLeftColor: m.color, background: m.bg }}
       >
-        <span className="rounded px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ background: m.color }}>
+        <span className="rounded px-1.5 py-0.5 text-meta font-bold text-white" style={{ background: m.color }}>
           D0 · 규정(통합)
         </span>
-        <span className="text-[11px] font-bold" style={{ color: m.color }}>
+        <span className="text-h4 font-bold" style={{ color: m.color }}>
           {m.label} · {m.sub}
         </span>
-        <span className="ml-auto text-[9px] text-gray-500">
+        <span className="ml-auto text-meta text-gray-500">
           기존 D1~D3 규정 페이지는 그대로 유지 — 여기는 관점별 통합 뷰
         </span>
       </div>
@@ -45,7 +45,7 @@ function RulesLayout() {
             <button
               key={k}
               onClick={() => setTab(k)}
-              className="rounded-md border px-2 py-1 text-[11px] font-semibold transition-colors flex items-center gap-1"
+              className="rounded-md border px-2 py-1 text-h4 font-semibold transition-colors flex items-center gap-1"
               style={
                 active
                   ? { background: mt.color, color: '#fff', borderColor: mt.color }
@@ -55,7 +55,7 @@ function RulesLayout() {
               <Icon size={12} />
               {mt.label}
               <span
-                className="ml-0.5 rounded px-1 text-[9px] font-bold"
+                className="ml-0.5 rounded px-1 text-meta font-bold"
                 style={
                   active
                     ? { background: 'rgba(255,255,255,0.25)', color: '#fff' }

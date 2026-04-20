@@ -884,7 +884,7 @@ export default function CompanyGuidelinesPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1e293b', margin: 0 }}>사내업무지침(통합-new)</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1e293b', margin: 0, lineHeight: 1.3 }}>사내업무지침(통합-new)</h1>
           <span style={{ fontSize: 12, color: '#94a3b8' }}>자동저장</span>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

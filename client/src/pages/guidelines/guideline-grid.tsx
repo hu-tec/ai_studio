@@ -31,12 +31,12 @@ function GuidelineList({
           key={item.id}
           className="flex items-start justify-between border-b border-gray-200 py-1 px-2 gap-2"
         >
-          <span className="text-gray-800 break-words min-w-0 flex-1">
+          <span className="text-h4 text-gray-800 break-words min-w-0 flex-1">
             {item.text}
           </span>
           <button
             onClick={() => onDelete(item.id)}
-            className="text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer"
+            className="text-meta text-gray-400 hover:text-gray-700 shrink-0 cursor-pointer"
           >
             [삭제]
           </button>
@@ -45,7 +45,7 @@ function GuidelineList({
       <div className="px-2 py-1">
         <button
           onClick={onAdd}
-          className="text-gray-500 hover:text-black cursor-pointer"
+          className="text-meta text-gray-500 hover:text-black cursor-pointer"
         >
           [+추가]
         </button>
@@ -65,13 +65,13 @@ export function GuidelineGrid({
     <div className="grid grid-cols-3 border border-gray-300">
       {/* Column Headers */}
       <div className="bg-gray-800 text-white px-2 py-1 border-r border-gray-300">
-        <div>[규정] 고정 (변경금지)</div>
+        <div className="text-h4 font-semibold">[규정] 고정 (변경금지)</div>
       </div>
       <div className="bg-gray-400 text-black px-2 py-1 border-r border-gray-300">
-        <div>[준규정] 준고정 (조건부변경가능)</div>
+        <div className="text-h4 font-semibold">[준규정] 준고정 (조건부변경가능)</div>
       </div>
       <div className="bg-gray-200 text-black px-2 py-1 border border-gray-400 border-t-0 border-b-0 border-r-0">
-        <div>[선택사항] 선택고정 (언제든변경가능)</div>
+        <div className="text-h4 font-semibold">[선택사항] 선택고정 (언제든변경가능)</div>
       </div>
 
       {/* Column Bodies */}

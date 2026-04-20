@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Database, Beaker } from 'lucide-react';
+import { Database, Beaker, Layers3 } from 'lucide-react';
 import SandboxTab from './tabs/SandboxTab';
 import EditTab from './tabs/EditTab';
+import AllTableTab from './tabs/AllTableTab';
 
-type RootTab = 'sandbox' | 'edit';
+type RootTab = 'sandbox' | 'edit' | 'all';
 
 const ROOT_TABS: { code: RootTab; label: string; icon: any; desc: string }[] = [
   { code: 'sandbox', label: '분류 모듈 체험', icon: Beaker,   desc: '샘플 데이터로 4안(기존/A/B/C) 비교' },
   { code: 'edit',    label: '분류 모듈 편집', icon: Database, desc: '최종 DB · API · 모듈화 중앙집합체' },
+  { code: 'all',     label: '전체 테이블',    icon: Layers3,  desc: 'scope·gov·axis·level 합집합 · 필터·검색·인라인 편집' },
 ];
 
 export default function WorkClassDemoPage() {
@@ -54,6 +56,7 @@ export default function WorkClassDemoPage() {
       <div>
         {tab === 'sandbox' && <SandboxTab />}
         {tab === 'edit'    && <EditTab />}
+        {tab === 'all'     && <AllTableTab />}
       </div>
     </div>
   );
