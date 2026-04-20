@@ -48,4 +48,38 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+// GET /api/upload/download?url=<s3_url>&name=<filename>
+// S3 파일을 서버가 받아 Content-Disposition: attachment로 스트리밍(CORS/뷰어 열림 회피)
+router.get('/download', async (req, res) => {
+  try {
+    const { url, name } = req.query;
+    if (!url || typeof url !== 'string') return res.status(400).json({ error: 'url required' });
+    const allowedHosts = ['work-studio-uploads.s3.ap-northeast-2.amazonaws.com'];
+    let u;
+    try { u = new URL(url); } catch { return res.status(400).json({ error: 'invalid url' }); }
+    if (!allowedHosts.includes(u.host)) return res.status(403).json({ error: 'host not allowed' });
+
+    const upstream = await fetch(url);
+    if (!upstream.ok) return res.status(upstream.status).send(await upstream.text());
+
+    const fileName = (typeof name === 'string' && name) ? name : path.basename(u.pathname);
+    const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
+    const len = upstream.headers.get('content-length');
+    if (len) res.setHeader('Content-Length', len);
+
+    const reader = upstream.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(Buffer.from(value));
+    }
+    res.end();
+  } catch (err) {
+    console.error('Download proxy error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

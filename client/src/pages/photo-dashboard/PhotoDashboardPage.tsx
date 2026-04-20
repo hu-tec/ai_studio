@@ -117,6 +117,42 @@ interface PhotoItem {
   category: Category;
   url: string;
   date: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+}
+
+const S3_DOC_BASE = 'https://work-studio-uploads.s3.ap-northeast-2.amazonaws.com/photo-docs/2026';
+const PDF_MAP: Record<string, string> = {
+  '1': 'agreement-1-p01.pdf',
+  '2': 'agreement-1-p02.pdf',
+  '3': 'agreement-1-p03.pdf',
+  '4': 'agreement-1-p04.pdf',
+  '5': 'agreement-1-p05.pdf',
+  '6': 'agreement-1-p06.pdf',
+  '7': 'agreement-1-p07.pdf',
+  '8': 'agreement-2-p01.pdf',
+  '10': 'agreement-2-p02.pdf',
+  '11': 'agreement-2-p03.pdf',
+  '16': 'agreement-2-p04.pdf',
+  '17': 'agreement-2-p05.pdf',
+  '18': 'agreement-2-p06.pdf',
+  '20': 'agreement-2-p07.pdf',
+  '22': 'agreement-2-p08.pdf',
+  '23': 'agreement-2-p09.pdf',
+  '25': 'agreement-2-p10.pdf',
+  '26': 'agreement-2-p11.pdf',
+  '21': 'patent-cert-p01.pdf',
+  '30': 'patent-cert-p02.pdf',
+  '9': 'patent-cert-p03.pdf',
+  '13': 'patent-cert-p04.pdf',
+  '14': 'patent-cert-p05.pdf',
+  '15': 'patent-cert-p06.pdf',
+};
+function applyPdfMap(item: PhotoItem): PhotoItem {
+  const f = PDF_MAP[item.id];
+  if (!f || item.fileUrl) return item;
+  return { ...item, fileUrl: `${S3_DOC_BASE}/${f}`, fileName: `${item.title}.pdf` };
 }
 
 // --- Mock Data ---
@@ -163,7 +199,7 @@ const INITIAL_DATA: PhotoItem[] = [
   { id: '33', title: '출원사실증명원 (본-프롬프팅 최적화)', category: '증명서', url: img33, date: '2024-02-28' },
 ];
 
-const MOCK_ITEMS: PhotoItem[] = INITIAL_DATA;
+const MOCK_ITEMS: PhotoItem[] = INITIAL_DATA.map(applyPdfMap);
 
 // --- API helpers ---
 function savePhotoToServer(id: string, data: any) {
@@ -185,13 +221,41 @@ export function PhotoDashboardPage() {
   useEffect(() => {
     fetch('/api/photos').then(r => r.json()).then((rows: any[]) => {
       if (rows.length > 0) {
-        const loaded = rows.map((r: any) => r.data).filter(Boolean);
+        const loaded = rows.map((r: any) => r.data).filter(Boolean).map(applyPdfMap);
         if (loaded.length > 0) {
           setItems(loaded as PhotoItem[]);
         }
       }
     }).catch(() => {}); // silent fallback to mock (photos have embedded image refs)
   }, []);
+
+  // Upload a PDF for a specific item (replace / set)
+  const handleUploadPdf = async (id: string, file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'photo-docs');
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'upload failed');
+      handleUpdateItem(id, { fileUrl: json.s3_url, fileName: json.original_name, fileSize: file.size });
+      toast.success(`파일 업로드 완료: ${json.original_name}`);
+    } catch (e: any) {
+      toast.error(`업로드 실패: ${e.message}`);
+    }
+  };
+
+  const handleDownload = (item: PhotoItem) => {
+    if (!item.fileUrl) { toast.error('다운로드 파일이 없습니다. 먼저 PDF를 업로드해 주세요.'); return; }
+    const name = item.fileName || `${item.title}.pdf`;
+    const proxy = `/api/upload/download?url=${encodeURIComponent(item.fileUrl)}&name=${encodeURIComponent(name)}`;
+    const a = document.createElement('a');
+    a.href = proxy;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
   const [mode, setMode] = useState<Mode>('VIEW');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'ALL'>('ALL');
@@ -264,6 +328,34 @@ export function PhotoDashboardPage() {
     setItems([newItem, ...items]);
     savePhotoToServer(newItem.id, newItem);
     toast.success('새 항목이 추가되었습니다.');
+  };
+
+  const handleAddItemWithPdf = async (file: File) => {
+    const id = Date.now().toString();
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('category', 'photo-docs');
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'upload failed');
+      const baseName = file.name.replace(/\.pdf$/i, '');
+      const newItem: PhotoItem = {
+        id,
+        title: baseName,
+        category: '협약서',
+        url: 'https://images.unsplash.com/photo-1695041712957-45634f4fa759?q=80&w=400',
+        date: new Date().toISOString().split('T')[0],
+        fileUrl: json.s3_url,
+        fileName: json.original_name,
+        fileSize: file.size,
+      };
+      setItems([newItem, ...items]);
+      savePhotoToServer(newItem.id, newItem);
+      toast.success(`신규 항목 추가: ${baseName}`);
+    } catch (e: any) {
+      toast.error(`업로드 실패: ${e.message}`);
+    }
   };
 
   const handleDeleteItem = (id: string) => {
@@ -540,21 +632,32 @@ export function PhotoDashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <AnimatePresence mode="popLayout">
               {mode === 'ADD' && (
-                <motion.div 
+                <motion.label
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="group relative border-2 border-dashed border-slate-300 rounded-md p-2 flex flex-col items-center justify-center gap-2 hover:border-slate-400 hover:bg-slate-100/50 transition-all cursor-pointer min-h-[320px]"
-                  onClick={handleAddItem}
+                  className="group relative border-2 border-dashed border-slate-300 rounded-md p-2 flex flex-col items-center justify-center gap-2 hover:border-slate-400 hover:bg-slate-100/50 transition-all cursor-pointer aspect-[3/4]"
                 >
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleAddItemWithPdf(f);
+                      else handleAddItem();
+                      e.target.value = '';
+                    }}
+                  />
                   <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
                     <Plus size={24} />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-slate-700">새 항목 추가</p>
-                    <p className="text-xs text-slate-400">클릭하여 새로운 이미지를 등록하세요</p>
+                    <p className="font-bold text-slate-700">PDF 업로드</p>
+                    <p className="text-xs text-slate-400">PDF 파일을 선택해 새 항목 등록</p>
+                    <p className="text-[10px] text-slate-300 mt-1">(파일 없이 빈 항목만 추가하려면 파일 선택 취소)</p>
                   </div>
-                </motion.div>
+                </motion.label>
               )}
 
               {filteredItems.map((item) => (
@@ -656,20 +759,43 @@ export function PhotoDashboardPage() {
                   {/* Hover Action (View Mode) */}
                   {mode === 'VIEW' && (
                     <div className="px-2 py-1 border-t border-slate-50 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); setPreviewItem(item); }}
                         className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-1.5"
                       >
                         <FileText size={12} /> 상세보기
                       </button>
                       <div className="flex gap-2">
-                         <button 
-                           onClick={(e) => e.stopPropagation()}
-                           className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                         <button
+                           onClick={(e) => { e.stopPropagation(); handleDownload(item); }}
+                           title={item.fileUrl ? `다운로드: ${item.fileName || item.title}` : '파일 미등록'}
+                           className={`p-1.5 transition-colors ${item.fileUrl ? 'text-slate-400 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}`}
                          >
                           <Download size={14} />
                          </button>
                       </div>
+                    </div>
+                  )}
+
+                  {/* EDIT mode: PDF upload/replace */}
+                  {mode === 'EDIT' && (
+                    <div className="px-2 py-1 border-t border-slate-100 flex items-center justify-between gap-1" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-[11px] text-slate-500 truncate flex-1">
+                        {item.fileUrl ? `📎 ${item.fileName || 'PDF 있음'}` : '📎 PDF 미등록'}
+                      </span>
+                      <label className="cursor-pointer text-[11px] font-bold text-blue-600 hover:text-blue-800">
+                        {item.fileUrl ? '교체' : '업로드'}
+                        <input
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleUploadPdf(item.id, f);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
                     </div>
                   )}
                 </motion.div>
@@ -812,14 +938,22 @@ export function PhotoDashboardPage() {
                   </div>
 
                   <div className="mt-1 flex gap-1">
-                    <button 
+                    <button
                       onClick={() => setPreviewItem(null)}
                       className="flex-1 px-2 py-1 bg-slate-100 text-slate-600 rounded-md font-bold hover:bg-slate-200 transition-colors"
                     >
                       닫기
                     </button>
-                    <button className="flex-1 px-2 py-1 bg-slate-900 text-white rounded-md font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
-                      <Download size={18} /> 다운로드
+                    <button
+                      onClick={() => handleDownload(previewItem)}
+                      disabled={!previewItem.fileUrl}
+                      className={`flex-1 px-2 py-1 rounded-md font-bold transition-colors flex items-center justify-center gap-2 ${
+                        previewItem.fileUrl
+                          ? 'bg-slate-900 text-white hover:bg-slate-800'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <Download size={18} /> {previewItem.fileUrl ? '다운로드' : '파일 없음'}
                     </button>
                   </div>
                 </div>
