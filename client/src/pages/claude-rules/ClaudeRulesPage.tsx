@@ -1,7 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet, Pencil, Trash2, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet, Pencil, Trash2, Plus, LayoutGrid, Table2 } from 'lucide-react';
 import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES, type RuleLevel, type HRRuleSet } from './data';
 import { PublicMemoryTab } from './PublicMemoryTab';
+
+/* ── 사내업무지침 교차 축 상수 (company-guidelines 페이지와 동일) ── */
+const COMPANY_DEPT = ['경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
+const WORK_CAT3 = ['일반', '전문', '교육'];
+const WORK_CAT4 = ['1급', '2급', '3급', '4급', '5급', '6급', '7급', '8급'];
 
 /* ── 등급 배지 ── */
 const LEVEL_STYLE: Record<RuleLevel, { bg: string; text: string; icon: typeof Shield }> = {
@@ -57,6 +62,7 @@ export function DesignRulesTab() {
   const [search, setSearch] = useState('');
   const [showDetail, setShowDetail] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
 
   type ItemPatch = { title: string; content: string };
   type Overlay = { deleted: string[]; edited: Record<string, ItemPatch>; added: Record<string, ItemPatch[]> };
@@ -221,6 +227,25 @@ export function DesignRulesTab() {
             className="rounded-md border border-gray-300 py-0.5 pl-2 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none"
           />
         </div>
+        {/* 뷰 모드 토글 (싱글=네모) */}
+        <div className="inline-flex rounded-md border border-gray-300 overflow-hidden">
+          <button
+            onClick={() => setViewMode('card')}
+            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold transition-colors"
+            style={viewMode === 'card'
+              ? { background: '#2563eb', color: '#fff' }
+              : { background: '#fff', color: '#6b7280' }}
+            title="카드 뷰 (계층형)"
+          ><LayoutGrid className="h-3 w-3" /> 카드</button>
+          <button
+            onClick={() => setViewMode('table')}
+            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold transition-colors border-l border-gray-300"
+            style={viewMode === 'table'
+              ? { background: '#2563eb', color: '#fff' }
+              : { background: '#fff', color: '#6b7280' }}
+            title="테이블 뷰 (평면)"
+          ><Table2 className="h-3 w-3" /> 테이블</button>
+        </div>
         <button
           onClick={() => setShowDetail(v => !v)}
           className="flex items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold transition-colors"
@@ -234,10 +259,12 @@ export function DesignRulesTab() {
           {showDetail ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
           {showDetail ? '상세 접기' : '상세 펼치기'}
         </button>
-        <button onClick={toggleAll} className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
-          {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
-          {allExpanded ? '전체 접기' : '전체 펼치기'}
-        </button>
+        {viewMode === 'card' && (
+          <button onClick={toggleAll} className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
+            {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
+            {allExpanded ? '전체 접기' : '전체 펼치기'}
+          </button>
+        )}
       </div>
 
       {/* 필터 칩 (멀티=원형) */}
@@ -249,7 +276,95 @@ export function DesignRulesTab() {
         ))}
       </div>
 
+      {/* 테이블 뷰 — 평면 리스트 */}
+      {viewMode === 'table' && (
+        <div className="rounded-md border border-gray-200 bg-white overflow-hidden">
+          <div className="grid grid-cols-[32px_minmax(100px,140px)_minmax(100px,140px)_minmax(140px,200px)_minmax(200px,1fr)_60px] gap-1 bg-gray-50 border-b border-gray-200 px-1 py-0.5 text-[9px] font-bold text-gray-500 uppercase">
+            <span className="text-center">#</span>
+            <span>대분류</span>
+            <span>중분류</span>
+            <span>제목</span>
+            <span>내용</span>
+            <span className="text-center">액션</span>
+          </div>
+          {(() => {
+            let rowNum = 0;
+            const rows: React.ReactNode[] = [];
+            filtered.forEach(r => {
+              r.midCategories.forEach(mc => {
+                mc.items.forEach((item: any) => {
+                  rowNum++;
+                  const itemKey = item.key as string;
+                  const isAdded = item.isAdded as boolean;
+                  const isEditing = editing?.key === itemKey;
+                  if (isEditing) {
+                    rows.push(
+                      <div key={itemKey} className="border-b border-gray-100 last:border-b-0 bg-blue-50/40 px-1 py-1">
+                        <div className="flex items-center gap-1 text-[9px] text-gray-500 mb-0.5">
+                          <span className="font-bold">{rowNum}</span>
+                          <span>·</span>
+                          <span style={{ color: r.color, fontWeight: 700 }}>{r.major}</span>
+                          <span>›</span>
+                          <span className="font-semibold">{mc.mid}</span>
+                        </div>
+                        <input
+                          value={editing!.title}
+                          onChange={e => setEditing({ ...editing!, title: e.target.value })}
+                          placeholder="제목"
+                          className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 mb-0.5 focus:border-blue-400 focus:outline-none"
+                          autoFocus
+                        />
+                        <textarea
+                          value={editing!.content}
+                          onChange={e => setEditing({ ...editing!, content: e.target.value })}
+                          placeholder="내용"
+                          rows={2}
+                          className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 resize-none focus:border-blue-400 focus:outline-none"
+                        />
+                        <div className="flex gap-0.5 justify-end mt-0.5">
+                          <button onClick={saveEdit} className="rounded bg-blue-500 text-white px-1.5 py-0.5 text-[9px] font-bold hover:bg-blue-600">저장</button>
+                          <button onClick={() => setEditing(null)} className="rounded border border-gray-300 bg-white text-gray-600 px-1.5 py-0.5 text-[9px] hover:bg-gray-50">취소</button>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    rows.push(
+                      <div key={itemKey} className="grid grid-cols-[32px_minmax(100px,140px)_minmax(100px,140px)_minmax(140px,200px)_minmax(200px,1fr)_60px] gap-1 items-center px-1 py-0.5 border-b border-gray-100 last:border-b-0 text-[10px] hover:bg-gray-50 group">
+                        <span className="text-center font-bold text-gray-400 text-[9px]">{rowNum}</span>
+                        <span className="font-semibold truncate" style={{ color: r.color }} title={r.major}>{r.major}</span>
+                        <span className="text-gray-600 truncate" title={mc.mid}>{mc.mid}</span>
+                        <span className="font-bold text-gray-800 truncate" title={item.title}>
+                          {item.title}
+                          {isAdded && <span className="ml-1 text-[8px] text-emerald-600 font-bold">+</span>}
+                        </span>
+                        <span className="text-gray-500 leading-tight text-[9px] truncate" title={item.content}>{item.content}</span>
+                        <span className="flex items-center gap-0.5 justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setEditing({ key: itemKey, title: item.title, content: item.content })} className="text-gray-400 hover:text-blue-500 p-px" title="편집">
+                            <Pencil className="h-2.5 w-2.5" />
+                          </button>
+                          <button onClick={() => deleteItem(itemKey)} className="text-gray-400 hover:text-red-500 p-px" title="삭제">
+                            <Trash2 className="h-2.5 w-2.5" />
+                          </button>
+                        </span>
+                      </div>
+                    );
+                  }
+                });
+              });
+            });
+            return rows.length > 0 ? rows : (
+              <div className="text-center text-[10px] text-gray-400 py-3">검색 결과 없음</div>
+            );
+          })()}
+          <div className="border-t border-gray-200 bg-gray-50 px-1 py-0.5 text-[9px] text-gray-500 flex items-center justify-between">
+            <span>총 {filtered.reduce((s, r) => s + r.midCategories.reduce((s2, mc) => s2 + mc.items.length, 0), 0)}개 항목</span>
+            <span className="text-gray-400">이사님 공유용 평면 뷰 · 편집은 마우스 오버 시</span>
+          </div>
+        </div>
+      )}
+
       {/* 대분류 4단 그리드 — 카드 내부 중분류 2단 + 소분류 2단 */}
+      {viewMode === 'card' && (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
         {filtered.map(r => (
           <div key={r.id} className="rounded-md border overflow-hidden" style={{ borderColor: r.color + '40' }}>
@@ -391,6 +506,7 @@ export function DesignRulesTab() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }
@@ -482,6 +598,10 @@ export function HRRulesTab() {
   const [expandAll, setExpandAll] = useState(true);
   const [activeGroups, setActiveGroups] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
+  // 교차 축 필터 (사내업무지침 동일 축)
+  const [deptFilter, setDeptFilter] = useState<Set<string>>(new Set());
+  const [gradeFilter, setGradeFilter] = useState<Set<string>>(new Set());
+  const [rankFilter, setRankFilter] = useState<Set<string>>(new Set());
 
   // 활성 section 에 해당하는 데이터
   const groups: Record<string, HRRuleSet> =
@@ -491,11 +611,22 @@ export function HRRulesTab() {
     { '직급 공통': HR_SEED_COMPANY };
 
   const groupNames = Object.keys(groups);
-  // 초기: 모든 그룹 펼침
+  // 섹션별 현재 축 필터 (교차) — 해당 축이 있는 섹션에서만 활성
+  const axisFiltered = useMemo(() => {
+    if (section === 'depts' && deptFilter.size > 0) {
+      return groupNames.filter(n => [...deptFilter].some(d => n.includes(d)));
+    }
+    if (section === 'ranks' && rankFilter.size > 0) {
+      return groupNames.filter(n => rankFilter.has(n));
+    }
+    return groupNames;
+  }, [section, deptFilter, rankFilter, groupNames]);
+
+  // 초기: 모든 그룹 펼침 (축 필터와 별개인 펼침 상태)
   const shown = useMemo(() => {
-    if (activeGroups.size === 0) return new Set(groupNames);
+    if (activeGroups.size === 0) return new Set(axisFiltered);
     return activeGroups;
-  }, [activeGroups, section]);
+  }, [activeGroups, section, axisFiltered]);
 
   const toggleGroup = (name: string) => {
     setActiveGroups(prev => {
@@ -518,6 +649,12 @@ export function HRRulesTab() {
     const g = groups[n];
     return sum + g.fixed.length + g.semi.length + g.opt.length;
   }, 0);
+
+  const toggleFrom = (set: Set<string>, key: string) => {
+    const n = new Set(set);
+    n.has(key) ? n.delete(key) : n.add(key);
+    return n;
+  };
 
   const SECTION_META: Record<string, { label: string; emoji: string; color: string }> = {
     company:  { label: '직급 공통',   emoji: '👥', color: '#4f46e5' },
@@ -569,9 +706,85 @@ export function HRRulesTab() {
         </button>
       </div>
 
+      {/* 🔍 교차 축 필터 (사내업무지침 동일 축) */}
+      <div className="rounded-md border border-blue-200 bg-blue-50/40 px-1.5 py-1 flex flex-col gap-1">
+        <div className="flex items-center gap-1 text-[9px] text-blue-700">
+          <span className="font-bold">🔗 사내업무지침 동일 축</span>
+          <span className="text-blue-500">— 부서·급수·직급 멀티 선택 필터 (빈 선택=전체)</span>
+          <span className="ml-auto text-blue-500">표시 그룹: <b className="text-blue-700">{axisFiltered.length}</b>/{groupNames.length}</span>
+        </div>
+        {/* 부서별 (11부서) — depts 섹션 활성 시 */}
+        <div className="flex items-start gap-1 flex-wrap">
+          <span className="text-[9px] font-bold text-emerald-700 mt-0.5 whitespace-nowrap">🏢 부서별:</span>
+          {COMPANY_DEPT.map(d => (
+            <FilterChip
+              key={d}
+              active={deptFilter.has(d)}
+              color="#059669"
+              bg="#ecfdf5"
+              onClick={() => setDeptFilter(prev => toggleFrom(prev, d))}
+            >{d}</FilterChip>
+          ))}
+          {section !== 'depts' && (
+            <span className="text-[9px] text-gray-400 ml-auto italic">부서(13부서) 섹션에서 활성</span>
+          )}
+        </div>
+        {/* 급수별 — 일반/전문/교육 */}
+        <div className="flex items-start gap-1 flex-wrap">
+          <span className="text-[9px] font-bold text-violet-700 mt-0.5 whitespace-nowrap">🎖️ 급수별:</span>
+          {WORK_CAT3.map(g => (
+            <FilterChip
+              key={g}
+              active={gradeFilter.has(g)}
+              color="#7c3aed"
+              bg="#f5f3ff"
+              onClick={() => setGradeFilter(prev => toggleFrom(prev, g))}
+            >{g}</FilterChip>
+          ))}
+          <span className="text-[9px] font-bold text-orange-700 mt-0.5 ml-2 whitespace-nowrap">세부급수:</span>
+          {WORK_CAT4.map(g => (
+            <FilterChip
+              key={g}
+              active={gradeFilter.has(g)}
+              color="#ea580c"
+              bg="#fff7ed"
+              onClick={() => setGradeFilter(prev => toggleFrom(prev, g))}
+            >{g}</FilterChip>
+          ))}
+          <span className="text-[9px] text-gray-400 ml-auto italic">참고 축 (현재 시드 미태깅)</span>
+        </div>
+        {/* 직급별 (ranks 섹션 그룹명) */}
+        {section === 'ranks' && (
+          <div className="flex items-start gap-1 flex-wrap">
+            <span className="text-[9px] font-bold text-red-700 mt-0.5 whitespace-nowrap">👤 직급별:</span>
+            {Object.keys(HR_SEED_RANKS).map(r => (
+              <FilterChip
+                key={r}
+                active={rankFilter.has(r)}
+                color="#dc2626"
+                bg="#fef2f2"
+                onClick={() => setRankFilter(prev => toggleFrom(prev, r))}
+              >{r}</FilterChip>
+            ))}
+            {(deptFilter.size > 0 || gradeFilter.size > 0 || rankFilter.size > 0) && (
+              <button
+                onClick={() => { setDeptFilter(new Set()); setGradeFilter(new Set()); setRankFilter(new Set()); }}
+                className="ml-auto rounded border border-gray-300 bg-white text-gray-600 px-1.5 py-0.5 text-[9px] font-semibold hover:bg-gray-50"
+              >✕ 필터 초기화</button>
+            )}
+          </div>
+        )}
+        {section !== 'ranks' && (deptFilter.size > 0 || gradeFilter.size > 0 || rankFilter.size > 0) && (
+          <button
+            onClick={() => { setDeptFilter(new Set()); setGradeFilter(new Set()); setRankFilter(new Set()); }}
+            className="self-end rounded border border-gray-300 bg-white text-gray-600 px-1.5 py-0.5 text-[9px] font-semibold hover:bg-gray-50"
+          >✕ 필터 초기화</button>
+        )}
+      </div>
+
       {/* 그룹 목록 — 그룹 2단 + 각 그룹 내부 고정·준고정·선택 3단 → 체감 2×3 = 6단 밀도 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-        {groupNames.map(name => {
+        {axisFiltered.map(name => {
           const g = groups[name];
           const hits = countHit(g);
           if (search && hits === 0) return null;
