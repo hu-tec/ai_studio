@@ -119,6 +119,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'F1', to: '/hutechc-homepage', icon: Home, label: '영규-hutechc' },
 
   // ─── G: 커뮤니티 ───
+  { code: 'G0',   to: '/community-hub',           icon: Megaphone,     label: '(gw) 커뮤니티' },
   { code: 'G1',   to: '/community-notice',        icon: Megaphone,     label: '(gw) 전체공지' },
   { code: 'G2',   to: '/community-team-notice',   icon: Megaphone,     label: '(gw) 팀별공지' },
   { code: 'G3',   to: '/community-center-notice', icon: Megaphone,     label: '(gw) 센터별공지' },
@@ -129,6 +130,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'G8',   to: '/community-meeting-board', icon: MessageSquare, label: '회의 게시판' },
 
   // ─── H: 학생관리 ───
+  { code: 'H0',   to: '/student-hub',        icon: GraduationCap, label: '(gw) 학생관리' },
   { code: 'H1',   to: '/student-tesol',      icon: GraduationCap, label: '(gw) 테솔 학생관리' },
   { code: 'H1-1', to: '/student-tesol-old',  icon: GraduationCap, label: '(gw) 테솔(이전자료)' },
   { code: 'H2',   to: '/student-accounting', icon: DollarSign,    label: '(gw) 회계관리' },
@@ -138,6 +140,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'H6',   to: '/student-etc',        icon: FolderOpen,    label: '(gw) 기타' },
 
   // ─── I: 서식/확인서 ───
+  { code: 'I0',   to: '/forms-hub',        icon: FileText,  label: '(gw) 서식/확인서' },
   { code: 'I1',   to: '/form-mgmt',        icon: FileText,  label: '(gw) 서식관리' },
   { code: 'I2',   to: '/design-materials', icon: Palette,   label: '(gw) 디자인물' },
   { code: 'I3',   to: '/cert-kukton',      icon: FileCheck,  label: '(gw) 확인서-국통' },

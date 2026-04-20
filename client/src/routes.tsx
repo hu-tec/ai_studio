@@ -79,6 +79,7 @@ export const router = createBrowserRouter(
         { path: 'coming/ai-studio', element: comingSoon },
 
         // ===== G: 커뮤니티 (gw + 신규) =====
+        { path: 'community-hub', element: lazyPage(() => import('./pages/category-hub/CommunityHubPage')) },
         { path: 'community-notice', element: comingSoon },
         { path: 'community-team-notice', element: comingSoon },
         { path: 'community-center-notice', element: comingSoon },
@@ -89,6 +90,7 @@ export const router = createBrowserRouter(
         { path: 'community-meeting-board', element: comingSoon },
 
         // ===== H: 학생관리 (gw) =====
+        { path: 'student-hub', element: lazyPage(() => import('./pages/category-hub/StudentHubPage')) },
         { path: 'student-tesol', element: comingSoon },
         { path: 'student-tesol-old', element: comingSoon },
         { path: 'student-accounting', element: comingSoon },
@@ -98,6 +100,7 @@ export const router = createBrowserRouter(
         { path: 'student-etc', element: comingSoon },
 
         // ===== I: 서식/확인서 (gw) =====
+        { path: 'forms-hub', element: lazyPage(() => import('./pages/category-hub/FormHubPage')) },
         { path: 'form-mgmt', element: comingSoon },
         { path: 'design-materials', element: comingSoon },
         { path: 'cert-kukton', element: comingSoon },
