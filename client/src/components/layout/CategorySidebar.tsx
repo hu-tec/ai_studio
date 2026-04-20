@@ -10,23 +10,67 @@ import {
   DEFAULT_GROUPS, ROLE_COLORS, ROLE_LABEL, canAccessGroup,
 } from './navData';
 import { useAuth } from '@/contexts/AuthContext';
-import { MARKER_COLORS, MARKER_LABELS, MARKER_ORDER, useSidebarMarkers, type PageMarker } from './sidebarMarkers';
+import {
+  MARKER_COLORS, MARKER_LABELS, PRIMARY_MARKERS, STATUS_MARKERS,
+  markerSortKey, useSidebarMarkers,
+  type PageMarkerSet, type PrimaryMarker, type StatusMarker,
+} from './sidebarMarkers';
 
 /* ── 네비 아이템 ── */
+function MarkerButton({
+  value, nextValue, onClick, ariaDim,
+}: {
+  value: PrimaryMarker | StatusMarker | undefined;
+  nextValue: PrimaryMarker | StatusMarker | undefined;
+  onClick: (e: React.MouseEvent) => void;
+  ariaDim: string;
+}) {
+  const mc = value ? MARKER_COLORS[value] : null;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={`${ariaDim}: ${value ?? '없음'} → ${nextValue ?? '해제'}`}
+      aria-label={`${ariaDim} 마커 전환 (${value ?? '없음'})`}
+      style={{
+        flexShrink: 0, width: 14, height: 14, padding: 0, lineHeight: '12px',
+        fontSize: 10, fontWeight: 700, fontFamily: 'ui-monospace, monospace',
+        border: mc ? `1px solid ${mc.border}` : '1px dashed #cbd5e1',
+        background: mc ? mc.bg : 'transparent',
+        color: mc ? mc.text : '#cbd5e1',
+        borderRadius: 3, cursor: 'pointer',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      {value ?? '·'}
+    </button>
+  );
+}
+
 function NavItemRow({
-  item, isActive, memoCount, collapsed, marker, onCycleMarker,
+  item, isActive, memoCount, collapsed, markerSet, onCyclePrimary, onCycleStatus,
 }: {
   item: NavItem; isActive: boolean; memoCount: number; collapsed: boolean;
-  marker: PageMarker | undefined;
-  onCycleMarker: (code: string) => void;
+  markerSet: PageMarkerSet | undefined;
+  onCyclePrimary: (code: string) => void;
+  onCycleStatus: (code: string) => void;
 }) {
-  const mc = marker ? MARKER_COLORS[marker] : null;
-  const handleMarkerClick = (e: React.MouseEvent) => {
+  const outlineColor =
+    markerSet?.primary ? MARKER_COLORS[markerSet.primary].border
+    : markerSet?.status ? MARKER_COLORS[markerSet.status].border
+    : 'transparent';
+  const handlePrimary = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onCycleMarker(item.code);
+    onCyclePrimary(item.code);
   };
-  const nextLabel = !marker ? '#' : marker === '#' ? '!' : marker === '!' ? '$' : '해제';
+  const handleStatus = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCycleStatus(item.code);
+  };
+  const nextPrimaryLabel = !markerSet?.primary ? '#' : markerSet.primary === '#' ? '$' : undefined;
+  const nextStatusLabel = !markerSet?.status ? '!' : markerSet.status === '!' ? '?' : undefined;
   return (
     <NavLink
       to={item.to}
@@ -39,7 +83,7 @@ function NavItemRow({
         background: isActive ? '#eff6ff' : 'transparent',
         textDecoration: 'none',
         transition: 'all 0.15s', whiteSpace: 'nowrap',
-        border: mc ? `1.5px solid ${mc.border}` : '1.5px solid transparent',
+        border: `1.5px solid ${outlineColor}`,
       }}
       title={`${item.code} ${item.label}`}
     >
@@ -64,23 +108,20 @@ function NavItemRow({
               {memoCount}
             </span>
           )}
-          <button
-            type="button"
-            onClick={handleMarkerClick}
-            title={`마커: ${marker ?? '없음'} → ${nextLabel}`}
-            aria-label={`페이지 마커 전환 (${marker ?? '없음'})`}
-            style={{
-              flexShrink: 0, width: 14, height: 14, padding: 0, lineHeight: '12px',
-              fontSize: 10, fontWeight: 700, fontFamily: 'ui-monospace, monospace',
-              border: mc ? `1px solid ${mc.border}` : '1px dashed #cbd5e1',
-              background: mc ? mc.bg : 'transparent',
-              color: mc ? mc.text : '#cbd5e1',
-              borderRadius: 3, cursor: 'pointer',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            {marker ?? '·'}
-          </button>
+          <span style={{ display: 'inline-flex', gap: 2, flexShrink: 0 }}>
+            <MarkerButton
+              value={markerSet?.primary}
+              nextValue={nextPrimaryLabel}
+              onClick={handlePrimary}
+              ariaDim="주요/돈"
+            />
+            <MarkerButton
+              value={markerSet?.status}
+              nextValue={nextStatusLabel}
+              onClick={handleStatus}
+              ariaDim="이슈/피드백"
+            />
+          </span>
         </>
       )}
     </NavLink>
@@ -91,7 +132,7 @@ function NavItemRow({
 function GroupSection({
   group, collapsed, location, memoCounts,
   collapsedGroups, toggleGroupCollapse,
-  markers, onCycleMarker,
+  markers, onCyclePrimary, onCycleStatus,
 }: {
   group: NavGroup;
   collapsed: boolean;
@@ -99,8 +140,9 @@ function GroupSection({
   memoCounts: Record<string, number>;
   collapsedGroups: Set<string>;
   toggleGroupCollapse: (groupId: string) => void;
-  markers: Record<string, PageMarker>;
-  onCycleMarker: (code: string) => void;
+  markers: Record<string, PageMarkerSet>;
+  onCyclePrimary: (code: string) => void;
+  onCycleStatus: (code: string) => void;
 }) {
   const isGroupCollapsed = collapsedGroups.has(group.id);
 
@@ -143,14 +185,13 @@ function GroupSection({
         );
       })()}
 
-      {/* 아이템 목록 — 마커 있는 항목을 # → ! → $ 순으로 섹션 상단 고정 */}
+      {/* 아이템 목록 — #/$ 먼저, 그 다음 !/? 만 찍힌 것, 나머지는 원래 순서 */}
       {!isGroupCollapsed && [...group.items]
         .sort((a, b) => {
-          const ma = markers[a.code];
-          const mb = markers[b.code];
-          const pa = ma ? MARKER_ORDER[ma] : 99;
-          const pb = mb ? MARKER_ORDER[mb] : 99;
-          return pa - pb;
+          const ka = markerSortKey(markers[a.code]);
+          const kb = markerSortKey(markers[b.code]);
+          if (ka[0] !== kb[0]) return ka[0] - kb[0];
+          return ka[1] - kb[1];
         })
         .map(item => {
           const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
@@ -162,8 +203,9 @@ function GroupSection({
               isActive={isActive}
               memoCount={memoCount}
               collapsed={collapsed}
-              marker={markers[item.code]}
-              onCycleMarker={onCycleMarker}
+              markerSet={markers[item.code]}
+              onCyclePrimary={onCyclePrimary}
+              onCycleStatus={onCycleStatus}
             />
           );
         })}
@@ -178,7 +220,7 @@ export function CategorySidebar() {
   const location = useLocation();
   const memoCounts = useAllMemoCounts();
   const { user } = useAuth();
-  const { markers, cycleMarker } = useSidebarMarkers();
+  const { markers, cyclePrimary, cycleStatus } = useSidebarMarkers();
 
   const groups = DEFAULT_GROUPS.filter(g => {
     if (g.id === 'grp-trash') return user?.tier === 'admin';
@@ -222,41 +264,50 @@ export function CategorySidebar() {
         {!sidebarCollapsed && <span style={{ fontWeight: 700, fontSize: 13 }}>사내 Studio</span>}
       </div>
 
-      {/* 마커 범례 */}
-      {!sidebarCollapsed && (
-        <div
-          title="각 페이지 우측 버튼 클릭 시 # → ! → $ → 해제 순환"
-          style={{
-            display: 'flex', gap: 3,
-            padding: '3px 4px',
-            borderBottom: '1px solid #f1f5f9',
-            background: '#fafafa',
-          }}
-        >
-          {(['#', '!', '$'] as PageMarker[]).map(m => {
-            const mc = MARKER_COLORS[m];
-            return (
-              <span
-                key={m}
-                style={{
-                  flex: 1,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 2,
-                  padding: '1px 2px',
-                  border: `1px solid ${mc.border}`,
-                  background: mc.bg,
-                  color: mc.text,
-                  borderRadius: 3,
-                  fontSize: 9, fontWeight: 700,
-                  lineHeight: 1.2,
-                }}
-              >
-                <span style={{ fontFamily: 'ui-monospace, monospace' }}>{m}</span>
-                <span style={{ fontWeight: 600 }}>{MARKER_LABELS[m]}</span>
-              </span>
-            );
-          })}
-        </div>
-      )}
+      {/* 마커 범례 — 좌: #/$ 주요/돈, 우: !/? 이슈/피드백 (독립 선택) */}
+      {!sidebarCollapsed && (() => {
+        const cell = (m: PrimaryMarker | StatusMarker) => {
+          const mc = MARKER_COLORS[m];
+          return (
+            <span
+              key={m}
+              style={{
+                flex: 1,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 2,
+                padding: '1px 2px',
+                border: `1px solid ${mc.border}`,
+                background: mc.bg,
+                color: mc.text,
+                borderRadius: 3,
+                fontSize: 9, fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
+              <span style={{ fontFamily: 'ui-monospace, monospace' }}>{m}</span>
+              <span style={{ fontWeight: 600 }}>{MARKER_LABELS[m]}</span>
+            </span>
+          );
+        };
+        return (
+          <div
+            title="좌: #/$ (주요/돈) · 우: !/? (이슈/피드백) — 두 차원 독립 선택, 각 클릭마다 순환"
+            style={{
+              display: 'flex', gap: 4,
+              padding: '3px 4px',
+              borderBottom: '1px solid #f1f5f9',
+              background: '#fafafa',
+            }}
+          >
+            <div style={{ display: 'flex', gap: 3, flex: 1 }}>
+              {PRIMARY_MARKERS.map(cell)}
+            </div>
+            <div style={{ width: 1, background: '#e2e8f0', flexShrink: 0 }} />
+            <div style={{ display: 'flex', gap: 3, flex: 1 }}>
+              {STATUS_MARKERS.map(cell)}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 전체 펼치기/접기 토글 */}
       {!sidebarCollapsed && groups.length > 0 && (
@@ -292,7 +343,8 @@ export function CategorySidebar() {
             collapsedGroups={collapsedGroups}
             toggleGroupCollapse={toggleGroupCollapse}
             markers={markers}
-            onCycleMarker={cycleMarker}
+            onCyclePrimary={cyclePrimary}
+            onCycleStatus={cycleStatus}
           />
         ))}
       </nav>

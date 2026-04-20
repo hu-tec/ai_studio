@@ -1,23 +1,29 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type PageMarker = '#' | '!' | '$';
+export type PrimaryMarker = '#' | '$';
+export type StatusMarker = '!' | '?';
+export type PageMarker = PrimaryMarker | StatusMarker;
+
+export type PageMarkerSet = {
+  primary?: PrimaryMarker;
+  status?: StatusMarker;
+};
+
+export const PRIMARY_MARKERS: PrimaryMarker[] = ['#', '$'];
+export const STATUS_MARKERS: StatusMarker[] = ['!', '?'];
 
 export const MARKER_COLORS: Record<PageMarker, { border: string; bg: string; text: string }> = {
   '#': { border: '#eab308', bg: '#fef9c3', text: '#854d0e' },
-  '!': { border: '#ef4444', bg: '#fee2e2', text: '#b91c1c' },
   '$': { border: '#10b981', bg: '#d1fae5', text: '#047857' },
+  '!': { border: '#ef4444', bg: '#fee2e2', text: '#b91c1c' },
+  '?': { border: '#8b5cf6', bg: '#ede9fe', text: '#6d28d9' },
 };
 
 export const MARKER_LABELS: Record<PageMarker, string> = {
   '#': '주요',
-  '!': '이슈',
   '$': '돈',
-};
-
-export const MARKER_ORDER: Record<PageMarker, number> = {
-  '#': 0,
-  '!': 1,
-  '$': 2,
+  '!': '이슈',
+  '?': '피드백',
 };
 
 /* ── 전 직원 공용 DB 저장 — localStorage 캐시는 오프라인/첫 프레임용 ── */
@@ -26,13 +32,33 @@ const MARKER_ID = 'global';
 const CACHE_KEY = 'sidebar-page-markers-cache';
 const EVENT_NAME = 'sidebar-page-markers-changed';
 
-type MarkerMap = Record<string, PageMarker>;
+type MarkerMap = Record<string, PageMarkerSet>;
+
+function isPrimary(v: unknown): v is PrimaryMarker {
+  return v === '#' || v === '$';
+}
+function isStatus(v: unknown): v is StatusMarker {
+  return v === '!' || v === '?';
+}
 
 function sanitize(obj: unknown): MarkerMap {
   if (!obj || typeof obj !== 'object') return {};
   const cleaned: MarkerMap = {};
   for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-    if (v === '#' || v === '!' || v === '$') cleaned[k] = v;
+    // 구버전 호환: 단일 문자열 → 2차원 구조로 마이그레이션
+    if (typeof v === 'string') {
+      if (isPrimary(v)) cleaned[k] = { primary: v };
+      else if (isStatus(v)) cleaned[k] = { status: v };
+      continue;
+    }
+    // 신버전: { primary?, status? }
+    if (v && typeof v === 'object') {
+      const raw = v as Record<string, unknown>;
+      const set: PageMarkerSet = {};
+      if (isPrimary(raw.primary)) set.primary = raw.primary;
+      if (isStatus(raw.status)) set.status = raw.status;
+      if (set.primary || set.status) cleaned[k] = set;
+    }
   }
   return cleaned;
 }
@@ -81,11 +107,25 @@ async function saveToServer(map: MarkerMap): Promise<boolean> {
   }
 }
 
-export function nextMarker(current: PageMarker | undefined): PageMarker | undefined {
-  if (!current) return '#';
-  if (current === '#') return '!';
-  if (current === '!') return '$';
+export function nextPrimary(cur: PrimaryMarker | undefined): PrimaryMarker | undefined {
+  if (!cur) return '#';
+  if (cur === '#') return '$';
   return undefined;
+}
+
+export function nextStatus(cur: StatusMarker | undefined): StatusMarker | undefined {
+  if (!cur) return '!';
+  if (cur === '!') return '?';
+  return undefined;
+}
+
+/* ── 섹션 내 정렬 키 ── */
+// [primaryRank, statusRank] 사전식 비교
+// primary: # < $ < 없음 / status: ! < ? < 없음
+export function markerSortKey(set: PageMarkerSet | undefined): [number, number] {
+  const p = set?.primary === '#' ? 0 : set?.primary === '$' ? 1 : 9;
+  const s = set?.status === '!' ? 0 : set?.status === '?' ? 1 : 9;
+  return [p, s];
 }
 
 export function useSidebarMarkers() {
@@ -111,19 +151,34 @@ export function useSidebarMarkers() {
     };
   }, []);
 
-  const cycleMarker = useCallback((code: string) => {
-    setMarkers((prev) => {
-      const next: MarkerMap = { ...prev };
-      const n = nextMarker(prev[code]);
-      if (n) next[code] = n;
-      else delete next[code];
-      // Optimistic: 캐시 즉시 갱신 + 이벤트 + 서버 저장
-      writeCache(next);
-      window.dispatchEvent(new CustomEvent(EVENT_NAME));
-      saveToServer(next);
-      return next;
-    });
-  }, []);
+  const applyCycle = useCallback(
+    (code: string, dim: 'primary' | 'status') => {
+      setMarkers((prev) => {
+        const next: MarkerMap = { ...prev };
+        const cur = prev[code];
+        const updated: PageMarkerSet = { ...(cur ?? {}) };
+        if (dim === 'primary') {
+          const n = nextPrimary(updated.primary);
+          if (n) updated.primary = n;
+          else delete updated.primary;
+        } else {
+          const n = nextStatus(updated.status);
+          if (n) updated.status = n;
+          else delete updated.status;
+        }
+        if (!updated.primary && !updated.status) delete next[code];
+        else next[code] = updated;
+        writeCache(next);
+        window.dispatchEvent(new CustomEvent(EVENT_NAME));
+        saveToServer(next);
+        return next;
+      });
+    },
+    [],
+  );
 
-  return { markers, cycleMarker };
+  const cyclePrimary = useCallback((code: string) => applyCycle(code, 'primary'), [applyCycle]);
+  const cycleStatus = useCallback((code: string) => applyCycle(code, 'status'), [applyCycle]);
+
+  return { markers, cyclePrimary, cycleStatus };
 }
