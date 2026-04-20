@@ -145,6 +145,7 @@ function GroupSection({
   onCycleStatus: (code: string) => void;
 }) {
   const isGroupCollapsed = collapsedGroups.has(group.id);
+  const visibleItems = group.items.filter(i => !i.hidden);
 
   return (
     <div style={{ marginBottom: 4 }}>
@@ -178,7 +179,7 @@ function GroupSection({
               }}
             >
               {group.title}
-              <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 3 }}>({group.items.length})</span>
+              <span style={{ fontSize: 8, color: '#94a3b8', marginLeft: 3 }}>({visibleItems.length})</span>
             </span>
             {isGroupCollapsed ? <ChevronDown size={10} color="#94a3b8" /> : <ChevronUp size={10} color="#94a3b8" />}
           </div>
@@ -186,7 +187,7 @@ function GroupSection({
       })()}
 
       {/* 아이템 목록 — #/$ 먼저, 그 다음 !/? 만 찍힌 것, 나머지는 원래 순서 */}
-      {!isGroupCollapsed && [...group.items]
+      {!isGroupCollapsed && [...visibleItems]
         .sort((a, b) => {
           const ka = markerSortKey(markers[a.code]);
           const kb = markerSortKey(markers[b.code]);

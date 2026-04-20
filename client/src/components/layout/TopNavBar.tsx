@@ -79,7 +79,7 @@ export function TopNavBar() {
                     }}
                   >
                     {g.title}
-                    <span style={{ fontSize: 8, marginLeft: 2, opacity: .3 }}>{g.items.length}</span>
+                    <span style={{ fontSize: 8, marginLeft: 2, opacity: .3 }}>{g.items.filter(i => !i.hidden).length}</span>
                   </div>
                 );
               })}
@@ -120,11 +120,11 @@ export function TopNavBar() {
                 {hovGroup.title}
               </span>
               <span style={{ fontSize: 9, color: '#94a3b8' }}>
-                {hovGroup.items.length}개
+                {hovGroup.items.filter(i => !i.hidden).length}개
               </span>
             </div>
 
-            {hovGroup.items.map(item => {
+            {hovGroup.items.filter(i => !i.hidden).map(item => {
               const isActive = loc.pathname === item.to || loc.pathname.startsWith(item.to + '/');
               const cnt = memo[toPageKey(item.to)] || 0;
               const isGw = item.label.startsWith('(gw)');
