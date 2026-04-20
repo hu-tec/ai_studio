@@ -19,9 +19,10 @@ import type { PromptSample } from './data';
 interface SampleDetailViewProps {
   sample: PromptSample;
   onBack: () => void;
+  onOpenImage?: (src: string, alt?: string) => void;
 }
 
-export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
+export function SampleDetailView({ sample, onBack, onOpenImage }: SampleDetailViewProps) {
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('프롬프트가 클립보드에 복사되었습니다.');
@@ -168,11 +169,15 @@ export function SampleDetailView({ sample, onBack }: SampleDetailViewProps) {
             <img
               src={sample.imageUrl}
               alt="최종 결과물"
-              className="w-full h-auto object-cover"
+              onClick={() => onOpenImage?.(sample.imageUrl, sample.title)}
+              className="w-full h-auto object-cover cursor-zoom-in"
             />
             <div className="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/10 transition-colors pointer-events-none" />
             <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="px-2 py-1 bg-white/90 backdrop-blur rounded-md text-xs font-bold shadow-sm flex items-center gap-2 hover:bg-white transition-all">
+              <button
+                onClick={() => onOpenImage?.(sample.imageUrl, sample.title)}
+                className="px-2 py-1 bg-white/90 backdrop-blur rounded-md text-xs font-bold shadow-sm flex items-center gap-2 hover:bg-white transition-all"
+              >
                 <Layout size={14} /> 전체 미리보기
               </button>
             </div>

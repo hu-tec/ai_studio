@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { promptSamples, type PromptSample } from './data';
 import { AddSampleModal } from './AddSampleModal';
 import { SampleDetailView } from './SampleDetailView';
+import { ImageLightbox } from './ImageLightbox';
 
 // ---------------------------------------------------------------------------
 // Header (simplified from Root.tsx -- no router, no sidebar)
@@ -129,12 +130,14 @@ function SampleCard({
   isHovered,
   isCheckboxSelected,
   onToggleSelect,
+  onOpenImage,
 }: {
   sample: PromptSample;
   onMouseEnter: () => void;
   isHovered: boolean;
   isCheckboxSelected: boolean;
   onToggleSelect: (e: React.MouseEvent) => void;
+  onOpenImage: (src: string, alt?: string) => void;
 }) {
   return (
     <motion.div
@@ -150,7 +153,8 @@ function SampleCard({
         <img
           src={sample.imageUrl}
           alt={sample.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+          onClick={(e) => { e.stopPropagation(); onOpenImage(sample.imageUrl, sample.title); }}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90 group-hover:opacity-100 cursor-zoom-in"
         />
         <div className="absolute top-3 left-3">
           <div
@@ -201,9 +205,11 @@ function SampleCard({
 function DashboardView({
   onOpenAddModal,
   onSelectSample,
+  onOpenImage,
 }: {
   onOpenAddModal: () => void;
   onSelectSample: (sample: PromptSample) => void;
+  onOpenImage: (src: string, alt?: string) => void;
 }) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
@@ -343,6 +349,7 @@ function DashboardView({
                       isHovered={hoveredSample?.id === sample.id}
                       isCheckboxSelected={selectedIds.includes(sample.id)}
                       onToggleSelect={(e) => toggleSelect(sample.id, e)}
+                      onOpenImage={onOpenImage}
                     />
                   ))}
                 </div>
@@ -434,7 +441,12 @@ function DashboardView({
                             </div>
                           </div>
                           <div className="rounded-md overflow-hidden border border-neutral-200 shadow-sm shadow-neutral-100">
-                            <img src={hoveredSample.imageUrl} className="w-full h-auto object-cover" alt="Result" />
+                            <img
+                              src={hoveredSample.imageUrl}
+                              alt="Result"
+                              onClick={() => onOpenImage(hoveredSample.imageUrl, hoveredSample.title)}
+                              className="w-full h-auto object-cover cursor-zoom-in"
+                            />
                           </div>
                         </div>
                       </div>
@@ -582,6 +594,9 @@ export default function PromptGuidePage() {
   const [currentUser, setCurrentUser] = useState(staffList[0]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedSample, setSelectedSample] = useState<PromptSample | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt?: string } | null>(null);
+
+  const handleOpenImage = (src: string, alt?: string) => setLightbox({ src, alt });
 
   return (
     <div className="flex h-screen bg-[#f0f0f0] text-neutral-900 font-sans overflow-hidden">
@@ -598,12 +613,14 @@ export default function PromptGuidePage() {
               <SampleDetailView
                 sample={selectedSample}
                 onBack={() => setSelectedSample(null)}
+                onOpenImage={handleOpenImage}
               />
             </div>
           ) : (
             <DashboardView
               onOpenAddModal={() => setIsAddModalOpen(true)}
               onSelectSample={setSelectedSample}
+              onOpenImage={handleOpenImage}
             />
           )}
         </div>
@@ -611,6 +628,12 @@ export default function PromptGuidePage() {
         <AddSampleModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
+        />
+
+        <ImageLightbox
+          src={lightbox?.src ?? null}
+          alt={lightbox?.alt}
+          onClose={() => setLightbox(null)}
         />
       </main>
     </div>
