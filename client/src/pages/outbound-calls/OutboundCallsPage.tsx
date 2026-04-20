@@ -55,9 +55,12 @@ type CallStatus = '부재중' | '재통화필요' | '처리완료' | '거절' | 
 
 interface ContactEntry {
   id: string;
+  field: string;
+  meetingDate: string;
   agency: string;
   name: string;
   phone: string;
+  feature: string;
   email: string;
   status: CallStatus;
   catLarge: string;
@@ -71,14 +74,7 @@ interface ContactEntry {
 
 type DashboardMode = 'view' | 'add' | 'edit' | 'delete';
 
-// --- MOCK DATA ---
-const INITIAL_DATA: ContactEntry[] = [
-  { id: '1', agency: '(주)미래디자인', name: '김철수', phone: '010-1234-5678', email: 'kim@mirae.com', status: '대기', catLarge: '마케팅', catMid: '신규개척', catSmall: 'A이벤트', callCount: 0, lastCallDate: '-', notes: '', history: '' },
-  { id: '2', agency: '글로벌테크', name: '이영희', phone: '010-9876-5432', email: 'lee@global.com', status: '처리완료', catLarge: '영업', catMid: '기존관리', catSmall: 'B이벤트', callCount: 2, lastCallDate: '2026-03-09', notes: '도입 긍정적 검토 중', history: '1회차: 부재\n2회차: 상담완료' },
-  { id: '3', agency: '에이치소프트', name: '박민준', phone: '010-1111-2222', email: 'park@hsoft.com', status: '부재중', catLarge: '마케팅', catMid: '잠재고객', catSmall: '일반조사', callCount: 1, lastCallDate: '2026-03-10', notes: '전화 안받음', history: '1회차: 부재' },
-  { id: '4', agency: '대원상사', name: '최지우', phone: '010-3333-4444', email: 'choi@dw.com', status: '거절', catLarge: '영업', catMid: '신규개척', catSmall: 'A이벤트', callCount: 1, lastCallDate: '2026-03-08', notes: '관심 없음', history: '1회차: 즉시거절' },
-  { id: '5', agency: '넥스트아이티', name: '정현우', phone: '010-5555-6666', email: 'jung@next.com', status: '재통화필요', catLarge: '마케팅', catMid: '기존관리', catSmall: 'B이벤트', callCount: 3, lastCallDate: '2026-03-10', notes: '오후 4시 이후 통화 희망', history: '1회차: 통화중\n2회차: 부재\n3회차: 시간약속' },
-];
+const INITIAL_DATA: ContactEntry[] = [];
 
 const STATUS_OPTIONS: CallStatus[] = ['부재중', '재통화필요', '처리완료', '거절', '대기'];
 const STATUS_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#f43f5e', '#facc15'];
@@ -146,7 +142,15 @@ export function OutboundCallsPage() {
 
   const filteredEntries = useMemo(() => {
     let result = entries.filter(e => {
-      const matchSearch = e.agency.includes(searchTerm) || e.name.includes(searchTerm) || e.phone.includes(searchTerm);
+      const q = searchTerm;
+      const matchSearch = !q
+        || (e.agency || '').includes(q)
+        || (e.name || '').includes(q)
+        || (e.phone || '').includes(q)
+        || (e.field || '').includes(q)
+        || (e.meetingDate || '').includes(q)
+        || (e.notes || '').includes(q)
+        || (e.feature || '').includes(q);
       const matchLarge = filterLarge.length === 0 || filterLarge.includes(e.catLarge);
       const matchMid = filterMid.length === 0 || filterMid.includes(e.catMid);
       const matchSmall = filterSmall.length === 0 || filterSmall.includes(e.catSmall);
@@ -197,9 +201,10 @@ export function OutboundCallsPage() {
       setActiveId(null);
       setFormData({
         id: Math.random().toString(36).substr(2, 9),
-        agency: '', name: '', phone: '', email: '', status: '대기',
-        catLarge: '마케팅', catMid: '신규', catSmall: '기본',
-        callCount: 0, lastCallDate: '-', notes: '', history: ''
+        field: '', meetingDate: '', agency: '', name: '', phone: '', feature: '',
+        email: '', status: '대기',
+        catLarge: '', catMid: '', catSmall: '',
+        callCount: 0, lastCallDate: '', notes: '', history: ''
       });
     } else if (newMode === 'edit') {
       if (!activeId) {
@@ -213,8 +218,8 @@ export function OutboundCallsPage() {
   };
 
   const handleSave = () => {
-    if (!formData.agency || !formData.name) {
-      toast.error('거래처명과 담당자명을 입력해주세요.');
+    if (!formData.agency && !formData.name) {
+      toast.error('회사명 또는 이름 중 하나는 입력해주세요.');
       return;
     }
 
@@ -315,26 +320,28 @@ export function OutboundCallsPage() {
               <table className="w-full text-left border-collapse table-fixed">
                 <thead className="sticky top-0 bg-white shadow-sm z-10 border-b-2 border-slate-100">
                   <tr>
-                    <SortableHeader label="거래처명" sortKey="agency" config={sortConfig} setConfig={setSortConfig} className="w-64" />
-                    <SortableHeader label="담당자" sortKey="name" config={sortConfig} setConfig={setSortConfig} className="w-32" />
-                    <SortableHeader label="연락처" sortKey="phone" config={sortConfig} setConfig={setSortConfig} className="w-48" />
-                    <SortableHeader label="상태" sortKey="status" config={sortConfig} setConfig={setSortConfig} className="w-32" />
-                    <SortableHeader label="분류" sortKey="catLarge" config={sortConfig} setConfig={setSortConfig} className="w-32" />
-                    <th className="px-2 py-1 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-24">미리보기</th>
+                    <SortableHeader label="분야" sortKey="field" config={sortConfig} setConfig={setSortConfig} className="w-24" />
+                    <SortableHeader label="미팅일자" sortKey="meetingDate" config={sortConfig} setConfig={setSortConfig} className="w-28" />
+                    <SortableHeader label="회사명" sortKey="agency" config={sortConfig} setConfig={setSortConfig} className="w-40" />
+                    <SortableHeader label="이름" sortKey="name" config={sortConfig} setConfig={setSortConfig} className="w-32" />
+                    <SortableHeader label="번호" sortKey="phone" config={sortConfig} setConfig={setSortConfig} className="w-36" />
+                    <SortableHeader label="내용" sortKey="notes" config={sortConfig} setConfig={setSortConfig} className="" />
+                    <SortableHeader label="특징" sortKey="feature" config={sortConfig} setConfig={setSortConfig} className="w-40" />
+                    <th className="px-2 py-1 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-16">보기</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {filteredEntries.map(entry => (
                     <tr key={entry.id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-2 py-1 text-xs font-bold text-slate-700">{entry.field}</td>
+                      <td className="px-2 py-1 text-xs text-slate-500">{entry.meetingDate}</td>
                       <td className="px-2 py-1 text-sm font-bold text-slate-800">{entry.agency}</td>
-                      <td className="px-2 py-1 text-sm text-slate-600">{entry.name}</td>
+                      <td className="px-2 py-1 text-sm text-slate-700">{entry.name}</td>
                       <td className="px-2 py-1 text-sm text-slate-500 font-mono">{entry.phone}</td>
-                      <td className="px-2 py-1 text-xs font-bold">
-                        <span className={`px-2 py-1 rounded-full border ${getStatusStyles(entry.status)}`}>{entry.status}</span>
-                      </td>
-                      <td className="px-2 py-1 text-xs text-gray-400 font-bold">{entry.catLarge}</td>
+                      <td className="px-2 py-1 text-[11px] text-slate-600 whitespace-pre-wrap break-words">{entry.notes}</td>
+                      <td className="px-2 py-1 text-[11px] text-slate-600 whitespace-pre-wrap break-words">{entry.feature}</td>
                       <td className="px-2 py-1 text-center">
-                        <button 
+                        <button
                           onClick={(e) => handleOpenDetailModal(e, entry)}
                           className="p-2 hover:bg-slate-800 hover:text-white rounded-full transition-all text-slate-300"
                         >
@@ -377,16 +384,18 @@ export function OutboundCallsPage() {
             <div className="flex-grow overflow-y-auto p-1 space-y-1">
               <div className="grid grid-cols-2 gap-1">
                 <div className="space-y-1">
-                  <ModalInfoItem label="거래처명" value={formData.agency} icon={<Building2 className="w-4 h-4" />} />
-                  <ModalInfoItem label="담당자명" value={formData.name} icon={<User className="w-4 h-4" />} />
-                  <ModalInfoItem label="연락처" value={formData.phone} icon={<Phone className="w-4 h-4" />} />
-                  <ModalInfoItem label="이메일" value={formData.email} icon={<Mail className="w-4 h-4" />} />
+                  <ModalInfoItem label="분야" value={formData.field} icon={<Settings2 className="w-4 h-4" />} />
+                  <ModalInfoItem label="미팅일자" value={formData.meetingDate} icon={<Calendar className="w-4 h-4" />} />
+                  <ModalInfoItem label="회사명" value={formData.agency} icon={<Building2 className="w-4 h-4" />} />
+                  <ModalInfoItem label="이름" value={formData.name} icon={<User className="w-4 h-4" />} />
+                  <ModalInfoItem label="번호" value={formData.phone} icon={<Phone className="w-4 h-4" />} />
                 </div>
                 <div className="space-y-1">
-                  <ModalInfoItem label="현재 상태" value={formData.status} icon={<Activity className="w-4 h-4" />} />
-                  <ModalInfoItem label="통화 횟수" value={`${formData.callCount}회`} icon={<RotateCcw className="w-4 h-4" />} />
-                  <ModalInfoItem label="최종 통화일" value={formData.lastCallDate} icon={<Calendar className="w-4 h-4" />} />
-                  <ModalInfoItem label="분류" value={`${formData.catLarge} > ${formData.catMid}`} icon={<Settings2 className="w-4 h-4" />} />
+                  <ModalInfoItem label="특징" value={formData.feature} icon={<AlertCircle className="w-4 h-4" />} />
+                  <ModalInfoItem label="이메일" value={formData.email} icon={<Mail className="w-4 h-4" />} />
+                  <ModalInfoItem label="상태" value={formData.status} icon={<Activity className="w-4 h-4" />} />
+                  <ModalInfoItem label="시도횟수" value={`${formData.callCount || 0}회`} icon={<RotateCcw className="w-4 h-4" />} />
+                  <ModalInfoItem label="최종통화일" value={formData.lastCallDate} icon={<Calendar className="w-4 h-4" />} />
                 </div>
               </div>
               
@@ -549,14 +558,15 @@ export function OutboundCallsPage() {
             <div className="flex-grow overflow-y-auto p-2 space-y-1">
               {activeId || mode === 'add' ? (
                 <>
-                  <EditableField label="거래처명" value={formData.agency} onChange={(v) => setFormData({...formData, agency: v})} disabled={mode === 'view'} icon={<Building2 className="w-3 h-3" />} />
-                  <EditableField label="담당자" value={formData.name} onChange={(v) => setFormData({...formData, name: v})} disabled={mode === 'view'} icon={<User className="w-3 h-3" />} />
-                  <EditableField label="연락처" value={formData.phone} onChange={(v) => setFormData({...formData, phone: v})} disabled={mode === 'view'} icon={<Phone className="w-3 h-3" />} />
-                  <EditableField label="이메일" value={formData.email} onChange={(v) => setFormData({...formData, email: v})} disabled={mode === 'view'} icon={<Mail className="w-3 h-3" />} />
                   <div className="grid grid-cols-2 gap-1">
-                    <EditableField label="대분류" type="select" options={categories.large} value={formData.catLarge} onChange={(v) => setFormData({...formData, catLarge: v})} disabled={mode === 'view'} />
-                    <EditableField label="시도횟수" type="number" value={formData.callCount} onChange={(v) => setFormData({...formData, callCount: Number(v)})} disabled={mode === 'view'} />
+                    <EditableField label="분야" value={formData.field} onChange={(v) => setFormData({...formData, field: v, catLarge: v})} disabled={mode === 'view'} icon={<Settings2 className="w-3 h-3" />} />
+                    <EditableField label="미팅일자" value={formData.meetingDate} onChange={(v) => setFormData({...formData, meetingDate: v})} disabled={mode === 'view'} icon={<Calendar className="w-3 h-3" />} />
                   </div>
+                  <EditableField label="회사명" value={formData.agency} onChange={(v) => setFormData({...formData, agency: v})} disabled={mode === 'view'} icon={<Building2 className="w-3 h-3" />} />
+                  <EditableField label="이름" value={formData.name} onChange={(v) => setFormData({...formData, name: v})} disabled={mode === 'view'} icon={<User className="w-3 h-3" />} />
+                  <EditableField label="번호" value={formData.phone} onChange={(v) => setFormData({...formData, phone: v})} disabled={mode === 'view'} icon={<Phone className="w-3 h-3" />} />
+                  <EditableField label="특징" value={formData.feature} onChange={(v) => setFormData({...formData, feature: v})} disabled={mode === 'view'} icon={<AlertCircle className="w-3 h-3" />} />
+                  <EditableField label="이메일" value={formData.email} onChange={(v) => setFormData({...formData, email: v})} disabled={mode === 'view'} icon={<Mail className="w-3 h-3" />} />
                 </>
               ) : (
                 <EmptyState icon={<RefreshCcw className="w-8 h-8" />} text="목록에서 거래처를 선택해주세요" />
@@ -631,10 +641,8 @@ export function OutboundCallsPage() {
                     <h3 className="text-sm font-black text-slate-800">상세 필터 설정 🔍</h3>
                     <button onClick={() => setShowFilterOverlay(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="grid grid-cols-3 gap-1">
-                    <FilterSection title="대분류 (복수선택)" items={categories.large} selected={filterLarge} onToggle={(v) => toggleFilter(filterLarge, setFilterLarge, v)} />
-                    <FilterSection title="중분류 (복수선택)" items={categories.mid} selected={filterMid} onToggle={(v) => toggleFilter(filterMid, setFilterMid, v)} />
-                    <FilterSection title="소분류 (복수선택)" items={categories.small} selected={filterSmall} onToggle={(v) => toggleFilter(filterSmall, setFilterSmall, v)} />
+                  <div className="grid grid-cols-1 gap-1">
+                    <FilterSection title="분야 (복수선택)" items={categories.large.filter(Boolean)} selected={filterLarge} onToggle={(v) => toggleFilter(filterLarge, setFilterLarge, v)} />
                   </div>
                   <div className="mt-auto pt-2 border-t border-gray-100 flex justify-end">
                     <button onClick={() => setShowFilterOverlay(false)} className="bg-slate-800 text-white px-2 py-1 rounded-md text-xs font-bold">필터 적용하기</button>
@@ -645,7 +653,7 @@ export function OutboundCallsPage() {
               <table className="w-full text-left border-collapse table-fixed">
                 <thead className="sticky top-0 bg-white shadow-xs z-10 border-b border-gray-50">
                   <tr>
-                    <th className="w-12 px-2 py-1">
+                    <th className="w-10 px-2 py-1">
                       {mode === 'delete' && (
                         <button onClick={() => {
                           if (selectedIds.size === filteredEntries.length) setSelectedIds(new Set());
@@ -655,15 +663,17 @@ export function OutboundCallsPage() {
                         </button>
                       )}
                     </th>
-                    <SortableHeader label="거래처명" sortKey="agency" config={sortConfig} setConfig={setSortConfig} className="w-1/3" />
-                    <SortableHeader label="담당자" sortKey="name" config={sortConfig} setConfig={setSortConfig} className="w-24" />
-                    <SortableHeader label="상태" sortKey="status" config={sortConfig} setConfig={setSortConfig} className="w-28" />
-                    <SortableHeader label="시도" sortKey="callCount" config={sortConfig} setConfig={setSortConfig} className="w-16 text-center" />
+                    <SortableHeader label="분야" sortKey="field" config={sortConfig} setConfig={setSortConfig} className="w-20" />
+                    <SortableHeader label="미팅일자" sortKey="meetingDate" config={sortConfig} setConfig={setSortConfig} className="w-20" />
+                    <SortableHeader label="회사명" sortKey="agency" config={sortConfig} setConfig={setSortConfig} className="w-28" />
+                    <SortableHeader label="이름" sortKey="name" config={sortConfig} setConfig={setSortConfig} className="w-24" />
+                    <SortableHeader label="번호" sortKey="phone" config={sortConfig} setConfig={setSortConfig} className="w-28" />
+                    <SortableHeader label="상태" sortKey="status" config={sortConfig} setConfig={setSortConfig} className="w-20" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {filteredEntries.map(entry => (
-                    <tr 
+                    <tr
                       key={entry.id}
                       onClick={() => handleEntryClick(entry)}
                       className={`group cursor-pointer hover:bg-slate-50 transition-colors ${activeId === entry.id ? 'bg-slate-50' : ''}`}
@@ -675,14 +685,16 @@ export function OutboundCallsPage() {
                           <div className={`w-1.5 h-1.5 rounded-full transition-all ${activeId === entry.id ? 'bg-slate-800 scale-125' : 'bg-transparent group-hover:bg-gray-200'}`} />
                         )}
                       </td>
+                      <td className="px-2 py-1 text-[11px] text-slate-600 font-bold truncate">{entry.field}</td>
+                      <td className="px-2 py-1 text-[11px] text-slate-500 truncate">{entry.meetingDate}</td>
                       <td className="px-2 py-1 text-xs font-bold text-slate-800 truncate">{entry.agency}</td>
-                      <td className="px-2 py-1 text-xs text-slate-500">{entry.name}</td>
+                      <td className="px-2 py-1 text-xs text-slate-700 truncate">{entry.name}</td>
+                      <td className="px-2 py-1 text-[11px] text-slate-500 font-mono truncate">{entry.phone}</td>
                       <td className="px-2 py-1">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusStyles(entry.status)}`}>
                           {entry.status}
                         </span>
                       </td>
-                      <td className="px-2 py-1 text-xs text-center text-gray-400 font-mono">{entry.callCount}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -851,9 +863,9 @@ function EditableField({ label, value, onChange, type = 'text', options = [], di
           ))}
         </div>
       ) : (
-        <input 
-          type={type} 
-          value={value} 
+        <input
+          type={type}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           className="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-md text-[11px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:bg-white disabled:bg-transparent disabled:border-transparent transition-all"
