@@ -93,10 +93,16 @@ export function PersonHub<T extends Record<string, any>>({
       }
       return true;
     });
+    const sortCol = config.columns.find(c => c.key === sortBy.key);
     rows = [...rows].sort((a, b) => {
-      const av = String(a[sortBy.key] ?? '');
-      const bv = String(b[sortBy.key] ?? '');
-      const cmp = av.localeCompare(bv, 'ko', { numeric: true });
+      const av = sortCol?.sortValue ? sortCol.sortValue(a) : a[sortBy.key];
+      const bv = sortCol?.sortValue ? sortCol.sortValue(b) : b[sortBy.key];
+      let cmp = 0;
+      if (typeof av === 'number' && typeof bv === 'number') {
+        cmp = av - bv;
+      } else {
+        cmp = String(av ?? '').localeCompare(String(bv ?? ''), 'ko', { numeric: true });
+      }
       return sortBy.dir === 'asc' ? cmp : -cmp;
     });
     return rows;
@@ -215,39 +221,44 @@ export function PersonHub<T extends Record<string, any>>({
 
   // ─── 렌더 헬퍼 ─────────────────────────────────
   const renderCell = (col: HubColumn, entry: T) => {
-    const val = entry[col.key];
-    const text = val == null ? '' : String(val);
+    const raw = entry[col.key];
+    const text = col.format ? col.format(raw, entry) : (raw == null ? '' : String(raw));
+    const titleAttr = col.tooltip ? col.tooltip(entry) : undefined;
     if (col.type === 'chip' && text) {
+      const filterVal = raw == null ? '' : String(raw);
       return (
         <button
+          title={titleAttr}
           onClick={(e) => {
             e.stopPropagation();
-            if (col.drilldown) toggleCellFilter(col.key, text);
+            if (col.drilldown) toggleCellFilter(col.key, filterVal);
           }}
           className={`px-1.5 py-0.5 rounded-full border text-[10px] ${chipClassByKey(col.key, text)} ${
             col.drilldown ? 'cursor-pointer hover:border-slate-500' : 'cursor-default'
-          } ${cellFilter[col.key] === text ? 'ring-1 ring-slate-800' : ''}`}
+          } ${cellFilter[col.key] === filterVal ? 'ring-1 ring-slate-800' : ''}`}
         >
           {text}
         </button>
       );
     }
     if (col.drilldown && text) {
+      const filterVal = raw == null ? '' : String(raw);
       return (
         <button
+          title={titleAttr}
           onClick={(e) => {
             e.stopPropagation();
-            toggleCellFilter(col.key, text);
+            toggleCellFilter(col.key, filterVal);
           }}
           className={`hover:underline text-left truncate ${
-            cellFilter[col.key] === text ? 'font-bold text-slate-900' : ''
+            cellFilter[col.key] === filterVal ? 'font-bold text-slate-900' : ''
           }`}
         >
           {text}
         </button>
       );
     }
-    return <span className="truncate block">{text}</span>;
+    return <span className="truncate block" title={titleAttr}>{text}</span>;
   };
 
   const renderEditInput = (col: HubColumn, data: T, update: (k: string, v: any) => void) => {

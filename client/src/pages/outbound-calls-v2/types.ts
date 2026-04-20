@@ -16,6 +16,12 @@ export interface HubColumn {
   showInDetail?: boolean;  // 펼침 상세에 표시 (기본 true)
   colSpan?: 1 | 2 | 3;     // 펼침 상세에서 그리드 span (기본 1)
   placeholder?: string;
+  // 표시 포맷 (원본 값 변환 없이 UI 레이어에서만 적용 — #21 no_fake_data 준수)
+  format?: (val: any, entry?: any) => string;
+  // 정렬 키 (문자열 정렬로 엉키는 값 처리)
+  sortValue?: (entry: any) => number | string;
+  // 원본 literal 툴팁 (포맷된 값과 별도로 원본 노출)
+  tooltip?: (entry: any) => string;
 }
 
 export interface HubConfig<T = any> {

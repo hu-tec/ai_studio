@@ -15,6 +15,8 @@ export interface NavItem {
   icon: LucideIcon;
   label: string;
   code: string;          // A1, A1-1, B2 …
+  /** 사이드바 숨김 (허브 페이지로 흡수된 하위 항목). detectGroup은 그대로 동작 */
+  hidden?: boolean;
 }
 
 /** 4-tier 권한 구조 (AuthContext.UserTier와 동기) + 공통('all') */
@@ -92,7 +94,6 @@ export const ALL_NAV_ITEMS: NavItem[] = [
   { code: 'C1',   to: '/meetings',        icon: Calendar,     label: '미팅 관리' },
   { code: 'C1-1', to: '/meeting-form',    icon: Calendar,     label: '미팅신폼' },
   { code: 'C2',   to: '/outbound-calls',  icon: Phone,        label: '거래처 아웃콜' },
-  { code: 'C2-1', to: '/outbound-calls-v2', icon: Phone,      label: '거래처 아웃콜 v2 🆕' },
   { code: 'C3',   to: '/photo-dashboard', icon: Image,        label: '사진모음' },
   { code: 'C4',   to: '/schedule',        icon: CalendarClock, label: '강의시간표' },
   { code: 'C5',   to: '/overdue',         icon: FileText,     label: '미수금관리' },
@@ -120,32 +121,32 @@ export const ALL_NAV_ITEMS: NavItem[] = [
 
   // ─── G: 커뮤니티 ───
   { code: 'G0',   to: '/community-hub',           icon: Megaphone,     label: '(gw) 커뮤니티' },
-  { code: 'G1',   to: '/community-notice',        icon: Megaphone,     label: '(gw) 전체공지' },
-  { code: 'G2',   to: '/community-team-notice',   icon: Megaphone,     label: '(gw) 팀별공지' },
-  { code: 'G3',   to: '/community-center-notice', icon: Megaphone,     label: '(gw) 센터별공지' },
-  { code: 'G4',   to: '/community-work-notice',   icon: Megaphone,     label: '(gw) 업무별공지' },
-  { code: 'G5',   to: '/community-free-board',    icon: MessageSquare, label: '(gw) 자유게시판' },
-  { code: 'G6',   to: '/community-qna',           icon: HelpCircle,    label: '(gw) Q&A' },
-  { code: 'G7',   to: '/community-memo',          icon: StickyNote,    label: '메모 모아보기' },
-  { code: 'G8',   to: '/community-meeting-board', icon: MessageSquare, label: '회의 게시판' },
+  { code: 'G1',   to: '/community-notice',        icon: Megaphone,     label: '(gw) 전체공지',   hidden: true },
+  { code: 'G2',   to: '/community-team-notice',   icon: Megaphone,     label: '(gw) 팀별공지',   hidden: true },
+  { code: 'G3',   to: '/community-center-notice', icon: Megaphone,     label: '(gw) 센터별공지', hidden: true },
+  { code: 'G4',   to: '/community-work-notice',   icon: Megaphone,     label: '(gw) 업무별공지', hidden: true },
+  { code: 'G5',   to: '/community-free-board',    icon: MessageSquare, label: '(gw) 자유게시판', hidden: true },
+  { code: 'G6',   to: '/community-qna',           icon: HelpCircle,    label: '(gw) Q&A',        hidden: true },
+  { code: 'G7',   to: '/community-memo',          icon: StickyNote,    label: '메모 모아보기',     hidden: true },
+  { code: 'G8',   to: '/community-meeting-board', icon: MessageSquare, label: '회의 게시판',       hidden: true },
 
   // ─── H: 학생관리 ───
   { code: 'H0',   to: '/student-hub',        icon: GraduationCap, label: '(gw) 학생관리' },
-  { code: 'H1',   to: '/student-tesol',      icon: GraduationCap, label: '(gw) 테솔 학생관리' },
-  { code: 'H1-1', to: '/student-tesol-old',  icon: GraduationCap, label: '(gw) 테솔(이전자료)' },
-  { code: 'H2',   to: '/student-accounting', icon: DollarSign,    label: '(gw) 회계관리' },
-  { code: 'H3',   to: '/student-certi',      icon: Award,         label: '(gw) Certi관리' },
-  { code: 'H4',   to: '/student-translator', icon: Languages,     label: '(gw) 번역사' },
-  { code: 'H5',   to: '/student-ics',        icon: Layers,        label: '(gw) ICS' },
-  { code: 'H6',   to: '/student-etc',        icon: FolderOpen,    label: '(gw) 기타' },
+  { code: 'H1',   to: '/student-tesol',      icon: GraduationCap, label: '(gw) 테솔 학생관리',   hidden: true },
+  { code: 'H1-1', to: '/student-tesol-old',  icon: GraduationCap, label: '(gw) 테솔(이전자료)', hidden: true },
+  { code: 'H2',   to: '/student-accounting', icon: DollarSign,    label: '(gw) 회계관리',        hidden: true },
+  { code: 'H3',   to: '/student-certi',      icon: Award,         label: '(gw) Certi관리',       hidden: true },
+  { code: 'H4',   to: '/student-translator', icon: Languages,     label: '(gw) 번역사',          hidden: true },
+  { code: 'H5',   to: '/student-ics',        icon: Layers,        label: '(gw) ICS',             hidden: true },
+  { code: 'H6',   to: '/student-etc',        icon: FolderOpen,    label: '(gw) 기타',            hidden: true },
 
   // ─── I: 서식/확인서 ───
   { code: 'I0',   to: '/forms-hub',        icon: FileText,  label: '(gw) 서식/확인서' },
-  { code: 'I1',   to: '/form-mgmt',        icon: FileText,  label: '(gw) 서식관리' },
-  { code: 'I2',   to: '/design-materials', icon: Palette,   label: '(gw) 디자인물' },
-  { code: 'I3',   to: '/cert-kukton',      icon: FileCheck,  label: '(gw) 확인서-국통' },
-  { code: 'I4',   to: '/cert-tesol',       icon: FileCheck,  label: '(gw) 확인서-테솔' },
-  { code: 'I5',   to: '/cert-itt',         icon: FileCheck,  label: '(gw) 확인서-ITT' },
+  { code: 'I1',   to: '/form-mgmt',        icon: FileText,  label: '(gw) 서식관리',    hidden: true },
+  { code: 'I2',   to: '/design-materials', icon: Palette,   label: '(gw) 디자인물',    hidden: true },
+  { code: 'I3',   to: '/cert-kukton',      icon: FileCheck, label: '(gw) 확인서-국통', hidden: true },
+  { code: 'I4',   to: '/cert-tesol',       icon: FileCheck, label: '(gw) 확인서-테솔', hidden: true },
+  { code: 'I5',   to: '/cert-itt',         icon: FileCheck, label: '(gw) 확인서-ITT',  hidden: true },
 
   // ─── J: 출장관리 ───
   { code: 'J1',   to: '/dispatch-instructor', icon: Truck,     label: '(gw) 출강강사관리' },

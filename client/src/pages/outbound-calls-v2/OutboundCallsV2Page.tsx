@@ -39,6 +39,35 @@ const FIELD_OPTIONS = [
 
 const STATUS_OPTIONS = ['대기', '진행중', '보류', '완료', '거절'];
 
+// 미팅일자 느슨 파서 — 원본은 보존, UI 레이어에서만 정규화 (#21 no_fake_data)
+// 지원 포맷: "03월 14일", "3월 08일", "3/26", "5/", "9/5?", "" 등
+function parseMtgDate(s: string | null | undefined): { m: number | null; d: number | null; raw: string } {
+  const raw = (s ?? '').toString().trim();
+  if (!raw) return { m: null, d: null, raw };
+  const kr = raw.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if (kr) return { m: +kr[1], d: +kr[2], raw };
+  const krM = raw.match(/(\d{1,2})\s*월/);
+  const slash = raw.match(/^\s*(\d{1,2})\s*\/\s*(\d{1,2})?/);
+  if (slash) return { m: +slash[1], d: slash[2] ? +slash[2] : null, raw };
+  if (krM) return { m: +krM[1], d: null, raw };
+  return { m: null, d: null, raw };
+}
+
+function formatMtgDate(s: string | null | undefined): string {
+  const { m, d, raw } = parseMtgDate(s);
+  if (m == null) return raw ? `⚠ ${raw}` : '';
+  const mm = String(m).padStart(2, '0');
+  if (d == null) return `${mm}월`;
+  const dd = String(d).padStart(2, '0');
+  return `${mm}/${dd}`;
+}
+
+function sortMtgDate(s: string | null | undefined): number {
+  const { m, d } = parseMtgDate(s);
+  if (m == null) return 999999; // 빈값·파싱실패 = 맨 뒤
+  return m * 100 + (d ?? 0);
+}
+
 const CONFIG: HubConfig<ContactEntry> = {
   title: '거래처 아웃콜 이력 v2',
   subtitle: '외부 인물·조직 통합 관리 공통 프레임 (강사·상담·면접 확장 시범)',
@@ -52,7 +81,12 @@ const CONFIG: HubConfig<ContactEntry> = {
   statusOptions: STATUS_OPTIONS,
   statsGroupBy: 'field',
   columns: [
-    { key: 'meetingDate', label: '미팅일자', width: 'w-24', required: true, colSpan: 1 },
+    { key: 'meetingDate', label: '미팅일자', width: 'w-20', required: true, colSpan: 1,
+      format: (v) => formatMtgDate(v),
+      sortValue: (e) => sortMtgDate(e.meetingDate),
+      tooltip: (e) => e.meetingDate ? `원본: ${e.meetingDate}` : '',
+      placeholder: '예: 03월 14일 또는 3/26',
+    },
     { key: 'field',       label: '분야',     width: 'w-28', required: true, type: 'chip', options: FIELD_OPTIONS, drilldown: true, colSpan: 1 },
     { key: 'agency',      label: '회사명',   width: 'w-32', drilldown: true, colSpan: 1 },
     { key: 'name',        label: '이름',     width: 'w-24', required: true, colSpan: 1 },
