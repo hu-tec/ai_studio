@@ -1,1 +1,0 @@
-import{bz as r,j as e}from"./index-CGlQ_NLb.js";import{C as a}from"./CategoryHubLayout-F0-OIYX4.js";function i(){const t=r.filter(o=>/^I\d+$/.test(o.code));return e.jsx(a,{title:"서식/확인서",category:"서식/확인서",tabs:t})}export{i as default};

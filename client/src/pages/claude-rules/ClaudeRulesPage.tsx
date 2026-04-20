@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet, Pencil, Trash2, Plus, LayoutGrid, Table2 } from 'lucide-react';
 import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES, type RuleLevel, type HRRuleSet } from './data';
 import { PublicMemoryTab } from './PublicMemoryTab';
+import { CompanyGuidelinesLiveTab } from './CompanyGuidelinesLiveTab';
 
 /* ── 사내업무지침 교차 축 상수 (company-guidelines 페이지와 동일) ── */
 const COMPANY_DEPT = ['경영', '개발', '마케팅', '인사', '영업', '강사팀', '기획', '홈페이지', '상담', '총무', '관리'];
@@ -838,7 +839,7 @@ export function HRRulesTab() {
 
 /* ── 메인 페이지 ── */
 export default function ClaudeRulesPage() {
-  const [tab, setTab] = useState<'memory' | 'design' | 'claude' | 'hr'>('memory');
+  const [tab, setTab] = useState<'memory' | 'design' | 'claude' | 'hr' | 'live'>('memory');
 
   return (
     <div className="flex flex-col gap-1.5 p-2">
@@ -858,6 +859,7 @@ export default function ClaudeRulesPage() {
       <div className="flex items-center gap-2">
         <div className="flex gap-1 flex-wrap">
           <TabChip active={tab === 'memory'} onClick={() => setTab('memory')}>🧠 공용 메모리 (원본)</TabChip>
+          <TabChip active={tab === 'live'} onClick={() => setTab('live')}>🔴 사내업무지침 (실데이터)</TabChip>
           <TabChip active={tab === 'design'} onClick={() => setTab('design')}>업무 설계 규정</TabChip>
           <TabChip active={tab === 'claude'} onClick={() => setTab('claude')}>Claude Code 작업 규정</TabChip>
           <TabChip active={tab === 'hr'} onClick={() => setTab('hr')}>인사규정 (가연님 xlsx)</TabChip>
@@ -865,6 +867,7 @@ export default function ClaudeRulesPage() {
       </div>
 
       {tab === 'memory' ? <PublicMemoryTab />
+        : tab === 'live' ? <CompanyGuidelinesLiveTab />
         : tab === 'design' ? <DesignRulesTab />
         : tab === 'claude' ? <ClaudeRulesTab />
         : <HRRulesTab />}

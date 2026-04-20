@@ -1,0 +1,1 @@
+import{bz as o,j as r}from"./index-B2-tXKoF.js";import{C as a}from"./CategoryHubLayout-B7s72xet.js";function i(){const t=o.filter(e=>/^H\d+$/.test(e.code));return r.jsx(a,{title:"학생관리",category:"학생관리",tabs:t})}export{i as default};
