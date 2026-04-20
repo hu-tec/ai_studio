@@ -56,6 +56,11 @@ export function DesignRulesTab() {
   const [activeMajors, setActiveMajors] = useState<Set<string>>(new Set(DESIGN_RULES.map(r => r.id)));
   const [search, setSearch] = useState('');
   const [showDetail, setShowDetail] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  const toggleItem = (key: string) => {
+    setExpandedItems(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
+  };
 
   const allExpanded = expandedMajor.size === DESIGN_RULES.length && DESIGN_RULES.every(r => r.midCategories.every((_, mi) => expandedMid.has(`${r.id}-${mi}`)));
 
@@ -182,14 +187,29 @@ export function DesignRulesTab() {
 
                       {expandedMid.has(midKey) && (
                         <div className="flex flex-col gap-0.5 px-1 pb-0.5">
-                          {mc.items.map((item, si) => (
-                            <div key={si} className="rounded border border-gray-100 bg-gray-50/50 px-1 py-0.5">
-                              <div className="text-[9px] font-bold text-gray-700 leading-tight" title={item.content}>{item.title}</div>
-                              {showDetail && (
-                                <div className="text-[9px] text-gray-500 leading-tight mt-0.5">{item.content}</div>
-                              )}
-                            </div>
-                          ))}
+                          {mc.items.map((item, si) => {
+                            const itemKey = `${r.id}-${mi}-${si}`;
+                            const open = showDetail || expandedItems.has(itemKey);
+                            return (
+                              <button
+                                key={si}
+                                type="button"
+                                onClick={() => toggleItem(itemKey)}
+                                className="rounded border border-gray-100 bg-gray-50/50 hover:bg-gray-100/70 transition-colors px-1 py-0.5 text-left w-full"
+                                title={open ? '접기' : item.content}
+                              >
+                                <div className="flex items-start gap-0.5">
+                                  {open
+                                    ? <ChevronDown className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />
+                                    : <ChevronRight className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />}
+                                  <span className="text-[9px] font-bold text-gray-700 leading-tight flex-1">{item.title}</span>
+                                </div>
+                                {open && (
+                                  <div className="text-[9px] text-gray-500 leading-tight mt-0.5 pl-3">{item.content}</div>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
