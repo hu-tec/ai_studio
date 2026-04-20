@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet, Pencil, Trash2, Plus } from 'lucide-react';
 import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES, type RuleLevel, type HRRuleSet } from './data';
 import { PublicMemoryTab } from './PublicMemoryTab';
 
@@ -58,9 +58,71 @@ export function DesignRulesTab() {
   const [showDetail, setShowDetail] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
+  type ItemPatch = { title: string; content: string };
+  type Overlay = { deleted: string[]; edited: Record<string, ItemPatch>; added: Record<string, ItemPatch[]> };
+  const OVERLAY_KEY = 'design-rules-overlay-v1';
+  const [overlay, setOverlay] = useState<Overlay>(() => {
+    try {
+      const raw = localStorage.getItem(OVERLAY_KEY);
+      if (raw) return JSON.parse(raw) as Overlay;
+    } catch {}
+    return { deleted: [], edited: {}, added: {} };
+  });
+  useEffect(() => {
+    try { localStorage.setItem(OVERLAY_KEY, JSON.stringify(overlay)); } catch {}
+  }, [overlay]);
+
+  const [editing, setEditing] = useState<{ key: string; title: string; content: string } | null>(null);
+  const [adding, setAdding] = useState<{ midKey: string; title: string; content: string } | null>(null);
+
   const toggleItem = (key: string) => {
     setExpandedItems(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
   };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const { key, title, content } = editing;
+    if (!title.trim()) return;
+    const patch = { title: title.trim(), content: content.trim() };
+    const addedMatch = key.match(/^(.+?)-a(\d+)$/);
+    setOverlay(o => {
+      if (addedMatch) {
+        const midKey = addedMatch[1]; const ai = +addedMatch[2];
+        const arr = [...(o.added[midKey] || [])]; arr[ai] = patch;
+        return { ...o, added: { ...o.added, [midKey]: arr } };
+      }
+      return { ...o, edited: { ...o.edited, [key]: patch } };
+    });
+    setEditing(null);
+  };
+  const deleteItem = (key: string) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    const addedMatch = key.match(/^(.+?)-a(\d+)$/);
+    setOverlay(o => {
+      if (addedMatch) {
+        const midKey = addedMatch[1]; const ai = +addedMatch[2];
+        const arr = [...(o.added[midKey] || [])]; arr.splice(ai, 1);
+        return { ...o, added: { ...o.added, [midKey]: arr } };
+      }
+      return { ...o, deleted: o.deleted.includes(key) ? o.deleted : [...o.deleted, key] };
+    });
+  };
+  const saveAdd = () => {
+    if (!adding) return;
+    const { midKey, title, content } = adding;
+    if (!title.trim()) return;
+    setOverlay(o => ({
+      ...o,
+      added: { ...o.added, [midKey]: [...(o.added[midKey] || []), { title: title.trim(), content: content.trim() }] },
+    }));
+    setAdding(null);
+  };
+  const resetOverlay = () => {
+    if (!window.confirm('편집 내역을 모두 초기화하시겠습니까? (추가/수정/삭제 전부)')) return;
+    setOverlay({ deleted: [], edited: {}, added: {} });
+  };
+  const overlayCount = overlay.deleted.length + Object.keys(overlay.edited).length
+    + Object.values(overlay.added).reduce((s, a) => s + a.length, 0);
 
   const allExpanded = expandedMajor.size === DESIGN_RULES.length && DESIGN_RULES.every(r => r.midCategories.every((_, mi) => expandedMid.has(`${r.id}-${mi}`)));
 
@@ -86,8 +148,28 @@ export function DesignRulesTab() {
     setActiveMajors(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
 
+  const overlayed = useMemo(() => {
+    return DESIGN_RULES.map(r => ({
+      ...r,
+      midCategories: r.midCategories.map((mc, mi) => {
+        const midKey = `${r.id}-${mi}`;
+        const base = mc.items
+          .map((it, si) => {
+            const key = `${r.id}-${mi}-${si}`;
+            const patch = overlay.edited[key];
+            return { key, isAdded: false, title: patch?.title ?? it.title, content: patch?.content ?? it.content };
+          })
+          .filter(it => !overlay.deleted.includes(it.key));
+        const added = (overlay.added[midKey] || []).map((it, ai) => ({
+          key: `${midKey}-a${ai}`, isAdded: true, title: it.title, content: it.content,
+        }));
+        return { ...mc, items: [...base, ...added] };
+      }),
+    }));
+  }, [overlay]);
+
   const filtered = useMemo(() => {
-    return DESIGN_RULES.filter(r => activeMajors.has(r.id)).map(r => {
+    return overlayed.filter(r => activeMajors.has(r.id)).map(r => {
       if (!search) return r;
       const q = search.toLowerCase();
       const midCategories = r.midCategories.map(mc => ({
@@ -96,19 +178,22 @@ export function DesignRulesTab() {
       })).filter(mc => mc.items.length > 0 || mc.mid.toLowerCase().includes(q));
       return { ...r, midCategories };
     }).filter(r => r.midCategories.length > 0 || r.major.toLowerCase().includes(search.toLowerCase()));
-  }, [activeMajors, search]);
+  }, [overlayed, activeMajors, search]);
 
-  const totalItems = DESIGN_RULES.reduce((s, r) => s + r.midCategories.reduce((s2, mc) => s2 + mc.items.length, 0), 0);
+  const totalItems = overlayed.reduce((s, r) => s + r.midCategories.reduce((s2, mc) => s2 + mc.items.length, 0), 0);
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* 핵심 원칙 5개 */}
+      {/* 핵심 원칙 5개 — 1줄 압축 (hover 시 desc 툴팁) */}
       <div className="grid grid-cols-5 gap-1">
         {KEY_PRINCIPLES.map(p => (
-          <div key={p.num} className="rounded-md border border-blue-200 bg-blue-50 p-1.5">
-            <div className="text-[10px] font-bold text-blue-600">원칙 {p.num}</div>
-            <div className="text-[11px] font-semibold text-gray-800">{p.title}</div>
-            <div className="text-[10px] text-gray-500">{p.desc}</div>
+          <div
+            key={p.num}
+            className="rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 flex items-center gap-1 min-w-0"
+            title={p.desc}
+          >
+            <span className="rounded bg-blue-500 text-white text-[9px] font-bold px-1 flex-shrink-0">{p.num}</span>
+            <span className="text-[10px] font-semibold text-gray-800 truncate">{p.title}</span>
           </div>
         ))}
       </div>
@@ -118,6 +203,15 @@ export function DesignRulesTab() {
         <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600">
           {DESIGN_RULES.length}개 대분류 · {DESIGN_RULES.reduce((s, r) => s + r.midCategories.length, 0)}개 중분류 · {totalItems}개 항목
         </span>
+        {overlayCount > 0 && (
+          <button
+            onClick={resetOverlay}
+            className="rounded border border-amber-300 bg-amber-50 text-amber-700 px-1.5 py-0.5 text-[10px] font-semibold hover:bg-amber-100"
+            title="추가/수정/삭제 편집 내역을 모두 초기화 (기본 시드로 복구)"
+          >
+            ↺ 편집 {overlayCount}건 초기화
+          </button>
+        )}
         <div className="flex-1" />
         <div className="relative">
           <Search className="absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
@@ -187,29 +281,106 @@ export function DesignRulesTab() {
 
                       {expandedMid.has(midKey) && (
                         <div className="flex flex-col gap-0.5 px-1 pb-0.5">
-                          {mc.items.map((item, si) => {
-                            const itemKey = `${r.id}-${mi}-${si}`;
+                          {mc.items.map((item: any) => {
+                            const itemKey = item.key as string;
+                            const isAdded = item.isAdded as boolean;
                             const open = showDetail || expandedItems.has(itemKey);
+                            const isEditing = editing?.key === itemKey;
+                            if (isEditing) {
+                              return (
+                                <div key={itemKey} className="rounded border border-blue-300 bg-blue-50/60 p-0.5 space-y-0.5">
+                                  <input
+                                    value={editing!.title}
+                                    onChange={e => setEditing({ ...editing!, title: e.target.value })}
+                                    placeholder="제목"
+                                    className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 focus:border-blue-400 focus:outline-none"
+                                    autoFocus
+                                  />
+                                  <textarea
+                                    value={editing!.content}
+                                    onChange={e => setEditing({ ...editing!, content: e.target.value })}
+                                    placeholder="내용"
+                                    rows={2}
+                                    className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 resize-none focus:border-blue-400 focus:outline-none"
+                                  />
+                                  <div className="flex gap-0.5 justify-end">
+                                    <button onClick={saveEdit} className="rounded bg-blue-500 text-white px-1.5 py-0.5 text-[9px] font-bold hover:bg-blue-600">저장</button>
+                                    <button onClick={() => setEditing(null)} className="rounded border border-gray-300 bg-white text-gray-600 px-1.5 py-0.5 text-[9px] hover:bg-gray-50">취소</button>
+                                  </div>
+                                </div>
+                              );
+                            }
                             return (
-                              <button
-                                key={si}
-                                type="button"
-                                onClick={() => toggleItem(itemKey)}
-                                className="rounded border border-gray-100 bg-gray-50/50 hover:bg-gray-100/70 transition-colors px-1 py-0.5 text-left w-full"
-                                title={open ? '접기' : item.content}
-                              >
-                                <div className="flex items-start gap-0.5">
-                                  {open
-                                    ? <ChevronDown className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />
-                                    : <ChevronRight className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />}
-                                  <span className="text-[9px] font-bold text-gray-700 leading-tight flex-1">{item.title}</span>
+                              <div key={itemKey} className="rounded border border-gray-100 bg-gray-50/50 hover:bg-gray-100/70 transition-colors group">
+                                <div className="flex items-start gap-0.5 px-1 py-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleItem(itemKey)}
+                                    className="flex items-start gap-0.5 flex-1 text-left min-w-0"
+                                    title={open ? '접기' : item.content}
+                                  >
+                                    {open
+                                      ? <ChevronDown className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />
+                                      : <ChevronRight className="h-2.5 w-2.5 mt-px text-gray-400 flex-shrink-0" />}
+                                    <span className="text-[9px] font-bold text-gray-700 leading-tight flex-1">
+                                      {item.title}
+                                      {isAdded && <span className="ml-1 text-[8px] text-emerald-600 font-bold">+</span>}
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditing({ key: itemKey, title: item.title, content: item.content })}
+                                    className="text-gray-400 hover:text-blue-500 p-px opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="편집"
+                                  >
+                                    <Pencil className="h-2.5 w-2.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteItem(itemKey)}
+                                    className="text-gray-400 hover:text-red-500 p-px opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="삭제"
+                                  >
+                                    <Trash2 className="h-2.5 w-2.5" />
+                                  </button>
                                 </div>
                                 {open && (
-                                  <div className="text-[9px] text-gray-500 leading-tight mt-0.5 pl-3">{item.content}</div>
+                                  <div className="text-[9px] text-gray-500 leading-tight px-1 pb-0.5 pl-3">{item.content}</div>
                                 )}
-                              </button>
+                              </div>
                             );
                           })}
+                          {adding?.midKey === midKey ? (
+                            <div className="rounded border border-emerald-300 bg-emerald-50/60 p-0.5 space-y-0.5">
+                              <input
+                                value={adding.title}
+                                onChange={e => setAdding({ ...adding, title: e.target.value })}
+                                placeholder="제목"
+                                className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 focus:border-emerald-400 focus:outline-none"
+                                autoFocus
+                              />
+                              <textarea
+                                value={adding.content}
+                                onChange={e => setAdding({ ...adding, content: e.target.value })}
+                                placeholder="내용"
+                                rows={2}
+                                className="w-full text-[10px] rounded border border-gray-300 px-1 py-0.5 resize-none focus:border-emerald-400 focus:outline-none"
+                              />
+                              <div className="flex gap-0.5 justify-end">
+                                <button onClick={saveAdd} className="rounded bg-emerald-500 text-white px-1.5 py-0.5 text-[9px] font-bold hover:bg-emerald-600">추가</button>
+                                <button onClick={() => setAdding(null)} className="rounded border border-gray-300 bg-white text-gray-600 px-1.5 py-0.5 text-[9px] hover:bg-gray-50">취소</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setAdding({ midKey, title: '', content: '' })}
+                              className="rounded border border-dashed border-emerald-300 bg-white/50 hover:bg-emerald-50 text-emerald-600 text-[9px] font-semibold py-0.5 flex items-center justify-center gap-0.5"
+                              title="이 중분류에 항목 추가"
+                            >
+                              <Plus className="h-2.5 w-2.5" /> 항목 추가
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
