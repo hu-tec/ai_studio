@@ -326,10 +326,10 @@ function MandalartView({ sub }: { sub: SubTab }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-1.5">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
       {cells.map((cell) => (
         <div key={cell.id} className="rounded border overflow-hidden" style={{ borderColor: cell.color + '40' }}>
-          <div className="px-1.5 py-0.5 border-b text-meta font-bold truncate" style={{ color: cell.color, background: cell.bg, borderColor: cell.color + '33' }}>
+          <div className="px-1.5 py-0.5 border-b text-[11px] font-bold truncate" style={{ color: cell.color, background: cell.bg, borderColor: cell.color + '33' }}>
             🎯 {cell.center}
           </div>
           <div className="grid grid-cols-3 gap-0.5 p-0.5" style={{ background: cell.bg + '30' }}>
@@ -338,7 +338,7 @@ function MandalartView({ sub }: { sub: SubTab }) {
               if (isCenter) {
                 return (
                   <div key={i} className="aspect-square rounded flex items-center justify-center text-center p-1" style={{ background: cell.color, color: '#fff' }}>
-                    <span className="text-meta font-bold leading-tight">{cell.center}</span>
+                    <span className="text-[12px] font-bold leading-tight">{cell.center}</span>
                   </div>
                 );
               }
@@ -348,11 +348,11 @@ function MandalartView({ sub }: { sub: SubTab }) {
                 return <div key={i} className="aspect-square rounded border border-dashed border-gray-300 bg-white/50" />;
               }
               return (
-                <div key={i} className="aspect-square rounded border border-gray-200 bg-white p-0.5 overflow-hidden">
-                  <div className="text-meta font-bold text-gray-800 leading-tight truncate" title={item.title}>{item.title}</div>
+                <div key={i} className="aspect-square rounded border border-gray-200 bg-white p-1 overflow-hidden">
+                  <div className="text-[11px] font-bold text-gray-800 leading-tight line-clamp-2" title={item.title}>{item.title}</div>
                   <ul className="mt-0.5 space-y-px">
                     {item.details.slice(0, 3).map((d, di) => (
-                      <li key={di} className="text-meta text-gray-500 leading-tight truncate" title={d}>• {d}</li>
+                      <li key={di} className="text-[10px] text-gray-500 leading-tight truncate" title={d}>• {d}</li>
                     ))}
                   </ul>
                 </div>

@@ -55,6 +55,7 @@ export function DesignRulesTab() {
   });
   const [activeMajors, setActiveMajors] = useState<Set<string>>(new Set(DESIGN_RULES.map(r => r.id)));
   const [search, setSearch] = useState('');
+  const [showDetail, setShowDetail] = useState(false);
 
   const allExpanded = expandedMajor.size === DESIGN_RULES.length && DESIGN_RULES.every(r => r.midCategories.every((_, mi) => expandedMid.has(`${r.id}-${mi}`)));
 
@@ -121,6 +122,19 @@ export function DesignRulesTab() {
             className="rounded-md border border-gray-300 py-0.5 pl-2 pr-2 text-[11px] w-40 focus:border-blue-400 focus:outline-none"
           />
         </div>
+        <button
+          onClick={() => setShowDetail(v => !v)}
+          className="flex items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold transition-colors"
+          style={
+            showDetail
+              ? { background: '#2563eb', color: '#fff', borderColor: '#2563eb' }
+              : { background: '#fff', color: '#6b7280', borderColor: '#d1d5db' }
+          }
+          title="항목 제목만 / 제목+상세 설명 전환"
+        >
+          {showDetail ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
+          {showDetail ? '상세 접기' : '상세 펼치기'}
+        </button>
         <button onClick={toggleAll} className="flex items-center gap-0.5 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
           {allExpanded ? <ChevronsUp className="h-3 w-3" /> : <ChevronsDown className="h-3 w-3" />}
           {allExpanded ? '전체 접기' : '전체 펼치기'}
@@ -170,8 +184,10 @@ export function DesignRulesTab() {
                         <div className="flex flex-col gap-0.5 px-1 pb-0.5">
                           {mc.items.map((item, si) => (
                             <div key={si} className="rounded border border-gray-100 bg-gray-50/50 px-1 py-0.5">
-                              <div className="text-[9px] font-bold text-gray-700 leading-tight truncate" title={item.title}>{item.title}</div>
-                              <div className="text-[9px] text-gray-500 leading-tight">{item.content}</div>
+                              <div className="text-[9px] font-bold text-gray-700 leading-tight" title={item.content}>{item.title}</div>
+                              {showDetail && (
+                                <div className="text-[9px] text-gray-500 leading-tight mt-0.5">{item.content}</div>
+                              )}
                             </div>
                           ))}
                         </div>
