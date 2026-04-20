@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronRight, ChevronsDown, ChevronsUp, Search, Shield, ShieldAlert, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 import { DESIGN_RULES, CLAUDE_RULES, KEY_PRINCIPLES, HR_SEED_COMPANY, HR_SEED_RANKS, HR_SEED_DEPTS, HR_SEED_SERVICES, type RuleLevel, type HRRuleSet } from './data';
+import { PublicMemoryTab } from './PublicMemoryTab';
 
 /* ── 등급 배지 ── */
 const LEVEL_STYLE: Record<RuleLevel, { bg: string; text: string; icon: typeof Shield }> = {
@@ -417,7 +418,7 @@ export function HRRulesTab() {
 
 /* ── 메인 페이지 ── */
 export default function ClaudeRulesPage() {
-  const [tab, setTab] = useState<'design' | 'claude' | 'hr'>('design');
+  const [tab, setTab] = useState<'memory' | 'design' | 'claude' | 'hr'>('memory');
 
   return (
     <div className="flex flex-col gap-1.5 p-2">
@@ -435,14 +436,18 @@ export default function ClaudeRulesPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
+          <TabChip active={tab === 'memory'} onClick={() => setTab('memory')}>🧠 공용 메모리 (원본)</TabChip>
           <TabChip active={tab === 'design'} onClick={() => setTab('design')}>업무 설계 규정</TabChip>
           <TabChip active={tab === 'claude'} onClick={() => setTab('claude')}>Claude Code 작업 규정</TabChip>
           <TabChip active={tab === 'hr'} onClick={() => setTab('hr')}>인사규정 (가연님 xlsx)</TabChip>
         </div>
       </div>
 
-      {tab === 'design' ? <DesignRulesTab /> : tab === 'claude' ? <ClaudeRulesTab /> : <HRRulesTab />}
+      {tab === 'memory' ? <PublicMemoryTab />
+        : tab === 'design' ? <DesignRulesTab />
+        : tab === 'claude' ? <ClaudeRulesTab />
+        : <HRRulesTab />}
     </div>
   );
 }
